@@ -689,6 +689,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     builder.append(", ");
                     builder.append(visitParameter(params[p], data));
                 }
+
+                if (node.isVarArgs())
+                    builder.append("...");
             }
             builder.append(')');
             if (named) {
