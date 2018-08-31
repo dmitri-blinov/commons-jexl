@@ -563,17 +563,19 @@ void MultiplicativeExpression() #void : {}
 
 void UnaryExpression() #void : {}
 {
-    <minus> UnaryExpression() #UnaryMinusNode(1)
+  <minus> UnaryExpression() #UnaryMinusNode(1)
   |
-    <tilda> UnaryExpression() #BitwiseComplNode(1)
+  <tilda> UnaryExpression() #BitwiseComplNode(1)
   |
-    <not> UnaryExpression() #NotNode(1)
+  <not> UnaryExpression() #NotNode(1)
   |
-    <EMPTY> UnaryExpression() #EmptyFunction(1)
+  <EMPTY> UnaryExpression() #EmptyFunction(1)
   |
-    <SIZE> UnaryExpression() #SizeFunction(1)
+  <SIZE> UnaryExpression() #SizeFunction(1)
   |
-    ValueExpression()
+  <ELLIPSIS> ValueExpression() #EnumerationNode(1)
+  |
+  ValueExpression()
 }
 
 
@@ -691,14 +693,15 @@ void ExtendedLiteral() #ExtendedLiteral() : {}
    <ELIPSIS>
 }
 
+void EmptyListLiteral() #ArrayLiteral() : {}
+{
+   <LBRACKET> ExtendedLiteral() <RBRACKET>
+}
+
 void ArrayLiteral() : {}
 {
-   <LBRACKET>
-   (
-        LOOKAHEAD(1) ExtendedLiteral()
-    |
-        (Expression() (LOOKAHEAD(2) <COMMA> Expression() )*)? (<COMMA> ExtendedLiteral())?
-   )
+   <LBRACKET> 
+      (Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )*)? (LOOKAHEAD(2) <COMMA> ExtendedLiteral())?
    <RBRACKET>
 }
 
@@ -846,27 +849,29 @@ void ReferenceExpression() #MethodNode(>1) : {}
 
 void PrimaryExpression() #void : {}
 {
-       LOOKAHEAD( LambdaLookahead() ) Lambda()
+    LOOKAHEAD( LambdaLookahead() ) Lambda()
     |
-       LOOKAHEAD( <LPAREN> ) ReferenceExpression()
+    LOOKAHEAD( <LPAREN> ) ReferenceExpression()
     |
-       LOOKAHEAD( <LCURLY> Expression() <COLON>) MapLiteral()
+    LOOKAHEAD( <LCURLY> Expression() <COLON>) MapLiteral()
     |
-       LOOKAHEAD( <LCURLY> <COLON>) MapLiteral()
+    LOOKAHEAD( <LCURLY> <COLON>) MapLiteral()
     |
-       LOOKAHEAD( <LCURLY> Expression() ) SetLiteral()
+    LOOKAHEAD( <LCURLY> Expression() ) SetLiteral()
     |
-       LOOKAHEAD( <LCURLY> <RCURLY> ) SetLiteral()
+    LOOKAHEAD( <LCURLY> <RCURLY> ) SetLiteral()
     |
-       LOOKAHEAD( <LBRACKET> ) ArrayLiteral()
+    LOOKAHEAD( EmptyListLiteral() ) EmptyListLiteral()
     |
-       LOOKAHEAD( <NEW> ) Constructor()
+    LOOKAHEAD( <LBRACKET> ) ArrayLiteral()
     |
-       LOOKAHEAD( FunctionCallLookahead() ) FunctionCall()
+    LOOKAHEAD( <NEW> ) Constructor()
     |
-       Identifier(true)
+    LOOKAHEAD( FunctionCallLookahead() ) FunctionCall()
     |
-       Literal()
+    Identifier(true)
+    |
+    Literal()
 }
 
 void MethodCall() #void : {}
