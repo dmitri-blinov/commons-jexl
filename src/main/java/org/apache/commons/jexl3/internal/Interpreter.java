@@ -69,6 +69,7 @@ import org.apache.commons.jexl3.parser.ASTJxltLiteral;
 import org.apache.commons.jexl3.parser.ASTLENode;
 import org.apache.commons.jexl3.parser.ASTLTNode;
 import org.apache.commons.jexl3.parser.ASTMapEntry;
+import org.apache.commons.jexl3.parser.ASTMapEnumerationNode;
 import org.apache.commons.jexl3.parser.ASTMapLiteral;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
 import org.apache.commons.jexl3.parser.ASTModNode;
@@ -593,7 +594,7 @@ public class Interpreter extends InterpreterBase {
             Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, iterableValue);
             Iterator<?> itemsIterator = forEach instanceof Iterator
                                    ? (Iterator<?>) forEach
-                                   : uberspect.getIndexedIterator(iterableValue);
+                                   : uberspect.getIterator(iterableValue);
             return itemsIterator;
         } else {
             return null;
@@ -867,8 +868,26 @@ public class Interpreter extends InterpreterBase {
         JexlArithmetic.MapBuilder mb = arithmetic.mapBuilder(childCount);
         for (int i = 0; i < childCount; i++) {
             cancelCheck(node);
-            Object[] entry = (Object[]) (node.jjtGetChild(i)).jjtAccept(this, data);
-            mb.put(entry[0], entry[1]);
+            JexlNode child = node.jjtGetChild(i);
+            if (child instanceof ASTMapEntry) {
+                Object[] entry = (Object[]) (child).jjtAccept(this, data);
+                mb.put(entry[0], entry[1]);
+            } else {
+                Iterator<Object> it = (Iterator<Object>) (child).jjtAccept(this, data);
+                int j = 0;
+                if (it != null) {
+                    while (it.hasNext()) {
+                        Object value = it.next();
+                        if (value instanceof Map.Entry<?,?>) {
+                            Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                            mb.put(entry.getKey(), entry.getValue());
+                        } else {
+                            mb.put(i, value);
+                        }
+                        i++;
+                    }
+                }
+            }
         }
         return mb.create();
     }
@@ -881,6 +900,21 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTMapEnumerationNode node, Object data) {
+        JexlNode valNode = node.jjtGetChild(0);
+        Object iterableValue = valNode.jjtAccept(this, data);
+
+        if (iterableValue != null) {
+            Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
+            Iterator<?> itemsIterator = forEach instanceof Iterator
+                                   ? (Iterator<?>) forEach
+                                   : uberspect.getIndexedIterator(iterableValue);
+            return itemsIterator;
+        } else {
+            return null;
+        }
+    }
+
     protected Object visit(ASTTernaryNode node, Object data) {
         Object condition = node.jjtGetChild(0).jjtAccept(this, data);
         if (node.jjtGetNumChildren() == 3) {
