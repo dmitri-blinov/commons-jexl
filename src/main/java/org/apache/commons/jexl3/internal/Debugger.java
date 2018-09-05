@@ -67,11 +67,13 @@ import org.apache.commons.jexl3.parser.ASTNotNode;
 import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTNumberLiteral;
 import org.apache.commons.jexl3.parser.ASTOrNode;
+import org.apache.commons.jexl3.parser.ASTProjectionNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTReferenceExpression;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
 import org.apache.commons.jexl3.parser.ASTSWNode;
+import org.apache.commons.jexl3.parser.ASTSelectionNode;
 import org.apache.commons.jexl3.parser.ASTSetAddNode;
 import org.apache.commons.jexl3.parser.ASTSetAndNode;
 import org.apache.commons.jexl3.parser.ASTSetDivNode;
@@ -1029,4 +1031,24 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
         return data;
     }
+
+    @Override
+    protected Object visit(ASTProjectionNode node, Object data) {
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            builder.append(".(");
+            accept(node.jjtGetChild(i), data);
+            builder.append(')');
+        }
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTSelectionNode node, Object data) {
+        builder.append(".[");
+        accept(node.jjtGetChild(0), data);
+        builder.append(']');
+        return data;
+    }
+
 }

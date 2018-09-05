@@ -148,7 +148,9 @@ TOKEN_MGR_DECLS : {
     | < COMMA : "," >
     | < DOT : "." > { pushDot(); } /* Lexical state is now DOT_ID */
     | < QDOT : "?." > { pushDot(); } /* Lexical state is now DOT_ID */
-    | < ELIPSIS : "..." >
+    | < DOTP : ".(" >
+    | < DOTB : ".[" >
+    | < ELLIPSIS : "...">
 }
 
 <*> TOKEN : { /* CONDITIONALS */
@@ -688,7 +690,7 @@ void JxltLiteral() #JxltLiteral :
 
 void ExtendedLiteral() #ExtendedLiteral() : {}
 {
-   <ELIPSIS>
+   <ELLIPSIS>
 }
 
 void ArrayLiteral() : {}
@@ -832,11 +834,53 @@ void ArrayAccess() : {}
 
 void MemberAccess() #void : {}
 {
+    LOOKAHEAD(<DOTP>) Projection()
+    |
+    LOOKAHEAD(<DOTB>) Selection()
+    |
     LOOKAHEAD(<LBRACKET>) ArrayAccess()
     |
     LOOKAHEAD(<DOT>) IdentifierAccess()
     |
     LOOKAHEAD(<QDOT>) IdentifierAccess()
+}
+
+void Selection() #SelectionNode : {}
+{
+    <DOTB> Lambda() <RBRACKET>
+}
+
+void Projection() #ProjectionNode : {}
+{
+    <DOTP> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() )* <RPAREN>
+}
+
+void ProjectionExpression() #void : {}
+{
+    LOOKAHEAD( LambdaLookahead() ) Lambda()
+    |
+    (Identifier() ( LOOKAHEAD(2) ProjectionMemberExpression() )*) #Reference(>1)
+}
+
+void ProjectionMemberExpression() #void : {}
+{
+    LOOKAHEAD(ProjectionMethodCall()) ProjectionMethodCall() 
+    |
+    ProjectionMemberAccess()
+}
+
+void ProjectionMemberAccess() #void : {}
+{
+    LOOKAHEAD(<LBRACKET>) ArrayAccess()
+    |
+    LOOKAHEAD(<DOT>) IdentifierAccess()
+    |
+    LOOKAHEAD(<QDOT>) IdentifierAccess()
+}
+
+void ProjectionMethodCall() #void : {}
+{
+    (ProjectionMemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
 }
 
 void ReferenceExpression() #MethodNode(>1) : {}
@@ -881,7 +925,9 @@ void MethodCall() #void : {}
 
 void MemberExpression() #void : {}
 {
-    LOOKAHEAD(MethodCall()) MethodCall() | MemberAccess()
+    LOOKAHEAD(MethodCall()) MethodCall() 
+    |
+    MemberAccess()
 }
 
 void ValueExpression() #void : {}
