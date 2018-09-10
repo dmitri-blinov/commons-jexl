@@ -155,7 +155,7 @@ TOKEN_MGR_DECLS : {
       < DOTP : ".(" >
     | < DOTB : ".[" >
     | < DOTC : ".{" >
-    | < DOTS : ".$" >
+    | < DOTS : ".@" >
 }
 
 <*> TOKEN : { /* CONDITIONALS */
