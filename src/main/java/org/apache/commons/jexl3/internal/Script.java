@@ -22,7 +22,6 @@ import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 
-import org.apache.commons.jexl3.parser.JexlNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -124,13 +123,24 @@ public class Script implements JexlScript, JexlExpression {
     public String getParsedText() {
         return getParsedText(2);
     }
-
+    
     @Override
     public String getParsedText(int indent) {
         Debugger debug = new Debugger();
         debug.setIndentation(indent);
-        debug.debug(script);
+        debug.debug(script, false);
         return debug.toString();
+    }
+
+    @Override
+    public String toString() {
+        CharSequence src = source;
+        if (src == null) {
+            Debugger debug = new Debugger();
+            debug.debug(script, false);
+            src = debug.toString();
+        }
+        return src.toString();
     }
 
     @Override
@@ -159,17 +169,6 @@ public class Script implements JexlScript, JexlExpression {
             return false;
         }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        CharSequence src = source;
-        if (src == null) {
-            Debugger debug = new Debugger();
-            debug.debug(script);
-            src = debug.toString();
-        }
-        return src.toString();
     }
 
     @Override
@@ -232,142 +231,12 @@ public class Script implements JexlScript, JexlExpression {
         return params;
     }
 
-    /**
-     * A script whose parameters are (partially) bound.
-     */
-    public static class Curried extends Script {
-        /** The evaluation frame. */
-        private final Scope.Frame frame;
-
-        /** The number of arguments being curried. */
-        private final int argCount;
-
-        /**
-         * Creates a curried version of this script.
-         * @param base the base script
-         * @param args the arguments
-         */
-        protected Curried(Script base, Object[] args) {
-            super(base.jexl, base.source, base.script);
-
-            if (base instanceof Curried) {
-                Scope.Frame sf = ((Curried) base).frame;
-
-                boolean varArgs = script.isVarArgs();
-                int baseArgCount = ((Curried) base).argCount;
-
-                if (varArgs) {
-                    if (baseArgCount >= script.getArgCount()) {
-                       frame = createNewVarArgFrame(sf, args);
-                    } else {
-                       frame = sf.assign(scriptArgs(baseArgCount, args));
-                    }
-                } else {
-                    frame = sf.assign(args);
-                }
-                argCount = baseArgCount + args.length;
-            } else {
-                frame = script.createFrame(scriptArgs(args));
-                argCount = args.length;
-            }
-        }
-
-        protected Scope.Frame createNewVarArgFrame(Scope.Frame sf, Object[] args) {
-
-            if (args != null && args.length > 0) {
-               int varArgPos = script.getArgCount() - 1;
-               Scope.Frame frame = sf.clone();
-
-               Object[] carg = (Object[]) frame.get(varArgPos);
-               Object[] varg = new Object[carg.length + args.length];
-
-               System.arraycopy(carg, 0, varg, 0, carg.length);
-               System.arraycopy(args, 0, varg, carg.length, args.length);
-               frame.set(varArgPos, varg);
-
-               return frame;
-            } else {
-               return sf;
-            }
-        }
-
-       /**
-        * Gets remaining curried lambda parameters.
-        * @return the parameters or null
-        * @since 3.2
-        */
-        @Override
-        public String[] getParameters() {
-
-            String[] scriptParams = super.getParameters();
-
-            if (scriptParams == null || scriptParams.length == 0)
-              return scriptParams;
-
-            boolean varArgs = script.isVarArgs();
-
-            if (argCount >= scriptParams.length) {
-               return varArgs ? new String[] {scriptParams[scriptParams.length - 1]} : null;
-            } else {
-               String[] result = new String[scriptParams.length - argCount];
-               System.arraycopy(scriptParams, argCount, result, 0, scriptParams.length - argCount);
-               return result;
-            }
-        }
-
-        @Override
-        protected Scope.Frame createFrame(Object[] args) {
-            return frame != null? frame.assign(args) : super.createFrame(args);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return this == obj;
-        }
-
-        @Override
-        public int hashCode() {
-            return System.identityHashCode(this);
-        }
-
-        @Override
-        public Object execute(JexlContext context) {
-            return execute(context, (Object[])null);
-        }
-
-        @Override
-        public Object execute(JexlContext context, Object... args) {
-            Scope.Frame callFrame = null;
-            if (frame != null) {
-
-                boolean varArgs = script.isVarArgs();
-
-                if (varArgs) {
-
-                    if (argCount >= script.getArgCount()) {
-                       callFrame = createNewVarArgFrame(frame, args);
-                    } else {
-                       callFrame = frame.assign(scriptArgs(argCount, args));
-                    }
-
-                } else {
-                    callFrame = frame.assign(args);
-                }
-            } else {
-                callFrame = script.createFrame(scriptArgs(args));
-            }
-            Interpreter interpreter = jexl.createInterpreter(context, callFrame);
-            JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-            return interpreter.interpret(block);
-        }
-    }
-
     @Override
     public JexlScript curry(Object... args) {
         String[] parms = script.getParameters();
         if (parms == null || parms.length == 0 || args == null || args.length == 0)
             return this;
-        return new Curried(this, args);
+        return new Closure(this, args);
     }
 
     /**

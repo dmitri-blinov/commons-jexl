@@ -28,6 +28,9 @@ public class Closure extends Script {
     /** The frame. */
     protected final Scope.Frame frame;
 
+    /** The number of arguments being curried. */
+    protected final int argCount;
+
     /**
      * Creates a closure.
      * @param theCaller the calling interpreter
@@ -36,18 +39,75 @@ public class Closure extends Script {
     protected Closure(Interpreter theCaller, ASTJexlLambda lambda) {
         super(theCaller.jexl, null, lambda);
         frame = lambda.createFrame(theCaller.frame);
+        argCount = 0;
+    }
+    
+    /**
+     * Creates a curried version of a script.
+     * @param base the base script
+     * @param args the script arguments
+     */
+    protected Closure(Script base, Object[] args) {
+        super(base.jexl, base.source, base.script);
+
+        if (base instanceof Closure) {
+            Scope.Frame sf = ((Closure) base).frame;
+
+            boolean varArgs = script.isVarArgs();
+            int baseArgCount = ((Closure) base).argCount;
+
+            if (varArgs) {
+                if (baseArgCount >= script.getArgCount()) {
+                   frame = createNewVarArgFrame(sf, args);
+                } else {
+                   frame = sf.assign(scriptArgs(baseArgCount, args));
+                }
+            } else {
+                frame = sf.assign(args);
+            }
+            argCount = baseArgCount + args.length;
+        } else {
+            frame = script.createFrame(scriptArgs(args));
+            argCount = args.length;
+        }
+    }
+
+    protected Scope.Frame createNewVarArgFrame(Scope.Frame sf, Object[] args) {
+
+        if (args != null && args.length > 0) {
+           int varArgPos = script.getArgCount() - 1;
+           Scope.Frame frame = sf.clone();
+
+           Object[] carg = (Object[]) frame.get(varArgPos);
+           Object[] varg = new Object[carg.length + args.length];
+
+           System.arraycopy(carg, 0, varg, 0, carg.length);
+           System.arraycopy(args, 0, varg, carg.length, args.length);
+           frame.set(varArgPos, varg);
+
+           return frame;
+        } else {
+           return sf;
+        }
     }
 
     @Override
-    public String toString() {
-        return getParsedText();
-    }
+    public String[] getParameters() {
 
-    @Override
-    public String getParsedText() {
-        Debugger debug = new Debugger();
-        debug.debug(script, false);
-        return debug.toString();
+        String[] scriptParams = super.getParameters();
+
+        if (scriptParams == null || scriptParams.length == 0)
+          return scriptParams;
+
+        boolean varArgs = script.isVarArgs();
+
+        if (argCount >= scriptParams.length) {
+           return varArgs ? new String[] {scriptParams[scriptParams.length - 1]} : null;
+        } else {
+           String[] result = new String[scriptParams.length - argCount];
+           System.arraycopy(scriptParams, argCount, result, 0, scriptParams.length - argCount);
+           return result;
+        }
     }
 
     @Override
@@ -115,9 +175,26 @@ public class Closure extends Script {
     @Override
     public Object execute(JexlContext context, Object... args) {
         Scope.Frame callFrame = null;
+
         if (frame != null) {
-            callFrame = frame.assign(scriptArgs(args));
+
+            boolean varArgs = script.isVarArgs();
+
+            if (varArgs) {
+
+                if (argCount >= script.getArgCount()) {
+                   callFrame = createNewVarArgFrame(frame, args);
+                } else {
+                   callFrame = frame.assign(scriptArgs(argCount, args));
+                }
+
+            } else {
+                callFrame = frame.assign(args);
+            }
+        } else {
+            callFrame = script.createFrame(scriptArgs(args));
         }
+
         Interpreter interpreter = jexl.createInterpreter(context, callFrame);
         JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
         return interpreter.interpret(block);
