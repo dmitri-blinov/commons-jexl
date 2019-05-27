@@ -480,7 +480,7 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTNEWNode node, Object data) {
-        return visitNode(node, data);    
+        return visitNode(node, data);
     }
 
     @Override

@@ -166,7 +166,7 @@ public class ArithmeticTest extends JexlTestCase {
             asserter.assertExpression("-aBigDecimal", new BigDecimal("-8.8"));
         }
     }
-       
+
     /**
      * test some simple mathematical calculations
      */

@@ -1516,11 +1516,10 @@ Token dotName() #void :
     Token t ;
 }
 {
-   ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO>
+   ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW>| t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS>
    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
-   | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof> 
-   | t=<NEW>| t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
+   | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
    | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
    | t=<VAR> | t=<FUNCTION> ) { return t ;}
 }

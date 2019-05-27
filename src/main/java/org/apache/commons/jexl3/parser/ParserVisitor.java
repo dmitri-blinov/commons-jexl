@@ -173,7 +173,7 @@ public abstract class ParserVisitor {
     protected abstract Object visit(ASTShiftRightUnsignedNode node, Object data);
 
     protected abstract Object visit(ASTUnaryMinusNode node, Object data);
-    
+
     protected abstract Object visit(ASTUnaryPlusNode node, Object data);
 
     protected abstract Object visit(ASTIncrementNode node, Object data);

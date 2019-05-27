@@ -1290,27 +1290,41 @@ public class JexlArithmetic {
 
     /**
      * Check for emptiness of various types: Number, Collection, Array, Map, String.
+     * <p>Override or overload this method to add new signatures to the size operators.
+     * @param object the object to check the emptiness of
+     * @return the boolean or false if object is not null
+     * @since 3.2
+     */
+    public Boolean empty(Object object) {
+        Boolean e = isEmpty(object);
+        return e == null ? Boolean.TRUE  : e;
+    }
+
+    /**
+     * Check for emptiness of various types: Number, Collection, Array, Map, String.
      *
      * @param object the object to check the emptiness of
      * @return the boolean or null if there is no arithmetic solution
      */
     public Boolean isEmpty(Object object) {
-        if (object instanceof Number) {
-            double d = ((Number) object).doubleValue();
-            return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
-        }
-        if (object instanceof CharSequence) {
-            return ((CharSequence) object).length() == 0 ? Boolean.TRUE : Boolean.FALSE;
-        }
-        if (object.getClass().isArray()) {
-            return Array.getLength(object) == 0 ? Boolean.TRUE : Boolean.FALSE;
-        }
-        if (object instanceof Collection<?>) {
-            return ((Collection<?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
-        }
-        // Map isn't a collection
-        if (object instanceof Map<?, ?>) {
-            return ((Map<?, ?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
+        if (object != null) {
+            if (object instanceof Number) {
+                double d = ((Number) object).doubleValue();
+                return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
+            }
+            if (object instanceof CharSequence) {
+                return ((CharSequence) object).length() == 0 ? Boolean.TRUE : Boolean.FALSE;
+            }
+            if (object.getClass().isArray()) {
+                return Array.getLength(object) == 0 ? Boolean.TRUE : Boolean.FALSE;
+            }
+            if (object instanceof Collection<?>) {
+                return ((Collection<?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            // Map isn't a collection
+            if (object instanceof Map<?, ?>) {
+                return ((Map<?, ?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
+            }
         }
         if (object instanceof Iterator<?>) {
             return ((Iterator<?>) object).hasNext() ? Boolean.FALSE : Boolean.TRUE;
