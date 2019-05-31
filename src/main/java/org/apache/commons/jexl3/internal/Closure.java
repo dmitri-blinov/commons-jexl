@@ -37,6 +37,8 @@ public class Closure extends Script {
     protected final JexlContext context;
     /** The number of arguments being curried. */
     protected final int curried;
+    /** The chained closure. */
+    protected final Closure chained;
 
     /**
      * Creates a closure.
@@ -48,6 +50,7 @@ public class Closure extends Script {
         frame = lambda.createFrame(theCaller.frame);
         context = theCaller.context;
         curried = 0;
+        chained = null;
     }
 
     /**
@@ -57,7 +60,6 @@ public class Closure extends Script {
      */
     protected Closure(Script base, Object[] args) {
         super(base.jexl, base.source, base.script);
-
         if (base instanceof Closure) {
             Closure closure = (Closure) base;
             Scope.Frame sf = closure.frame;
@@ -76,11 +78,26 @@ public class Closure extends Script {
             }
             context = closure.context;
             curried = baseCurried + args.length;
+            chained = closure.chained;
         } else {
             frame = script.createFrame(scriptArgs(args));
             context = null;
             curried = args.length;
+            chained = null;
         }
+    }
+
+    /**
+     * Creates a chained closure.
+     * @param base the base closure
+     * @param chained the chained closure
+     */
+    protected Closure(Closure base, Closure chained) {
+        super(base.jexl, base.source, base.script);
+        frame = base.frame.assign();
+        context = base.context;
+        curried = base.curried;
+        this.chained = chained;
     }
 
     protected static Closure create(Interpreter theCaller, ASTJexlLambda lambda) {
@@ -100,6 +117,28 @@ public class Closure extends Script {
                argCount == 1 ? new ClosureFunction(base, args) : 
                argCount == 2 ? new ClosureBiFunction(base, args) : 
                new Closure(base, args);
+    }
+
+    public static Closure create(Closure base, Closure chained) {
+        String[] parms = base.getUnboundParameters();
+        int argCount = parms != null ? parms.length : 0;
+        return argCount <= 0 ? new ClosureSupplier(base, chained) : 
+               argCount == 1 ? new ClosureFunction(base, chained) : 
+               argCount == 2 ? new ClosureBiFunction(base, chained) : 
+               new Closure(base, chained);
+    }
+
+    @Override
+    public String toString() {
+        if (chained != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(super.toString());
+            sb.append(" >> ");
+            sb.append(chained.toString());
+            return sb.toString();
+        } else {
+            return super.toString();
+        } 
     }
 
     /**
@@ -247,7 +286,10 @@ public class Closure extends Script {
         Scope.Frame local = getCallFrame(args);
         Interpreter interpreter = jexl.createInterpreter(context != null ? context : this.context, local);
         JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-        return interpreter.interpret(block);
+        Object result = interpreter.interpret(block);
+        if (chained == null)
+            return result;
+        return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);
     }
 
     @Override
@@ -257,7 +299,10 @@ public class Closure extends Script {
             @Override
             public Object interpret() {
                 JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-                return interpreter.interpret(block);
+                Object result = interpreter.interpret(block);
+                if (chained == null)
+                    return result;
+                return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);
             }
         };
     }
@@ -278,6 +323,10 @@ public class Closure extends Script {
 
         protected ClosureSupplier(Script base, Object[] args) {
             super(base, args);
+        }
+
+        protected ClosureSupplier(Closure base, Closure chained) {
+            super(base, chained);
         }
 
         protected Object eval() {
@@ -341,6 +390,10 @@ public class Closure extends Script {
 
         protected ClosureFunction(Script base, Object[] args) {
             super(base, args);
+        }
+
+        protected ClosureFunction(Closure base, Closure chained) {
+            super(base, chained);
         }
 
         protected Object eval(Object arg) {
@@ -461,6 +514,10 @@ public class Closure extends Script {
 
         protected ClosureBiFunction(Script base, Object[] args) {
             super(base, args);
+        }
+
+        protected ClosureBiFunction(Closure base, Closure chained) {
+            super(base, chained);
         }
 
         protected Object eval(Object arg1, Object arg2) {

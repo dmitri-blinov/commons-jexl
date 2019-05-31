@@ -18,6 +18,7 @@
 package org.apache.commons.jexl3;
 
 import org.apache.commons.jexl3.introspection.JexlMethod;
+import org.apache.commons.jexl3.internal.Closure;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
@@ -1053,6 +1054,15 @@ public class JexlArithmetic {
         if (left == null && right == null) {
             return controlNullNullOperands();
         }
+        if (left instanceof Closure) {
+            if (right instanceof Closure) {
+                return Closure.create((Closure) right, (Closure) left);
+            } else if (right instanceof Object[]) {
+                return ((Closure) left).execute(null, (Object[]) right);
+            } else {
+                return ((Closure) left).execute(null, right);
+            }
+        }
         // if either are no longer than integers use that type
         if (isIntegerPrecisionNumber(left)) {
             int l = ((Number) left).intValue();
@@ -1095,6 +1105,9 @@ public class JexlArithmetic {
     public Object rightShift(Object left, Object right) {
         if (left == null && right == null) {
             return controlNullNullOperands();
+        }
+        if (left instanceof Closure && right instanceof Closure) {
+            return Closure.create((Closure) left, (Closure) right);
         }
         // if either are no longer than integers use that type
         if (isIntegerPrecisionNumber(left)) {
