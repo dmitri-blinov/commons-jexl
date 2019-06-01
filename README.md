@@ -16,6 +16,56 @@
 -->
 Apache Commons JEXL Pro
 =======================
+
+The Apache Commons JEXL Pro library is an experimental fork of the The Apache Commons JEXL library.
+
+Idea of the fork
+----------------
+The fork is intended to be source compatible with the latest JEXL version (3.2-SNAPSHOT), but provides some 
+enhancements and changes to the capabilities of the scripting language. 
+
+I have no intention of promoting this fork as an alternative implementation, and I would be happy to have all 
+the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
+the JEXL community would benefit from remains at the descretion of the Apache JEXL team.
+
+Language Compatibility 
+----------------------
+The library tends to maintain as much syntax compatibility with the original syntax as possible, but there are
+some changes that may break your existing scripts. The main reason for this comes from the introduction of the new 
+reserved words to support new syntax constructs, so your variables may no longer be named by one of those that were introduced. 
+There are also some minor tweaks to the original syntax in order to clarify language structure and align language 
+constructs with other popular scripting languages, to minimize the learning curve. 
+These changes are all reflected in the documentation, but the breef summary is given below.
+
+Incompatible changes
+--------------------
++ Java 8 is the new minimum supported version 
+
++ New reserved words are introduced. Those are:
+  `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove`
+  `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double`.
+  You may not longer use them as the names of the variables and methods. The exception is made for the `remove` identifer,
+  as it is still may be used in method invocations.
+
++ Pragmas can only be defined at the beginning of the script. The reason is the pragmas are not executable constructs, 
+  so it is pointless and misleading to have them incorporated in flow-control structures somewhere in the middle.
+
++ Literal `null` can not have any properies, so it is forbidden to use it in expressions like `null.prop`.
+  If, for some reason, you still want to do this, use parentheses like `(null).prop`.
+
++ Precedence of the `range` operator (`..`) is changed to be higher than that of relational operators, 
+  but lower than that of arithmetic operators.
+
++ Precedence of the `match` operator (`=~`) and `not-match` operator (`!~`) is changed to be that of other equality operators.
+
++ Passing a function more arguments than is specified in the function declaration now results in error
+
++ Hoisted variables are effectively final. The reason is hoisted variables are in fact copies of the original variables,
+  so assigning a new value to the hoisted variable does not affect the original one. Such behaviour is misleading and thus restricted.
+
++ Left-hand assignment expression can not use safe access operator `?.`
+
+New features
 ------------
 + Java-like `switch` statement is introduced
 
@@ -35,9 +85,9 @@ Apache Commons JEXL Pro
 
 + New `this` literal is introduced to allow easier access to the current evaluation context
 
-+ Java-like `<<`,`>>`,`>>>` bitwise shift operators are introduced
++ Java-like `<<`,`>>`,`>>>` bitwise shift operators are introduced 
 
-+ Java-like `<<=`,`>>=`,`>>>=` self-assignment operators are introduced
++ Java-like `<<=`,`>>=`,`>>>=` self-assignment operators are introduced 
 
 + Java-like `++` and `--` increment/decrement operators are introduced. Prefix and postfix forms are supported
 
@@ -73,7 +123,7 @@ Apache Commons JEXL Pro
 
 Enhancements
 ------------
-+ Labeled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used.
++ Labeled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used. 
   The defined labels can be further specified for inner `break`, `continue` and `remove` flow-control statements
 
 + Multidimensional arrays can be accessed by using new syntax `arr[x,y]` as well as by using older syntax `arr[x][y]`
@@ -84,7 +134,7 @@ Enhancements
 
 + Variable argument functions can be defined by using `...` syntax after the last function argument
 
-+ Functions now implement almost all basic java8 `@FunctionalInterface` interfaces,
++ Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
   so it is possible to pass a function as an argument to java methods that accept such interfaces
 
 + Function parameters can use `var` keyword for parameter definition
@@ -105,7 +155,7 @@ Enhancements
 
 + Last part of the ternary expression `x?y:z` (along with the separating `:`) can be omitted, implying `null` as a result
 
-+ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases
++ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases 
 
 + Operator `new` supports Java-like object creation syntax `new String()` or array creation syntax `new String[] {'abc','def'}`
 
@@ -113,7 +163,7 @@ Enhancements
 
 + Foreach statement may also define additional `counter` variable `for (var x,i : list)` along with the current loop value variable
 
-+ Immutable list `#[1,2,3]` literal constructs can be used
++ Immutable list `#[1,2,3]` literal constructs can be used 
 
 + Immutable set `#{1,2,3}` literal constructs can be used
 
@@ -125,11 +175,13 @@ Enhancements
 
 + Map comprehensions `{*:...a}` can be used in map literals
 
-+ Function argument comprehensions `func(...a)` can be used
++ Function argument comprehensions `func(...a)` can be used 
 
-+ Binary format `0b...` for natural literals
++ Binary format `0b...` for natural literals 
 
 + Java-like support for underscores in numeric literals
+
++ Groovy-like lambda composition operators `<<`, `>>` may be used 
 
 + Corresponding unicode characters may be used for the operators like `!=`, `>=` etc
 
