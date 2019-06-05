@@ -1303,14 +1303,16 @@ public class JexlArithmetic {
 
     /**
      * Check for emptiness of various types: Number, Collection, Array, Map, String.
-     * <p>Override or overload this method to add new signatures to the size operators.
+     * <p>Override or overload this method to add new signatures to the empty operators.
      * @param object the object to check the emptiness of
      * @return the boolean or false if object is not null
      * @since 3.2
      */
     public Boolean empty(Object object) {
+        if (object == null)
+            return Boolean.TRUE;
         Boolean e = isEmpty(object);
-        return e == null ? Boolean.TRUE  : e;
+        return e == null ? Boolean.FALSE : e;
     }
 
     /**
@@ -1338,9 +1340,9 @@ public class JexlArithmetic {
             if (object instanceof Map<?, ?>) {
                 return ((Map<?, ?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
             }
-        }
-        if (object instanceof Iterator<?>) {
-            return ((Iterator<?>) object).hasNext() ? Boolean.FALSE : Boolean.TRUE;
+            if (object instanceof Iterator<?>) {
+                return ((Iterator<?>) object).hasNext() ? Boolean.FALSE : Boolean.TRUE;
+            }
         }
         return null;
     }
