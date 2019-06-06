@@ -98,6 +98,8 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTNullAssignment node, Object data);
 
+    protected abstract Object visit(ASTNEAssignment node, Object data);
+
     protected abstract Object visit(ASTMultipleInitialization node, Object data);
 
     protected abstract Object visit(ASTInitialization node, Object data);
@@ -234,9 +236,13 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTInlinePropertyArrayNullEntry node, Object data);
 
+    protected abstract Object visit(ASTInlinePropertyArrayNEEntry node, Object data);
+
     protected abstract Object visit(ASTInlinePropertyEntry node, Object data);
 
     protected abstract Object visit(ASTInlinePropertyNullEntry node, Object data);
+
+    protected abstract Object visit(ASTInlinePropertyNEEntry node, Object data);
 
     protected abstract Object visit(ASTEmptyFunction node, Object data);
 

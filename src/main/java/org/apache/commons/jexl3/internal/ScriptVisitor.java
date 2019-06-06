@@ -72,8 +72,10 @@ import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyNullEntry;
 import org.apache.commons.jexl3.parser.ASTInnerConstructorNode;
 import org.apache.commons.jexl3.parser.ASTIfStatement;
@@ -95,6 +97,7 @@ import org.apache.commons.jexl3.parser.ASTMulNode;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
 import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
 import org.apache.commons.jexl3.parser.ASTNINode;
@@ -350,6 +353,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTNullAssignment node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTNEAssignment node, Object data) {
         return visitNode(node, data);
     }
 
@@ -699,12 +707,22 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(ASTInlinePropertyArrayNEEntry node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(ASTInlinePropertyEntry node, Object data) {
         return visitNode(node, data);
     }
 
     @Override
     protected Object visit(ASTInlinePropertyNullEntry node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTInlinePropertyNEEntry node, Object data) {
         return visitNode(node, data);
     }
 

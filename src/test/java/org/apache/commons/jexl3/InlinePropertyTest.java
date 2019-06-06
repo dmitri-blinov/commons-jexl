@@ -178,6 +178,26 @@ public class InlinePropertyTest extends JexlTestCase {
     }
 
     @Test
+    public void inlinePropertyNotEqualsSimple() throws Exception {
+        JexlScript e = JEXL.createScript("addr { PostalCode =: '123456'}; addr.PostalCode");
+        JexlContext jc = new MapContext();
+        jc.set("addr", new Address());
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", o);
+    }
+
+    @Test
+    public void inlinePropertyEqualsSimple() throws Exception {
+        JexlScript e = JEXL.createScript("addr { PostalCode =: '123456'}; addr.PostalCode");
+        JexlContext jc = new MapContext();
+        String value = "123456";
+        Address address = new Address(value);
+        jc.set("addr", address);
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", value == o);
+    }
+
+    @Test
     public void inlinePropertyNullArray() throws Exception {
         JexlScript e = JEXL.createScript("var i = 1; addr.lines{[i] ?: '123456'}; addr.lines[1]");
         JexlContext jc = new MapContext();
@@ -197,6 +217,29 @@ public class InlinePropertyTest extends JexlTestCase {
         jc.set("addr", addr);
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", "111111", o);
+    }
+
+    @Test
+    public void inlinePropertyNotEqualsArray() throws Exception {
+        JexlScript e = JEXL.createScript("var i = 1; addr.lines{[i] =: '123456'}; addr.lines[1]");
+        JexlContext jc = new MapContext();
+        Address addr = new Address();
+        addr.getLines().add(null);
+        jc.set("addr", addr);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", o);
+    }
+
+    @Test
+    public void inlinePropertyEqualsArray() throws Exception {
+        JexlScript e = JEXL.createScript("var i = 1; addr.lines{[i] =: '123456'}; addr.lines[1]");
+        JexlContext jc = new MapContext();
+        Address addr = new Address();
+        String value = "123456";
+        addr.getLines().add(value);
+        jc.set("addr", addr);
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", value == o);
     }
 
 }
