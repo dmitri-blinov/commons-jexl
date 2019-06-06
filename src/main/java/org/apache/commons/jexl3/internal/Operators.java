@@ -188,10 +188,7 @@ public class Operators {
         }
         // call base operator
         JexlOperator base = operator.getBaseOperator();
-        if (base == null) {
-            throw new IllegalArgumentException("must be called with a side-effect operator");
-        }
-        if (operators != null && operators.overloads(base)) {
+        if (operators != null && base != null && operators.overloads(base)) {
             // in case there is an overload on the base operator
             try {
                 JexlMethod vm = operators.getOperator(base, args);
