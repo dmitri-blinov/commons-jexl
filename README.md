@@ -97,6 +97,8 @@ New features
 
 + Groovy-like `?=` conditional assignment operator is introduced
 
++ New `:=` equality conditional assignment operator is introduced
+
 + Java-like `::` method reference operator is introduced
 
 + Java-like `switch` expression operator is introduced
