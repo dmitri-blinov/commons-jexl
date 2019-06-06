@@ -1310,7 +1310,7 @@ public class JexlArithmetic {
      */
     public Boolean empty(Object object) {
         Boolean e = isEmpty(object);
-        return e == null ? Boolean.TRUE  : e;
+        return e == null ? Boolean.FALSE : e;
     }
 
     /**
@@ -1320,24 +1320,25 @@ public class JexlArithmetic {
      * @return the boolean or null if there is no arithmetic solution
      */
     public Boolean isEmpty(Object object) {
-        if (object != null) {
-            if (object instanceof Number) {
-                double d = ((Number) object).doubleValue();
-                return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
-            }
-            if (object instanceof CharSequence) {
-                return ((CharSequence) object).length() == 0 ? Boolean.TRUE : Boolean.FALSE;
-            }
-            if (object.getClass().isArray()) {
-                return Array.getLength(object) == 0 ? Boolean.TRUE : Boolean.FALSE;
-            }
-            if (object instanceof Collection<?>) {
-                return ((Collection<?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
-            }
-            // Map isn't a collection
-            if (object instanceof Map<?, ?>) {
-                return ((Map<?, ?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
-            }
+        if (object == null) {
+            return Boolean.TRUE;
+        }
+        if (object instanceof Number) {
+            double d = ((Number) object).doubleValue();
+            return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof CharSequence) {
+            return ((CharSequence) object).length() == 0 ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object.getClass().isArray()) {
+            return Array.getLength(object) == 0 ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof Collection<?>) {
+            return ((Collection<?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
+        }
+        // Map isn't a collection
+        if (object instanceof Map<?, ?>) {
+            return ((Map<?, ?>) object).isEmpty() ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof Iterator<?>) {
             return ((Iterator<?>) object).hasNext() ? Boolean.FALSE : Boolean.TRUE;
