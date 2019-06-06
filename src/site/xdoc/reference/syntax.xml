@@ -198,11 +198,20 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>Conditional assignment</td>
+                    <td>Null assignment</td>
                     <td>
                         Assigns the value to a variable, context variable or property (<code>my.var ?= 'a value'</code>) if a 
                         variable or a property is null, e.g. 
                         <code>city ?= foo</code> and <code>if (city == null) city = foo</code> are equivalent.
+                        Both <em>beans</em> and <em>ant-ish</em> variables assignment are supported.
+                    </td>
+                </tr>
+                <tr>
+                    <td>Equality assignment</td>
+                    <td>
+                        Assigns the value to a variable, context variable or property (<code>my.var := 'a value'</code>) if a 
+                        variable or a property is not equal to assigned value, e.g. 
+                        <code>city := foo</code> and <code>if (city != foo) city = foo</code> are equivalent.
                         Both <em>beans</em> and <em>ant-ish</em> variables assignment are supported.
                     </td>
                 </tr>
@@ -315,8 +324,10 @@
                         <p>Properties can also be quoted as in <code>foo {'b a r' : 10}</code> and can be dynamic
                         back-quoted interpolation strings as in <code>cal {`${dd.year}-${dd.month}-${dd.day}` : '1990-01-01'}</code>.</p>
                         <p>Nested properties can also be assigned as in <code>foo {bar {quux: 10}}</code>.</p>
-                        <p>The conditional assignment operator <code>foo {bar ?: 10}</code> can be specified, 
+                        <p>The null assignment operator <code>foo {bar ?: 10}</code> can be specified, 
                         which assigns a value to the property only if property is null.</p>
+                        <p>The equality assignment operator <code>foo {bar =: 10}</code> can be specified, 
+                        which assigns a value to the property only if property is not equal to assigned value.</p>
                     </td>
                 </tr>
                 <tr>

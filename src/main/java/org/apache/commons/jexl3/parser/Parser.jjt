@@ -200,6 +200,7 @@ TOKEN_MGR_DECLS : {
 <*> TOKEN : { /* CONDITIONALS */
       < QMARK : "?" >
     | < ELVIS : "?:" >
+    | < EN_ASSIGN : "=:" >
     | < NULLP : "??" >
     | < AND : "&&" | "\u2227" >
     | < _AND :  "and" >  { popDot(); }
@@ -248,6 +249,7 @@ TOKEN_MGR_DECLS : {
     | < shr_assign : ">>>=" >
 
     | < null_assign : "?=" >
+    | < ne_assign : ":=" >
     | < assign : "=" >
     | < increment : "++" >
     | < decrement : "--" >
@@ -760,6 +762,8 @@ void AssignmentExpression() #void : {}
     <shr_assign> Expression() #SetShrNode(2)
     |
     <null_assign> Expression() #NullAssignment(2)
+    |
+    <ne_assign> Expression() #NEAssignment(2)
     |
     <assign> Expression() #Assignment(2)
   ) )*
@@ -1654,9 +1658,13 @@ void InlinePropertyBlock() #void : {}
     |
     LOOKAHEAD(InlinePropertyName() <ELVIS>) InlinePropertyNullEntry()
     |
+    LOOKAHEAD(InlinePropertyName() <EN_ASSIGN>) InlinePropertyNEEntry()
+    |
     LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <COLON>) InlinePropertyArrayEntry()
     |
     LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <ELVIS>) InlinePropertyArrayNullEntry()
+    |
+    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <EN_ASSIGN>) InlinePropertyArrayNEEntry()
     |
     ((LOOKAHEAD(<LBRACKET>) ArrayAccess() | Identifier()) (LOOKAHEAD(2) InlineMemberAccess() )* InlinePropertyAssignment()) #Reference()
 }
@@ -1680,6 +1688,11 @@ void InlinePropertyNullEntry() : {}
     InlinePropertyName() <ELVIS> Expression()
 }
 
+void InlinePropertyNEEntry() : {}
+{
+    InlinePropertyName() <EN_ASSIGN> Expression()
+}
+
 void InlinePropertyArrayEntry() : {}
 {
     <LBRACKET> Expression() <RBRACKET> <COLON> Expression()
@@ -1688,6 +1701,11 @@ void InlinePropertyArrayEntry() : {}
 void InlinePropertyArrayNullEntry() : {}
 {
     <LBRACKET> Expression() <RBRACKET> <ELVIS> Expression()
+}
+
+void InlinePropertyArrayNEEntry() : {}
+{
+    <LBRACKET> Expression() <RBRACKET> <EN_ASSIGN> Expression()
 }
 
 void ValueExpression() #void : {}

@@ -72,8 +72,10 @@ import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyNullEntry;
 import org.apache.commons.jexl3.parser.ASTInnerConstructorNode;
 import org.apache.commons.jexl3.parser.ASTIOFNode;
@@ -97,6 +99,7 @@ import org.apache.commons.jexl3.parser.ASTMulNode;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
 import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
 import org.apache.commons.jexl3.parser.ASTNINode;
@@ -636,6 +639,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTNullAssignment node, Object data) {
         return infixChildren(node, " ?= ", false, data);
+    }
+
+    @Override
+    protected Object visit(ASTNEAssignment node, Object data) {
+        return infixChildren(node, " := ", false, data);
     }
 
     @Override
@@ -1263,6 +1271,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
+    protected Object visit(ASTInlinePropertyArrayNEEntry node, Object data) {
+        builder.append("[");
+        accept(node.jjtGetChild(0), data);
+        builder.append("] =: ");
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
     protected Object visit(ASTInlinePropertyEntry node, Object data) {
         accept(node.jjtGetChild(0), data);
         builder.append(" : ");
@@ -1274,6 +1291,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTInlinePropertyNullEntry node, Object data) {
         accept(node.jjtGetChild(0), data);
         builder.append(" ?: ");
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTInlinePropertyNEEntry node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        builder.append(" =: ");
         accept(node.jjtGetChild(1), data);
         return data;
     }

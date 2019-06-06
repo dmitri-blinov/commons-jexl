@@ -83,7 +83,9 @@ import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyEntry;
+import org.apache.commons.jexl3.parser.ASTInlinePropertyNEEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyNullEntry;
 import org.apache.commons.jexl3.parser.ASTInnerConstructorNode;
 import org.apache.commons.jexl3.parser.ASTIfStatement;
@@ -106,6 +108,7 @@ import org.apache.commons.jexl3.parser.ASTMulNode;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
 import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
 import org.apache.commons.jexl3.parser.ASTNINode;
@@ -2013,6 +2016,25 @@ public class Interpreter extends InterpreterBase {
                   setAttribute(data, property, value, p, JexlOperator.PROPERTY_SET);
                }
 
+            } else if (p instanceof ASTInlinePropertyNEEntry) {
+
+               ASTInlinePropertyNEEntry entry = (ASTInlinePropertyNEEntry) p;
+
+               JexlNode name = entry.jjtGetChild(0);
+               Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, null);
+               String property = String.valueOf(key);
+
+               Object value = getAttribute(data, property, p);
+               Object right = entry.jjtAccept(this, null);
+
+               Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
+               boolean equals = (result != JexlEngine.TRY_FAILED)
+                          ? arithmetic.toBoolean(result)
+                          : arithmetic.equals(value, right);
+               if (!equals) {
+                  setAttribute(data, property, right, p, JexlOperator.PROPERTY_SET);
+               }
+
             } else if (p instanceof ASTInlinePropertyArrayNullEntry) {
 
                ASTInlinePropertyArrayNullEntry entry = (ASTInlinePropertyArrayNullEntry) p;
@@ -2023,6 +2045,22 @@ public class Interpreter extends InterpreterBase {
                if (value == null) {
                   value = entry.jjtAccept(this, null);
                   setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
+               }
+
+            } else if (p instanceof ASTInlinePropertyArrayNEEntry) {
+
+               ASTInlinePropertyArrayNEEntry entry = (ASTInlinePropertyArrayNEEntry) p;
+
+               Object key = entry.jjtGetChild(0).jjtAccept(this, null);
+               Object value = getAttribute(data, key, p);
+               Object right = entry.jjtAccept(this, null);
+
+               Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
+               boolean equals = (result != JexlEngine.TRY_FAILED)
+                          ? arithmetic.toBoolean(result)
+                          : arithmetic.equals(value, right);
+               if (!equals) {
+                  setAttribute(data, key, right, p, JexlOperator.ARRAY_SET);
                }
 
             } else {
@@ -2059,7 +2097,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTInlinePropertyNEEntry node, Object data) {
+        return node.jjtGetChild(1).jjtAccept(this, data);
+    }
+
+    @Override
     protected Object visit(ASTInlinePropertyArrayNullEntry node, Object data) {
+        return node.jjtGetChild(1).jjtAccept(this, data);
+    }
+
+    @Override
+    protected Object visit(ASTInlinePropertyArrayNEEntry node, Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
@@ -2533,6 +2581,22 @@ public class Interpreter extends InterpreterBase {
         Object value = left.jjtAccept(this, data);
         if (value == null) {
            Object right = node.jjtGetChild(1).jjtAccept(this, data);
+           return executeAssign(node, left, right, null, data);
+        }
+        return value;
+    }
+
+    @Override
+    protected Object visit(ASTNEAssignment node, Object data) {
+        JexlNode left = node.jjtGetChild(0);
+        Object value = left.jjtAccept(this, data);
+        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+
+        Object result = operators.tryOverload(node, JexlOperator.EQ, value, right);
+        boolean equals = (result != JexlEngine.TRY_FAILED)
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.equals(value, right);
+        if (!equals) {
            return executeAssign(node, left, right, null, data);
         }
         return value;
