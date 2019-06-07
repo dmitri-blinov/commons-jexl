@@ -596,7 +596,7 @@ public class Engine extends JexlEngine {
             if (collector.isCollecting()) {
                 collector.add(((ASTIdentifierAccess) node).getName());
             }
-        } else if (node instanceof ASTArrayAccess || node instanceof ASTArrayAccessSafe) {
+        } else if (node instanceof ASTArrayAccess) {
             int num = node.jjtGetNumChildren();
             // collect only if array access is const and follows an identifier
             boolean collecting = collector.isCollecting();
@@ -609,6 +609,7 @@ public class Engine extends JexlEngine {
                     collecting = false;
                     collector.collect(null);
                     getVariables(script, child, collector);
+                    collector.collect(null);
                 }
             }
         } else {
