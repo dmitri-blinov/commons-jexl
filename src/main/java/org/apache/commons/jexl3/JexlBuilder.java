@@ -84,7 +84,7 @@ public class JexlBuilder {
 
     /** Whether this engine is in tolerant mode. */
     private Boolean safe = false;
-    
+
     /** Whether error messages will carry debugging information. */
     private Boolean debug = null;
 
@@ -94,6 +94,9 @@ public class JexlBuilder {
     /** Whether interrupt throws JexlException.Cancel. */
     private Boolean cancellable = null;
 
+    /** Whether getVariables considers all potential equivalent syntactic forms. */
+    private Boolean collectAll = null;
+
     /** The map of 'prefix:function' to object implementing the namespaces. */
     private Map<String, Object> namespaces = null;
 
@@ -102,7 +105,7 @@ public class JexlBuilder {
 
     /** The cache size. */
     private int cache = -1;
-    
+
     /** The stack overflow limit. */
     private int stackOverflow = Integer.MAX_VALUE;
 
@@ -328,7 +331,7 @@ public class JexlBuilder {
     public Boolean safe() {
         return this.safe;
     }
-    
+
     /**
      * Sets whether the engine will report debugging information when error occurs.
      *
@@ -364,6 +367,22 @@ public class JexlBuilder {
      */
     public Boolean cancellable() {
         return this.cancellable;
+    }
+
+    /**
+     * Sets whether the engine variable collectors considers all potential forms of variable syntaxes.
+     *
+     * @param flag true means var collections considers constant array accesses equivalent to dotted references
+     * @return this builder
+     */
+    public JexlBuilder collectAll(boolean flag) {
+        this.collectAll = flag;
+        return this;
+    }
+
+    /** @return true if collect all, false otherwise */
+    public Boolean collectAll() {
+        return this.collectAll;
     }
 
     /**
@@ -461,7 +480,7 @@ public class JexlBuilder {
     public int stackOverflow() {
         return stackOverflow;
     }
-    
+
     /**
      * @return a {@link JexlEngine} instance
      */
