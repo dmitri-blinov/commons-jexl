@@ -275,6 +275,9 @@ public abstract class JexlNode extends SimpleNode {
         JexlNode node = this;
         for (JexlNode walk = node.jjtGetParent(); walk != null; walk = walk.jjtGetParent()) {
             // protect only the condition part of the ternay
+            if (walk instanceof ASTTernaryNode && node == walk.jjtGetChild(0)) {
+                return true;
+            }
             if (walk instanceof ASTElvisNode && node == walk.jjtGetChild(0)) {
                 return true;
             }
