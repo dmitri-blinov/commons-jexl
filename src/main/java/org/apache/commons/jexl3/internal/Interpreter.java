@@ -2113,7 +2113,18 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTTernaryNode node, Object data) {
-        Object condition = node.jjtGetChild(0).jjtAccept(this, data);
+        Object condition = null;
+        try {
+            condition = node.jjtGetChild(0).jjtAccept(this, data);
+        } catch(JexlException.Property xprop) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xprop);
+            }
+        } catch(JexlException.Variable xvar) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xvar);
+            }
+        }
         if (condition != null && arithmetic.toBoolean(condition))
             return node.jjtGetChild(1).jjtAccept(this, data);
         if (node.jjtGetNumChildren() == 3) {
@@ -2124,7 +2135,18 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTElvisNode node, Object data) {
-        Object condition = node.jjtGetChild(0).jjtAccept(this, data);
+        Object condition = null;
+        try {
+            condition = node.jjtGetChild(0).jjtAccept(this, data);
+        } catch(JexlException.Property xprop) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xprop);
+            }
+        } catch(JexlException.Variable xvar) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xvar);
+            }
+        }
         if (condition != null && arithmetic.toBoolean(condition)) {
             return condition;
         } else {
@@ -2134,7 +2156,19 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTNullpNode node, Object data) {
-        Object lhs = node.jjtGetChild(0).jjtAccept(this, data);
+        Object lhs = null;
+        try {
+            lhs = node.jjtGetChild(0).jjtAccept(this, data);
+        } catch(JexlException.Property xprop) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xprop);
+            }
+        } catch(JexlException.Variable xvar) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xvar);
+            }
+        }
+        // null elision as in "x ?? z"
         return lhs != null? lhs : node.jjtGetChild(1).jjtAccept(this, data);
     }
 
@@ -2241,7 +2275,7 @@ public class Interpreter extends InterpreterBase {
             if (value == null
                 && !(node.jjtGetParent() instanceof ASTReference)
                 && !(context.has(name))
-                && !node.isTernaryProtected()) {
+                /*&& !node.isTernaryProtected()*/) {
                 return jexl.safe
                         ? null
                         : unsolvableVariable(node, name, !(node.getSymbol() >= 0 || context.has(name)));
@@ -2332,7 +2366,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTReference node, Object data) {
+    protected Object visit(final ASTReference node, Object data) {
         cancelCheck(node);
         final int numChildren = node.jjtGetNumChildren();
         final JexlNode parent = node.jjtGetParent();
@@ -2432,7 +2466,7 @@ public class Interpreter extends InterpreterBase {
             }
         }
         // am I the left-hand side of a safe op ?
-        if (object == null && !node.isTernaryProtected()) {
+        if (object == null/* && !node.isTernaryProtected()*/) {
             if (ptyNode != null) {
                 if (ptyNode.isSafeLhs(jexl.safe)) {
                     return null;
@@ -2578,20 +2612,40 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTNullAssignment node, Object data) {
         JexlNode left = node.jjtGetChild(0);
-        Object value = left.jjtAccept(this, data);
-        if (value == null) {
-           Object right = node.jjtGetChild(1).jjtAccept(this, data);
-           return executeAssign(node, left, right, null, data);
+        try {
+            Object value = left.jjtAccept(this, data);
+            if (value != null) {
+               return value;
+            }
+        } catch(JexlException.Property xprop) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xprop);
+            }
+        } catch(JexlException.Variable xvar) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xvar);
+            }
         }
-        return value;
+        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        return executeAssign(node, left, right, null, data);
     }
 
     @Override
     protected Object visit(ASTNEAssignment node, Object data) {
         JexlNode left = node.jjtGetChild(0);
-        Object value = left.jjtAccept(this, data);
+        Object value = null;
+        try {
+            value = left.jjtAccept(this, data);
+        } catch(JexlException.Property xprop) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xprop);
+            }
+        } catch(JexlException.Variable xvar) {
+            if (logger.isDebugEnabled()) {
+                logger.debug(node, xvar);
+            }
+        }
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
-
         Object result = operators.tryOverload(node, JexlOperator.EQ, value, right);
         boolean equals = (result != JexlEngine.TRY_FAILED)
                    ? arithmetic.toBoolean(result)
