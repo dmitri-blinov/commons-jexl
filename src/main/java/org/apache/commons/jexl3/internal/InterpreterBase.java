@@ -346,7 +346,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object unsolvableVariable(JexlNode node, String var, boolean undef) {
-        if (isStrictEngine()) {
+        if (isStrictEngine() && !node.isTernaryProtected()) {
             throw new JexlException.Variable(node, var, undef);
         } else if (logger.isDebugEnabled()) {
             logger.debug(JexlException.variableError(node, var, undef));
@@ -389,7 +389,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object unsolvableProperty(JexlNode node, String property, boolean undef, Throwable cause) {
-        if (isStrictEngine()) {
+        if (isStrictEngine() && !node.isTernaryProtected()) {
             throw new JexlException.Property(node, property, undef, cause);
         } else if (logger.isDebugEnabled()) {
             logger.debug(JexlException.propertyError(node, property, undef));
