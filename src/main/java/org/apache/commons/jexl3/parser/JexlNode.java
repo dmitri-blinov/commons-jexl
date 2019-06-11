@@ -261,7 +261,7 @@ public abstract class JexlNode extends SimpleNode {
         }
         return false;
     }
-        
+
     /**
      * Check if a null evaluated expression is protected by a ternary expression.
      * <p>
@@ -275,7 +275,7 @@ public abstract class JexlNode extends SimpleNode {
         JexlNode node = this;
         for (JexlNode walk = node.jjtGetParent(); walk != null; walk = walk.jjtGetParent()) {
             // protect only the condition part of the ternary
-            if (walk instanceof ASTTernaryNode || walk instanceof ASTNullpNode) {
+            if (walk instanceof ASTTernaryNode || walk instanceof ASTNullpNode || walk instanceof ASTElvisNode || walk instanceof ASTNullAssignment || walk instanceof ASTNEAssignment) {
                 return node == walk.jjtGetChild(0);
             }
             if (!(walk instanceof ASTReference || walk instanceof ASTArrayAccess)) {
@@ -284,5 +284,5 @@ public abstract class JexlNode extends SimpleNode {
             node = walk;
         }
         return false;
-    } 
+    }
 }
