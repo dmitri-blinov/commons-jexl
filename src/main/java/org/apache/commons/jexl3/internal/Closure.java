@@ -103,8 +103,8 @@ public class Closure extends Script {
     protected static Closure create(Interpreter theCaller, ASTJexlLambda lambda) {
         int argCount = lambda.getArgCount();
         return argCount == 0 ? new ClosureSupplier(theCaller, lambda) :
-               argCount == 1 ? new ClosureFunction(theCaller, lambda) : 
-               argCount == 2 ? new ClosureBiFunction(theCaller, lambda) : 
+               argCount == 1 ? new ClosureFunction(theCaller, lambda) :
+               argCount == 2 ? new ClosureBiFunction(theCaller, lambda) :
                new Closure(theCaller, lambda);
     }
 
@@ -113,18 +113,18 @@ public class Closure extends Script {
         int argCount = parms != null ? parms.length : 0;
         if (args != null)
             argCount -= args.length;
-        return argCount <= 0 ? new ClosureSupplier(base, args) : 
-               argCount == 1 ? new ClosureFunction(base, args) : 
-               argCount == 2 ? new ClosureBiFunction(base, args) : 
+        return argCount <= 0 ? new ClosureSupplier(base, args) :
+               argCount == 1 ? new ClosureFunction(base, args) :
+               argCount == 2 ? new ClosureBiFunction(base, args) :
                new Closure(base, args);
     }
 
     public static Closure create(Closure base, Closure chained) {
         String[] parms = base.getUnboundParameters();
         int argCount = parms != null ? parms.length : 0;
-        return argCount <= 0 ? new ClosureSupplier(base, chained) : 
-               argCount == 1 ? new ClosureFunction(base, chained) : 
-               argCount == 2 ? new ClosureBiFunction(base, chained) : 
+        return argCount <= 0 ? new ClosureSupplier(base, chained) :
+               argCount == 1 ? new ClosureFunction(base, chained) :
+               argCount == 2 ? new ClosureBiFunction(base, chained) :
                new Closure(base, chained);
     }
 
@@ -138,7 +138,7 @@ public class Closure extends Script {
             return sb.toString();
         } else {
             return super.toString();
-        } 
+        }
     }
 
     /**
@@ -284,7 +284,7 @@ public class Closure extends Script {
     @Override
     public Object execute(JexlContext context, Object... args) {
         Scope.Frame local = getCallFrame(args);
-        Interpreter interpreter = jexl.createInterpreter(context != null ? context : this.context, local);
+        Interpreter interpreter = createInterpreter(context != null ? context : this.context, local);
         JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
         Object result = interpreter.interpret(block);
         if (chained == null)
@@ -295,7 +295,7 @@ public class Closure extends Script {
     @Override
     public Callable callable(JexlContext context, Object... args) {
         Scope.Frame local = getCallFrame(args);
-        return new CallableScript(jexl.createInterpreter(context != null ? context : this.context, local)) {
+        return new CallableScript(createInterpreter(context != null ? context : this.context, local)) {
             @Override
             public Object interpret() {
                 JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
@@ -310,7 +310,7 @@ public class Closure extends Script {
     /**
      * Implements the @FunctionalInterface interfaces with no arguments to help delegation.
      */
-    public static class ClosureSupplier extends Closure implements 
+    public static class ClosureSupplier extends Closure implements
           Supplier<Object>, BooleanSupplier, DoubleSupplier, IntSupplier, LongSupplier,
           Callable<Object>, Runnable {
         /**
@@ -373,9 +373,9 @@ public class Closure extends Script {
     /**
      * Implements the @FunctionalInterface interfaces with one argument to help delegation.
      */
-    public static class ClosureFunction extends Closure implements 
+    public static class ClosureFunction extends Closure implements
           Function<Object, Object>, DoubleFunction<Object>, LongFunction<Object>, IntFunction<Object>,
-          UnaryOperator<Object>, Predicate<Object>, 
+          UnaryOperator<Object>, Predicate<Object>,
           ToDoubleFunction<Object>, ToIntFunction<Object>, ToLongFunction<Object>,
           LongToDoubleFunction, LongToIntFunction, IntToDoubleFunction, IntToLongFunction,
           DoubleUnaryOperator, LongUnaryOperator, IntUnaryOperator,
@@ -499,8 +499,8 @@ public class Closure extends Script {
     /**
      * Implements the @FunctionalInterface interfaces with two arguments to help delegation.
      */
-    public static class ClosureBiFunction extends Closure implements 
-          Comparator<Object>, BiFunction<Object, Object, Object>, BiPredicate<Object, Object>, 
+    public static class ClosureBiFunction extends Closure implements
+          Comparator<Object>, BiFunction<Object, Object, Object>, BiPredicate<Object, Object>,
           BinaryOperator<Object>, DoubleBinaryOperator, LongBinaryOperator, IntBinaryOperator,
           BiConsumer<Object, Object>, ObjDoubleConsumer<Object>, ObjLongConsumer<Object>, ObjIntConsumer<Object>,
           ToDoubleBiFunction<Object, Object>, ToLongBiFunction<Object, Object>, ToIntBiFunction<Object, Object> {
