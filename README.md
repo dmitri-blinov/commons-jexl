@@ -103,6 +103,8 @@ New features
 
 + Java-like `switch` expression operator is introduced
 
++ Java-like `yield` statement is introduced
+
 + Java-like `()` type-cast operator is introduced
 
 + Javascript-like `===` and `!==` identity operators are introduced
