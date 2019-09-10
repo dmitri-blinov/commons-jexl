@@ -489,7 +489,8 @@
                         Can start and end with either <code>'</code> or <code>"</code> delimiters, e.g.
                         <code>"Hello world"</code> and
                         <code>'Hello world'</code> are equivalent.
-                        <p>The escape character is <code>\</code> (backslash); it only escapes the string delimiter</p>
+                        <p>The escape character is <code>\</code> (backslash); it only escapes the string delimiter 
+                        and a unicode sequence starting with 'u' followed by 4 hexadecimals, e.g. <code>\u0021</code></p>
                     </td>
                 </tr>
                 <tr>
