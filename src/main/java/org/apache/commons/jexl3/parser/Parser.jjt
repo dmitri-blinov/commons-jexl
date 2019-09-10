@@ -151,6 +151,7 @@ TOKEN_MGR_DECLS : {
     | < TRUE : "true" > { popDot(); }
     | < FALSE : "false" > { popDot(); }
     | < RETURN : "return" > { popDot(); }
+    | < YIELD : "yield" > { popDot(); }
     | < FUNCTION : "function" > { popDot(); } /* Revert state to default if was DOT_ID. */
     | < LAMBDA : "->" | "\u2192" >
     | < LAMBDAE : "=>" | "\u21D2" >
@@ -427,6 +428,7 @@ void Statement() #void : {}
     | LOOKAHEAD(SwitchStatementLookahead()) SwitchStatement()
     | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
     | ReturnStatement()
+    | YieldStatement()
     | Continue()
     | Remove()
     | Break()
@@ -583,6 +585,11 @@ void SwitchStatementDefault() : {}
 void ReturnStatement() : {}
 {
     <RETURN> [ LOOKAHEAD(2) ExpressionStatement() ]
+}
+
+void YieldStatement() : {}
+{
+    <YIELD> Expression() { if (!branchScope.yieldSupported()) { throwParsingException(jjtThis); } } 
 }
 
 void Continue() #Continue :
@@ -1063,7 +1070,7 @@ void IteratorExpression() #void : {}
 
 void SwitchExpression() : {}
 {
-    <SWITCH> <LPAREN> Expression() <RPAREN> <LCURLY> SwitchExpressionBlock() <RCURLY>
+    <SWITCH> <LPAREN> Expression() <RPAREN> <LCURLY> { branchScope.yieldCount += 1; } SwitchExpressionBlock() { branchScope.yieldCount -= 1; } <RCURLY>
 }
 
 void SwitchExpressionBlock() #void : {}
@@ -1567,7 +1574,7 @@ void ArrayAccessSafe() : {}
 void ReferenceExpression() #MethodNode(>1) : {}
 {
     ( <LPAREN> (
-      LOOKAHEAD(Expression()) Expression() | Block()
+      LOOKAHEAD(Expression()) Expression() | { branchScope.yieldCount += 1; } Block() { branchScope.yieldCount -= 1; } 
     ) <RPAREN> #ReferenceExpression(1) ) ( LOOKAHEAD(<LPAREN>) Arguments() )*
 }
 

@@ -899,6 +899,36 @@ public class JexlException extends RuntimeException {
     }
 
     /**
+     * Thrown to yield a value.
+     *
+     * @since 3.2
+     */
+    public static class Yield extends JexlException {
+
+        /** The yeilded value. */
+        private final Object result;
+
+        /**
+         * Creates a new instance of Yield.
+         *
+         * @param node  the yeild node
+         * @param msg   the message
+         * @param value the yeilded value
+         */
+        public Yield(JexlNode node, String msg, Object value) {
+            super(node, msg, null);
+            this.result = value;
+        }
+
+        /**
+         * @return the yeilded value
+         */
+        public Object getValue() {
+            return result;
+        }
+    }
+
+    /**
      * Thrown to cancel a script execution.
      *
      * @since 3.0

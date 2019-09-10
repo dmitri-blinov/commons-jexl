@@ -598,6 +598,7 @@ public abstract class JexlParser extends StringParser {
         protected int loopCount = 0;
         protected int foreachLoopCount = 0;
         protected int switchCount = 0;
+        protected int yieldCount = 0;
 
         protected Deque<String> blockLabels = new ArrayDeque<String> ();
         protected Deque<String> loopLabels = new ArrayDeque<String> ();
@@ -609,6 +610,10 @@ public abstract class JexlParser extends StringParser {
 
         protected boolean breakSupported(String label) {
             return blockLabels.contains(label);
+        }
+
+        protected boolean yieldSupported() {
+            return yieldCount != 0;
         }
 
         protected boolean continueSupported() {
