@@ -123,6 +123,7 @@ TOKEN_MGR_DECLS : {
     | "\n"
     | "\r"
     | "\f"
+    | "\u00A0"
 }
 
 <*> TOKEN : /* KEYWORDS */
