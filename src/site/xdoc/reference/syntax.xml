@@ -153,8 +153,10 @@
                 </tr>
                 <tr>
                     <td>Local variables</td>
-                    <td>Can be defined untyped by using the <code>var</code> keyword or strongly typed by specifying one of java primitive types:
+                    <td>Can be defined untyped by using the <code>var</code> keyword or strongly typed by specifying a simple class name or one of java primitive types:
                         <code>boolean char byte short int long float double</code>
+                        The array syntax is also supported, e.g.
+                        <code>String[] x</code>, or <code>int[] a</code>.
                         The local variable name should be a valid identifier.
                         <ul>
                             <li>Basic declaration: <code>var x;</code></li>

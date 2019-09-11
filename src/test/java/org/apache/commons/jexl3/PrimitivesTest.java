@@ -37,6 +37,15 @@ public class PrimitivesTest extends JexlTestCase {
         super("PrimitivesTest");
     }
 
+    public void testFailed(String expr) throws Exception {
+        try {
+           JexlScript e = jexl.createScript(expr);
+           Assert.fail("Should have failed");
+        } catch (Exception ex) {
+           //
+        }
+    }
+
     @Test
     public void testBoolean() throws Exception {
         JexlContext jc = new MapContext();
@@ -306,6 +315,18 @@ public class PrimitivesTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Long);
         Assert.assertEquals("Result is not true", 42L, o);
+    }
+
+    @Test
+    public void testRequired() throws Exception {
+        testFailed("boolean x");
+        testFailed("char x");
+        testFailed("byte x");
+        testFailed("short x");
+        testFailed("int x");
+        testFailed("long x");
+        testFailed("float x");
+        testFailed("double x");
     }
 
 }
