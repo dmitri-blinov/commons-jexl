@@ -45,6 +45,33 @@ public class VarParametersTest extends JexlTestCase {
     }
 
     @Test
+    public void testPrimitive() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = JEXL.createScript("function(int x, int y) { x + y }");
+        Object o = e.execute(jc, 40, 2);
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
+    @Test
+    public void testScoped() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = JEXL.createScript("function(String x, String y) { x + y }");
+        Object o = e.execute(jc, "4", "2");
+        Assert.assertEquals("Result is not as expected", "42", o);
+    }
+
+    @Test
+    public void testArray() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = JEXL.createScript("function(int[] x) { x[0] + x[1] }");
+        Object o = e.execute(jc, new int[] {40, 2});
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
+    @Test
     public void testMixed() throws Exception {
         try {
             JexlScript e = JEXL.createScript("function(var x,y) { x + y }");

@@ -676,12 +676,23 @@ void DeclareVar() #Var :
     <VAR> t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
+void RequiredVarLookahead() #void() : {}
+{
+  <FINAL>
+  |
+  <VAR> <and>
+  |
+  (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
+  |
+  LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
+  <IDENTIFIER> (<LBRACKET> <RBRACKET>)* <and> <IDENTIFIER> 
+}
+
 void Var() #void : {}
 {
-    LOOKAHEAD(<FINAL> | (<VAR> <and>) | (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) <IDENTIFIER>)
-    DeclareLocalVar() <assign> Expression() #Initialization(2)
+    LOOKAHEAD(RequiredVarLookahead()) DeclareLocalVar() <assign> Expression() #Initialization(2)
     |
-    DeclareLocalVar() (<assign> Expression() #Initialization(2))?
+    DeclareLocalVar() [ <assign> Expression() #Initialization(2) ]
 }
 
 void DeclareLocalVar() #Var :
@@ -690,7 +701,7 @@ void DeclareLocalVar() #Var :
 }
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
-    ( <VAR> [ <and> { jjtThis.setRequired(); } ]
+    ( <VAR>
       | 
       ( <INT> { jjtThis.setType(Integer.TYPE); }
         |
@@ -708,11 +719,11 @@ void DeclareLocalVar() #Var :
         |
         <DOUBLE> { jjtThis.setType(Double.TYPE); }
         |
-        LOOKAHEAD( { Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
+        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
 
       ) (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
     )
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    [ <and> { jjtThis.setRequired(); } ] t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
 void DeclareExtVar(boolean isFinal) #ExtVar :
@@ -1172,23 +1183,20 @@ void This() #void : {}
     <THIS> #ThisNode
 }
 
-void Literal() #void :
-{
-   Token t;
-}
+void Literal() #void : {}
 {
   IntegerLiteral()
-|
+  |
   FloatLiteral()
-|
+  |
   BooleanLiteral()
-|
+  |
   JxltLiteral()
-|
+  |
   StringLiteral()
-|
+  |
   RegexLiteral()
-|
+  |
   NaNLiteral()
 }
 
@@ -1276,7 +1284,7 @@ void TypeCastReference() #ClassLiteral() :
     |
     t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
     |
-    LOOKAHEAD( { Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
   )
   (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
@@ -1518,27 +1526,38 @@ void VarParameter() #void :
     boolean isRequired = false;
 }
 {
-    ( <FINAL> { isFinal = true; } )?
-    ( <VAR> ( <and> { isRequired = true; } )?
-      | <INT> { type = Integer.TYPE; }
-      | <LONG> { type = Long.TYPE; }
-      | <SHORT> { type = Short.TYPE; }
-      | <BYTE> { type = Byte.TYPE; }
-      | <CHAR> { type = Character.TYPE; }
-      | <BOOLEAN> { type = Boolean.TYPE; }
-      | <FLOAT> { type = Float.TYPE; }
-      | <DOUBLE> { type = Double.TYPE; }
+    [ <FINAL> { isFinal = true; } ]
+    ( <VAR>
+      | 
+      (
+         <INT> { type = Integer.TYPE; }
+         |
+         <LONG> { type = Long.TYPE; }
+         |
+         <SHORT> { type = Short.TYPE; }
+         |
+         <BYTE> { type = Byte.TYPE; }
+         |
+         <CHAR> { type = Character.TYPE; }
+         |
+         <BOOLEAN> { type = Boolean.TYPE; }
+         |
+         <FLOAT> { type = Float.TYPE; }
+         |
+         <DOUBLE> { type = Double.TYPE; }
+         |
+         LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }     
+
+      ) (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
-    t=<IDENTIFIER> { declareParameter(t, type, isFinal, isRequired); }
+    [ <and> { isRequired = true; } ] t=<IDENTIFIER> { declareParameter(t, type, isFinal, isRequired); }
 }
 
 void Parameters() #void : {}
 {
     <LPAREN> [
-      (LOOKAHEAD(<FINAL> | <VAR> | <BYTE> | <SHORT> | <INT> | <LONG> | <FLOAT> | <DOUBLE> | <BOOLEAN> | <CHAR> ) VarParameter() (<COMMA> VarParameter())*
-       |
-       Parameter() (<COMMA> Parameter())*)
-      (<ELLIPSIS> { declareVarArgSupport(); })?
+      (LOOKAHEAD(VarParameter()) VarParameter() (<COMMA> VarParameter())* | Parameter() (<COMMA> Parameter())*) 
+      [ <ELLIPSIS> { declareVarArgSupport(); } ]
     ] <RPAREN>
 }
 

@@ -22,6 +22,8 @@ import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.internal.Scope;
 
+import java.lang.reflect.Array;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -491,6 +493,15 @@ public abstract class JexlParser extends StringParser {
     }
 
     protected static String[] implicitPackages = {"java.lang.","java.util.","java.io.","java.net."};
+
+    /**
+     * Constructs an array type
+     * @param c the component type
+     * @return the Class
+     */
+    protected static Class arrayType(Class c) {
+        return c != null ? Array.newInstance(c, 0).getClass() : null;
+    }
 
     /**
      * Resolves a type by its name.

@@ -16,8 +16,6 @@
  */
 package org.apache.commons.jexl3.parser;
 
-import java.lang.reflect.Array;
-
 /**
  * Declares a local variable.
  */
@@ -44,7 +42,7 @@ public class ASTVar extends ASTIdentifier {
     }
 
     void setArray() {
-        type = type != null ? Array.newInstance(type, 0).getClass() : null;
+        type = JexlParser.arrayType(type);
     }
 
     public boolean isRequired() {

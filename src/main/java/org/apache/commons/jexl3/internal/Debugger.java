@@ -419,6 +419,37 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     /**
+     * Gets printable class name
+     * @param ñ the type
+     * @return class name value
+     */
+    protected String getClassName(Class c) {
+        StringBuilder result = new StringBuilder();
+        Class literal = c;
+        int array = 0;
+
+        while (literal.isArray()) {
+            array++;
+            literal = literal.getComponentType();
+        }
+
+        if (literal != null) {
+            String qn = literal.getName();
+            Package pack = literal.getPackage();
+            String p = pack != null ? pack.getName() : null;
+            if (p == null || p.equals("java.lang") || p.equals("java.util") || p.equals("java.io") || p.equals("java.net")
+                || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger")) {
+                result.append(literal.getSimpleName());
+            } else {
+                result.append(literal.getName());
+            }
+        }
+        for (int i = 0; i < array; i++)
+            result.append("[]");
+        return result.toString();
+    }
+
+    /**
      * Checks if a terminal node is the the cause to debug &amp; adds its representation to the rebuilt expression.
      * @param node  the child node
      * @param image the child node token image (may be null)
@@ -1131,10 +1162,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                         Class type = scope.getVariableType(symbol);
                         if (type == null) {
                             builder.append("var ");
-                        } else if (type.isPrimitive()) {
-                            builder.append(type.getSimpleName()).append(" ");
                         } else {
-                            builder.append(type.getName()).append(" ");
+                            builder.append(getClassName(type)).append(" ");
                         }
                     }
                     boolean isRequired = scope.isVariableRequired(symbol);
@@ -1698,7 +1727,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         if (type == null) {
            builder.append("var ");
         } else {
-           builder.append(type.getSimpleName()).append(" ");
+           builder.append(getClassName(type)).append(" ");
         }
         if (isRequired) {
            builder.append("&");

@@ -16,8 +16,6 @@
  */
 package org.apache.commons.jexl3.parser;
 
-import java.lang.reflect.Array;
-
 public final class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class> {
 
     /** The actual literal value; the inherited 'value' member may host a cached getter. */
@@ -78,7 +76,7 @@ public final class ASTClassLiteral extends JexlNode implements JexlNode.Constant
 
     void setArray() {
         array++;
-        type = type != null ? Array.newInstance(type, 0).getClass() : null;
+        type = JexlParser.arrayType(type);
     }
 
     public int getArray() {
