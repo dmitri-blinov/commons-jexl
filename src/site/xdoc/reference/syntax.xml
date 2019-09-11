@@ -75,10 +75,10 @@
                     <td>
                         Must start with <code>a-z</code>, <code>A-Z</code>, <code>_</code> or <code>$</code>.
                         Can then be followed by <code>0-9</code>, <code>a-z</code>, <code>A-Z</code>, <code>_</code> or <code>$</code>.
-                        e.g.
+                        Identifier can not be a single underscore <code>_</code> e.g.
                         <ul>
                             <li>Valid: <code>var1</code>,<code>_a99</code>,<code>$1</code></li>
-                            <li>Invalid: <code>9v</code>,<code>!a99</code>,<code>1$</code></li>
+                            <li>Invalid: <code>9v</code>,<code>!a99</code>,<code>1$</code>,<code>_</code></li>
                         </ul>
                         <p>
                             <strong>N.B.</strong> the following keywords are reserved, and cannot be used as an identifier or the property name when using the dot operator:

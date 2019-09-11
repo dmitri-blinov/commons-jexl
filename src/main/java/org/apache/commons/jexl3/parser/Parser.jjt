@@ -160,6 +160,7 @@ TOKEN_MGR_DECLS : {
     | < CONTINUE : "continue" > { popDot(); }
     | < REMOVE : "remove" > { popDot(); } /* Revert state to default if was DOT_ID. */
     | < PRAGMA : "#pragma" > { pushQ(); } /* Lexical state is now QUALIFIED */
+    | < UNDERSCORE : "_" > { popDot(); }
 }
 
 <*> TOKEN : { /* SEPARATORS */
