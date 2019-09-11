@@ -1022,7 +1022,8 @@
                     <td>
                         The 'cast' operator is used for the conversion of one data type to another.
                         For example <code>(char)42</code> returns <code>'*'</code>.
-                        The type name to cast the value to can be any java primitive type name.
+                        The type name to cast the value to can be any java primitive type name or simple name as defined for <code>instanceof</code>.
+                        The array syntax is also supported.
                     </td>
                 </tr>
                 <tr>

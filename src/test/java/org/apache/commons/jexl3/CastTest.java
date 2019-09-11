@@ -212,7 +212,16 @@ public class CastTest extends JexlTestCase {
         o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Boolean);
         Assert.assertEquals("Result is not true", Boolean.FALSE, o);
+    }
 
+    @Test
+    public void testClass() throws Exception {
+        JexlEngine jexl = new JexlBuilder().arithmetic(new JexlArithmetic(false)).create();
+        JexlContext jc = new MapContext();
+        JexlScript e = jexl.createScript("String x = (String) 123");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not true", o instanceof String);
+        Assert.assertEquals("Result is not true", "123", o);
     }
 
 }

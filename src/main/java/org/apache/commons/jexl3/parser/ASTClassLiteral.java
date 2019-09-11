@@ -16,12 +16,15 @@
  */
 package org.apache.commons.jexl3.parser;
 
+import java.lang.reflect.Array;
+
 public final class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class> {
 
     /** The actual literal value; the inherited 'value' member may host a cached getter. */
 
-    private Class literal = null;
-    private int array = 0;
+    private Class literal;
+    private Class type;
+    private int array;
 
     ASTClassLiteral(int id) {
         super(id);
@@ -56,7 +59,11 @@ public final class ASTClassLiteral extends JexlNode implements JexlNode.Constant
      */
     @Override
     public Class getLiteral() {
-        return this.literal;
+        return literal;
+    }
+
+    public Class getType() {
+        return type;
     }
 
     @Override
@@ -66,10 +73,12 @@ public final class ASTClassLiteral extends JexlNode implements JexlNode.Constant
 
     void setLiteral(Class literal) {
         this.literal = literal;
+        type = literal;
     }
 
     void setArray() {
         array++;
+        type = type != null ? Array.newInstance(type, 0).getClass() : null;
     }
 
     public int getArray() {

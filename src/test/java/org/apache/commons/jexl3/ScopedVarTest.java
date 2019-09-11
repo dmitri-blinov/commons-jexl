@@ -79,7 +79,7 @@ public class ScopedVarTest extends JexlTestCase {
     public void testAssignCheck() throws Exception {
         JexlContext jc = new MapContext();
 
-        JexlScript e = jexl.createScript("String x; x = 123");
+        JexlScript e = JEXL.createScript("String x; x = 123");
         try {
            Object o = e.execute(jc);
            Assert.fail("Should have failed");

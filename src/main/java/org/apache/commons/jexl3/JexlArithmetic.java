@@ -1550,6 +1550,12 @@ public class JexlArithmetic {
             return toShort(val);
         } else if (type == Character.class) {
             return toCharacter(val);
+        } else if (type == String.class) {
+            return toString(val);
+        } else if (type == BigInteger.class) {
+            return toBigInteger(val);
+        } else if (type == BigDecimal.class) {
+            return toBigDecimal(val);
         }
         return type.cast(val);
     }

@@ -24,7 +24,7 @@ import java.lang.reflect.Array;
 public class ASTVar extends ASTIdentifier {
 
     /** The optional variable type. */
-    private Class type = null;
+    private Class type;
     protected boolean isRequired;
 
     public ASTVar(int id) {

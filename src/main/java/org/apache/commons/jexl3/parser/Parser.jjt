@@ -966,7 +966,7 @@ void UnaryExpression() #void : {}
   |
   (<not>|<NOT>) UnaryExpression() #NotNode(1)
   |
-  LOOKAHEAD(<LPAREN> PrimitiveType() <RPAREN>) (<LPAREN> PrimitiveType() <RPAREN> UnaryExpression() #CastNode(2))
+  LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
   |
   <EMPTY> UnaryExpression() #EmptyFunction(1)
   |
@@ -1254,6 +1254,33 @@ void RegexLiteral() :
   { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
+void TypeCastReference() #ClassLiteral() :
+{
+   Token t;
+}
+{
+  (
+    t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+    | 
+    t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+    |
+    t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+    |
+    t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+    |
+    t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+    |
+    t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+    |
+    t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+    |
+    t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+    |
+    LOOKAHEAD( { Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+  )
+  (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+}
+
 void TypeReference() #ClassLiteral() :
 {
    Token t;
@@ -1316,14 +1343,21 @@ void PrimitiveType() #ClassLiteral() :
    Token t;
 }
 {
-      LOOKAHEAD(1) t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
-    | LOOKAHEAD(1) t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
-    | LOOKAHEAD(1) t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
-    | LOOKAHEAD(1) t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
-    | LOOKAHEAD(1) t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
-    | LOOKAHEAD(1) t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
-    | LOOKAHEAD(1) t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
-    | LOOKAHEAD(1) t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+    t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+    |
+    t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+    |
+    t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+    |
+    t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+    |
+    t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+    |
+    t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+    |
+    t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+    |
+    t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
 }
 
 void EmptyListLiteral() #ArrayLiteral() : {}

@@ -980,7 +980,7 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(ASTCastNode node, Object data) {
         // Type
         ASTClassLiteral type = (ASTClassLiteral) node.jjtGetChild(0);
-        Class c = type.getLiteral();
+        Class c = type.getType();
         // Value
         Object val = node.jjtGetChild(1).jjtAccept(this, data);
         try {

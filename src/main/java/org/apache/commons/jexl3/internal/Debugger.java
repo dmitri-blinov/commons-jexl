@@ -1697,10 +1697,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         Class type = node.getType();
         if (type == null) {
            builder.append("var ");
-        } else if (type.isPrimitive()) {
-           builder.append(type.getSimpleName()).append(" ");
         } else {
-           builder.append(type.getName()).append(" ");
+           builder.append(type.getSimpleName()).append(" ");
         }
         if (isRequired) {
            builder.append("&");
