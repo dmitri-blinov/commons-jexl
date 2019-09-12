@@ -35,7 +35,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.math.BigInteger;
@@ -77,7 +77,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * The list of imported classes.
      */
-    protected static final Map<String, Class> classes = new HashMap<String, Class> ();
+    protected static final Map<String, Class> classes = new WeakHashMap<String, Class> ();
     /**
      * Cleanup.
      * @param features the feature set to restore if any
@@ -539,30 +539,30 @@ public abstract class JexlParser extends StringParser {
             case "String" : return String.class;
         }
 
-        Class result = classes.get(name);
-        if (result != null)
-            return result;
+        if (Character.isLowerCase(name.charAt(0)) && name.indexOf(".") == -1)
+            return null;
 
+        return classes.computeIfAbsent(name, x -> {return forName(x);});
+    }
+
+    /**
+     * Gets a class by its name.
+     * @param name the name of the class
+     * @return the Class
+     */
+    protected static Class forName(String name) {
         if (name.indexOf(".") == -1) {
-            if (Character.isLowerCase(name.charAt(0)))
-                return null;
             for (String prefix : implicitPackages) {
                 String className = prefix + name;
                 try {
-                    result = Class.forName(className);
-                    break;
+                    return Class.forName(className);
                 } catch (ClassNotFoundException ex) {
                 }
             }
-            if (result != null)
-                classes.put(name, result);
-            return result;
+            return null;
         }
         try {
-            result = Class.forName(name);
-            if (result != null)
-                classes.put(name, result);
-            return result;
+            return Class.forName(name);
         } catch (ClassNotFoundException ex) {
             return null;
         }
