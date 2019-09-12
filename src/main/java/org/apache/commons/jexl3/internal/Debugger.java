@@ -161,6 +161,7 @@ import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTTryResource;
 import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
+import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
 import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
@@ -1514,6 +1515,12 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTNullLiteral node, Object data) {
         check(node, "null", data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTUnderscoreLiteral node, Object data) {
+        check(node, "_", data);
         return data;
     }
 

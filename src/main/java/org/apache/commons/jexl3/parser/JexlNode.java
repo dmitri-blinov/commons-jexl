@@ -157,7 +157,10 @@ public abstract class JexlNode extends SimpleNode {
             if (walk instanceof ASTMultipleIdentifier) {
                 int nc = walk.jjtGetNumChildren();
                 for (int i = 0; i < nc; i++) {
-                    if (!walk.jjtGetChild(i).isLeftValue())
+                    JexlNode left = walk.jjtGetChild(i);
+                    if (left instanceof ASTUnderscoreLiteral)
+                        continue;
+                    if (!left.isLeftValue())
                         return false;
                 }
                 return true;

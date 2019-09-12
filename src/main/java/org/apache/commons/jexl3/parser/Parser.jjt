@@ -492,7 +492,14 @@ void MultipleAssignmentStatement() #MultipleAssignment : {}
 
 void MultipleIdentifier() #MultipleIdentifier : {}
 {
-    <LPAREN> Identifier(true) (<COMMA> Identifier(true))* <RPAREN>
+    <LPAREN> AssignmentIdentifier() (<COMMA> AssignmentIdentifier())* <RPAREN>
+}
+
+void AssignmentIdentifier() #void : {}
+{
+    UnderscoreLiteral()
+    |
+    Identifier(true)
 }
 
 ASTIfStatement IfStatement() : {}
@@ -1198,6 +1205,11 @@ void Literal() #void : {}
   RegexLiteral()
   |
   NaNLiteral()
+}
+
+void UnderscoreLiteral() : {}
+{
+    <UNDERSCORE>
 }
 
 void NaNLiteral() #NumberLiteral : {}

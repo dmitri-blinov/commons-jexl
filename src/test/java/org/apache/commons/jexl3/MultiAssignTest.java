@@ -140,4 +140,15 @@ public class MultiAssignTest extends JexlTestCase {
         Assert.assertEquals("Result is not 2", 2, o);
     }
 
+    @Test
+    public void testUnderscore() throws Exception {
+        JexlScript assign = JEXL.createScript("(x,_,y) = [40,1,2]");
+        JexlContext jc = new MapContext();
+        jc.set("x", 10);
+        jc.set("y", 20);
+        Object o = assign.execute(jc);
+        Assert.assertEquals("Result is not as expected", 40, jc.get("x"));
+        Assert.assertEquals("Result is not as expected", 2, jc.get("y"));
+    }
+
 }

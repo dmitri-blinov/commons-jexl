@@ -160,6 +160,7 @@ import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTTryResource;
 import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
+import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
 import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
@@ -619,6 +620,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTMultipleIdentifier node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTUnderscoreLiteral node, Object data) {
         return visitNode(node, data);
     }
 

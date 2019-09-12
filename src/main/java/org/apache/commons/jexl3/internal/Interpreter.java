@@ -171,6 +171,7 @@ import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTTryResource;
 import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
+import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
 import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
@@ -1777,6 +1778,11 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTUnderscoreLiteral node, Object data) {
+        return null;
+    }
+
+    @Override
     protected Object visit(ASTNullLiteral node, Object data) {
         return null;
     }
@@ -2522,9 +2528,11 @@ public class Interpreter extends InterpreterBase {
             for (int i = 0; i < num; i++) {
                 cancelCheck(node);
                 JexlNode left = identifiers.jjtGetChild(i);
-                ASTIdentifier var = (ASTIdentifier) left;
-                Object right = assignableMap.get(var.getName());
-                result = executeAssign(left, left, right, null, data);
+                if (left instanceof ASTIdentifier) {
+                    ASTIdentifier var = (ASTIdentifier) left;
+                    Object right = assignableMap.get(var.getName());
+                    result = executeAssign(left, left, right, null, data);
+                }
             }
         } else if (value != null) {
             Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, value);
@@ -2544,12 +2552,13 @@ public class Interpreter extends InterpreterBase {
                         Object right = itemsIterator.next();
                         // The identifier to assign to
                         JexlNode left = identifiers.jjtGetChild(i);
-                        result = executeAssign(left, left, right, null, data);
+                        if (left instanceof ASTIdentifier)
+                            result = executeAssign(left, left, right, null, data);
                     }
                     while (i + 1 < num) {
                         JexlNode left = identifiers.jjtGetChild(++i);
-                        ASTIdentifier var = (ASTIdentifier) left;
-                        result = executeAssign(left, left, null, null, data);
+                        if (left instanceof ASTIdentifier)
+                            result = executeAssign(left, left, null, null, data);
                     }
                 } finally {
                     //  closeable iterator handling
@@ -2559,17 +2568,19 @@ public class Interpreter extends InterpreterBase {
                 for (int i = 0; i < num; i++) {
                     cancelCheck(node);
                     JexlNode left = identifiers.jjtGetChild(i);
-                    ASTIdentifier var = (ASTIdentifier) left;
-                    Object right = getAttribute(value, var.getName(), node);
-                    result = executeAssign(left, left, right, null, data);
+                    if (left instanceof ASTIdentifier) {
+                        ASTIdentifier var = (ASTIdentifier) left;
+                        Object right = getAttribute(value, var.getName(), node);
+                        result = executeAssign(left, left, right, null, data);
+                    }
                 }
             }
         } else {
             for (int i = 0; i < num; i++) {
                 cancelCheck(node);
                 JexlNode left = identifiers.jjtGetChild(i);
-                ASTIdentifier var = (ASTIdentifier) left;
-                result = executeAssign(left, left, null, null, data);
+                if (left instanceof ASTIdentifier)
+                    result = executeAssign(left, left, null, null, data);
             }
         }
         return result;
