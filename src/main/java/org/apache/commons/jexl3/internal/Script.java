@@ -178,15 +178,12 @@ public class Script implements JexlScript, JexlExpression {
 
     @Override
     public Object evaluate(JexlContext context) {
-        return execute(context);
+        return execute(context, null);
     }
 
     @Override
     public Object execute(JexlContext context) {
-        checkCacheVersion();
-        Scope.Frame frame = createFrame(null);
-        Interpreter interpreter = createInterpreter(context, frame);
-        return interpreter.interpret(script);
+        return execute(context, null);
     }
 
     @Override
@@ -236,7 +233,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return the script parameter list 
      */
     protected Object[] scriptArgs(Object[] args) {
-        return args != null && args.length > 0 ? scriptArgs(0, args) : args;
+        return scriptArgs(0, args);
     }
 
     /**

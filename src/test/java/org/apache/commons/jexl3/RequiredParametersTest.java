@@ -67,6 +67,18 @@ public class RequiredParametersTest extends JexlTestCase {
     }
 
     @Test
+    public void testEmptyInvocation() throws Exception {
+        JexlContext jc = new MapContext();
+        JexlScript e = JEXL.createScript("var x = function(var &a) { return a}; x()");
+        try {
+           Object o = e.execute(jc);
+           Assert.fail("Null values should not be assigned to non null parameters");
+        } catch (JexlException ex) {
+           // OK
+        }
+    }
+
+    @Test
     public void testVarargs() throws Exception {
         JexlContext jc = new MapContext();
         JexlScript e = JEXL.createScript("var x = function(var &a...) {a}; x()");
