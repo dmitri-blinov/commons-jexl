@@ -415,8 +415,7 @@ void Statement() #void : {}
     <SEMICOL>
     | LOOKAHEAD(<ANNOTATION>) AnnotatedStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
-    | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVar()
-    | LOOKAHEAD(Var()) Var()
+    | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(Expression()) ExpressionStatement()
     | Block()
     | IfStatement()
@@ -436,6 +435,7 @@ void Statement() #void : {}
     | Continue()
     | Remove()
     | Break()
+    | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVar()
 }
 
 void LabelledStatementLookahead() #void() : {}
@@ -636,7 +636,7 @@ ASTForStatement ForStatement() : {}
 
 void ForInitializationNode() : {}
 {
-    (LOOKAHEAD(Var()) Var() | Expression())?
+    (LOOKAHEAD(DeclareLocalVar()) Var() | Expression())?
 }
 
 void ForTerminationNode() : {}
@@ -691,8 +691,7 @@ void RequiredVarLookahead() #void() : {}
   |
   (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
   |
-  LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
-  <IDENTIFIER> (<LBRACKET> <RBRACKET>)* <and> <IDENTIFIER> 
+  <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> 
 }
 
 void Var() #void : {}
@@ -984,13 +983,13 @@ void UnaryExpression() #void : {}
   |
   (<not>|<NOT>) UnaryExpression() #NotNode(1)
   |
-  LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
-  |
   <EMPTY> UnaryExpression() #EmptyFunction(1)
   |
   <SIZE> UnaryExpression() #SizeFunction(1)
   |
   <ELLIPSIS> EnumerationExpression()
+  |
+  LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
   |
   PostfixExpression()
 }

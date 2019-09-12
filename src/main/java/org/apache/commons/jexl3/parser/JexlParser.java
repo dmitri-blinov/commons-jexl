@@ -35,6 +35,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.math.BigInteger;
@@ -74,6 +75,10 @@ public abstract class JexlParser extends StringParser {
      */
     protected Map<String, Object> pragmas = null;
     /**
+     * The list of imported classes.
+     */
+    protected static final Map<String, Class> classes = new HashMap<String, Class> ();
+    /**
      * Cleanup.
      * @param features the feature set to restore if any
      */
@@ -82,7 +87,7 @@ public abstract class JexlParser extends StringParser {
         source = null;
         frame = null;
         frames.clear();
-        pragmas = null;
+        pragmas = null;    
         branchScope = null;
         branchScopes.clear();
     }
@@ -509,7 +514,7 @@ public abstract class JexlParser extends StringParser {
      * @return the Class
      */
     protected static Class resolveType(String name) {
-        if (name == null)
+        if (name == null || "".equals(name))
             return null;
         switch (name) {
             case "char" : return Character.TYPE;
@@ -530,20 +535,34 @@ public abstract class JexlParser extends StringParser {
             case "Double" : return Double.class;
             case "BigInteger" : return BigInteger.class;
             case "BigDecimal" : return BigDecimal.class;
+            case "Object" : return Object.class;
+            case "String" : return String.class;
         }
 
+        Class result = classes.get(name);
+        if (result != null)
+            return result;
+
         if (name.indexOf(".") == -1) {
+            if (Character.isLowerCase(name.charAt(0)))
+                return null;
             for (String prefix : implicitPackages) {
                 String className = prefix + name;
                 try {
-                    return Class.forName(className);
+                    result = Class.forName(className);
+                    break;
                 } catch (ClassNotFoundException ex) {
                 }
             }
-            return null;
+            if (result != null)
+                classes.put(name, result);
+            return result;
         }
         try {
-            return Class.forName(name);
+            result = Class.forName(name);
+            if (result != null)
+                classes.put(name, result);
+            return result;
         } catch (ClassNotFoundException ex) {
             return null;
         }
@@ -555,49 +574,9 @@ public abstract class JexlParser extends StringParser {
      * @return the Class
      */
     protected static Class resolveInstantiableType(String name) {
-        if (name == null)
-            return null;
-        switch (name) {
-            case "char" :
-            case "boolean" :
-            case "byte" :
-            case "short" :
-            case "int" :
-            case "long" :
-            case "float" :
-            case "double" : return null;
-            case "Character" : return Character.class;
-            case "Boolean" : return Boolean.class;
-            case "Byte" : return Byte.class;
-            case "Short" : return Short.class;
-            case "Integer" : return Integer.class;
-            case "Long" : return Long.class;
-            case "Float" : return Float.class;
-            case "Double" : return Double.class;
-            case "BigInteger" : return BigInteger.class;
-            case "BigDecimal" : return BigDecimal.class;
-        }
-
-        Class result = null;
-
-        if (name.indexOf(".") == -1) {
-            for (String prefix : implicitPackages) {
-                String className = prefix + name;
-                try {
-                    result = Class.forName(className);
-                    break;
-                } catch (ClassNotFoundException ex) {
-                }
-            }
-        }
-        if (result == null) {
-            try {
-                result = Class.forName(name);
-            } catch (ClassNotFoundException ex) {
-                return null;
-            }
-        }
-        return (result.isInterface() || result.isMemberClass() || result.isAnnotation() || result.isEnum() || result.isArray() ||
+        Class result = resolveType(name);
+        return (result == null || result.isPrimitive() || result.isInterface() || result.isMemberClass() || 
+                result.isAnnotation() || result.isEnum() || result.isArray() ||
                 Modifier.isAbstract(result.getModifiers())) ? null : result;
     }
 
