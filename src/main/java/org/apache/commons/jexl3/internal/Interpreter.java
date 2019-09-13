@@ -153,9 +153,9 @@ import org.apache.commons.jexl3.parser.ASTStartCountNode;
 import org.apache.commons.jexl3.parser.ASTStopCountNode;
 import org.apache.commons.jexl3.parser.ASTStringLiteral;
 import org.apache.commons.jexl3.parser.ASTSubNode;
+import org.apache.commons.jexl3.parser.ASTSwitchCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpression;
 import org.apache.commons.jexl3.parser.ASTSwitchExpressionCase;
-import org.apache.commons.jexl3.parser.ASTSwitchExpressionCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpressionDefault;
 import org.apache.commons.jexl3.parser.ASTSwitchStatement;
 import org.apache.commons.jexl3.parser.ASTSwitchStatementCase;
@@ -1599,17 +1599,24 @@ public class Interpreter extends InterpreterBase {
             for (int i = 1; i < childCount; i++) {
                 JexlNode child = node.jjtGetChild(i);
                 if (!matched && child instanceof ASTSwitchStatementCase) {
-                    JexlNode label = child.jjtGetChild(0);
-                    Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
-                    try {
-                        Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                        if (caseMatched == JexlEngine.TRY_FAILED)
-                            caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
-                        matched = arithmetic.toBoolean(caseMatched);
-                    } catch (ArithmeticException xrt) {
-                        throw new JexlException(node, "== error", xrt);
+                    JexlNode labels = child.jjtGetChild(0);
+                    // check all labels
+                    for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
+                        JexlNode label = labels.jjtGetChild(j);
+                        Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
+                        try {
+                            Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
+                            if (caseMatched == JexlEngine.TRY_FAILED)
+                                caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                            matched = arithmetic.toBoolean(caseMatched);
+                        } catch (ArithmeticException xrt) {
+                            throw new JexlException(node, "== error", xrt);
+                        }
+                        if (matched)
+                            break;
                     }
                 }
+                // Fall through until break
                 if (matched)
                     result = child.jjtAccept(this, data);
             }
@@ -1711,7 +1718,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchExpressionCaseLabel node, Object data) {
+    protected Object visit(ASTSwitchCaseLabel node, Object data) {
         return null;
     }
 

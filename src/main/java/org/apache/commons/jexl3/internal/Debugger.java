@@ -143,9 +143,9 @@ import org.apache.commons.jexl3.parser.ASTStartCountNode;
 import org.apache.commons.jexl3.parser.ASTStopCountNode;
 import org.apache.commons.jexl3.parser.ASTStringLiteral;
 import org.apache.commons.jexl3.parser.ASTSubNode;
+import org.apache.commons.jexl3.parser.ASTSwitchCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpression;
 import org.apache.commons.jexl3.parser.ASTSwitchExpressionCase;
-import org.apache.commons.jexl3.parser.ASTSwitchExpressionCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpressionDefault;
 import org.apache.commons.jexl3.parser.ASTSwitchStatement;
 import org.apache.commons.jexl3.parser.ASTSwitchStatementCase;
@@ -1863,7 +1863,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(ASTSwitchExpressionCaseLabel node, Object data) {
+    protected Object visit(ASTSwitchCaseLabel node, Object data) {
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             if (i > 0)
                 builder.append(',');

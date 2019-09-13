@@ -63,6 +63,10 @@ public class SwitchTest extends JexlTestCase {
         e = JEXL.createScript("switch (1) {default: return -1; case 2: case 1 : return 42}");
         o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 42, o);
+
+        e = JEXL.createScript("switch (1) {default: return -1; case 2, 1 : return 42}");
+        o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 42, o);
     }
 
     @Test

@@ -583,7 +583,7 @@ void SwitchStatementBlock() #void : {}
 
 void SwitchStatementCase() : {}
 {
-    <CASE> (Literal() | Identifier()) <COLON> ((LOOKAHEAD(1) Block() | Statement()) )*
+    <CASE> SwitchCaseLabel() <COLON> ((LOOKAHEAD(1) Block() | Statement()) )*
 }
 
 void SwitchStatementDefault() : {}
@@ -1112,10 +1112,10 @@ void SwitchExpressionBlock() #void : {}
 
 void SwitchExpressionCase() : {}
 {
-    <CASE> SwitchExpressionCaseLabel() <LAMBDA> ((LOOKAHEAD(1) Block() | Statement()) )+
+    <CASE> SwitchCaseLabel() <LAMBDA> ((LOOKAHEAD(1) Block() | Statement()) )+
 }
 
-void SwitchExpressionCaseLabel() : {}
+void SwitchCaseLabel() : {}
 {
     (Literal() | Identifier()) (<COMMA> (Literal() | Identifier()))*
 }
