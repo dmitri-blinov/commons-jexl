@@ -1181,6 +1181,8 @@ void MethodReferenceIdentifier() #Identifier :
     |
     t=<VAR> { jjtThis.setSymbol(t.image); }
     |
+    t=<YIELD> { jjtThis.setSymbol(t.image); }
+    |
     t=<IDENTIFIER> { jjtThis.setSymbol(t.image); }
 }
 
@@ -1609,7 +1611,7 @@ Token dotName() #void :
 }
 {
    ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW>| t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
-   | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS>
+   | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD>
    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
    | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
    | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
