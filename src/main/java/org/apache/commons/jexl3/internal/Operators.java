@@ -163,7 +163,7 @@ public class Operators {
     }
 
     /**
-     * Evaluates an assign operator.
+     * Evaluates two-argument assign operator.
      * <p>
      * This takes care of finding and caching the operator method when appropriate.
      * If an overloads returns Operator.ASSIGN, it means the side-effect is complete.
@@ -176,13 +176,81 @@ public class Operators {
      *         JexlEngine.TRY_FAILED if no operation was performed,
      *         the value to use as the side effect argument otherwise
      */
-    protected Object tryAssignOverload(JexlNode node, JexlOperator operator, Object...args) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
-        if (args.length != operator.getArity()) {
+    protected Object tryAssignOverload(JexlNode node, JexlOperator operator, Object arg1, Object arg2) {
+        if (operator.getArity() != 2) {
             return JexlEngine.TRY_FAILED;
         }
         // try to call overload with side effect
-        Object result = tryOverload(node, operator, args);
+        Object result = tryOverload(node, operator, arg1, arg2);
+        if (result != JexlEngine.TRY_FAILED) {
+            return result;
+        }
+
+        // call base operator
+        JexlOperator base = operator.getBaseOperator();
+        if (operators != null && base != null && operators.overloads(base)) {
+            result = callAssignOverload(node, operator, arg1, arg2);
+            if (result != JexlEngine.TRY_FAILED) {
+                return result;
+            }
+        }
+
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
+        // base eval
+        try {
+            switch (operator) {
+                case SELF_ADD:
+                    return arithmetic.selfAdd(arg1, arg2);
+                case SELF_SUBTRACT:
+                    return arithmetic.selfSubtract(arg1, arg2);
+                case SELF_MULTIPLY:
+                    return arithmetic.selfMultiply(arg1, arg2);
+                case SELF_DIVIDE:
+                    return arithmetic.selfDivide(arg1, arg2);
+                case SELF_MOD:
+                    return arithmetic.selfMod(arg1, arg2);
+                case SELF_AND:
+                    return arithmetic.selfAnd(arg1, arg2);
+                case SELF_OR:
+                    return arithmetic.selfOr(arg1, arg2);
+                case SELF_XOR:
+                    return arithmetic.selfXor(arg1, arg2);
+                case SELF_SHL:
+                    return arithmetic.selfLeftShift(arg1, arg2);
+                case SELF_SAR:
+                    return arithmetic.selfRightShift(arg1, arg2);
+                case SELF_SHR:
+                    return arithmetic.selfRightShiftUnsigned(arg1, arg2);
+                default:
+                    // unexpected, new operator added?
+                    throw new UnsupportedOperationException(operator.getOperatorSymbol());
+            }
+        } catch (Exception xany) {
+            interpreter.operatorError(node, base, xany);
+        }
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Evaluates one-argument assign operator.
+     * <p>
+     * This takes care of finding and caching the operator method when appropriate.
+     * If an overloads returns Operator.ASSIGN, it means the side-effect is complete.
+     * Otherwise, a += b &lt;=&gt; a = a + b
+     * </p>
+     * @param node     the syntactic node
+     * @param operator the operator
+     * @param args     the arguments, the first one being the target of assignment
+     * @return JexlOperator.ASSIGN if operation assignment has been performed,
+     *         JexlEngine.TRY_FAILED if no operation was performed,
+     *         the value to use as the side effect argument otherwise
+     */
+    protected Object tryAssignOverload(JexlNode node, JexlOperator operator, Object arg1) {
+        if (operator.getArity() != 1) {
+            return JexlEngine.TRY_FAILED;
+        }
+        // try to call overload with side effect
+        Object result = tryOverload(node, operator, arg1);
         if (result != JexlEngine.TRY_FAILED) {
             return result;
         }
@@ -190,50 +258,48 @@ public class Operators {
         JexlOperator base = operator.getBaseOperator();
         if (operators != null && base != null && operators.overloads(base)) {
             // in case there is an overload on the base operator
-            try {
-                JexlMethod vm = operators.getOperator(base, args);
-                if (vm != null) {
-                    result = vm.invoke(arithmetic, args);
-                    if (result != JexlEngine.TRY_FAILED) {
-                        return result;
-                    }
-                }
-            } catch (Exception xany) {
-                interpreter.operatorError(node, base, xany);
+            result = callAssignOverload(node, operator, arg1);
+            if (result != JexlEngine.TRY_FAILED) {
+                return result;
             }
         }
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
         // base eval
         try {
             switch (operator) {
-                case SELF_ADD:
-                    return arithmetic.selfAdd(args[0], args[1]);
-                case SELF_SUBTRACT:
-                    return arithmetic.selfSubtract(args[0], args[1]);
-                case SELF_MULTIPLY:
-                    return arithmetic.selfMultiply(args[0], args[1]);
-                case SELF_DIVIDE:
-                    return arithmetic.selfDivide(args[0], args[1]);
-                case SELF_MOD:
-                    return arithmetic.selfMod(args[0], args[1]);
-                case SELF_AND:
-                    return arithmetic.selfAnd(args[0], args[1]);
-                case SELF_OR:
-                    return arithmetic.selfOr(args[0], args[1]);
-                case SELF_XOR:
-                    return arithmetic.selfXor(args[0], args[1]);
-                case SELF_SHL:
-                    return arithmetic.selfLeftShift(args[0], args[1]);
-                case SELF_SAR:
-                    return arithmetic.selfRightShift(args[0], args[1]);
-                case SELF_SHR:
-                    return arithmetic.selfRightShiftUnsigned(args[0], args[1]);
                 case INCREMENT:
-                    return arithmetic.increment(args[0]);
+                    return arithmetic.increment(arg1);
                 case DECREMENT:
-                    return arithmetic.decrement(args[0]);
+                    return arithmetic.decrement(arg1);
                 default:
                     // unexpected, new operator added?
                     throw new UnsupportedOperationException(operator.getOperatorSymbol());
+            }
+        } catch (Exception xany) {
+            interpreter.operatorError(node, base, xany);
+        }
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Call an assign operator.
+     * <p>
+     * This takes care of finding the operator method when appropriate
+     * @param node     the syntactic node
+     * @param operator the operator
+     * @param args     the arguments
+     * @return the result of the operator evaluation or TRY_FAILED
+     */
+    protected Object callAssignOverload(JexlNode node, JexlOperator base, Object... args) {
+        // call base operator
+        try {
+            JexlMethod vm = operators.getOperator(base, args);
+            if (vm != null) {
+                final JexlArithmetic arithmetic = interpreter.arithmetic;
+                Object result = vm.invoke(arithmetic, args);
+                if (result != JexlEngine.TRY_FAILED) {
+                    return result;
+                }
             }
         } catch (Exception xany) {
             interpreter.operatorError(node, base, xany);
