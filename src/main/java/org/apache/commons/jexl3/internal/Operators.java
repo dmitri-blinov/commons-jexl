@@ -300,7 +300,6 @@ public class Operators {
      * @return true if left starts with right, false otherwise
      */
     protected boolean startsWith(JexlNode node, String operator, Object left, Object right) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         try {
             // try operator overload
             Object result = tryOverload(node, JexlOperator.STARTSWITH, left, right);
@@ -308,6 +307,7 @@ public class Operators {
                 return (Boolean) result;
             }
             // use arithmetic / pattern matching ?
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.startsWith(left, right);
             if (matched != null) {
                 return matched;
@@ -344,7 +344,6 @@ public class Operators {
      * @return true if left ends with right, false otherwise
      */
     protected boolean endsWith(JexlNode node, String operator, Object left, Object right) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         try {
             // try operator overload
             Object result = tryOverload(node, JexlOperator.ENDSWITH, left, right);
@@ -352,6 +351,7 @@ public class Operators {
                 return (Boolean) result;
             }
             // use arithmetic / pattern matching ?
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.endsWith(left, right);
             if (matched != null) {
                 return matched;
@@ -392,7 +392,6 @@ public class Operators {
      * @return true if left matches right, false otherwise
      */
     protected boolean contains(JexlNode node, String op, Object left, Object right) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         try {
             // try operator overload
             Object result = tryOverload(node, JexlOperator.CONTAINS, left, right);
@@ -400,6 +399,7 @@ public class Operators {
                 return (Boolean) result;
             }
             // use arithmetic / pattern matching ?
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.contains(left, right);
             if (matched != null) {
                 return matched;
@@ -506,11 +506,11 @@ public class Operators {
      * @return the evaluation result
      */
     protected Object indirect(JexlNode node, Object object) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         Object result = tryOverload(node, JexlOperator.INDIRECT, object);
         if (result != JexlEngine.TRY_FAILED) {
             return result;
         }
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
         result = arithmetic.indirect(object);
         if (result == JexlEngine.TRY_FAILED) {
             // check if there is a get() method on the object if so, just use it
@@ -536,11 +536,11 @@ public class Operators {
      * @return the evaluation result
      */
     protected Object indirectAssign(JexlNode node, Object object, Object right) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         Object result = tryOverload(node, JexlOperator.INDIRECT_ASSIGN, object, right);
         if (result != JexlEngine.TRY_FAILED) {
             return result;
         }
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
         result = arithmetic.indirectAssign(object, right);
         if (result == JexlEngine.TRY_FAILED) {
             // check if there is a set(Object) method on the object and if so, just use it
