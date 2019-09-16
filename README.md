@@ -43,7 +43,7 @@ Incompatible changes
 
 + New reserved words are introduced. Those are:
   `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove`
-  `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double`.
+  `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `yield` `_`.
   You may not longer use them as the names of the variables and methods. The exception is made for the `remove` identifer,
   as it is still may be used in method invocations.
 
@@ -121,7 +121,7 @@ New features
 
 + New iterator processing (selection/projection/reduction) operators are introduced
 
-+ New multiple assignment statement `(x,y) = [2,3]` is introduced
++ New multiple assignment statement `(x,_,y) = [2,1,3]` is introduced
 
 + New inline property assignment `a{b:3,c:4}` construct is introduced
 
@@ -143,7 +143,7 @@ Enhancements
 
 + Function parameters can use `var` keyword for parameter definition
 
-+ Function parameters can be declared strongly typed by using java primitive types `function(int a, int b) {a+b}`
++ Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
 
 + Function parameters can be declared as `final`
 
@@ -151,7 +151,7 @@ Enhancements
 
 + Return statement expression can be omitted, implying `null` as a result
 
-+ Local variables can be declared strongly typed by using java primitive types `int i = 0`
++ Local variables can be declared strongly typed by using java class or primitive types `int i = 0`
 
 + Local variables can be declared final `final var i = 0`
 
