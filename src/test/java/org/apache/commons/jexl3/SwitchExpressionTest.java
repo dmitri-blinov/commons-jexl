@@ -76,7 +76,7 @@ public class SwitchExpressionTest extends JexlTestCase {
 
     @Test
     public void testBlockSyntax() throws Exception {
-        JexlScript e = JEXL.createScript("var e = switch (1) {case 1 -> {42}; case 2 -> {0}}");
+        JexlScript e = JEXL.createScript("var e = switch (1) {case 1 -> {42;} case 2 -> {0}}");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 42, o);
