@@ -64,22 +64,6 @@ public class Operators {
      * This takes care of finding and caching the operator method when appropriate
      * @param node     the syntactic node
      * @param operator the operator
-     * @param args     the arguments
-     * @return the result of the operator evaluation or TRY_FAILED
-     */
-    protected Object tryOverload(JexlNode node, JexlOperator operator, Object[] args) {
-        if (operators != null && operators.overloads(operator)) {
-            return callOverload(node, operator, args);
-        }
-        return JexlEngine.TRY_FAILED;
-    }
-
-    /**
-     * Attempts to call an operator.
-     * <p>
-     * This takes care of finding and caching the operator method when appropriate
-     * @param node     the syntactic node
-     * @param operator the operator
      * @param arg1     the first argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
