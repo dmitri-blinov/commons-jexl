@@ -381,7 +381,7 @@ ASTJexlScript JexlScript(Scope frame) : {
 {
    (LOOKAHEAD(<PRAGMA>) Pragma())*
    (
-      LOOKAHEAD( LambdaLookahead() ) Lambda() (LOOKAHEAD(1) <SEMICOL>)? <EOF> { return jjtThis.script(); }
+      LOOKAHEAD( LambdaLookahead() ) Lambda() (<SEMICOL>)? <EOF> { return jjtThis.script(); }
       |
       ( ( Statement() )*) <EOF> { return jjtThis.script(); }
    )
@@ -407,7 +407,7 @@ void Annotation() #Annotation :
 
 void AnnotatedStatement() #AnnotatedStatement() : {}
 {
-    (LOOKAHEAD(<ANNOTATION>) Annotation())+ (LOOKAHEAD(1) Block() | Statement())
+    (LOOKAHEAD(<ANNOTATION>) Annotation())+ Statement()
 }
 
 void Statement() #void : {}
@@ -505,13 +505,13 @@ void AssignmentIdentifier() #void : {}
 ASTIfStatement IfStatement() : {}
 {
     <IF> <LPAREN> Expression() <RPAREN>  (LOOKAHEAD(1) Block() | Statement())
-    ( LOOKAHEAD(1) <ELSE>  (LOOKAHEAD(1) Block() | Statement()) )?
+    (LOOKAHEAD(1) <ELSE> (LOOKAHEAD(1) Block() | Statement()) )?
     { return jjtThis; }
 }
 
 ASTWhileStatement WhileStatement() : {}
 {
-    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; }  (LOOKAHEAD(1) Block() | Statement()) { branchScope.loopCount -= 1; }
+    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.loopCount -= 1; }
     { return jjtThis; }
 }
 
@@ -559,7 +559,7 @@ void AssertStatement() : {}
 
 ASTSynchronizedStatement SynchronizedStatement() : {}
 {
-    <SYNCHRONIZED> <LPAREN> Expression() <RPAREN> (LOOKAHEAD(1) Block() | Statement())
+    <SYNCHRONIZED> <LPAREN> Expression() <RPAREN> Block()
     { return jjtThis; }
 }
 
@@ -583,12 +583,12 @@ void SwitchStatementBlock() #void : {}
 
 void SwitchStatementCase() : {}
 {
-    <CASE> SwitchCaseLabel() <COLON> ((LOOKAHEAD(1) Block() | Statement()) )*
+    <CASE> SwitchCaseLabel() <COLON> (Statement())*
 }
 
 void SwitchStatementDefault() : {}
 {
-    <DCASE> <COLON> ((LOOKAHEAD(1) Block() | Statement()) )*
+    <DCASE> <COLON> (Statement())*
 }
 
 void ReturnStatement() : {}
