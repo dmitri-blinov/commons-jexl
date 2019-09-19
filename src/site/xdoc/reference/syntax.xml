@@ -859,6 +859,17 @@
                             </li>
                             <li>Equality uses the java <code>equals</code> method</li>
                         </ol>
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 == (a,b)</code> and
+                            <code>val1 == a and val1 == b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 == ?(a,b)</code> and
+                            <code>val1 == a or val1 == b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -868,6 +879,17 @@
                         For example
                         <code>val1 != val2</code> and
                         <code>val1 ne val2</code> are equivalent.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 != (a,b)</code> and
+                            <code>val1 != a and val1 != b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 != ?(a,b)</code> and
+                            <code>val1 != a or val1 != b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -931,6 +953,17 @@
                         For example
                         <code>val1 &lt; val2</code> and
                         <code>val1 lt val2</code> are equivalent.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 &lt; (a,b)</code> and
+                            <code>val1 &lt; a and val1 &lt; b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 &lt; ?(a,b)</code> and
+                            <code>val1 &lt; a or val1 &lt; b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -940,6 +973,17 @@
                         For example
                         <code>val1 &lt;= val2</code> and
                         <code>val1 le val2</code> are equivalent.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 &lt;= (a,b)</code> and
+                            <code>val1 &lt;= a and val1 &lt;= b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 &lt;= ?(a,b)</code> and
+                            <code>val1 &lt;= a or val1 &lt;= b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -949,6 +993,17 @@
                         For example
                         <code>val1 &gt; val2</code> and
                         <code>val1 gt val2</code> are equivalent.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 &gt; (a,b)</code> and
+                            <code>val1 &gt; a and val1 &gt; b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 &gt; ?(a,b)</code> and
+                            <code>val1 &gt; a or val1 &gt; b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -958,6 +1013,17 @@
                         For example
                         <code>val1 &gt;= val2</code> and
                         <code>val1 ge val2</code> are equivalent.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 &gt;= (a,b)</code> and
+                            <code>val1 &gt;= a and val1 &gt;= b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 &gt;= ?(a,b)</code> and
+                            <code>val1 &gt;= a or val1 &gt;= b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                  <tr>

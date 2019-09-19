@@ -128,6 +128,7 @@ import org.apache.commons.jexl3.parser.ASTSetDivNode;
 import org.apache.commons.jexl3.parser.ASTSetLiteral;
 import org.apache.commons.jexl3.parser.ASTSetModNode;
 import org.apache.commons.jexl3.parser.ASTSetMultNode;
+import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
 import org.apache.commons.jexl3.parser.ASTSetShlNode;
@@ -670,6 +671,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTSetLiteral node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTSetOperand node, Object data) {
         return visitNode(node, data);
     }
 

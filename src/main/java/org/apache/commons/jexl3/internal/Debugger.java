@@ -129,6 +129,7 @@ import org.apache.commons.jexl3.parser.ASTSetDivNode;
 import org.apache.commons.jexl3.parser.ASTSetLiteral;
 import org.apache.commons.jexl3.parser.ASTSetModNode;
 import org.apache.commons.jexl3.parser.ASTSetMultNode;
+import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
 import org.apache.commons.jexl3.parser.ASTSetShlNode;
@@ -1261,6 +1262,23 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             }
         }
         builder.append(" }");
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTSetOperand node, Object data) {
+        if (node.isAny())
+            builder.append("?");
+        builder.append("(");
+        int num = node.jjtGetNumChildren();
+        if (num > 0) {
+            accept(node.jjtGetChild(0), data);
+            for (int i = 1; i < num; ++i) {
+                builder.append(",");
+                accept(node.jjtGetChild(i), data);
+            }
+        }
+        builder.append(")");
         return data;
     }
 

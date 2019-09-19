@@ -877,9 +877,9 @@ void EqualityExpression() #void : {}
 {
   RelationalExpression()
   ( LOOKAHEAD(2) (
-     (<eq> | <EQ>) RelationalExpression() #EQNode(2)
+     (<eq> | <EQ>) (LOOKAHEAD(SetOperand()) SetOperand() | RelationalExpression()) #EQNode(2)
    |
-     (<ne> | <NE>) RelationalExpression() #NENode(2)
+     (<ne> | <NE>) (LOOKAHEAD(SetOperand()) SetOperand() | RelationalExpression()) #NENode(2)
    |
      (<req> | <IN>) RelationalExpression() #ERNode(2) // equals regexp
    |
@@ -892,17 +892,22 @@ void EqualityExpression() #void : {}
   ) )?
 }
 
+void SetOperand() : {}
+{
+    [<QMARK> { jjtThis.setAny(); } ] <LPAREN> RangeExpression() (<COMMA> RangeExpression())+ <RPAREN>  
+}
+
 void RelationalExpression() #void : {}
 {
   RangeExpression()
   ( LOOKAHEAD(2) (
-    (<lt> |<LT>) RangeExpression() #LTNode(2)
+    (<lt> |<LT>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #LTNode(2)
    |
-    (<gt> | <GT>) RangeExpression() #GTNode(2)
+    (<gt> | <GT>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #GTNode(2)
    |
-    (<le> | <LE>) RangeExpression() #LENode(2)
+    (<le> | <LE>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #LENode(2)
    |
-    (<ge> | <GE>) RangeExpression() #GENode(2)
+    (<ge> | <GE>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #GENode(2)
    |
     <seq> RangeExpression() #SWNode(2) // starts with
    |

@@ -139,6 +139,7 @@ import org.apache.commons.jexl3.parser.ASTSetDivNode;
 import org.apache.commons.jexl3.parser.ASTSetLiteral;
 import org.apache.commons.jexl3.parser.ASTSetModNode;
 import org.apache.commons.jexl3.parser.ASTSetMultNode;
+import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
 import org.apache.commons.jexl3.parser.ASTSetShlNode;
@@ -493,85 +494,211 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTEQNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? result
-                   : arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "== error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
+                    Boolean eq = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                           : arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                    if (eq && any || !eq && !any)
+                        return eq;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, "== error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                       : arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            } catch (ArithmeticException xrt) {
+                throw new JexlException(node, "== error", xrt);
+            }
         }
     }
 
     @Override
     protected Object visit(ASTNENode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
-                   : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
-        } catch (ArithmeticException xrt) {
-            JexlNode xnode = findNullOperand(xrt, node, left, right);
-            throw new JexlException(xnode, "!= error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
+                    Boolean ne = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
+                           : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
+                    if (ne && any || !ne && !any)
+                        return ne;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, "!= error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
+                       : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
+            } catch (ArithmeticException xrt) {
+                JexlNode xnode = findNullOperand(xrt, node, left, right);
+                throw new JexlException(xnode, "!= error", xrt);
+            }
         }
     }
 
     @Override
     protected Object visit(ASTGENode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? result
-                   : arithmetic.greaterThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
-            throw new JexlException(node, ">= error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
+                    Boolean ge = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                           : arithmetic.greaterThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                    if (ge && any || !ge && !any)
+                        return ge;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, ">= error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                       : arithmetic.greaterThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            } catch (ArithmeticException xrt) {
+                throw new JexlException(node, ">= error", xrt);
+            }
         }
     }
 
     @Override
     protected Object visit(ASTGTNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? result
-                   : arithmetic.greaterThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "> error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
+                    Boolean gt = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                           : arithmetic.greaterThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                    if (gt && any || !gt && !any)
+                        return gt;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, "> error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                       : arithmetic.greaterThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            } catch (ArithmeticException xrt) {
+                throw new JexlException(node, "> error", xrt);
+            }
         }
     }
 
     @Override
     protected Object visit(ASTLENode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? result
-                   : arithmetic.lessThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "<= error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
+                    Boolean le = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                           : arithmetic.lessThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                    if (le && any || !le && !any)
+                        return le;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, "<= error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                       : arithmetic.lessThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            } catch (ArithmeticException xrt) {
+                throw new JexlException(node, "<= error", xrt);
+            }
         }
     }
 
     @Override
     protected Object visit(ASTLTNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        try {
-            Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
-            return result != JexlEngine.TRY_FAILED
-                   ? result
-                   : arithmetic.lessThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "< error", xrt);
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                try {
+                    Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
+                    Boolean lt = result != JexlEngine.TRY_FAILED
+                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                           : arithmetic.lessThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                    if (lt && any || !lt && !any)
+                        return lt;
+                } catch (ArithmeticException xrt) {
+                    throw new JexlException(node, "< error", xrt);
+                }
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            try {
+                Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
+                return result != JexlEngine.TRY_FAILED
+                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
+                       : arithmetic.lessThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            } catch (ArithmeticException xrt) {
+                throw new JexlException(node, "< error", xrt);
+            }
         }
     }
 
@@ -1090,7 +1217,6 @@ public class Interpreter extends InterpreterBase {
         public void remove() throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
-
     }
 
 
@@ -1876,6 +2002,11 @@ public class Interpreter extends InterpreterBase {
         } else {
             return ab.create(extended);
         }
+    }
+
+    @Override
+    protected Object visit(ASTSetOperand node, Object data) {
+        return null;
     }
 
     @Override
