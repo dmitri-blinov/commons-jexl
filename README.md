@@ -141,7 +141,7 @@ Enhancements
 + Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
   so it is possible to pass a function as an argument to java methods that accept such interfaces
 
-+ Relational operators like `==`, `!=`, `&gt;`, `&gt;=`, `&lt;`, `&lt;=`, `=~`, `!~`, `=^`, `=$`, `!^`, `!$` support comparison against set of values like `1 != (a,b)`
++ Relational operators like `==`, `!=`, `>`, `>=`, `<`, `<=`, `=~`, `!~`, `=^`, `=$`, `!^`, `!$` support comparison against set of values like `1 != (a,b)`
 
 + Function parameters can use `var` keyword for parameter definition
 
