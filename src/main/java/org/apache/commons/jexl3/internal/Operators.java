@@ -301,13 +301,13 @@ public class Operators {
      */
     protected boolean startsWith(JexlNode node, String operator, Object left, Object right) {
         try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
             Object result = tryOverload(node, JexlOperator.STARTSWITH, left, right);
-            if (result instanceof Boolean) {
-                return (Boolean) result;
+            if (result != JexlEngine.TRY_FAILED) {
+                return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.startsWith(left, right);
             if (matched != null) {
                 return matched;
@@ -345,13 +345,13 @@ public class Operators {
      */
     protected boolean endsWith(JexlNode node, String operator, Object left, Object right) {
         try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
             Object result = tryOverload(node, JexlOperator.ENDSWITH, left, right);
-            if (result instanceof Boolean) {
-                return (Boolean) result;
+            if (result != JexlEngine.TRY_FAILED) {
+                return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.endsWith(left, right);
             if (matched != null) {
                 return matched;
@@ -393,13 +393,13 @@ public class Operators {
      */
     protected boolean contains(JexlNode node, String op, Object left, Object right) {
         try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
             Object result = tryOverload(node, JexlOperator.CONTAINS, left, right);
-            if (result instanceof Boolean) {
-                return (Boolean) result;
+            if (result != JexlEngine.TRY_FAILED) {
+                return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            final JexlArithmetic arithmetic = interpreter.arithmetic;
             Boolean matched = arithmetic.contains(left, right);
             if (matched != null) {
                 return matched;
@@ -440,11 +440,11 @@ public class Operators {
         if (object == null) {
             return Boolean.TRUE;
         }
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
         Object result = tryOverload(node, JexlOperator.EMPTY, object);
         if (result != JexlEngine.TRY_FAILED) {
-            return result;
+            return arithmetic.toBoolean(result);
         }
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         result = arithmetic.isEmpty(object);
         if (result == null) {
             result = false;
