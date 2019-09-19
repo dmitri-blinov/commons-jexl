@@ -277,4 +277,244 @@ public class RelationalSetOperandTest extends JexlTestCase {
         Assert.assertFalse("Result is not as expected", (Boolean) o);
     }
 
+    @Test
+    public void testContainsAll() throws Exception {
+        JexlScript e = JEXL.createScript("1 =~ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {1});
+        jc.set("b", new int[] {1,2});
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testContainsAny() throws Exception {
+        JexlScript e = JEXL.createScript("1 =~ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {1});
+        jc.set("b", new int[] {2});
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testContainsAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("1 =~ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {2});
+        jc.set("b", new int[] {1});
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testContainsAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("1 =~ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {2});
+        jc.set("b", new int[] {3});
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotContainsAll() throws Exception {
+        JexlScript e = JEXL.createScript("1 !~ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {2});
+        jc.set("b", new int[] {3,2});
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotContainsAny() throws Exception {
+        JexlScript e = JEXL.createScript("1 !~ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {1});
+        jc.set("b", new int[] {2});
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotContainsAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("1 !~ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {1});
+        jc.set("b", new int[] {2});
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotContainsAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("1 !~ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", new int[] {1});
+        jc.set("b", new int[] {1});
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testStartsWithAll() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =^ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "ab");
+        jc.set("b", "a");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testStartsWithAny() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =^ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "ab");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testStartsWithAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =^ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "ab");
+        jc.set("b", "cd");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testStartsWithAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =^ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "de");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotStartsWithAll() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !^ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "ef");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotStartsWithAny() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !^ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "ab");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotStartsWithAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !^ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "ab");
+        jc.set("b", "cd");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotStartsWithAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !^ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "ab");
+        jc.set("b", "a");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testEndsWithAll() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =$ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "c");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testEndsWithAny() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =$ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "ab");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testEndsWithAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =$ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "cd");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testEndsWithAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' =$ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "de");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotEndsWithAll() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !$ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "cd");
+        jc.set("b", "de");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotEndsWithAny() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !$ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "ab");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotEndsWithAllFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !$ (a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "cd");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
+    @Test
+    public void testNotEndsWithAnyFalse() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' !$ ?(a,b)");
+        JexlContext jc = new MapContext();
+        jc.set("a", "bc");
+        jc.set("b", "c");
+        Object o = e.execute(jc);
+        Assert.assertFalse("Result is not as expected", (Boolean) o);
+    }
+
 }

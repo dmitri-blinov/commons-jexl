@@ -895,29 +895,51 @@
                 <tr>
                     <td>In or Match<code>=~</code></td>
                     <td>
-                        The syntactically Perl inspired <code>=~</code> operator can be used to check that a <code>string</code> matches
-                        a regular expression (expressed either a Java String or a java.util.regex.Pattern).
+                        The syntactically Perl inspired <code>=~</code> operator as well as the abbreviation <code>in</code> can be used to check 
+                        that a <code>string</code> matches a regular expression (expressed either a Java String or a java.util.regex.Pattern).
                         For example
                         <code>"abcdef" =~ "abc.*</code> returns <code>true</code>.
                         It also checks whether any collection, set or map (on keys) contains a value or not; in that case, it behaves
                         as an "in" operator.
-                        Note that arrays and user classes exposing a public 'contains' method will allow their instances
+                        Note that arrays and user classes which expose a public 'contains' method will allow their instances
                         to behave as right-hand side operands of this operator.
                         <code> "a" =~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 =~ (a,b)</code> and
+                            <code>val1 =~ a and val1 =~ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 =~ ?(a,b)</code> and
+                            <code>val1 =~ a or val1 =~ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
                     <td>Not-In or Not-Match<code>!~</code></td>
                     <td>
-                        The syntactically Perl inspired <code>!~</code> operator can be used to check that a <code>string</code> does not
-                        match a regular expression (expressed either a Java String or a java.util.regex.Pattern).
+                        The syntactically Perl inspired <code>!~</code> operator as well as the abbreviation <code>!in</code> can be used to check 
+                        that a <code>string</code> does not match a regular expression (expressed either a Java String or a java.util.regex.Pattern).
                         For example
                         <code>"abcdef" !~ "abc.*</code> returns <code>false</code>.
                         It also checks whether any collection, set or map (on keys) does not contain a value; in that case, it behaves
                         as "not in" operator.
-                        Note that arrays and user classes exposing a public 'contains' method will allow their instances
+                        Note that arrays and user classes which expose a public 'contains' method will allow their instances
                         to behave as right-hand side operands of this operator.
                         <code> "a" !~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 !~ (a,b)</code> and
+                            <code>val1 !~ a and val1 !~ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 !~ ?(a,b)</code> and
+                            <code>val1 !~ a or val1 !~ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -1033,6 +1055,17 @@
                         For example, <code> "abcdef" =^ "abc" </code> returns <code>true</code>.
                         Note that through duck-typing, user classes exposing a public 'startsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 =^ (a,b)</code> and
+                            <code>val1 =^ a and val1 =^ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 =^ ?(a,b)</code> and
+                            <code>val1 =^ a or val1 =^ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -1040,6 +1073,17 @@
                     <td>
                         This is the negation of the 'starts with' operator.
                         <code>a !^ "abc"</code> is equivalent to <code>!(a =^ "abc")</code>
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 !^ (a,b)</code> and
+                            <code>val1 !^ a and val1 !^ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 !^ ?(a,b)</code> and
+                            <code>val1 !^ a or val1 !^ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -1048,6 +1092,17 @@
                         For example, <code> "abcdef" =$ "def" </code> returns <code>true</code>.
                         Note that through duck-typing, user classes exposing an 'endsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 =$ (a,b)</code> and
+                            <code>val1 =$ a and val1 =$ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 =$ ?(a,b)</code> and
+                            <code>val1 =$ a or val1 =$ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>
@@ -1055,6 +1110,17 @@
                     <td>
                         This is the negation of the 'ends with' operator.
                         <code>a !$ "abc"</code> is equivalent to <code>!(a =$ "abc")</code>
+                        <p>
+                            This operator also supports comparison of single argument against the set of values.
+                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
+                            with <code>)</code>, e.g.
+                            <code>val1 !$ (a,b)</code> and
+                            <code>val1 !$ a and val1 !$ b</code> are equivalent.
+                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
+                            value from the set is true, e.g.
+                            <code>val1 !$ ?(a,b)</code> and
+                            <code>val1 !$ a or val1 !$ b</code> are equivalent.
+                        </p>
                     </td>
                 </tr>
                 <tr>

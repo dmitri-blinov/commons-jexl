@@ -877,13 +877,13 @@ void EqualityExpression() #void : {}
 {
   RelationalExpression()
   ( LOOKAHEAD(2) (
-     (<eq> | <EQ>) (LOOKAHEAD(SetOperand()) SetOperand() | RelationalExpression()) #EQNode(2)
+     (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
    |
-     (<ne> | <NE>) (LOOKAHEAD(SetOperand()) SetOperand() | RelationalExpression()) #NENode(2)
+     (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
    |
-     (<req> | <IN>) RelationalExpression() #ERNode(2) // equals regexp
+     (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
    |
-     <rne> RelationalExpression() #NRNode(2) // not equals regexp
+     <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
    |
      <is> RelationalExpression() #ISNode(2) // identical
    |
@@ -897,25 +897,32 @@ void SetOperand() : {}
     [<QMARK> { jjtThis.setAny(); } ] <LPAREN> RangeExpression() (<COMMA> RangeExpression())+ <RPAREN>  
 }
 
+void RelationalExpressionOperand() #void : {}
+{
+    LOOKAHEAD(SetOperand()) SetOperand() 
+    |
+    RangeExpression()
+}
+
 void RelationalExpression() #void : {}
 {
   RangeExpression()
   ( LOOKAHEAD(2) (
-    (<lt> |<LT>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #LTNode(2)
+    (<lt> |<LT>) RelationalExpressionOperand() #LTNode(2)
    |
-    (<gt> | <GT>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #GTNode(2)
+    (<gt> | <GT>) RelationalExpressionOperand() #GTNode(2)
    |
-    (<le> | <LE>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #LENode(2)
+    (<le> | <LE>) RelationalExpressionOperand() #LENode(2)
    |
-    (<ge> | <GE>) (LOOKAHEAD(SetOperand()) SetOperand() | RangeExpression()) #GENode(2)
+    (<ge> | <GE>) RelationalExpressionOperand() #GENode(2)
    |
-    <seq> RangeExpression() #SWNode(2) // starts with
+    <seq> RelationalExpressionOperand() #SWNode(2) // starts with
    |
-    <sne> RangeExpression() #NSWNode(2) // not starts with
+    <sne> RelationalExpressionOperand() #NSWNode(2) // not starts with
    |
-    <eeq> RangeExpression() #EWNode(2) // ends with
+    <eeq> RelationalExpressionOperand() #EWNode(2) // ends with
    |
-    <ene> RangeExpression() #NEWNode(2) // not ends with
+    <ene> RelationalExpressionOperand() #NEWNode(2) // not ends with
    |
     <iof> TypeReference() #IOFNode(2) // instanceof
    |

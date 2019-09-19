@@ -705,43 +705,127 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTSWNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.startsWith(node, "^=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.startsWith(node, "^=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.startsWith(node, "^=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+        }
     }
 
     @Override
     protected Object visit(ASTNSWNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.startsWith(node, "^!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.startsWith(node, "^!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.startsWith(node, "^!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+        }
     }
 
     @Override
     protected Object visit(ASTEWNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.endsWith(node, "$=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.endsWith(node, "$=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.endsWith(node, "$=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+        }
     }
 
     @Override
     protected Object visit(ASTNEWNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.endsWith(node, "$!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.endsWith(node, "$!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.endsWith(node, "$!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+        }
     }
 
     @Override
     protected Object visit(ASTERNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.contains(node, "=~", right, left) ? Boolean.TRUE : Boolean.FALSE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.contains(node, "=~", right, left) ? Boolean.TRUE : Boolean.FALSE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.contains(node, "=~", right, left) ? Boolean.TRUE : Boolean.FALSE;
+        }
     }
 
     @Override
     protected Object visit(ASTNRNode node, Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        return operators.contains(node, "!~", right, left) ? Boolean.FALSE : Boolean.TRUE;
+        JexlNode operand = node.jjtGetChild(1);
+        if (operand instanceof ASTSetOperand) {
+            boolean any = ((ASTSetOperand) operand).isAny();
+            int numChildren = operand.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                cancelCheck(node);
+                Object right = operand.jjtGetChild(i).jjtAccept(this, data);
+                Boolean ok = operators.contains(node, "!~", right, left) ? Boolean.FALSE : Boolean.TRUE;
+                if (ok && any || !ok && !any)
+                    return ok;
+            }
+            return !any;
+        } else {
+            Object right = operand.jjtAccept(this, data);
+            return operators.contains(node, "!~", right, left) ? Boolean.FALSE : Boolean.TRUE;
+        }
     }
 
     @Override
