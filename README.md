@@ -141,6 +141,8 @@ Enhancements
 + Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
   so it is possible to pass a function as an argument to java methods that accept such interfaces
 
++ Relational operators like `eq`, `ne`, `gt`, `ge`, `lt`, `le` support comparison against set of values `1 gt (a,b)`
+
 + Function parameters can use `var` keyword for parameter definition
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
