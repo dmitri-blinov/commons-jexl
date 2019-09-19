@@ -885,9 +885,9 @@ void EqualityExpression() #void : {}
    |
      <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
    |
-     <is> RelationalExpression() #ISNode(2) // identical
+     <is> RangeExpression() #ISNode(2) // identical
    |
-     <ni> RelationalExpression() #NINode(2) // not identical
+     <ni> RangeExpression() #NINode(2) // not identical
 
   ) )?
 }
