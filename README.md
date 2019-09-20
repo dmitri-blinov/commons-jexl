@@ -125,6 +125,8 @@ New features
 
 + New inline property assignment `a{b:3,c:4}` construct is introduced
 
++ New set operators *any* `?()` and *all* `??()` that can be used in relational operators are introduced
+
 Enhancements
 ------------
 + Labeled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used. 
@@ -140,8 +142,6 @@ Enhancements
 
 + Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
   so it is possible to pass a function as an argument to java methods that accept such interfaces
-
-+ Relational operators like `==`, `!=`, `>`, `>=`, `<`, `<=`, `=~`, `!~`, `=^`, `=$`, `!^`, `!$` support comparison against set of values like `1 != (a,b)`
 
 + Function parameters can use `var` keyword for parameter definition
 
