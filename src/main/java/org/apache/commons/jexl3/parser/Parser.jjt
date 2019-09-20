@@ -1020,7 +1020,7 @@ void PointerExpression() #void : {}
 {
   <and> ValueExpression() #PointerNode(1)
   |
-  ValueExpression()
+  NullableExpression()
 }
 
 void EnumerationExpression() #void : {}
@@ -1107,7 +1107,7 @@ void IteratorExpression() #void : {}
 {
   LOOKAHEAD(<LPAREN> Expression() <COLON>) <LPAREN> Expression() <COLON> Lambda() <RPAREN> #EnumerationNode(2)
   |
-  ValueExpression() #EnumerationNode(1)
+  NullableExpression() #EnumerationNode(1)
 }
 
 void SwitchExpression() : {}
@@ -1810,9 +1810,14 @@ void InlinePropertyArrayNEEntry() : {}
     <LBRACKET> Expression() <RBRACKET> <EN_ASSIGN> Expression()
 }
 
-void ValueExpression() #void : {}
+void NullableExpression() #void : {}
 {
     NullLiteral()
     |
+    ValueExpression()
+}
+
+void ValueExpression() #void : {}
+{
     ( PrimaryExpression() ( LOOKAHEAD(2) MemberExpression() )* [LOOKAHEAD(2) MethodReference()] ) #Reference(>1)
 }
