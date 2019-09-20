@@ -1622,7 +1622,7 @@ Token dotName() #void :
     Token t ;
 }
 {
-   ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW>| t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
+   ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD>
    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
    | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
@@ -1673,6 +1673,8 @@ void PrimaryExpression() #void : {}
 {
     LOOKAHEAD( LambdaLookahead() ) Lambda()
     |
+    LOOKAHEAD( <LPAREN> ) ReferenceExpression()
+    |
     LOOKAHEAD( <LCURLY> MapElement() ) MapLiteral()
     |
     LOOKAHEAD( <LCURLY> <COLON>) MapLiteral()
@@ -1703,13 +1705,37 @@ void PrimaryExpression() #void : {}
     |
     LOOKAHEAD( FunctionCallLookahead() ) FunctionCall()
     |
-    LOOKAHEAD( <LPAREN> ) ReferenceExpression()
-    |
     Identifier(true)
     |
     This()
     |
     Literal()
+}
+
+void NullableExpression() #void : {}
+{
+    NullLiteral()
+    |
+    ValueExpression()
+}
+
+void ValueExpression() #void : {}
+{
+    ( PrimaryExpression() ( LOOKAHEAD(2) MemberExpression() )* [LOOKAHEAD(2) MethodReference()] ) #Reference(>1)
+}
+
+void MemberExpression() #void : {}
+{
+    LOOKAHEAD(MethodCall()) MethodCall()
+    |
+    MemberAccess()
+}
+
+void MethodCall() #void : {}
+{
+    LOOKAHEAD(<DOT> <NEW> InnerType()) (<DOT> <NEW> InnerType() Arguments()) #InnerConstructorNode()
+    |
+    (MemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
 }
 
 void MemberAccess() #void : {}
@@ -1721,20 +1747,6 @@ void MemberAccess() #void : {}
     LOOKAHEAD(<DOT> | <QDOT>) IdentifierAccess()
     |
     LOOKAHEAD(<LCURLY>) InlinePropertyAssignment()
-}
-
-void MethodCall() #void : {}
-{
-    LOOKAHEAD(<DOT> <NEW>) (<DOT> <NEW> InnerType() Arguments()) #InnerConstructorNode()
-    |
-    (MemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
-}
-
-void MemberExpression() #void : {}
-{
-    LOOKAHEAD(MethodCall()) MethodCall()
-    |
-    MemberAccess()
 }
 
 void MethodReference() : {}
@@ -1808,16 +1820,4 @@ void InlinePropertyArrayNullEntry() : {}
 void InlinePropertyArrayNEEntry() : {}
 {
     <LBRACKET> Expression() <RBRACKET> <EN_ASSIGN> Expression()
-}
-
-void NullableExpression() #void : {}
-{
-    NullLiteral()
-    |
-    ValueExpression()
-}
-
-void ValueExpression() #void : {}
-{
-    ( PrimaryExpression() ( LOOKAHEAD(2) MemberExpression() )* [LOOKAHEAD(2) MethodReference()] ) #Reference(>1)
 }
