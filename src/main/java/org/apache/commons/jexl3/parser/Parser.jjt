@@ -1666,7 +1666,7 @@ void ReferenceExpression() #MethodNode(>1) : {}
 {
     ( <LPAREN> (
       LOOKAHEAD(Expression()) Expression() | { branchScope.yieldCount += 1; } Block() { branchScope.yieldCount -= 1; } 
-    ) <RPAREN> #ReferenceExpression(1) ) ( LOOKAHEAD(<LPAREN>) Arguments() )*
+    ) <RPAREN> #EnclosedExpression(1) ) ( LOOKAHEAD(<LPAREN>) Arguments() )*
 }
 
 void PrimaryExpression() #void : {}

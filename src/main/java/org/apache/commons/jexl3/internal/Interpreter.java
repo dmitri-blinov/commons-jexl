@@ -127,7 +127,7 @@ import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
 import org.apache.commons.jexl3.parser.ASTReductionNode;
 import org.apache.commons.jexl3.parser.ASTReference;
-import org.apache.commons.jexl3.parser.ASTReferenceExpression;
+import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
 import org.apache.commons.jexl3.parser.ASTRegexLiteral;
 import org.apache.commons.jexl3.parser.ASTRemove;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
@@ -2416,7 +2416,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTReferenceExpression node, Object data) {
+    protected Object visit(ASTEnclosedExpression node, Object data) {
         try {
             return node.jjtGetChild(0).jjtAccept(this, data);
         } catch (JexlException.Yield stmtYield) {
