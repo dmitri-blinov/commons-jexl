@@ -894,12 +894,12 @@ void EqualityExpression() #void : {}
 
 void SetOperand() : {}
 {
-    [<QMARK> { jjtThis.setAny(); } ] <LPAREN> RangeExpression() (<COMMA> RangeExpression())+ <RPAREN>  
+    ( <QMARK> { jjtThis.setAny(); } | <NULLP> ) <LPAREN> RangeExpression() (<COMMA> RangeExpression())* <RPAREN>  
 }
 
 void RelationalExpressionOperand() #void : {}
 {
-    LOOKAHEAD(SetOperand()) SetOperand() 
+    SetOperand() 
     |
     RangeExpression()
 }

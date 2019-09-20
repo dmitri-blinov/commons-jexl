@@ -39,7 +39,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testEqualsAll() throws Exception {
-        JexlScript e = JEXL.createScript("1 == (a,b)");
+        JexlScript e = JEXL.createScript("1 == ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 1);
         jc.set("b", 1);
@@ -59,7 +59,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testEqualsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("1 == (a,b)");
+        JexlScript e = JEXL.createScript("1 == ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 1);
         jc.set("b", 2);
@@ -79,7 +79,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotEqualsAll() throws Exception {
-        JexlScript e = JEXL.createScript("1 != (a,b)");
+        JexlScript e = JEXL.createScript("1 != ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 2);
         jc.set("b", 3);
@@ -99,7 +99,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotEqualsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("1 != (a,b)");
+        JexlScript e = JEXL.createScript("1 != ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 1);
         jc.set("b", 1);
@@ -119,7 +119,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testGreaterAll() throws Exception {
-        JexlScript e = JEXL.createScript("3 > (a,b)");
+        JexlScript e = JEXL.createScript("3 > ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 1);
         jc.set("b", 2);
@@ -139,7 +139,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testGreaterAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("3 > (a,b)");
+        JexlScript e = JEXL.createScript("3 > ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 2);
         jc.set("b", 3);
@@ -159,7 +159,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testGreaterEqualsAll() throws Exception {
-        JexlScript e = JEXL.createScript("3 >= (a,b)");
+        JexlScript e = JEXL.createScript("3 >= ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 2);
         jc.set("b", 3);
@@ -179,7 +179,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testGreaterEqualsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("3 >= (a,b)");
+        JexlScript e = JEXL.createScript("3 >= ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 4);
         jc.set("b", 3);
@@ -199,7 +199,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testLessAll() throws Exception {
-        JexlScript e = JEXL.createScript("3 < (a,b)");
+        JexlScript e = JEXL.createScript("3 < ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 4);
         jc.set("b", 5);
@@ -219,7 +219,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testLessAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("3 < (a,b)");
+        JexlScript e = JEXL.createScript("3 < ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 4);
         jc.set("b", 3);
@@ -239,7 +239,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testLessEqualsAll() throws Exception {
-        JexlScript e = JEXL.createScript("3 <= (a,b)");
+        JexlScript e = JEXL.createScript("3 <= ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 4);
         jc.set("b", 3);
@@ -259,7 +259,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testLessEqualsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("3 <= (a,b)");
+        JexlScript e = JEXL.createScript("3 <= ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", 2);
         jc.set("b", 3);
@@ -279,7 +279,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testContainsAll() throws Exception {
-        JexlScript e = JEXL.createScript("1 =~ (a,b)");
+        JexlScript e = JEXL.createScript("1 =~ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", new int[] {1});
         jc.set("b", new int[] {1,2});
@@ -299,7 +299,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testContainsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("1 =~ (a,b)");
+        JexlScript e = JEXL.createScript("1 =~ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", new int[] {2});
         jc.set("b", new int[] {1});
@@ -319,7 +319,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotContainsAll() throws Exception {
-        JexlScript e = JEXL.createScript("1 !~ (a,b)");
+        JexlScript e = JEXL.createScript("1 !~ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", new int[] {2});
         jc.set("b", new int[] {3,2});
@@ -339,7 +339,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotContainsAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("1 !~ (a,b)");
+        JexlScript e = JEXL.createScript("1 !~ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", new int[] {1});
         jc.set("b", new int[] {2});
@@ -359,7 +359,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testStartsWithAll() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' =^ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' =^ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "ab");
         jc.set("b", "a");
@@ -379,7 +379,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testStartsWithAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' =^ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' =^ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "ab");
         jc.set("b", "cd");
@@ -399,7 +399,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotStartsWithAll() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' !^ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' !^ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "cd");
         jc.set("b", "ef");
@@ -419,7 +419,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotStartsWithAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' !^ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' !^ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "ab");
         jc.set("b", "cd");
@@ -439,7 +439,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testEndsWithAll() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' =$ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' =$ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "bc");
         jc.set("b", "c");
@@ -459,7 +459,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testEndsWithAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' =$ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' =$ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "bc");
         jc.set("b", "cd");
@@ -479,7 +479,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotEndsWithAll() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' !$ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' !$ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "cd");
         jc.set("b", "de");
@@ -499,7 +499,7 @@ public class RelationalSetOperandTest extends JexlTestCase {
 
     @Test
     public void testNotEndsWithAllFalse() throws Exception {
-        JexlScript e = JEXL.createScript("'abc' !$ (a,b)");
+        JexlScript e = JEXL.createScript("'abc' !$ ??(a,b)");
         JexlContext jc = new MapContext();
         jc.set("a", "bc");
         jc.set("b", "cd");

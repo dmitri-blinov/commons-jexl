@@ -846,6 +846,28 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Any</td>
+                    <td>
+                        The set <code>?()</code> operator can be used for comparison of single argument against the set of values.
+                        A set of values is specified by <code>?(</code> followed by one or more expressions separated by <code>,</code> and ending
+                        with <code>)</code>. The result is true if comparison of argument against <strong>any</strong>  
+                        value from the set is true, e.g.
+                        <code>val1 == ?(a,b)</code> and
+                        <code>val1 == a or val1 == b</code> are equivalent.
+                    </td>
+                </tr>
+                <tr>
+                    <td>All</td>
+                    <td>
+                        The set <code>??()</code> operator can be used for comparison of single argument against the set of values.
+                        A set of values is specified by <code>??(</code> followed by one or more expressions separated by <code>,</code> and ending
+                        with <code>)</code>. The result is true if comparison of argument against <strong>all</strong>  
+                        values from the set is true, e.g.
+                        <code>val1 == ??(a,b)</code> and
+                        <code>val1 == a and val1 == b</code> are equivalent.
+                    </td>
+                </tr>
+                <tr>
                     <td>Equality</td>
                     <td>
                         The usual <code>==</code> operator can be used as well as the abbreviation <code>eq</code>.
@@ -860,15 +882,8 @@
                             <li>Equality uses the java <code>equals</code> method</li>
                         </ol>
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 == (a,b)</code> and
-                            <code>val1 == a and val1 == b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 == ?(a,b)</code> and
-                            <code>val1 == a or val1 == b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -880,15 +895,8 @@
                         <code>val1 != val2</code> and
                         <code>val1 ne val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 != (a,b)</code> and
-                            <code>val1 != a and val1 != b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 != ?(a,b)</code> and
-                            <code>val1 != a or val1 != b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -905,15 +913,8 @@
                         to behave as right-hand side operands of this operator.
                         <code> "a" =~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 =~ (a,b)</code> and
-                            <code>val1 =~ a and val1 =~ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 =~ ?(a,b)</code> and
-                            <code>val1 =~ a or val1 =~ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -930,15 +931,8 @@
                         to behave as right-hand side operands of this operator.
                         <code> "a" !~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 !~ (a,b)</code> and
-                            <code>val1 !~ a and val1 !~ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 !~ ?(a,b)</code> and
-                            <code>val1 !~ a or val1 !~ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -976,15 +970,8 @@
                         <code>val1 &lt; val2</code> and
                         <code>val1 lt val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 &lt; (a,b)</code> and
-                            <code>val1 &lt; a and val1 &lt; b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 &lt; ?(a,b)</code> and
-                            <code>val1 &lt; a or val1 &lt; b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -996,15 +983,8 @@
                         <code>val1 &lt;= val2</code> and
                         <code>val1 le val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 &lt;= (a,b)</code> and
-                            <code>val1 &lt;= a and val1 &lt;= b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 &lt;= ?(a,b)</code> and
-                            <code>val1 &lt;= a or val1 &lt;= b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1016,15 +996,8 @@
                         <code>val1 &gt; val2</code> and
                         <code>val1 gt val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 &gt; (a,b)</code> and
-                            <code>val1 &gt; a and val1 &gt; b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 &gt; ?(a,b)</code> and
-                            <code>val1 &gt; a or val1 &gt; b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1036,15 +1009,8 @@
                         <code>val1 &gt;= val2</code> and
                         <code>val1 ge val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 &gt;= (a,b)</code> and
-                            <code>val1 &gt;= a and val1 &gt;= b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 &gt;= ?(a,b)</code> and
-                            <code>val1 &gt;= a or val1 &gt;= b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1056,15 +1022,8 @@
                         Note that through duck-typing, user classes exposing a public 'startsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 =^ (a,b)</code> and
-                            <code>val1 =^ a and val1 =^ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 =^ ?(a,b)</code> and
-                            <code>val1 =^ a or val1 =^ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1074,15 +1033,8 @@
                         This is the negation of the 'starts with' operator.
                         <code>a !^ "abc"</code> is equivalent to <code>!(a =^ "abc")</code>
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 !^ (a,b)</code> and
-                            <code>val1 !^ a and val1 !^ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 !^ ?(a,b)</code> and
-                            <code>val1 !^ a or val1 !^ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1093,15 +1045,8 @@
                         Note that through duck-typing, user classes exposing an 'endsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 =$ (a,b)</code> and
-                            <code>val1 =$ a and val1 =$ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 =$ ?(a,b)</code> and
-                            <code>val1 =$ a or val1 =$ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>
@@ -1111,15 +1056,8 @@
                         This is the negation of the 'ends with' operator.
                         <code>a !$ "abc"</code> is equivalent to <code>!(a =$ "abc")</code>
                         <p>
-                            This operator also supports comparison of single argument against the set of values.
-                            A set of values is specified by <code>(</code> followed by two or more expressions separated by <code>,</code> and ending
-                            with <code>)</code>, e.g.
-                            <code>val1 !$ (a,b)</code> and
-                            <code>val1 !$ a and val1 !$ b</code> are equivalent.
-                            If a set of values is prepended with <code>?</code>, then the result is true if comparison of argument against <strong>any</strong>  
-                            value from the set is true, e.g.
-                            <code>val1 !$ ?(a,b)</code> and
-                            <code>val1 !$ a or val1 !$ b</code> are equivalent.
+                            This operator also supports comparison of single argument against the set of values by using 
+                            <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
                 </tr>

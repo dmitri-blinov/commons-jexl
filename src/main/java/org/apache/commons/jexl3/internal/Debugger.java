@@ -1267,7 +1267,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTSetOperand node, Object data) {
-        if (node.isAny())
+        builder.append("?");
+        if (!node.isAny())
             builder.append("?");
         builder.append("(");
         int num = node.jjtGetNumChildren();
