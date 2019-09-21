@@ -854,6 +854,8 @@
                         value from the set is true, e.g.
                         <code>val1 == ?(a,b)</code> and
                         <code>val1 == a or val1 == b</code> are equivalent.
+                        <p>Argument comprehentions syntax can also be used to construct sets based on other iterable objects,
+                            like collections and arrays, e.g.<code>?(1, 2, 3, ...[4, 5, 6])</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -865,6 +867,8 @@
                         values from the set is true, e.g.
                         <code>val1 == ??(a,b)</code> and
                         <code>val1 == a and val1 == b</code> are equivalent.
+                        <p>Argument comprehentions syntax can also be used to construct sets based on other iterable objects,
+                            like collections and arrays, e.g.<code>??(1, 2, 3, ...[4, 5, 6])</code></p>
                     </td>
                 </tr>
                 <tr>

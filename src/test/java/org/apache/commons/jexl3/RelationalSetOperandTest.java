@@ -517,4 +517,12 @@ public class RelationalSetOperandTest extends JexlTestCase {
         Assert.assertFalse("Result is not as expected", (Boolean) o);
     }
 
+    @Test
+    public void testArgumentExpansion() throws Exception {
+        JexlScript e = JEXL.createScript("'abc' eq ?(...['sdf','abc'])");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", (Boolean) o);
+    }
+
 }
