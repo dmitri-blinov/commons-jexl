@@ -3681,14 +3681,21 @@ public class Interpreter extends InterpreterBase {
         }
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
-        // get the length of the array
-        int argc = node.jjtGetNumChildren() - 1;
+        if (!Collection.class.isAssignableFrom(target))
+            throw new JexlException(node, "Not a Collection", null);
         try {
-            Collection<Object> result = (Collection<Object>) target.newInstance();
-            for (int i = 0; i < argc; i++) {
-                result.add(node.jjtGetChild(i + 1).jjtAccept(this, data));
+            JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
+            if (ctor != null) {
+                Collection<Object> result = (Collection<Object>) ctor.invoke(target, EMPTY_PARAMS);
+                // get the length of the collection
+                int argc = node.jjtGetNumChildren() - 1;
+                for (int i = 0; i < argc; i++) {
+                    result.add(node.jjtGetChild(i + 1).jjtAccept(this, data));
+                }
+                return result;
             }
-            return result;
+            String tstr = target != null ? target.toString() : "?";
+            return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (Exception xany) {
             String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
@@ -3702,15 +3709,22 @@ public class Interpreter extends InterpreterBase {
         }
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
-        // get the length of the array
-        int argc = node.jjtGetNumChildren() - 1;
+        if (!Map.class.isAssignableFrom(target))
+            throw new JexlException(node, "Not a Map", null);
         try {
-            Map<Object,Object> result = (Map<Object,Object>) target.newInstance();
-            for (int i = 0; i < argc; i++) {
-                Object[] entry = (Object[]) node.jjtGetChild(i + 1).jjtAccept(this, data);
-                result.put(entry[0], entry[1]);
+            JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
+            if (ctor != null) {
+                Map<Object,Object> result = (Map<Object,Object>) ctor.invoke(target, EMPTY_PARAMS);
+                // get the length of the map
+                int argc = node.jjtGetNumChildren() - 1;
+                for (int i = 0; i < argc; i++) {
+                    Object[] entry = (Object[]) node.jjtGetChild(i + 1).jjtAccept(this, data);
+                    result.put(entry[0], entry[1]);
+                }
+                return result;
             }
-            return result;
+            String tstr = target != null ? target.toString() : "?";
+            return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (Exception xany) {
             String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
