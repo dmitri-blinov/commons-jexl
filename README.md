@@ -163,7 +163,13 @@ Enhancements
 
 + Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases 
 
-+ Operator `new` supports Java-like object creation syntax `new String()` or array creation syntax `new String[] {'abc','def'}`
++ Operator `new` supports Java-like object creation syntax `new String()`
+
++ Operator `new` supports initialized array creation syntax `new String[] {'abc','def'}`
+
++ Operator `new` supports initialized collection creation syntax `new LinkedHashSet {'abc','def'}`
+
++ Operator `new` supports initialized map creation syntax `new LinkedHashMap {'abc' : 1, 'def' : 2}`
 
 + Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
 
