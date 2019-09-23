@@ -1494,6 +1494,10 @@ void Constructor() #void : {}
        |
        LOOKAHEAD(<QUALIFIED_IDENTIFIER> <LPAREN>) QualifiedConstructor()
        |
+       LOOKAHEAD(<QUALIFIED_IDENTIFIER> <LCURLY> MapElement()) InitializedMapConstructor()
+       |
+       LOOKAHEAD(<QUALIFIED_IDENTIFIER> <LCURLY>) InitializedCollectionConstructor()
+       |
        LOOKAHEAD(ArrayTypeReference() <LBRACKET> <RBRACKET>) InitializedArrayConstructor()
        |
        LOOKAHEAD(ArrayTypeReference() <LBRACKET>) ArrayConstructor()
@@ -1527,12 +1531,27 @@ void ArrayOpenDimension() : {}
 
 void InitializedArrayConstructor() #InitializedArrayConstructorNode() : {}
 {
-    ArrayTypeReference() <LBRACKET> <RBRACKET> InitializedArrayLiteral()
+    ArrayTypeReference() <LBRACKET> <RBRACKET> InitializedCollectionLiteral()
 }
 
-void InitializedArrayLiteral() #void() : {}
+void InitializedCollectionConstructor() #InitializedCollectionConstructorNode() : {}
+{
+    NewTypeReference() InitializedCollectionLiteral()
+}
+
+void InitializedMapConstructor() #InitializedMapConstructorNode() : {}
+{
+    NewTypeReference() InitializedMapLiteral()
+}
+
+void InitializedCollectionLiteral() #void() : {}
 {
     <LCURLY> [ Expression() ( <COMMA> Expression() )* ] <RCURLY>
+}
+
+void InitializedMapLiteral() #void() : {}
+{
+    <LCURLY> [ MapElement() ( <COMMA> MapElement() )* ] <RCURLY>
 }
 
 void Parameter() #void :

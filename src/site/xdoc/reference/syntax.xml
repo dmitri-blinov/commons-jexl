@@ -1119,6 +1119,10 @@
                            <code>new String[5]</code>, <code>new int[5][7]</code> or <code>new int[5][]</code></p>
                         <p>The array initialization syntax is also supported for single-dimension arrays, e.g.
                            <code>new String[] {'abc','def'}</code></p>
+                        <p>The collection initialization syntax is also supported for any type that implements Collection interface, e.g.
+                           <code>new LinkedHashSet {'abc','def'}</code></p>
+                        <p>The map initialization syntax is also supported for any type that implements Map interface, e.g.
+                           <code>new LinkedHashMap {'abc':1,'def':2}</code></p>
                         <p>Note that this operator can not be overloaded</p>
                     </td>
                 </tr>

@@ -80,6 +80,8 @@ import org.apache.commons.jexl3.parser.ASTIncrementPostfixNode;
 import org.apache.commons.jexl3.parser.ASTIndirectNode;
 import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
+import org.apache.commons.jexl3.parser.ASTInitializedCollectionConstructorNode;
+import org.apache.commons.jexl3.parser.ASTInitializedMapConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
@@ -179,6 +181,7 @@ import org.apache.commons.jexl3.parser.ASTYieldStatement;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.Node;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -3663,6 +3666,49 @@ public class Interpreter extends InterpreterBase {
             Object result = Array.newInstance(target, argc);
             for (int i = 0; i < argc; i++) {
                 Array.set(result, i, node.jjtGetChild(i + 1).jjtAccept(this, data));
+            }
+            return result;
+        } catch (Exception xany) {
+            String tstr = target != null ? target.toString() : "?";
+            throw invocationException(node, tstr, xany);
+        }
+    }
+
+    @Override
+    protected Object visit(ASTInitializedCollectionConstructorNode node, Object data) {
+        if (isCancelled()) {
+            throw new JexlException.Cancel(node);
+        }
+        // first child is class or class name
+        final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
+        // get the length of the array
+        int argc = node.jjtGetNumChildren() - 1;
+        try {
+            Collection<Object> result = (Collection<Object>) target.newInstance();
+            for (int i = 0; i < argc; i++) {
+                result.add(node.jjtGetChild(i + 1).jjtAccept(this, data));
+            }
+            return result;
+        } catch (Exception xany) {
+            String tstr = target != null ? target.toString() : "?";
+            throw invocationException(node, tstr, xany);
+        }
+    }
+
+    @Override
+    protected Object visit(ASTInitializedMapConstructorNode node, Object data) {
+        if (isCancelled()) {
+            throw new JexlException.Cancel(node);
+        }
+        // first child is class or class name
+        final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
+        // get the length of the array
+        int argc = node.jjtGetNumChildren() - 1;
+        try {
+            Map<Object,Object> result = (Map<Object,Object>) target.newInstance();
+            for (int i = 0; i < argc; i++) {
+                Object[] entry = (Object[]) node.jjtGetChild(i + 1).jjtAccept(this, data);
+                result.put(entry[0], entry[1]);
             }
             return result;
         } catch (Exception xany) {

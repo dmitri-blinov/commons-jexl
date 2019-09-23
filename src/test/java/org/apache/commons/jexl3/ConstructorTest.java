@@ -17,7 +17,10 @@
 package org.apache.commons.jexl3;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -135,6 +138,24 @@ public class ConstructorTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof String[]);
         Assert.assertEquals("Result is not as expected", 2, ((String[])o).length);
+    }
+
+    @Test
+    public void testInitializedCollection() throws Exception {
+        JexlScript e = JEXL.createScript("new LinkedHashSet {'abc','def'}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashSet);
+        Assert.assertEquals("Result is not as expected", 2, ((Set)o).size());
+    }
+
+    @Test
+    public void testInitializedMap() throws Exception {
+        JexlScript e = JEXL.createScript("new LinkedHashMap {'abc':1,'def':2}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashMap);
+        Assert.assertEquals("Result is not as expected", 2, ((Map)o).size());
     }
 
     @Test
