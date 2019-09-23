@@ -3690,7 +3690,21 @@ public class Interpreter extends InterpreterBase {
                 // get the length of the collection
                 int argc = node.jjtGetNumChildren() - 1;
                 for (int i = 0; i < argc; i++) {
-                    result.add(node.jjtGetChild(i + 1).jjtAccept(this, data));
+                    JexlNode child = node.jjtGetChild(i + 1);
+                    if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference) {
+                        Iterator<?> it = (Iterator<?>) child.jjtAccept(this, data);
+                        if (it != null) {
+                            try {
+                                while (it.hasNext()) {
+                                    result.add(it.next());
+                                }
+                            } finally {
+                                closeIfSupported(it);
+                            }
+                        }
+                    } else {
+                        result.add(child.jjtAccept(this, data));
+                    }
                 }
                 return result;
             }
@@ -3718,8 +3732,28 @@ public class Interpreter extends InterpreterBase {
                 // get the length of the map
                 int argc = node.jjtGetNumChildren() - 1;
                 for (int i = 0; i < argc; i++) {
-                    Object[] entry = (Object[]) node.jjtGetChild(i + 1).jjtAccept(this, data);
-                    result.put(entry[0], entry[1]);
+                    JexlNode child = node.jjtGetChild(i + 1);
+                    if (child instanceof ASTMapEntry) {
+                        Object[] entry = (Object[]) (child).jjtAccept(this, data);
+                        result.put(entry[0], entry[1]);
+                    } else {
+                        Iterator<Object> it = (Iterator<Object>) (child).jjtAccept(this, data);
+                        if (it != null) {
+                            try {
+                                while (it.hasNext()) {
+                                    Object value = it.next();
+                                    if (value instanceof Map.Entry<?,?>) {
+                                        Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                                        result.put(entry.getKey(), entry.getValue());
+                                    } else {
+                                        throw new JexlException(node, "Not a Map.Entry", null);
+                                    }
+                                }
+                            } finally {
+                                closeIfSupported(it);
+                            }
+                        }
+                    }
                 }
                 return result;
             }

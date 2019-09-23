@@ -150,12 +150,35 @@ public class ConstructorTest extends JexlTestCase {
     }
 
     @Test
+    public void testInitializedCollectionComprehension() throws Exception {
+        JexlScript e = JEXL.createScript("new LinkedHashSet {'abc','def', ...a}");
+        JexlContext jc = new MapContext();
+        jc.set("a", new String[] {"opq", "xyz"});
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashSet);
+        Assert.assertEquals("Result is not as expected", 4, ((Set)o).size());
+    }
+
+    @Test
     public void testInitializedMap() throws Exception {
         JexlScript e = JEXL.createScript("new LinkedHashMap {'abc':1,'def':2}");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashMap);
         Assert.assertEquals("Result is not as expected", 2, ((Map)o).size());
+    }
+
+    @Test
+    public void testInitializedMapComprehension() throws Exception {
+        JexlScript e = JEXL.createScript("new LinkedHashMap {'abc':1,'def':2, *:...x}");
+        JexlContext jc = new MapContext();
+        HashMap map = new HashMap();
+        map.put("opq",3);
+        map.put("xyz",4);
+        jc.set("x", map);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashMap);
+        Assert.assertEquals("Result is not as expected", 4, ((Map)o).size());
     }
 
     @Test
