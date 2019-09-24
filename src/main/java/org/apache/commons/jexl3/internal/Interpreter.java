@@ -3662,12 +3662,63 @@ public class Interpreter extends InterpreterBase {
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         // get the length of the array
         int argc = node.jjtGetNumChildren() - 1;
+        boolean comprehensions = false;
+        for (int i = 0; i < argc; i++) {
+            JexlNode child = node.jjtGetChild(i + 1);
+            if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference)
+                comprehensions = true;
+        }
         try {
-            Object result = Array.newInstance(target, argc);
-            for (int i = 0; i < argc; i++) {
-                Array.set(result, i, node.jjtGetChild(i + 1).jjtAccept(this, data));
+            if (comprehensions) {
+                ArrayList<Object> result = new ArrayList<Object> (argc);
+                for (int i = 0; i < argc; i++) {
+                    JexlNode child = node.jjtGetChild(i + 1);
+                    if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference) {
+                        Iterator<?> it = (Iterator<?>) child.jjtAccept(this, data);
+                        if (it != null) {
+                            try {
+                                while (it.hasNext()) {
+                                    result.add(it.next());
+                                }
+                            } finally {
+                                closeIfSupported(it);
+                            }
+                        }
+                    } else {
+                        result.add(child.jjtAccept(this, data));
+                    }
+                }
+                int sz = result.size();
+                Object array = Array.newInstance(target, sz);
+                Class type = arithmetic.getWrapperClass(target);
+                for (int i = 0; i < argc; i++) {
+                    Object value = result.get(i);
+                    if (!type.isInstance(value)) {
+                        if (arithmetic.isStrict()) {
+                            value = arithmetic.implicitCast(type, value);
+                        } else {
+                            value = arithmetic.cast(type, value);
+                        }
+                    }
+                    Array.set(array, i, value);
+                }
+                return array;
+            } else {
+                Object result = Array.newInstance(target, argc);
+                Class type = arithmetic.getWrapperClass(target);
+                for (int i = 0; i < argc; i++) {
+                    Object value = node.jjtGetChild(i + 1).jjtAccept(this, data);
+                    if (!type.isInstance(value)) {
+                        if (arithmetic.isStrict()) {
+                            value = arithmetic.implicitCast(type, value);
+                        } else {
+                            value = arithmetic.cast(type, value);
+                        }
+                    }
+                    Array.set(result, i, value);
+                }
+                return result;
             }
-            return result;
         } catch (Exception xany) {
             String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);

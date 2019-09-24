@@ -50,7 +50,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new String()");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof String);
+        Assert.assertTrue("Result is not true", o instanceof String);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new java.util.concurrent.atomic.AtomicLong()");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof AtomicLong);
+        Assert.assertTrue("Result is not true", o instanceof AtomicLong);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new String[5]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof String[]);
+        Assert.assertTrue("Result is not true", o instanceof String[]);
         Assert.assertEquals("Result is not as expected", 5, ((String[])o).length);
     }
 
@@ -91,7 +91,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new int[5]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof int[]);
+        Assert.assertTrue("Result is not true", o instanceof int[]);
         Assert.assertEquals("Result is not as expected", 5, ((int[])o).length);
     }
 
@@ -100,7 +100,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new java.util.concurrent.atomic.AtomicLong[5]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof AtomicLong[]);
+        Assert.assertTrue("Result is not true", o instanceof AtomicLong[]);
         Assert.assertEquals("Result is not as expected", 5, ((AtomicLong[])o).length);
     }
 
@@ -109,7 +109,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new String[6][5]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Object[]);
+        Assert.assertTrue("Result is not true", o instanceof Object[]);
         Assert.assertEquals("Result is not as expected", 6, ((Object[])o).length);
     }
 
@@ -118,7 +118,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new String[6][]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Object[]);
+        Assert.assertTrue("Result is not true", o instanceof Object[]);
         Assert.assertEquals("Result is not as expected", 6, ((Object[])o).length);
     }
 
@@ -127,7 +127,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new int[6][5]");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Object[]);
+        Assert.assertTrue("Result is not true", o instanceof Object[]);
         Assert.assertEquals("Result is not as expected", 6, ((Object[])o).length);
     }
 
@@ -136,8 +136,18 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new String[] {'abc','def'}");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof String[]);
+        Assert.assertTrue("Result is not true", o instanceof String[]);
         Assert.assertEquals("Result is not as expected", 2, ((String[])o).length);
+    }
+
+    @Test
+    public void testInitializedArrayComprehension() throws Exception {
+        JexlScript e = JEXL.createScript("new String[] {'abc','def',...a}");
+        JexlContext jc = new MapContext();
+        jc.set("a", new String[] {"opq", "xyz"});
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not true", o instanceof String[]);
+        Assert.assertEquals("Result is not as expected", 4, ((String[])o).length);
     }
 
     @Test
@@ -145,7 +155,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new LinkedHashSet {'abc','def'}");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashSet);
+        Assert.assertTrue("Result is not true", o instanceof LinkedHashSet);
         Assert.assertEquals("Result is not as expected", 2, ((Set)o).size());
     }
 
@@ -155,7 +165,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         jc.set("a", new String[] {"opq", "xyz"});
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashSet);
+        Assert.assertTrue("Result is not true", o instanceof LinkedHashSet);
         Assert.assertEquals("Result is not as expected", 4, ((Set)o).size());
     }
 
@@ -164,7 +174,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("new LinkedHashMap {'abc':1,'def':2}");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashMap);
+        Assert.assertTrue("Result is not true", o instanceof LinkedHashMap);
         Assert.assertEquals("Result is not as expected", 2, ((Map)o).size());
     }
 
@@ -177,7 +187,7 @@ public class ConstructorTest extends JexlTestCase {
         map.put("xyz",4);
         jc.set("x", map);
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof LinkedHashMap);
+        Assert.assertTrue("Result is not true", o instanceof LinkedHashMap);
         Assert.assertEquals("Result is not as expected", 4, ((Map)o).size());
     }
 
@@ -187,7 +197,7 @@ public class ConstructorTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         jc.set("x", new Foo());
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Foo.Cheezy);
+        Assert.assertTrue("Result is not true", o instanceof Foo.Cheezy);
     }
     
 }
