@@ -52,9 +52,10 @@ public final class DuckSetExecutor extends AbstractExecutor.Set {
      * @return the executor if found, null otherwise
      */
     public static DuckSetExecutor discover(Introspector is, Class<?> clazz, Object key, Object value) {
-        java.lang.reflect.Method method = is.getMethod(clazz, "set", makeArgs(key, value));
+        Object[] args = makeArgs(key, value);
+        java.lang.reflect.Method method = is.getMethod(clazz, "set", args);
         if (method == null) {
-            method = is.getMethod(clazz, "put", makeArgs(key, value));
+            method = is.getMethod(clazz, "put", args);
         }
         return method == null? null : new DuckSetExecutor(clazz, method, key, value);
     }

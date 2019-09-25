@@ -56,11 +56,11 @@ public final class IndexedType implements JexlPropertyGet {
     public static JexlPropertyGet discover(Introspector is, Object object, String name) {
         if (object != null && name != null && !name.isEmpty()) {
             String base = Character.isUpperCase(name.charAt(0)) ? name : name.substring(0, 1).toUpperCase() + name.substring(1);
-            final String container = name;
-            final Class<?> clazz = object.getClass();
             final Method[] getters = is.getMethods(object.getClass(), "get" + base);
-            final Method[] setters = is.getMethods(object.getClass(), "set" + base);
             if (getters != null) {
+                final String container = name;
+                final Class<?> clazz = object.getClass();
+                final Method[] setters = is.getMethods(object.getClass(), "set" + base);
                 return new IndexedType(container, clazz, getters, setters);
             }
         }
