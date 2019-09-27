@@ -3404,10 +3404,11 @@ public class Interpreter extends InterpreterBase {
                         }
                         // the method may also be a functor stored in a property of the target
                         if (!narrow) {
-                            JexlPropertyGet get = uberspect.getPropertyGet(target, methodName);
-                            if (get != null) {
-                                functor = get.tryInvoke(target, methodName);
-                                functorp = functor != null;
+                            try {
+                               functor = getAttribute(target, methodName);
+                               functorp = functor != null;
+                            } catch (UnsupportedOperationException eux) {
+                               //
                             }
                         }
                     }
