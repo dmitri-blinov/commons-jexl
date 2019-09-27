@@ -871,6 +871,14 @@ public abstract class InterpreterBase extends ParserVisitor {
                     }
                 }
             }
+
+            // attempt arithmetic implementation
+            result = (operator == JexlOperator.ARRAY_GET) ? arithmetic.arrayGet(object, attribute)
+                : arithmetic.propertyGet(object, attribute);
+            if (result != JexlEngine.TRY_FAILED) {
+                return result;
+            }
+
             // resolve that property
             List<PropertyResolver> resolvers = uberspect.getResolvers(operator, object);
             JexlPropertyGet vg = uberspect.getPropertyGet(resolvers, object, attribute);
@@ -941,6 +949,12 @@ public abstract class InterpreterBase extends ParserVisitor {
                         return;
                     }
                 }
+            }
+            // attempt arithmetic implementation
+            result = (operator == JexlOperator.ARRAY_SET) ? arithmetic.arraySet(object, attribute, value)
+                : arithmetic.propertySet(object, attribute, value);
+            if (result != JexlEngine.TRY_FAILED) {
+                return;
             }
             List<PropertyResolver> resolvers = uberspect.getResolvers(operator, object);
             JexlPropertySet vs = uberspect.getPropertySet(resolvers, object, attribute, value);

@@ -19,6 +19,7 @@ package org.apache.commons.jexl3;
 
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.internal.Closure;
+import org.apache.commons.jexl3.internal.introspection.IndexedType;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
@@ -1396,6 +1397,60 @@ public class JexlArithmetic {
         if (object instanceof AtomicLong) {
             return ((AtomicLong) object).get();
         }
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Property get operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object propertyGet(Object object, Object key) throws Exception {
+        if (object instanceof IndexedType.IndexedContainer) 
+            return ((IndexedType.IndexedContainer) object).get(key);
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Array get operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object arrayGet(Object object, Object key) throws Exception {
+        if (object instanceof IndexedType.IndexedContainer) 
+            return ((IndexedType.IndexedContainer) object).get(key);
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Property set operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @param value the value to assign to property
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object propertySet(Object object, Object key, Object value) throws Exception {
+        if (object instanceof IndexedType.IndexedContainer) 
+            return ((IndexedType.IndexedContainer) object).set(key, value);
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Array set operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @param value the value to assign to property
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object arraySet(Object object, Object key, Object value) throws Exception {
+        if (object instanceof IndexedType.IndexedContainer) 
+            return ((IndexedType.IndexedContainer) object).set(key, value);
         return JexlEngine.TRY_FAILED;
     }
 

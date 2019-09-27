@@ -50,7 +50,7 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private boolean returnsBoolean(JexlMethod vm) {
+    private static boolean returnsBoolean(JexlMethod vm) {
         if (vm !=null) {
             Class<?> rc = vm.getReturnType();
             return Boolean.TYPE.equals(rc) || Boolean.class.equals(rc);
