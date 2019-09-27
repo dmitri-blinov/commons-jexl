@@ -65,6 +65,8 @@ Incompatible changes
 
 + Left-hand assignment expression can not use safe access operator `?.`
 
++ Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
+
 New features
 ------------
 + Java-like `switch` statement is introduced
