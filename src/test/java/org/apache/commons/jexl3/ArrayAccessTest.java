@@ -233,18 +233,6 @@ public class ArrayAccessTest extends JexlTestCase {
     }
 
     @Test
-    public void testArrayMethods() throws Exception {
-        Object[] objects = new Object[] {"an", "array", new Long(0)};
-
-        asserter.setVariable("objects", objects);
-        asserter.assertExpression("objects.get(1)", "array");
-        asserter.assertExpression("objects.size()", new Integer(3));
-        // setting an index returns the old value
-        asserter.assertExpression("objects.set(1, 'dion')", "array");
-        asserter.assertExpression("objects[1]", "dion");
-    }
-
-    @Test
     public void testArrayArray() throws Exception {
         Integer i42 = Integer.valueOf(42);
         Integer i43 = Integer.valueOf(43);

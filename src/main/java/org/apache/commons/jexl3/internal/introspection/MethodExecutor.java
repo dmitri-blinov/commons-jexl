@@ -34,10 +34,6 @@ public final class MethodExecutor extends AbstractExecutor.Method {
     /**
      * Discovers a {@link MethodExecutor}.
      * <p>
-     * If the object is an array, an attempt will be made to find the
-     * method in a List (see {@link ArrayListWrapper})
-     * </p>
-     * <p>
      * If the object is a class, an attempt will be made to find the
      * method as a static method of that class.
      * </p>
@@ -51,10 +47,6 @@ public final class MethodExecutor extends AbstractExecutor.Method {
         final Class<?> clazz = obj.getClass();
         final MethodKey key = new MethodKey(method, args);
         java.lang.reflect.Method m = is.getMethod(clazz, key);
-        if (m == null && clazz.isArray()) {
-            // check for support via our array->list wrapper
-            m = is.getMethod(ArrayListWrapper.class, key);
-        }
         if (m == null && obj instanceof Class<?>) {
             m = is.getMethod((Class<?>) obj, key);
         }
@@ -75,9 +67,6 @@ public final class MethodExecutor extends AbstractExecutor.Method {
     public static MethodExecutor[] discover(Introspector is, Object obj, String method) {
         final Class<?> clazz = obj.getClass();
         java.lang.reflect.Method[] methods = is.getMethods(clazz, method);
-        if ((methods == null || methods.length == 0) && clazz.isArray()) {
-            methods = is.getMethods(ArrayListWrapper.class, method);
-        }
         if ((methods == null || methods.length == 0) && obj instanceof Class<?>) {
             methods = is.getMethods((Class<?>) obj, method);
         }
@@ -117,11 +106,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
         if (vaClass != null) {
             args = handleVarArg(args);
         }
-        if (method.getDeclaringClass() == ArrayListWrapper.class && o.getClass().isArray()) {
-            return method.invoke(new ArrayListWrapper(o), args);
-        } else {
-            return method.invoke(o, args);
-        }
+        return method.invoke(o, args);
     }
 
     @Override

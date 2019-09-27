@@ -1229,6 +1229,24 @@ public class JexlArithmetic {
             //if both are null L == R
             return true;
         }
+        // try contains on array
+        if (container != null && container.getClass().isArray()) {
+            final int size = Array.getLength(container);
+            if (value == null) {
+                for (int i = 0; i < size; i++) {
+                    if (Array.get(container, i) == null) {
+                        return true;
+                    }
+                }
+            } else {
+                for (int i = 0; i < size; i++) {
+                    if (value.equals(Array.get(container, i))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         if (value == null || container == null) {
             // we know both aren't null, therefore L != R
             return false;
@@ -1354,6 +1372,9 @@ public class JexlArithmetic {
      * @return the size of object or null if there is no arithmetic solution
      */
     public Integer size(Object object) {
+        if (object == null) {
+            return null;
+        }
         if (object instanceof CharSequence) {
             return ((CharSequence) object).length();
         }
@@ -1410,6 +1431,8 @@ public class JexlArithmetic {
     public Object propertyGet(Object object, Object key) throws Exception {
         if (object instanceof IndexedType.IndexedContainer) 
             return ((IndexedType.IndexedContainer) object).get(key);
+        if (object != null && object.getClass().isArray())
+            return Array.get(object, toInteger(key));
         return JexlEngine.TRY_FAILED;
     }
 
@@ -1421,9 +1444,7 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object arrayGet(Object object, Object key) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer) 
-            return ((IndexedType.IndexedContainer) object).get(key);
-        return JexlEngine.TRY_FAILED;
+        return propertyGet(object, key);
     }
 
     /**
@@ -1437,6 +1458,10 @@ public class JexlArithmetic {
     public Object propertySet(Object object, Object key, Object value) throws Exception {
         if (object instanceof IndexedType.IndexedContainer) 
             return ((IndexedType.IndexedContainer) object).set(key, value);
+        if (object != null && object.getClass().isArray()) {
+            Array.set(object, toInteger(key), value);
+            return null;
+        }
         return JexlEngine.TRY_FAILED;
     }
 
@@ -1449,9 +1474,7 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object arraySet(Object object, Object key, Object value) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer) 
-            return ((IndexedType.IndexedContainer) object).set(key, value);
-        return JexlEngine.TRY_FAILED;
+        return propertySet(object, key, value);
     }
 
     /**
