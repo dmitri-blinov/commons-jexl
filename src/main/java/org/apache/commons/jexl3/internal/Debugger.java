@@ -1247,7 +1247,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTMapEnumerationNode node, Object data) {
-        return prefixChild(node, "*:...", data);
+        return prefixChild(node, "*:", data);
     }
 
     @Override

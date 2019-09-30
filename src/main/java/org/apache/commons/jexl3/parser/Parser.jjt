@@ -1420,7 +1420,7 @@ void MapLiteral() : {}
 
 void MapElement() #void : {}
 {
-    LOOKAHEAD(<mult> <COLON> <ELLIPSIS>) <mult> <COLON> <ELLIPSIS> ValueExpression() #MapEnumerationNode(1)
+    LOOKAHEAD(<mult> <COLON> <ELLIPSIS>) <mult> <COLON> <ELLIPSIS> EnumerationExpression() #MapEnumerationNode(1)
     |
     MapEntry()
 }
