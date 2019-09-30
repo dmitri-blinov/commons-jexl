@@ -821,8 +821,6 @@ void ConditionalExpression() #void : {}
     <QMARK> TernaryExpression()
     |
     <ELVIS> Expression() #ElvisNode(2)
-    |
-    <NULLP> Expression() #NullpNode(2)
   ) )?
 }
 
@@ -1733,9 +1731,10 @@ void PrimaryExpression() #void : {}
 
 void NullableExpression() #void : {}
 {
-    NullLiteral()
-    |
-    ValueExpression()
+    (NullLiteral() | ValueExpression())
+    ( LOOKAHEAD( <NULLP> )
+       <NULLP> NullableExpression() #NullpNode(2)
+    )*
 }
 
 void ValueExpression() #void : {}

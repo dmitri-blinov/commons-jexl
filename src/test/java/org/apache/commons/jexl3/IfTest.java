@@ -487,6 +487,14 @@ public class IfTest extends JexlTestCase {
         debuggerCheck(JEXL);
     }
 
+    @Test
+    public void testNullCoaelescingPriority() throws Exception {
+        Object o;
+        JexlEvalContext jc = new JexlEvalContext();
+        JexlScript xtrue = JEXL.createScript("10??0 + 200");
+        o = xtrue.execute(jc);
+        Assert.assertEquals("Should be true", 210, o);
+    }
 
     @Test
     public void testTernaryFail() throws Exception {
