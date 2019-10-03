@@ -1433,6 +1433,8 @@ public class JexlArithmetic {
             return ((IndexedType.IndexedContainer) object).get(key);
         if (object != null && object.getClass().isArray())
             return Array.get(object, toInteger(key));
+        if (object instanceof JexlContext) 
+            return ((JexlContext) object).get(toString(key));
         return JexlEngine.TRY_FAILED;
     }
 
@@ -1460,6 +1462,10 @@ public class JexlArithmetic {
             return ((IndexedType.IndexedContainer) object).set(key, value);
         if (object != null && object.getClass().isArray()) {
             Array.set(object, toInteger(key), value);
+            return null;
+        }
+        if (object instanceof JexlContext) {
+            ((JexlContext) object).set(toString(key), value);
             return null;
         }
         return JexlEngine.TRY_FAILED;
