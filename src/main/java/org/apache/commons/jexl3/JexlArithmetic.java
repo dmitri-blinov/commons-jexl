@@ -122,23 +122,22 @@ public class JexlArithmetic {
      * @param options the {@link JexlEngine.Options} to use
      * @return an arithmetic with those options set
      */
-    public JexlArithmetic options(JexlEngine.Options options) {
-        Boolean ostrict = options.isStrictArithmetic();
-        if (ostrict == null) {
-            ostrict = isStrict();
-        }
-        MathContext bigdContext = options.getArithmeticMathContext();
-        if (bigdContext == null) {
-            bigdContext = getMathContext();
-        }
-        int bigdScale = options.getArithmeticMathScale();
-        if (bigdScale == Integer.MIN_VALUE) {
-            bigdScale = getMathScale();
-        }
-        if (ostrict != isStrict()
-            || bigdScale != getMathScale()
-            || bigdContext != getMathContext()) {
-            return createWithOptions(ostrict, bigdContext, bigdScale);
+    public JexlArithmetic options(JexlOptions options) {
+        if (options != null) {
+            boolean ostrict = options.isStrictArithmetic();
+            MathContext bigdContext = options.getMathContext();
+            if (bigdContext == null) {
+                bigdContext = getMathContext();
+            }
+            int bigdScale = options.getMathScale();
+            if (bigdScale == Integer.MIN_VALUE) {
+                bigdScale = getMathScale();
+            }
+            if (ostrict != isStrict()
+                || bigdScale != getMathScale()
+                || bigdContext != getMathContext()) {
+                return createWithOptions(ostrict, bigdContext, bigdScale);
+            }
         }
         return this;
     }
@@ -147,14 +146,49 @@ public class JexlArithmetic {
      * Apply options to this arithmetic which eventually may create another instance.
      * @see #createWithOptions(boolean, java.math.MathContext, int)
      *
-     * @param context the context that may extend {@link JexlEngine.Options} to use
+     * @param options the {@link JexlEngine.Options} to use
+     * @return an arithmetic with those options set
+     * @deprecated
+     */
+    public JexlArithmetic options(JexlEngine.Options options) {
+        if (options != null) {
+            Boolean ostrict = options.isStrictArithmetic();
+            if (ostrict == null) {
+                ostrict = isStrict();
+            }
+            MathContext bigdContext = options.getArithmeticMathContext();
+            if (bigdContext == null) {
+                bigdContext = getMathContext();
+            }
+            int bigdScale = options.getArithmeticMathScale();
+            if (bigdScale == Integer.MIN_VALUE) {
+                bigdScale = getMathScale();
+            }
+            if (ostrict != isStrict()
+                || bigdScale != getMathScale()
+                || bigdContext != getMathContext()) {
+                return createWithOptions(ostrict, bigdContext, bigdScale);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Apply options to this arithmetic which eventually may create another instance.
+     * @see #createWithOptions(boolean, java.math.MathContext, int)
+     *
+     * @param context the context that may extend {@link JexlContext.OptionsHandle} to use
      * @return a new arithmetic instance or this
      * @since 3.1
      */
     public JexlArithmetic options(JexlContext context) {
-        return context instanceof JexlEngine.Options
-               ? options((JexlEngine.Options) context)
-               : this;
+        if (context instanceof JexlContext.OptionsHandle) {
+            return options(((JexlContext.OptionsHandle) context).getEngineOptions());
+        }
+        if (context instanceof JexlEngine.Options) {
+            return options((JexlEngine.Options) context);
+        }
+        return this;
     }
 
     /**
@@ -1006,7 +1040,10 @@ public class JexlArithmetic {
      * @return the negated value
      */
     public Object negate(Object val) {
-        if (val instanceof Integer) {
+        if (val == null) {
+            controlNullOperand();
+            return null;
+        } else if (val instanceof Integer) {
             return -((Integer) val);
         } else if (val instanceof Double) {
             return - ((Double) val);
@@ -1187,6 +1224,10 @@ public class JexlArithmetic {
      * @return the positive value
      */
     public Object positivize(Object val) {
+        if (val == null) {
+            controlNullOperand();
+            return null;
+        }
         if (val instanceof Byte) {
             return +(Byte) val;
         } else if (val instanceof Short) {
@@ -1429,11 +1470,11 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object propertyGet(Object object, Object key) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer) 
+        if (object instanceof IndexedType.IndexedContainer)
             return ((IndexedType.IndexedContainer) object).get(key);
         if (object != null && object.getClass().isArray())
             return Array.get(object, toInteger(key));
-        if (object instanceof JexlContext) 
+        if (object instanceof JexlContext)
             return ((JexlContext) object).get(toString(key));
         return JexlEngine.TRY_FAILED;
     }
@@ -1458,7 +1499,7 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object propertySet(Object object, Object key, Object value) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer) 
+        if (object instanceof IndexedType.IndexedContainer)
             return ((IndexedType.IndexedContainer) object).set(key, value);
         if (object != null && object.getClass().isArray()) {
             Array.set(object, toInteger(key), value);

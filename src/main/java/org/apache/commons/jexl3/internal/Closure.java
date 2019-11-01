@@ -32,7 +32,7 @@ import java.util.function.*;
  */
 public class Closure extends Script {
     /** The frame. */
-    protected final Scope.Frame frame;
+    protected final Frame frame;
     /** The context. */
     protected final JexlContext context;
     /** The number of arguments being curried. */
@@ -62,7 +62,7 @@ public class Closure extends Script {
         super(base.jexl, base.source, base.script);
         if (base instanceof Closure) {
             Closure closure = (Closure) base;
-            Scope.Frame sf = closure.frame;
+            Frame sf = closure.frame;
 
             boolean varArgs = script.isVarArgs();
             int baseCurried = closure.curried;
@@ -147,8 +147,8 @@ public class Closure extends Script {
      * @param args the parameters
      * @return the adjusted local frame
      */
-    protected Scope.Frame createNewVarArgFrame(Scope.Frame sf, Object[] args) {
-        Scope.Frame frame = sf;
+    protected Frame createNewVarArgFrame(Frame sf, Object[] args) {
+        Frame frame = sf;
         if (args != null && args.length > 0) {
            String[] params = getParameters();
            String name = params[params.length - 1];
@@ -181,8 +181,8 @@ public class Closure extends Script {
      * @param args the parameters
      * @return the new local frame
      */
-    protected Scope.Frame getCallFrame(Object[] args) {
-        Scope.Frame local = null;
+    protected Frame getCallFrame(Object[] args) {
+        Frame local = null;
         if (frame != null) {
             boolean varArgs = script.isVarArgs();
             if (varArgs) {
@@ -283,10 +283,9 @@ public class Closure extends Script {
 
     @Override
     public Object execute(JexlContext context, Object... args) {
-        Scope.Frame local = getCallFrame(args);
+        Frame local = getCallFrame(args);
         Interpreter interpreter = createInterpreter(context != null ? context : this.context, local);
-        JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-        Object result = interpreter.interpret(block);
+        Object result = interpreter.runClosure(this, null);
         if (chained == null)
             return result;
         return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);
@@ -294,12 +293,11 @@ public class Closure extends Script {
 
     @Override
     public Callable callable(JexlContext context, Object... args) {
-        Scope.Frame local = getCallFrame(args);
+        Frame local = getCallFrame(args);
         return new CallableScript(createInterpreter(context != null ? context : this.context, local)) {
             @Override
             public Object interpret() {
-                JexlNode block = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-                Object result = interpreter.interpret(block);
+                Object result = interpreter.runClosure(Closure.this, null);
                 if (chained == null)
                     return result;
                 return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);

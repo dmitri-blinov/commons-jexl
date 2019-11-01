@@ -60,7 +60,7 @@ public final class Introspector {
     /**
      * the logger.
      */
-    protected final Log rlog;
+    protected final Log logger;
     /**
      * The class loader used to solve constructors if needed.
      */
@@ -98,7 +98,7 @@ public final class Introspector {
      * @param perms the permissions
      */
     public Introspector(Log log, ClassLoader cloader, Permissions perms) {
-        this.rlog = log;
+        this.logger = log;
         this.loader = cloader;
         this.permissions = perms != null? perms : Permissions.DEFAULT;
     }
@@ -141,8 +141,8 @@ public final class Introspector {
             return getMap(c).getMethod(key);
         } catch (MethodKey.AmbiguousException xambiguous) {
             // whoops. Ambiguous and not benign. Make a nice log message and return null...
-            if (rlog != null && xambiguous.isSevere() && rlog.isInfoEnabled()) {
-                rlog.info("ambiguous method invocation: "
+            if (logger != null && xambiguous.isSevere() && logger.isInfoEnabled()) {
+                logger.info("ambiguous method invocation: "
                         + c.getName() + "."
                         + key.debugString(), xambiguous);
             }
@@ -244,8 +244,8 @@ public final class Introspector {
             try {
                 return (c != null && c.getName().equals(x)) ? c : loader.loadClass(x);
             } catch (ClassNotFoundException xnotfound) {
-                if (rlog != null && rlog.isDebugEnabled()) {
-                    rlog.debug("unable to find class: "
+                if (logger != null && logger.isDebugEnabled()) {
+                    logger.debug("unable to find class: "
                             + x, xnotfound);
                 }
                 return null;
@@ -292,8 +292,8 @@ public final class Introspector {
                 Constructor<?> result = x.getMostSpecificConstructor(constructors);
                 return result != null ? result : CTOR_MISS;
             } catch (MethodKey.AmbiguousException xambiguous) {
-                if (rlog != null  && xambiguous.isSevere() &&  rlog.isInfoEnabled()) {
-                    rlog.info("ambiguous constructor invocation: "
+                if (logger != null  && xambiguous.isSevere() &&  logger.isInfoEnabled()) {
+                    logger.info("ambiguous constructor invocation: "
                             + cname + "."
                             + x.debugString(), xambiguous);
                 }
@@ -310,7 +310,7 @@ public final class Introspector {
      * @return the class map
      */
     private ClassMap getMap(Class<?> c) {
-        return classMethodMaps.computeIfAbsent(c, x -> new ClassMap(x, permissions, rlog));
+        return classMethodMaps.computeIfAbsent(c, x -> new ClassMap(x, permissions, logger));
     }
 
     /**

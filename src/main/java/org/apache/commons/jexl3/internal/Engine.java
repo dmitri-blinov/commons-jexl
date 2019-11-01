@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlInfo;
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.internal.introspection.SandboxUberspect;
 import org.apache.commons.jexl3.internal.introspection.Uberspect;
@@ -49,7 +50,6 @@ import java.util.Set;
 
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -122,14 +122,6 @@ public class Engine extends JexlEngine {
      */
     protected final boolean debug;
     /**
-     * The atomic parsing flag; true whilst parsing.
-     */
-    protected final AtomicBoolean parsing = new AtomicBoolean(false);
-    /**
-     * The default charset.
-     */
-    protected final Charset charset;
-    /**
      * The set of default script parsing features.
      */
     protected final JexlFeatures scriptFeatures;
@@ -137,6 +129,14 @@ public class Engine extends JexlEngine {
      * The set of default expression parsing features.
      */
     protected final JexlFeatures expressionFeatures;
+    /**
+     * The default charset.
+     */
+    protected final Charset charset;
+    /**
+     * The atomic parsing flag; true whilst parsing.
+     */
+    protected final AtomicBoolean parsing = new AtomicBoolean(false);
     /**
      * The {@link Parser}; when parsing expressions, this engine uses the parser if it
      * is not already in use otherwise it will create a new temporary one.
@@ -158,6 +158,10 @@ public class Engine extends JexlEngine {
      * Collect all or only dot references.
      */
     protected final boolean collectAll;
+    /**
+     * A cached version of the options.
+     */
+    protected final JexlOptions options =  new org.apache.commons.jexl3.internal.Options();
 
     /**
      * Creates an engine with default arguments.
@@ -206,17 +210,9 @@ public class Engine extends JexlEngine {
         if (uberspect == null) {
             throw new IllegalArgumentException("uberspect can not be null");
         }
+        options.setOptions(this);
     }
 
-    /**
-     * Solves an optional option.
-     * @param conf the option as configured, may be null
-     * @param def the default value if null
-     * @return true or false
-     */
-    private boolean option(Boolean conf, boolean def) {
-        return conf == null? def : conf;
-    }
 
     /**
      * Gets the default instance of Uberspect.
@@ -258,12 +254,17 @@ public class Engine extends JexlEngine {
 
     @Override
     public boolean isStrict() {
-        return strict;
+        return this.strict;
     }
 
     @Override
     public boolean isAssertions() {
         return assertions;
+    }
+
+    @Override
+    public boolean isSafe() {
+        return this.safe;
     }
 
     @Override
@@ -302,6 +303,46 @@ public class Engine extends JexlEngine {
         return charset;
     }
 
+    /**
+     * Extracts the engine evaluation options from context.
+     * @param context the context
+     * @return the options if any
+     */
+    JexlOptions options(JexlContext context) {
+        JexlOptions jexlo = null;
+        if (context instanceof JexlContext.OptionsHandle) {
+            jexlo = ((JexlContext.OptionsHandle) context).getEngineOptions();
+        }
+        if (jexlo == null) {
+            jexlo = options;
+            /** The following block for compatibility between 3.1 and 3.2*/
+            if (context instanceof JexlEngine.Options) {
+                jexlo = jexlo.copy();
+                JexlEngine jexl = this;
+                JexlEngine.Options opts = (JexlEngine.Options) context;
+                jexlo.setCancellable(option(opts.isCancellable(), jexl.isCancellable()));
+                jexlo.setSilent(option(opts.isSilent(), jexl.isSilent()));
+                jexlo.setStrict(option(opts.isStrict(), jexl.isStrict()));
+                JexlArithmetic jexla = jexl.getArithmetic();
+                jexlo.setStrictArithmetic(option(opts.isStrictArithmetic(), jexla.isStrict()));
+                jexlo.setMathContext(opts.getArithmeticMathContext());
+                jexlo.setMathScale(opts.getArithmeticMathScale());
+            }
+        }
+        return jexlo;
+    }
+
+    /**
+     * Solves an optional option.
+     * @param conf the option as configured, may be null
+     * @param def the default value if null, shall not be null
+     * @param <T> the option type
+     * @return conf or def
+     */
+    private static <T> T option(T conf, T def) {
+        return conf == null? def : conf;
+    }
+
     @Override
     public TemplateEngine createJxltEngine(boolean noScript, int cacheSize, char immediate, char deferred) {
         return new TemplateEngine(this, noScript, cacheSize, immediate, deferred);
@@ -320,7 +361,7 @@ public class Engine extends JexlEngine {
      * @param frame   the interpreter frame
      * @return an Interpreter
      */
-    protected Interpreter createInterpreter(JexlContext context, Scope.Frame frame) {
+    protected Interpreter createInterpreter(JexlContext context, Frame frame) {
         return new Interpreter(this, context, frame);
     }
 
@@ -370,7 +411,7 @@ public class Engine extends JexlEngine {
             final Scope scope = new Scope(null, "#0");
             final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
-            final Scope.Frame frame = script.createFrame(bean);
+            final Frame frame = script.createFrame(bean);
             final Interpreter interpreter = createInterpreter(context, frame);
             return node.jjtAccept(interpreter, null);
         } catch (JexlException xjexl) {
@@ -399,7 +440,7 @@ public class Engine extends JexlEngine {
             final Scope scope = new Scope(null, "#0", "#1");
             final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
-            final Scope.Frame frame = script.createFrame(bean, value);
+            final Frame frame = script.createFrame(bean, value);
             final Interpreter interpreter = createInterpreter(context, frame);
             node.jjtAccept(interpreter, null);
         } catch (JexlException xjexl) {

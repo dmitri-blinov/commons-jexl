@@ -98,7 +98,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param args the arguments to bind to parameters
      * @return the frame (may be null)
      */
-    protected Scope.Frame createFrame(Object[] args) {
+    protected Frame createFrame(Object[] args) {
         return script.createFrame(args);
     }
 
@@ -108,7 +108,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param frame the calling frame
      * @return  the interpreter
      */
-    protected Interpreter createInterpreter(JexlContext context, Scope.Frame frame) {
+    protected Interpreter createInterpreter(JexlContext context, Frame frame) {
         return jexl.createInterpreter(context, frame);
     }
 
@@ -189,7 +189,7 @@ public class Script implements JexlScript, JexlExpression {
     @Override
     public Object execute(JexlContext context, Object... args) {
         checkCacheVersion();
-        Scope.Frame frame = createFrame(scriptArgs(args));
+        Frame frame = createFrame(scriptArgs(args));
         Interpreter interpreter = createInterpreter(context, frame);
         return interpreter.interpret(script);
     }
@@ -230,7 +230,7 @@ public class Script implements JexlScript, JexlExpression {
     /**
      * Prepares arguments list with regard to type-casting and vararg option.
      * @param args the passed arguments list
-     * @return the script parameter list 
+     * @return the script parameter list
      */
     protected Object[] scriptArgs(Object[] args) {
         return scriptArgs(0, args);
@@ -240,7 +240,7 @@ public class Script implements JexlScript, JexlExpression {
      * Prepares arguments list with regard to type-casting and vararg option.
      * @param curried the number of arguments that are already curried for the script
      * @param args the passed arguments list
-     * @return the script parameter list 
+     * @return the script parameter list
      */
     protected Object[] scriptArgs(int curried, Object[] args) {
 
@@ -276,7 +276,7 @@ public class Script implements JexlScript, JexlExpression {
                     } else if (isArray(args[args.length-1])) {
                         varg = castArray(args[args.length-1], type);
                     }
-                } 
+                }
 
                 if (varg == null) {
                     varg = castArray(args, type, argCount - 1);
@@ -293,7 +293,7 @@ public class Script implements JexlScript, JexlExpression {
                     } else if (isArray(args[0])) {
                         varg = castArray(args[0], type);
                     }
-                } 
+                }
 
                 if (varg == null) {
                     varg = castArray(args, type);

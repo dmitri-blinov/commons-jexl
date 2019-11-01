@@ -124,6 +124,7 @@ public class Issues200Test extends JexlTestCase {
     @Test
     public void test217() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
+        JexlOptions options = jc.getEngineOptions();
         jc.set("foo", new int[]{0, 1, 2, 42});
         JexlEngine jexl;
         JexlScript e;
@@ -135,7 +136,8 @@ public class Issues200Test extends JexlTestCase {
 
         // cache and fail?
         jc.set("foo", new int[]{0, 1});
-        jc.setStrict(true);
+        options.setStrict(true);
+        Assert.assertTrue(options.isStrict());
         try {
             r = e.execute(jc);
             Assert.fail("should have thrown an exception");
@@ -144,7 +146,7 @@ public class Issues200Test extends JexlTestCase {
             Assert.assertTrue(ArrayIndexOutOfBoundsException.class.equals(th.getClass()));
         }
         //
-        jc.setStrict(false);
+        options.setStrict(false);
         r = e.execute(jc);
         Assert.assertNull("oob adverted", r);
     }
@@ -806,7 +808,7 @@ public class Issues200Test extends JexlTestCase {
         JexlEngine jexl = new JexlBuilder().strict(true).create();
         String src;
         JexlScript script;
-        Object result;
+        Object result = null;
         // declared, not defined
         src = "x = 1; if (false) var x = 2; x";
         script = jexl.createScript(src);

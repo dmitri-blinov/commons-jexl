@@ -54,7 +54,7 @@ public class ArithmeticTest extends JexlTestCase {
 
     @Test
     public void testUndefinedVar() throws Exception {
-        asserter.failExpression("objects[1].status", ".* undefined variable objects.*");
+        asserter.failExpression("objects[1].status", ".*variable 'objects' is undefined.*");
     }
 
     @Test
@@ -277,7 +277,8 @@ public class ArithmeticTest extends JexlTestCase {
     @Test
     public void testLongLiterals() throws Exception {
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 10L; b = 10l; c = 42.0D; d = 42.0d; e=56.3F; f=56.3f; g=63.5; h=0x10; i=010; j=0x10L; k=010l}";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -297,7 +298,8 @@ public class ArithmeticTest extends JexlTestCase {
     @Test
     public void testBigLiteralValue() throws Exception {
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         JexlExpression e = JEXL.createExpression("9223372036854775806.5B");
         String res = String.valueOf(e.evaluate(ctxt));
         Assert.assertEquals("9223372036854775806.5", res);
@@ -320,7 +322,8 @@ public class ArithmeticTest extends JexlTestCase {
     @Test
     public void testBigLiterals() throws Exception {
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 10H; b = 10h; c = 42.0B; d = 42.0b;}";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -334,7 +337,8 @@ public class ArithmeticTest extends JexlTestCase {
     @Test
     public void testBigExponentLiterals() throws Exception {
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 42.0e1B; b = 42.0E+2B; c = 42.0e-1B; d = 42.0E-2b; e=4242.4242e1b}";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -349,7 +353,8 @@ public class ArithmeticTest extends JexlTestCase {
     @Test
     public void test2DoubleLiterals() throws Exception {
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 42.0e1D; b = 42.0E+2D; c = 42.0e-1d; d = 42.0E-2d; e=10e10; f= +1.e1; g=1e1; }";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -372,6 +377,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testDivideByZero() throws Exception {
         Map<String, Object> vars = new HashMap<String, Object>();
         JexlEvalContext context = new JexlEvalContext(vars);
+        JexlOptions options = context.getEngineOptions();
+        options.setStrictArithmetic(true);
         vars.put("aByte", new Byte((byte) 1));
         vars.put("aShort", new Short((short) 2));
         vars.put("aInteger", new Integer(3));
@@ -402,7 +409,8 @@ public class ArithmeticTest extends JexlTestCase {
         // for non-silent, silent...
         for (int s = 0; s < 2; ++s) {
             boolean strict = Boolean.valueOf(s != 0);
-            context.setStrict(true, strict);
+            options.setStrict(true);
+            options.setStrictArithmetic(strict);
             int zthrow = 0;
             int zeval = 0;
             // for vars of all types...
@@ -590,14 +598,16 @@ public class ArithmeticTest extends JexlTestCase {
     public void testOption() throws Exception {
         Map<String, Object> vars = new HashMap<String, Object>();
         JexlEvalContext context = new JexlEvalContext(vars);
+        JexlOptions options = context.getEngineOptions();
+        options.setStrictArithmetic(true);
         JexlScript script = JEXL.createScript("0 + '1.2' ");
         Object result;
 
-        context.setStrictArithmetic(true);
+        options.setStrictArithmetic(true);
         result = script.execute(context);
         Assert.assertEquals("01.2", result);
 
-        context.setStrictArithmetic(false);
+        options.setStrictArithmetic(false);
         result = script.execute(context);
         Assert.assertEquals(1.2d, (Double) result, EPSILON);
     }
@@ -1290,7 +1300,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testCoerceInteger() throws Exception {
         JexlArithmetic ja = JEXL.getArithmetic();
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "a = 34L; b = 45.0D; c=56.0F; d=67B; e=78H;";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -1308,7 +1319,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testCoerceLong() throws Exception {
         JexlArithmetic ja = JEXL.getArithmetic();
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "a = 34L; b = 45.0D; c=56.0F; d=67B; e=78H;";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -1326,7 +1338,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testCoerceDouble() throws Exception {
         JexlArithmetic ja = JEXL.getArithmetic();
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 34L; b = 45.0D; c=56.0F; d=67B; e=78H; }";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -1344,7 +1357,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testCoerceBigInteger() throws Exception {
         JexlArithmetic ja = JEXL.getArithmetic();
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 34L; b = 45.0D; c=56.0F; d=67B; e=78H; }";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);
@@ -1362,7 +1376,8 @@ public class ArithmeticTest extends JexlTestCase {
     public void testCoerceBigDecimal() throws Exception {
         JexlArithmetic ja = JEXL.getArithmetic();
         JexlEvalContext ctxt = new JexlEvalContext();
-        ctxt.setStrictArithmetic(true);
+        JexlOptions options = ctxt.getEngineOptions();
+        options.setStrictArithmetic(true);
         String stmt = "{a = 34L; b = 45.0D; c=56.0F; d=67B; e=78H; }";
         JexlScript expr = JEXL.createScript(stmt);
         /* Object value = */ expr.execute(ctxt);

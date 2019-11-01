@@ -166,7 +166,8 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testEmpty() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
-        jc.setStrict(false);
+        JexlOptions options = jc.getEngineOptions();
+        options.setStrict(false);
         jc.set("string", "");
         jc.set("array", new Object[0]);
         jc.set("map", new HashMap<Object, Object>());
@@ -190,7 +191,8 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testSize() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
-        jc.setStrict(false);
+        JexlOptions options = jc.getEngineOptions();
+        options.setStrict(false);
         jc.set("s", "five!");
         jc.set("array", new Object[5]);
 
@@ -286,7 +288,9 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testCalculations() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
-        jc.setStrict(false);
+        JexlOptions options = jc.getEngineOptions();
+        options.setStrict(false);
+        options.setStrictArithmetic(false);
 
         /*
          * test to ensure new string cat works
@@ -312,6 +316,7 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testConditions() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
+        JexlOptions options = jc.getEngineOptions();
         jc.set("foo", new Integer(2));
         jc.set("aFloat", new Float(1));
         jc.set("aDouble", new Double(2));
@@ -342,11 +347,11 @@ public class JexlTest extends JexlTestCase {
         assertExpression(jc, "aBool == 'false'", Boolean.FALSE);
         assertExpression(jc, "aBool != 'false'", Boolean.TRUE);
         // test null and boolean
-        jc.setStrict(false);
+        options.setStrict(false);
         assertExpression(jc, "aBool == notThere", Boolean.FALSE);
         assertExpression(jc, "aBool != notThere", Boolean.TRUE);
         // anything and string as a string comparison
-        jc.setStrict(true);
+        options.setStrict(true);
         assertExpression(jc, "aBuffer == 'abc'", Boolean.TRUE);
         assertExpression(jc, "aBuffer != 'abc'", Boolean.FALSE);
         // arbitrary equals
@@ -420,7 +425,8 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testNull() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
-        jc.setStrict(false);
+        JexlOptions options = jc.getEngineOptions();
+        options.setStrict(false);
         jc.set("bar", new Integer(2));
 
         assertExpression(jc, "empty foo", Boolean.TRUE);
@@ -552,7 +558,8 @@ public class JexlTest extends JexlTestCase {
     @Test
     public void testCharAtBug() throws Exception {
         JexlEvalContext jc = new JexlEvalContext();
-        jc.setSilent(true);
+        JexlOptions options = jc.getEngineOptions();
+        options.setSilent(true);
 
         jc.set("foo", "abcdef");
 

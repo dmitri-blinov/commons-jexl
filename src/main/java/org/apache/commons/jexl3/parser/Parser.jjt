@@ -375,24 +375,33 @@ TOKEN_MGR_DECLS : {
  *      Statements
  ***************************************/
 
-ASTJexlScript JexlScript(Scope frame) : {
-    jjtThis.setScope(frame);
+ASTJexlScript JexlScript(Scope frame) : 
+{
+    jjtThis.setScope(frame);  
+    pushUnit(jjtThis, frame != null && frame.getArgCount() > 0);
 }
 {
    (LOOKAHEAD(<PRAGMA>) Pragma())*
    (
-      LOOKAHEAD( LambdaLookahead() ) Lambda() (<SEMICOL>)? <EOF> { return jjtThis.script(); }
+      LOOKAHEAD( LambdaLookahead() ) Lambda() (<SEMICOL>)?
       |
-      ( ( Statement() )*) <EOF> { return jjtThis.script(); }
-   )
+      ( ( Statement() )*)
+   ) <EOF>
+   {
+        popUnit(jjtThis);
+        return jjtThis.script();
+   }
 }
 
-ASTJexlScript JexlExpression(Scope frame) #JexlScript : {
+ASTJexlScript JexlExpression(Scope frame) #JexlScript : 
+{
     jjtThis.setScope(frame);
+    pushUnit(jjtThis, true);
 }
 {
    ( Expression() )? <EOF>
    {
+        popUnit(jjtThis);
         return jjtThis.script();
    }
 }
@@ -476,7 +485,7 @@ void LabelledStatement() #void :
 
 ASTBlock Block() #Block : {}
 {
-    <LCURLY> ( Statement() )* <RCURLY>
+    <LCURLY> { pushUnit(jjtThis); } ( Statement() )* { popUnit(jjtThis); } <RCURLY>
     { return jjtThis; }
 }
 
@@ -598,7 +607,7 @@ void ReturnStatement() : {}
 
 void YieldStatement() : {}
 {
-    <YIELD> Expression() { if (!branchScope.yieldSupported()) { throwParsingException(jjtThis); } } 
+    <YIELD> Expression() { if (!branchScope.yieldSupported()) { throwParsingException(jjtThis); } }
 }
 
 void Continue() #Continue :
@@ -628,10 +637,16 @@ void Break() #Break :
     { if (t == null && !branchScope.breakSupported()) { throwParsingException(jjtThis); } }
 }
 
-ASTForStatement ForStatement() : {}
+ASTForStatement ForStatement() :
+{
+    pushUnit(jjtThis, true);
+}
 {
     <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.loopCount -= 1; }
-    { return jjtThis; }
+    {
+      popUnit(jjtThis); 
+      return jjtThis;
+    }
 }
 
 void ForInitializationNode() : {}
@@ -649,10 +664,16 @@ void ForIncrementNode() : {}
     (Expression())?
 }
 
-ASTForeachStatement ForeachStatement() : {}
+ASTForeachStatement ForeachStatement() : 
+{
+    pushUnit(jjtThis, true);
+}
 {
     <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.foreachLoopCount -= 1; }
-    { return jjtThis; }
+    {
+      popUnit(jjtThis); 
+      return jjtThis;
+    }
 }
 
 void ForeachVar() : {}
@@ -691,7 +712,7 @@ void RequiredVarLookahead() #void() : {}
   |
   (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
   |
-  <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> 
+  <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
 }
 
 void Var() #void : {}
@@ -708,7 +729,7 @@ void DeclareLocalVar() #Var :
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
     ( <VAR>
-      | 
+      |
       ( <INT> { jjtThis.setType(Integer.TYPE); }
         |
         <LONG> { jjtThis.setType(Long.TYPE); }
@@ -892,12 +913,12 @@ void EqualityExpression() #void : {}
 
 void SetOperand() : {}
 {
-    ( <QMARK> { jjtThis.setAny(); } | <NULLP> ) <LPAREN> RangeExpression() (<COMMA> RangeExpression())* <RPAREN>  
+    ( <QMARK> { jjtThis.setAny(); } | <NULLP> ) <LPAREN> RangeExpression() (<COMMA> RangeExpression())* <RPAREN>
 }
 
 void RelationalExpressionOperand() #void : {}
 {
-    SetOperand() 
+    SetOperand()
     |
     RangeExpression()
 }
@@ -1292,7 +1313,7 @@ void TypeCastReference() #ClassLiteral() :
 {
   (
     t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
-    | 
+    |
     t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
     |
     t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
@@ -1570,7 +1591,7 @@ void VarParameter() #void :
 {
     [ <FINAL> { isFinal = true; } ]
     ( <VAR>
-      | 
+      |
       (
          <INT> { type = Integer.TYPE; }
          |
@@ -1588,7 +1609,7 @@ void VarParameter() #void :
          |
          <DOUBLE> { type = Double.TYPE; }
          |
-         LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }     
+         LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
 
       ) (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
@@ -1598,7 +1619,7 @@ void VarParameter() #void :
 void Parameters() #void : {}
 {
     <LPAREN> [
-      (LOOKAHEAD(VarParameter()) VarParameter() (<COMMA> VarParameter())* | Parameter() (<COMMA> Parameter())*) 
+      (LOOKAHEAD(VarParameter()) VarParameter() (<COMMA> VarParameter())* | Parameter() (<COMMA> Parameter())*)
       [ <ELLIPSIS> { declareVarArgSupport(); } ]
     ] <RPAREN>
 }
@@ -1617,15 +1638,19 @@ void LambdaLookahead() #void() : {}
 void Lambda() #JexlLambda() :
 {
    pushFrame();
+   pushUnit(jjtThis, true);
 }
 {
-  LOOKAHEAD(2) <FUNCTION> Parameters() Block()
-  |
-  LOOKAHEAD(2) <FUNCTION> Block()
-  |
-  Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
-  |
-  Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+   LOOKAHEAD(2) <FUNCTION> Parameters() Block()
+   |
+   LOOKAHEAD(2) <FUNCTION> Block()
+   |
+   Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+   |
+   Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+{ 
+   popUnit(jjtThis); 
+}
 }
 
 
@@ -1682,7 +1707,7 @@ void ArrayAccessSafe() : {}
 void ReferenceExpression() #MethodNode(>1) : {}
 {
     ( <LPAREN> (
-      LOOKAHEAD(Expression()) Expression() | { branchScope.yieldCount += 1; } Block() { branchScope.yieldCount -= 1; } 
+      LOOKAHEAD(Expression()) Expression() | { branchScope.yieldCount += 1; } Block() { branchScope.yieldCount -= 1; }
     ) <RPAREN> #EnclosedExpression(1) ) ( LOOKAHEAD(<LPAREN>) Arguments() )*
 }
 

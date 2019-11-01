@@ -24,7 +24,9 @@ import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.JexlException.VariableIssue;
 import org.apache.commons.jexl3.JexlOperator;
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
@@ -59,6 +61,8 @@ public abstract class InterpreterBase extends ParserVisitor {
     protected final JexlArithmetic arithmetic;
     /** The context to store/retrieve variables. */
     protected final JexlContext context;
+    /** The options. */
+    protected final JexlOptions options;
     /** Cache executors. */
     protected final boolean cache;
     /** Cancellation support. */
@@ -86,10 +90,11 @@ public abstract class InterpreterBase extends ParserVisitor {
         this.context = aContext != null ? aContext : Engine.EMPTY_CONTEXT;
         this.cache = engine.cache != null;
         JexlArithmetic jexla = jexl.arithmetic;
-        this.arithmetic = jexla.options(context);
+        this.options = jexl.options(context);
+        this.arithmetic = jexla.options(options);
         if (arithmetic != jexla && !arithmetic.getClass().equals(jexla.getClass())) {
             logger.warn("expected arithmetic to be " + jexla.getClass().getSimpleName()
-                          + ", got " + arithmetic.getClass().getSimpleName()
+                    + ", got " + arithmetic.getClass().getSimpleName()
             );
         }
         if (this.context instanceof JexlContext.NamespaceResolver) {
@@ -118,6 +123,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         functions = ii.functions;
         functors = ii.functors;
         operators = ii.operators;
+        options = new org.apache.commons.jexl3.internal.Options(ii.options);
     }
 
     /**
@@ -211,9 +217,13 @@ public abstract class InterpreterBase extends ParserVisitor {
             } else if (namespace instanceof Class<?> || namespace instanceof String) {
                 // attempt to reuse last ctor cached in volatile JexlNode.value
                 if (cached instanceof JexlMethod) {
-                    Object eval = ((JexlMethod) cached).tryInvoke(null, context);
-                    if (JexlEngine.TRY_FAILED != eval) {
-                        functor = eval;
+                    try {
+                        Object eval = ((JexlMethod) cached).tryInvoke(null, context);
+                        if (JexlEngine.TRY_FAILED != eval) {
+                            functor = eval;
+                        }
+                    } catch (JexlException.TryFailed xtry) {
+                        throw new JexlException(node, "unable to instantiate namespace " + prefix, xtry.getCause());
                     }
                 }
                 if (functor == null) {
@@ -250,15 +260,53 @@ public abstract class InterpreterBase extends ParserVisitor {
     /**
      * Gets a value of a defined local variable or from the context.
      * @param frame the local frame
-     * @param node the variable node
+     * @param block the lexical block if any
+     * @param identifier the variable node
      * @return the value
      */
-    protected Object getVariable(Scope.Frame frame, ASTIdentifier node) {
-        int symbol = node.getSymbol();
-        if (frame.has(symbol)) {
-            return frame.get(symbol);
+    protected Object getVariable(Frame frame, LexicalScope block, ASTIdentifier identifier) {
+        int symbol = identifier.getSymbol();
+        // if we have a symbol, we have a scope thus a frame
+        if (symbol >= 0) {
+            if (frame.has(symbol)) {
+                if (options.isLexical()) {
+                    // if not in lexical block, undefined if (in its symbol) shade
+                    if (!block.hasSymbol(symbol) && options.isLexicalShade()) {
+                        return undefinedVariable(identifier, identifier.getName());
+                    }
+                }
+                return frame.get(symbol);
+            }
         }
-        return context.get(node.getName());
+        String name = identifier.getName();
+        Object value = context.get(name);
+        if (value == null
+            && !(identifier.jjtGetParent() instanceof ASTReference)
+            && !(context.has(name))) {
+                return isSafe()
+                    ? null
+                    : unsolvableVariable(identifier, name, true); // undefined
+        }
+        return value;
+    }
+
+    /**
+     * Sets a variable in the global context.
+     * <p>If interpretation applies lexical shade, the variable must exist (ie
+     * the context has(...) method returns true) otherwise an error occurs.
+     * @param node the node
+     * @param name the variable name
+     * @param value the variable value
+     */
+    protected void setContextVariable(JexlNode node, String name, Object value) {
+        if (options.isLexicalShade() && !context.has(name)) {
+            throw new JexlException.Variable(node, name, true);
+        }
+        try {
+            context.set(name, value);
+        } catch (UnsupportedOperationException xsupport) {
+            throw new JexlException(node, "context is readonly", xsupport);
+        }
     }
 
     /**
@@ -266,14 +314,15 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return true if strict engine, false otherwise
      */
     protected boolean isStrictEngine() {
-        if (this.context instanceof JexlEngine.Options) {
-            JexlEngine.Options opts = (JexlEngine.Options) context;
-            Boolean strict = opts.isStrict();
-            if (strict != null) {
-                return strict.booleanValue();
-            }
-        }
-        return jexl.isStrict();
+        return options.isStrict();
+    }
+
+    /**
+     * Whether this interpreter ignores null in navigation expression as errors.
+     * @return true if safe, false otherwise
+     */
+    protected boolean isSafe() {
+        return options.isSafe();
     }
 
     /**
@@ -281,14 +330,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return true if silent, false otherwise
      */
     protected boolean isSilent() {
-        if (this.context instanceof JexlEngine.Options) {
-            JexlEngine.Options opts = (JexlEngine.Options) context;
-            Boolean silent = opts.isSilent();
-            if (silent != null) {
-                return silent.booleanValue();
-            }
-        }
-        return jexl.isSilent();
+        return options.isSilent();
     }
 
     /**
@@ -306,16 +348,11 @@ public abstract class InterpreterBase extends ParserVisitor {
         return jexl.isAssertions();
     }
 
-    /** @return true if interrupt throws a JexlException.Cancel. */
+    /**
+     * @return true if interrupt throws a JexlException.Cancel.
+     */
     protected boolean isCancellable() {
-        if (this.context instanceof JexlEngine.Options) {
-            JexlEngine.Options opts = (JexlEngine.Options) context;
-            Boolean ocancellable = opts.isCancellable();
-            if (ocancellable != null) {
-                return ocancellable.booleanValue();
-            }
-        }
-        return jexl.isCancellable();
+        return options.isCancellable();
     }
 
     /**
@@ -346,14 +383,44 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object unsolvableVariable(JexlNode node, String var, boolean undef) {
+        return variableError(node, var, undef? VariableIssue.UNDEFINED : VariableIssue.NULLVALUE);
+    }
+
+    /**
+     * Triggered when a variable is lexically known as undefined.
+     * @param node  the node where the error originated from
+     * @param var   the variable name
+     * @return throws JexlException if strict and not silent, null otherwise
+     */
+    protected Object undefinedVariable(JexlNode node, String var) {
+        return variableError(node, var, VariableIssue.UNDEFINED);
+    }
+
+    /**
+     * Triggered when a variable is lexically known as being redefined.
+     * @param node  the node where the error originated from
+     * @param var   the variable name
+     * @return throws JexlException if strict and not silent, null otherwise
+     */
+    protected Object redefinedVariable(JexlNode node, String var) {
+        return variableError(node, var, VariableIssue.REDEFINED);
+    }
+
+    /**
+     * Triggered when a variable generates an issue.
+     * @param node  the node where the error originated from
+     * @param var   the variable name
+     * @param issue the issue type
+     * @return throws JexlException if strict and not silent, null otherwise
+     */
+    protected Object variableError(JexlNode node, String var, VariableIssue issue) {
         if (isStrictEngine() && !node.isTernaryProtected()) {
-            throw new JexlException.Variable(node, var, undef);
+            throw new JexlException.Variable(node, var, issue);
         } else if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.variableError(node, var, undef));
+            logger.debug(JexlException.variableError(node, var, issue));
         }
         return null;
     }
-
     /**
      * Triggered when a method can not be resolved.
      * @param node   the node where the error originated from
@@ -516,7 +583,12 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return false if already cancelled, true otherwise
      */
     protected  boolean cancel() {
-        return cancelled? false : (cancelled = true);
+        if (cancelled) {
+            return false;
+        } else {
+            cancelled = true;
+            return true;
+        }
     }
 
     /**
@@ -850,7 +922,7 @@ public abstract class InterpreterBase extends ParserVisitor {
             throw new JexlException(node, "object is null");
         }
         cancelCheck(node);
-        final JexlOperator operator = node != null && 
+        final JexlOperator operator = node != null &&
                 (node.jjtGetParent() instanceof ASTArrayAccess ||
                  node.jjtGetParent() instanceof ASTArrayAccessSafe)
                 ? JexlOperator.ARRAY_GET : JexlOperator.PROPERTY_GET;
