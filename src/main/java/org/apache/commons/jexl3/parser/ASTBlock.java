@@ -16,11 +16,14 @@
  */
 package org.apache.commons.jexl3.parser;
 
-/**
- * Block of statements.
- */
-public class ASTBlock extends ASTLabelledStatement {
+import org.apache.commons.jexl3.internal.LexicalScope;
 
+/**
+ * Declares a local variable.
+ */
+public class ASTBlock extends ASTLabelledStatement implements JexlParser.LexicalUnit {
+    private LexicalScope locals = null;
+    
     public ASTBlock(int id) {
         super(id);
     }
@@ -32,5 +35,28 @@ public class ASTBlock extends ASTLabelledStatement {
     @Override
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
+    }
+    
+    @Override
+    public boolean declareSymbol(int symbol) {
+        if (locals == null) {
+            locals  = new LexicalScope(null);
+        }
+        return locals.declareSymbol(symbol);
+    }
+    
+    @Override
+    public int getSymbolCount() {
+        return locals == null? 0 : locals.getSymbolCount();
+    }
+
+    @Override
+    public boolean hasSymbol(int symbol) {
+        return locals == null? false : locals.hasSymbol(symbol);
+    }    
+    
+    @Override
+    public void clearUnit() {
+        locals = null;
     }
 }

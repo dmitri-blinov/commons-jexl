@@ -59,11 +59,18 @@ public class ProjectionTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("foo"));
         Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("bar"));
+    }
 
-        e = JEXL.createScript("var s = {}; for (var i : ...m.[value]) s.add(i); s");
+    @Test
+    public void testMapProjectionA() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {}; for (var i : [1]) s.add(i); s");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(1));
+
+        e = JEXL.createScript("var s = {}; for (var i : [1]) s.add(i); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("foo"));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("bar"));
+        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(1));
     }
 
     @Test

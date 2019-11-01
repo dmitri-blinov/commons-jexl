@@ -43,6 +43,27 @@ public final class Frame {
     }
 
     /**
+     * Creates a new frame.
+     * @param f the parent frame
+     */
+    protected Frame(Frame f, Object... values) {
+        scope = f.scope;
+        stack = f.stack != null ? f.stack.clone() : null;
+        curried = f.curried;
+        if (stack != null) {
+            int nparm = scope.getArgCount();
+            int ncopy = 0;
+            if (values != null && values.length > 0) {
+                ncopy = Math.min(nparm - curried, Math.min(nparm, values.length));
+                System.arraycopy(values, 0, stack, curried, ncopy);
+            }
+            // unbound parameters are defined as null
+            Arrays.fill(stack, curried + ncopy, nparm, null);
+            curried += ncopy;
+        }
+    }
+
+    /**
      * Gets this script unbound parameters, i.e. parameters not bound through curry().
      * @return the parameter names
      */
@@ -56,6 +77,14 @@ public final class Frame {
      */
     public Scope getScope() {
         return scope;
+    }
+
+    /**
+     * Gets the stack length.
+     * @return this frame stack size
+     */
+    public Integer getStackSize() {
+        return stack != null ? stack.length : null;
     }
 
     @Override
@@ -101,26 +130,23 @@ public final class Frame {
     void set(int r, Object value) {
         stack[r] = value;
     }
-
     /**
      * Assign values to this frame.
      * @param values the values
      * @return this frame
      */
-    Frame assign(Object... values) {
-        if (stack != null) {
-            int nparm = scope.getArgCount();
-            Object[] copy = stack.clone();
-            int ncopy = 0;
-            if (values != null && values.length > 0) {
-                ncopy = Math.min(nparm - curried, Math.min(nparm, values.length));
-                System.arraycopy(values, 0, copy, curried, ncopy);
-            }
-            // unbound parameters are defined as null
-            Arrays.fill(copy, curried + ncopy, nparm, null);
-            return new Frame(scope, copy, curried + ncopy);
-        }
-        return this;
-    }
-    
+     public Frame assign(Object... values) {
+         if (stack != null) {
+             return new Frame(this, values);
+         }
+         return this;
+     }
+
+     /**
+      * Creates a clone of this frame.
+      * @return new frame
+      */
+     public Frame clone() {
+         return new Frame(this);
+     }
 }

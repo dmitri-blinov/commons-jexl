@@ -302,14 +302,14 @@ public class Issues300Test {
         Object result;
         script = jexl.createScript("a?? 42 + 10", "a");
         result = script.execute(ctxt, 32);
-        Assert.assertEquals(32, result);
+        Assert.assertEquals(42, result);
         result = script.execute(ctxt, (Object) null);
         Assert.assertEquals(52, result);
         script = jexl.createScript("- a??42 + +10", "a");
         result = script.execute(ctxt, 32);
-        Assert.assertEquals(-32, result);
+        Assert.assertEquals(-22, result);
         result = script.execute(ctxt, (Object) null);
-        Assert.assertEquals(52, result);
+        Assert.assertEquals(-32, result);
         // long version of ternary
         script = jexl.createScript("a? a : +42 + 10", "a");
         result = script.execute(ctxt, 32);

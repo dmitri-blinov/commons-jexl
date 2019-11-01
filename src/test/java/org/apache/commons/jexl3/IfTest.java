@@ -272,13 +272,14 @@ public class IfTest extends JexlTestCase {
         JexlEngine jexl = JEXL;
 
         JexlEvalContext jc = new JexlEvalContext();
+        JexlOptions options = jc.getEngineOptions();
         JexlExpression e = jexl.createExpression("x.y.z = foo ?'bar'");
         Object o;
 
         // undefined foo
         for (int l = 0; l < 4; ++l) {
-            jc.setStrict((l & 1) == 0);
-            jc.setSilent((l & 2) != 0);
+            options.setStrict((l & 1) == 0);
+            options.setSilent((l & 2) != 0);
             o = e.evaluate(jc);
             Assert.assertNull(o);
             o = jc.get("x.y.z");
@@ -288,8 +289,8 @@ public class IfTest extends JexlTestCase {
         jc.set("foo", null);
 
         for (int l = 0; l < 4; ++l) {
-            jc.setStrict((l & 1) == 0);
-            jc.setSilent((l & 2) != 0);
+            options.setStrict((l & 1) == 0);
+            options.setSilent((l & 2) != 0);
             o = e.evaluate(jc);
             Assert.assertNull(o);
             o = jc.get("x.y.z");
@@ -299,8 +300,8 @@ public class IfTest extends JexlTestCase {
         jc.set("foo", Boolean.FALSE);
 
         for (int l = 0; l < 4; ++l) {
-            jc.setStrict((l & 1) == 0);
-            jc.setSilent((l & 2) != 0);
+            options.setStrict((l & 1) == 0);
+            options.setSilent((l & 2) != 0);
             o = e.evaluate(jc);
             Assert.assertNull(o);
             o = jc.get("x.y.z");
@@ -310,8 +311,8 @@ public class IfTest extends JexlTestCase {
         jc.set("foo", Boolean.TRUE);
 
         for (int l = 0; l < 4; ++l) {
-            jc.setStrict((l & 1) == 0);
-            jc.setSilent((l & 2) != 0);
+            options.setStrict((l & 1) == 0);
+            options.setSilent((l & 2) != 0);
             o = e.evaluate(jc);
             Assert.assertEquals("Should be bar", "bar", o);
             o = jc.get("x.y.z");

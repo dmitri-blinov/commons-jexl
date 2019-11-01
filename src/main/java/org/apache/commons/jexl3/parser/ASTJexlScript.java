@@ -208,7 +208,7 @@ public class ASTJexlScript extends JexlNode implements JexlParser.LexicalUnit  {
      * @return true if final, false otherwise
      */
     public boolean isVariableFinal(int symbol) {
-        return scope != null? scope.isVariableFinal(symbol) : false;
+        return locals != null? locals.isVariableFinal(symbol) : false;
     }
 
 }
