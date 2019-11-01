@@ -134,6 +134,8 @@ public abstract class JexlParser extends StringParser {
         branchScope = null;
         branchScopes.clear();
         blocks.clear();
+        block = null;
+        mergeBlock = false;
     }
     /**
      * Utility function to create '.' separated string from a list of string.
