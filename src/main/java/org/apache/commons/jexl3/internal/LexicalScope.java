@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.BitSet;
 
 /**
@@ -76,7 +78,7 @@ public final class LexicalScope {
     /** Previous block. */
     protected final LexicalScope previous;
     /** The actual var modifiers. */
-    private final VariableModifier[] modifiers;
+    private Map<Integer, VariableModifier> modifiers;
     /** The frame */
     private final Frame frame;
 
@@ -96,15 +98,12 @@ public final class LexicalScope {
     public LexicalScope(Frame frame, LexicalScope scope) {
         if (frame != null) {
             this.frame = frame;
-            Integer stackSize = frame.getStackSize();
-            modifiers = stackSize != null ? new VariableModifier[stackSize] : null;
             int argc = frame.getScope().getArgCount();
             for(int a  = 0; a < argc; ++a) {
                 declareSymbol(a);
             }
         } else {
             this.frame = scope != null ? scope.frame : null;
-            modifiers = null;
         }
         previous = scope;
     }
@@ -140,7 +139,9 @@ public final class LexicalScope {
      * @param req whether the variable is required
      */
     public void setModifiers(int r, Class c, boolean fin, boolean req) {
-        modifiers[r] = new VariableModifier(c, fin, req);
+        if (modifiers == null)
+            modifiers = new HashMap<Integer, VariableModifier> ();
+        modifiers.put(r, new VariableModifier(c, fin, req));
     }
     /**
      * Gets a symbol type.
@@ -148,7 +149,9 @@ public final class LexicalScope {
      * @return the type if any
      */
     public Class typeof(int s) {
-        return modifiers != null && modifiers[s] != null ? modifiers[s].getType() : frame.getScope().getVariableType(s);
+        if (modifiers != null && modifiers.containsKey(s))
+            return modifiers.get(s).getType();
+        return previous != null ? previous.typeof(s) : frame.getScope().getVariableType(s);
     }
     /**
      * Returns if the local variable is declared final.
@@ -156,7 +159,9 @@ public final class LexicalScope {
      * @return true if final, false otherwise
      */
     public boolean isVariableFinal(int s) {
-        return modifiers != null && modifiers[s] != null ? modifiers[s].isFinal() : frame.getScope().isVariableFinal(s);
+        if (modifiers != null && modifiers.containsKey(s))
+            return modifiers.get(s).isFinal();
+        return previous != null ? previous.isVariableFinal(s) : frame.getScope().isVariableFinal(s);
     }
     /**
      * Returns if the local variable is declared non-null.
@@ -164,8 +169,27 @@ public final class LexicalScope {
      * @return true if non-null, false otherwise
      */
     public boolean isVariableRequired(int s) {
-        return modifiers != null && modifiers[s] != null ? modifiers[s].isRequired() : frame.getScope().isVariableRequired(s);
+        if (modifiers != null && modifiers.containsKey(s))
+            return modifiers.get(s).isRequired();
+        return previous != null ? previous.isVariableRequired(s) : frame.getScope().isVariableRequired(s);
     }
+    /**
+     * Declares a local symbol.
+     *
+     * @param symbol the symbol index
+     * @param c the variable type
+     * @param fin whether the variable is final
+     * @param req whether the variable is required
+     * @return true if was not already declared, false if lexical clash (error)
+     */
+    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
+        boolean result = declareSymbol(symbol);
+        if (result) {
+            setModifiers(symbol, c, fin, req);
+        }
+        return result;
+    }
+
     /**
      * Declares a local symbol.
      *
@@ -200,5 +224,9 @@ public final class LexicalScope {
      */
     public int getSymbolCount() {
         return Long.bitCount(symbols) + (moreSymbols == null? 0 : moreSymbols.cardinality());
+    }
+
+    public String toString() {
+        return String.valueOf(symbols);
     }
 }

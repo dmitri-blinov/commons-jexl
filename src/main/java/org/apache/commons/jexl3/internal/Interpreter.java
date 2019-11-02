@@ -2493,11 +2493,11 @@ public class Interpreter extends InterpreterBase {
         // Adjust frame variable modifiers
         block.setModifiers(symbol, node.getType(), node.isFinal(), node.isRequired());
         // if we have a var, we have a scope thus a frame
-        if (frame.has(symbol)) {
-            return frame.get(symbol);
-        } else {
+        if (options.isLexical() || !frame.has(symbol)) {
             frame.set(symbol, null);
             return null;
+        } else {
+            return frame.get(symbol);
         }
     }
 
@@ -3032,12 +3032,8 @@ public class Interpreter extends InterpreterBase {
             var = (ASTIdentifier) left;
             symbol = var.getSymbol();
             if (symbol >= 0 && options.isLexical()) {
-                if (var instanceof ASTVar) {
-                    if (!block.declareSymbol(symbol)) {
-                        return redefinedVariable(var, var.getName());
-                    }
                 // if not in lexical block, undefined if (in its symbol) shade
-                } else if (!block.hasSymbol(symbol) && options.isLexicalShade()) {
+                if (!block.hasSymbol(symbol) && options.isLexicalShade()) {
                     return undefinedVariable(var, var.getName());
                 }
             }

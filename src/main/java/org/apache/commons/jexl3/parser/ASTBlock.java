@@ -44,6 +44,14 @@ public class ASTBlock extends ASTLabelledStatement implements JexlParser.Lexical
         }
         return locals.declareSymbol(symbol);
     }
+
+    @Override
+    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
+        if (locals == null) {
+            locals  = new LexicalScope(null);
+        }
+        return locals.declareSymbol(symbol, c, fin, req);
+    }
     
     @Override
     public int getSymbolCount() {

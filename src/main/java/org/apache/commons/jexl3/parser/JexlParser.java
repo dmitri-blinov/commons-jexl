@@ -104,6 +104,16 @@ public abstract class JexlParser extends StringParser {
         boolean declareSymbol(int symbol);
 
         /**
+         * Declares a local symbol.
+         * @param symbol the symbol index in the scope
+         * @param c the variable type
+         * @param fin whether the variable is final
+         * @param req whether the variable is required
+         * @return true if declaration was successful, false if symbol was already declared
+         */
+        boolean declareSymbol(int symbol, Class c, boolean fin, boolean req);
+
+        /**
          * Checks whether a symbol is declared in this lexical unit.
          * @param symbol the symbol
          * @return true if declared, false otherwise
@@ -346,6 +356,30 @@ public abstract class JexlParser extends StringParser {
     /**
      * Declares a symbol.
      * @param symbol the symbol index
+     * @param c the variable type
+     * @param fin whether the variable is final
+     * @param req whether the variable is required
+     * @return true if symbol can be declared in lexical scope, false (error)
+     * if it is already declared
+     */
+    private boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
+        if (blocks != null) {
+            for(LexicalUnit lu : blocks) {
+                if (lu.hasSymbol(symbol)) {
+                    return false;
+                }
+                // stop at first new scope reset, aka lambda
+                if (lu instanceof ASTJexlLambda) {
+                    break;
+                }
+            }
+        }
+        return block == null || block.declareSymbol(symbol, c, fin, req);
+    }
+
+    /**
+     * Declares a symbol.
+     * @param symbol the symbol index
      * @return true if symbol can be declared in lexical scope, false (error)
      * if it is already declared
      */
@@ -379,16 +413,18 @@ public abstract class JexlParser extends StringParser {
             frame = new Scope(null, (String[]) null);
         }
         Integer symbol = frame.getSymbol(name, false);
-        if (symbol != null && frame.isVariableFinal(symbol)) {
+        if (symbol != null && frame.isVariableFinal(symbol) && !frame.isHoistedSymbol(symbol)) {
             throwParsingException(var);
         }
         symbol = frame.declareVariable(name);
         var.setSymbol(symbol, name);
         // lexical feature error
-        if (!declareSymbol(symbol) && getFeatures().isLexical()) {
-            throw new JexlException(var,  name + ": variable is already declared");
+        if (getFeatures().isLexical()) {
+            if (!declareSymbol(symbol, var.getType(), var.isFinal(), var.isRequired())) 
+                throw new JexlException(var,  name + ": variable is already declared");
+        } else {
+            declareSymbol(symbol);
         }
-
     }
 
     /**
