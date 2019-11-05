@@ -24,7 +24,7 @@ import java.util.BitSet;
  * The set of symbols declared in a lexical scope.
  * <p>The symbol identifiers are determined by the functional scope.
  */
-public final class LexicalScope {
+public class LexicalScope {
     /**
      * A variable modifier, stores additional variable attributes.
      * @since 3.2
@@ -80,7 +80,8 @@ public final class LexicalScope {
     /** The actual var modifiers. */
     private Map<Integer, VariableModifier> modifiers;
     /** The frame */
-    private final Frame frame;
+    protected final Frame frame;
+
 
     /**
      * Default ctor.
@@ -118,7 +119,7 @@ public final class LexicalScope {
         }
         return moreSymbols;
     }
-    
+
     /**
      * Checks whether a symbol has already been declared.
      * @param symbol the symbol
@@ -204,6 +205,10 @@ public final class LexicalScope {
             }
             walk = walk.previous;
         }
+        return registerSymbol(symbol);
+    }
+
+    protected final boolean registerSymbol(int symbol) {
         if (symbol < LONGBITS) {
             if ((symbols & (1L << symbol)) != 0L) {
                 return false;

@@ -177,7 +177,9 @@ public class LambdaTest extends JexlTestCase {
         Assert.assertEquals(1, hvars.size());
 
         // declaring a local that overrides hoisted
-        strs = "(x)->{ (y)->{ var x; x + y } }";
+        // in 3.1, such a local was considered local
+        // per 3.2, this local is considered hoisted
+        strs = "(x)->{ (y)->{ var z = 169; var x; x + y } }";
         s42 = jexl.createScript(strs);
         result = s42.execute(ctx, 15);
         Assert.assertTrue(result instanceof JexlScript);
@@ -186,7 +188,10 @@ public class LambdaTest extends JexlTestCase {
         Assert.assertNotNull(localv);
         Assert.assertEquals(1, localv.length);
         hvars = s15.getVariables();
-        Assert.assertEquals(0, hvars.size());
+        Assert.assertEquals(1, hvars.size());
+        // evidence this is not (strictly) a local since it inherited a hoisted value
+        result = ((JexlScript) s15).execute(ctx, 27);
+        Assert.assertEquals(42, result);
     }
 
     @Test

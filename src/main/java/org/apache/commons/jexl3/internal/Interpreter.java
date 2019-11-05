@@ -206,7 +206,7 @@ public class Interpreter extends InterpreterBase {
     /** Symbol values. */
     protected final Frame frame;
     /** Block micro-frames. */
-    protected LexicalScope block = null;
+    protected LexicalFrame block = null;
 
     /**
      * The thread local interpreter.
@@ -256,6 +256,9 @@ public class Interpreter extends InterpreterBase {
      * @throws JexlException if any error occurs during interpretation.
      */
     public Object interpret(JexlNode node) {
+        return interpret(node, false);
+    }
+    public Object interpret(JexlNode node, boolean rethrow) {
         JexlContext.ThreadLocal tcontext = null;
         JexlEngine tjexl = null;
         Interpreter tinter = null;
@@ -289,7 +292,7 @@ public class Interpreter extends InterpreterBase {
                 throw xcancel.clean();
             }
         } catch (JexlException xjexl) {
-            if (!isSilent()) {
+            if (rethrow || !isSilent()) {
                 throw xjexl.clean();
             }
             if (logger.isWarnEnabled()) {
@@ -1332,10 +1335,10 @@ public class Interpreter extends InterpreterBase {
         }
         LexicalScope lexical = block;
         try {
-            block = new LexicalScope(lexical);
+            block = new LexicalFrame(frame, block);
             return visitBlock(node, data);
         } finally {
-            block = lexical;
+            block = block.pop();
         }
     }
 
@@ -1371,10 +1374,10 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTForStatement node, Object data) {
-        final LexicalScope lexical = block;
+        final LexicalFrame lexical = block;
         if (options.isLexical()) {
                // create lexical frame
-               block = new LexicalScope(lexical);
+               block = new LexicalFrame(frame, lexical);
         }
         try {
             // Initialize for-loop
@@ -1441,14 +1444,14 @@ public class Interpreter extends InterpreterBase {
 
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
         final int symbol = loopVariable.getSymbol();
-        final LexicalScope lexical = block;
+        final LexicalFrame lexical = block;
         if (options.isLexical()) {
                // the iteration variable can not be declared in parent block
                if (symbol >= 0 && block.hasSymbol(symbol)) {
                    return redefinedVariable(node, loopVariable.getName());
                }
                // create lexical frame
-               block = new LexicalScope(lexical);
+               block = new LexicalFrame(frame, lexical);
         }
         try {
                 /* second objectNode is the variable to iterate */
@@ -2438,13 +2441,12 @@ public class Interpreter extends InterpreterBase {
      */
     protected Object runClosure(Closure closure, Object data) {
         ASTJexlScript script = closure.getScript();
-        final LexicalScope lexical = block;
-        block = new LexicalScope(frame, null);
+        block = new LexicalFrame(frame, block).declareArgs();
         try {
             JexlNode body = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-            return interpret(body);
+            return interpret(body, true);
         } finally {
-            block = lexical;
+            block = block.pop();
         }
     }
 
@@ -2453,8 +2455,7 @@ public class Interpreter extends InterpreterBase {
         if (script instanceof ASTJexlLambda && !((ASTJexlLambda) script).isTopLevel()) {
             return Closure.create(this, (ASTJexlLambda) script);
         } else {
-            final LexicalScope lexical = block;
-            block = new LexicalScope(frame, null);
+            block = new LexicalFrame(frame, block).declareArgs();
             try {
                 final int numChildren = script.jjtGetNumChildren();
                 Object result = null;
@@ -2465,7 +2466,7 @@ public class Interpreter extends InterpreterBase {
                 }
                 return result;
             } finally {
-                block = lexical;
+                block = block.pop();
             }
         }
     }
