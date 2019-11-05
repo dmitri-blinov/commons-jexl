@@ -24,8 +24,6 @@ import java.util.Deque;
  * <p>The symbol identifiers are determined by the functional scope.
  */
 public class LexicalFrame extends LexicalScope {
-    /** The script frame. */
-    private final Frame frame;
     /** The stack of values in the lexical frame. */
     private Deque<Object> stack = null;
     /**
@@ -34,8 +32,7 @@ public class LexicalFrame extends LexicalScope {
      * @param previous the previous lexical frame
      */
     public LexicalFrame(Frame frame, LexicalFrame previous) {
-        super(previous);
-        this.frame = frame;
+        super(frame, previous);
     }
 
     public LexicalFrame declareArgs() {
