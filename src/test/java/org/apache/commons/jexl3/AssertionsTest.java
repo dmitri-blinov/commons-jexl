@@ -75,86 +75,16 @@ public class AssertionsTest extends JexlTestCase {
         }
     }
 
-    public class AssertionsContext implements JexlContext, JexlEngine.Options {
-
-        /** The wrapped context. */
-        private final JexlContext wrapped;
-
-        private final boolean assertions;
-
-        /**
-         * Creates a new readonly context.
-         * @param context the wrapped context
-         * @param eopts the engine evaluation options
-         */
-        public AssertionsContext(JexlContext context, boolean assertions) {
-            wrapped = context;
-            this.assertions = assertions;
-        }
-
-        @Override
-        public Object get(String name) {
-            return wrapped.get(name);
-        }
-
-        @Override
-        public void set(String name, Object value) {
-            wrapped.set(name, value);
-        }
-
-        @Override
-        public boolean has(String name) {
-            return wrapped.has(name);
-        }
-
-        @Override
-        public Boolean isSilent() {
-            return false;
-        }
-
-        @Override
-        public Boolean isStrict() {
-            return true;
-        }
-
-        @Override
-        public Boolean isAssertions() {
-            return assertions;
-        }
-
-        @Override
-        public Boolean isCancellable() {
-            return true;
-        }
-
-        @Override
-        public Boolean isStrictArithmetic() {
-            return true;
-        }
-
-        @Override
-        public MathContext getArithmeticMathContext() {
-            return null;
-        }
-
-        @Override
-        public int getArithmeticMathScale() {
-            return -1;
-        }
-
-        @Override
-        public Charset getCharset() {
-            return Charset.defaultCharset();
-        }
-    }
-
     @Test
     public void testContextEnabledAssertions() throws Exception {
-        JexlContext jc = new AssertionsContext(new MapContext(), true);
+        JexlEvalContext ctxt = new JexlEvalContext();
         JexlEngine jexl = new JexlBuilder().assertions(false).create();
         JexlScript s = jexl.createScript("assert false");
+        JexlOptions options = ctxt.getEngineOptions();
+        // ensure errors will throw
+        options.setAssertions(true);
         try {
-             Object o = s.execute(jc);
+             Object o = s.execute(ctxt);
              Assert.fail("Should have failed");
         } catch (AssertionError ex) {
              // OK
@@ -163,10 +93,13 @@ public class AssertionsTest extends JexlTestCase {
 
     @Test
     public void testContextDisabledAssertions() throws Exception {
-        JexlContext jc = new AssertionsContext(new MapContext(), false);
+        JexlEvalContext ctxt = new JexlEvalContext();
         JexlEngine jexl = new JexlBuilder().assertions(true).create();
         JexlScript s = jexl.createScript("assert false");
-        Object o = s.execute(jc);
+        JexlOptions options = ctxt.getEngineOptions();
+        // ensure errors will throw
+        options.setAssertions(false);
+        Object o = s.execute(ctxt);
         Assert.assertNull(o);
     }
 

@@ -367,6 +367,7 @@ public class JexlBuilder {
      */
     public JexlBuilder assertions(boolean flag) {
         this.assertions = flag;
+        options.setAssertions(flag);
         return this;
     }
 

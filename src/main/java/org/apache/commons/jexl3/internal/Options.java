@@ -29,6 +29,8 @@ import java.math.MathContext;
  * allow a script to run as such will use a copy.
  */
 public class Options implements JexlOptions {
+    /** The asertions bit. */
+    protected static final int ASSERTIONS = 7;
     /** The local shade bit. */
     protected static final int SHADE = 6;
     /** The antish var bit. */
@@ -94,6 +96,7 @@ public class Options implements JexlOptions {
         set(SILENT, flags, jexl.isSilent());
         set(SAFE, flags, jexl.isSafe());
         set(CANCELLABLE, flags, jexl.isCancellable());
+        set(ASSERTIONS, flags, jexl.isAssertions());
         return this;
     }
     
@@ -122,6 +125,7 @@ public class Options implements JexlOptions {
             mask = set(SILENT, mask, opts.isSilent());
             mask = set(SAFE, mask, opts.isSafe());
             mask = set(CANCELLABLE, mask, opts.isCancellable());
+            mask = set(ASSERTIONS, mask, opts.isAssertions());
             flags = mask;
         }
     }
@@ -165,6 +169,11 @@ public class Options implements JexlOptions {
     public void setCancellable(boolean flag) {
         flags = set(CANCELLABLE, flags, flag);
     }
+
+    @Override
+    public void setAssertions(boolean flag) {
+        flags = set(ASSERTIONS, flags, flag);
+    }
             
     @Override
     public void setLexical(boolean flag) {
@@ -199,6 +208,11 @@ public class Options implements JexlOptions {
     @Override
     public boolean isCancellable() {
         return isSet(CANCELLABLE, flags);
+    }
+
+    @Override
+    public boolean isAssertions() {
+        return isSet(ASSERTIONS, flags);
     }
      
     @Override

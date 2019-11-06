@@ -341,14 +341,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return true if assertions enabled, false otherwise
      */
     protected boolean isAssertions() {
-        if (this.context instanceof JexlEngine.Options) {
-            JexlEngine.Options opts = (JexlEngine.Options) context;
-            Boolean assertions = opts.isAssertions();
-            if (assertions != null) {
-                return assertions.booleanValue();
-            }
-        }
-        return jexl.isAssertions();
+        return options.isAssertions();
     }
 
     /**

@@ -62,6 +62,12 @@ public interface JexlOptions {
     boolean isCancellable();
 
     /**
+     * Check whether the engine will evaluate assertions
+     * @return true when assertions are enabled, false otherwise
+     */
+    boolean isAssertions();
+
+    /**
      * Checks whether runtime variable scope is lexical.
      * <p>If true, lexical scope applies to local variables and parameters.
      * Redefining a variable in the same lexical unit will generate errors.
@@ -122,6 +128,12 @@ public interface JexlOptions {
      * @param flag true when cancellable, false otherwise
      */
     void setCancellable(boolean flag);
+
+    /**
+     * Sets whether the engine will evaluate assertions
+     * @param flag true when assertions are enabled, false otherwise
+     */
+    void setAssertions(boolean flag);
     
     /**
      * Sets whether the engine uses a strict block lexical scope during

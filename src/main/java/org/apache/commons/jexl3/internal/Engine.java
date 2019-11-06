@@ -322,6 +322,7 @@ public class Engine extends JexlEngine {
                 JexlEngine jexl = this;
                 JexlEngine.Options opts = (JexlEngine.Options) context;
                 jexlo.setCancellable(option(opts.isCancellable(), jexl.isCancellable()));
+                jexlo.setAssertions(option(opts.isAssertions(), jexl.isAssertions()));
                 jexlo.setSilent(option(opts.isSilent(), jexl.isSilent()));
                 jexlo.setStrict(option(opts.isStrict(), jexl.isStrict()));
                 JexlArithmetic jexla = jexl.getArithmetic();
