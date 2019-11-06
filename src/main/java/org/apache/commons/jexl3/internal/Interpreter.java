@@ -256,9 +256,6 @@ public class Interpreter extends InterpreterBase {
      * @throws JexlException if any error occurs during interpretation.
      */
     public Object interpret(JexlNode node) {
-        return interpret(node, false);
-    }
-    public Object interpret(JexlNode node, boolean rethrow) {
         JexlContext.ThreadLocal tcontext = null;
         JexlEngine tjexl = null;
         Interpreter tinter = null;
@@ -292,7 +289,7 @@ public class Interpreter extends InterpreterBase {
                 throw xcancel.clean();
             }
         } catch (JexlException xjexl) {
-            if (rethrow || !isSilent()) {
+            if (!isSilent()) {
                 throw xjexl.clean();
             }
             if (logger.isWarnEnabled()) {
@@ -1374,10 +1371,11 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTForStatement node, Object data) {
-        final LexicalFrame lexical = block;
-        if (options.isLexical()) {
-               // create lexical frame
-               block = new LexicalFrame(frame, lexical);
+        final boolean lexical = options.isLexical();
+        if (lexical) {
+              // create lexical frame
+              LexicalFrame locals = new LexicalFrame(frame, block);
+              block = locals;
         }
         try {
             // Initialize for-loop
@@ -1407,8 +1405,9 @@ public class Interpreter extends InterpreterBase {
             }
             return result;
         } finally {
-            if (lexical != null && block != null)
-                 block = lexical;
+              // restore lexical frame
+              if (lexical)
+                  block = block.pop();
         }
     }
 
@@ -1444,14 +1443,14 @@ public class Interpreter extends InterpreterBase {
 
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
         final int symbol = loopVariable.getSymbol();
-        final LexicalFrame lexical = block;
-        if (options.isLexical()) {
-               // the iteration variable can not be declared in parent block
-               if (symbol >= 0 && block.hasSymbol(symbol)) {
-                   return redefinedVariable(node, loopVariable.getName());
-               }
-               // create lexical frame
-               block = new LexicalFrame(frame, lexical);
+        final boolean lexical = options.isLexical() && symbol >= 0;
+        if (lexical) {
+            // create lexical frame
+            LexicalFrame locals = new LexicalFrame(frame, block);
+            if (!locals.declareSymbol(symbol)) {
+                return redefinedVariable(node, loopVariable.getName());
+            }
+            block = locals;
         }
         try {
                 /* second objectNode is the variable to iterate */
@@ -1575,8 +1574,9 @@ public class Interpreter extends InterpreterBase {
                     }
                }
         } finally {
-              if (lexical != null && block != null)
-                   block = lexical;
+              // restore lexical frame
+              if (lexical)
+                  block = block.pop();
         }
         return result;
     }
@@ -2444,7 +2444,7 @@ public class Interpreter extends InterpreterBase {
         block = new LexicalFrame(frame, block).declareArgs();
         try {
             JexlNode body = script.jjtGetChild(script.jjtGetNumChildren() - 1);
-            return interpret(body, true);
+            return interpret(body);
         } finally {
             block = block.pop();
         }
@@ -2521,10 +2521,13 @@ public class Interpreter extends InterpreterBase {
                          return undefinedVariable(identifier, name);
                      }
                  }
-                 return frame.get(symbol);
+                 Object value = frame.get(symbol);
+                 if (value != Scope.UNDEFINED) {
+                     return value;
+                 }
             }
             Object value = context.get(name);
-            if (value == null && identifier.jjtGetParent() instanceof ASTExpressionStatement) {
+            if (value == null && !context.has(name) && identifier.jjtGetParent() instanceof ASTExpressionStatement) {
                JexlMethod vm = uberspect.getMethod(arithmetic, name, EMPTY_PARAMS);
                if (vm != null) {
                    try {
