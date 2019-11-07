@@ -127,4 +127,22 @@ public class TryTest extends JexlTestCase {
         Assert.assertEquals(42, o);
     }
 
+    @Test
+    public void testLexical() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlEvalContext ctxt = new JexlEvalContext();
+        JexlOptions options = ctxt.getEngineOptions();
+        // ensure errors will throw
+        options.setLexical(true);
+        JexlScript script = jexl.createScript("e = 42; try {42/0} catch (var e) {}; return e");
+        try {
+            Object result = script.execute(ctxt);
+            Assert.assertEquals(42, result);
+        } catch (JexlException xany) {
+            String ww = xany.toString();
+            Assert.fail(ww);
+        }
+    }
+
+
 }

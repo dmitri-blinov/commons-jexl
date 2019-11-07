@@ -219,4 +219,60 @@ public class TryWithResourcesTest extends JexlTestCase {
         Assert.assertEquals(42, o);
     }
 
+    @Test
+    public void testLexical1() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlContext ctxt = new MapContext();
+        JexlScript script = jexl.createScript("e = 1; try(var e = 42) {return e}");
+        try {
+            Object result = script.execute(ctxt);
+            Assert.assertEquals(42, result);
+        } catch (JexlException xany) {
+            String ww = xany.toString();
+            Assert.fail(ww);
+        }
+    }
+
+    @Test
+    public void testLexical2() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlContext ctxt = new MapContext();
+        JexlScript script = jexl.createScript("e = 1; try(var e = 42) {}; return e");
+        try {
+            Object result = script.execute(ctxt);
+            Assert.assertEquals(1, result);
+        } catch (JexlException xany) {
+            String ww = xany.toString();
+            Assert.fail(ww);
+        }
+    }
+
+    @Test
+    public void testLexical3() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlContext ctxt = new MapContext();
+        JexlScript script = jexl.createScript("e = 1; try(var e = 42) {} finally {return e}");
+        try {
+            Object result = script.execute(ctxt);
+            Assert.assertEquals(1, result);
+        } catch (JexlException xany) {
+            String ww = xany.toString();
+            Assert.fail(ww);
+        }
+    }
+
+    @Test
+    public void testLexical4() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlContext ctxt = new MapContext();
+        JexlScript script = jexl.createScript("e = 42; try (var e = 1) {42/0} catch (var x) {return e}");
+        try {
+            Object result = script.execute(ctxt);
+            Assert.assertEquals(42, result);
+        } catch (JexlException xany) {
+            String ww = xany.toString();
+            Assert.fail(ww);
+        }
+    }
+
 }

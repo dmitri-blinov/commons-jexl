@@ -532,13 +532,29 @@ ASTDoWhileStatement DoWhileStatement() : {}
 
 ASTTryStatement TryStatement() : {}
 {
-    <TRY> Block() ( (<CATCH> <LPAREN> TryVar() <RPAREN> Block() (<FINALLY> Block())?) | <FINALLY> Block() )
+    <TRY> Block() 
+    ( 
+      <CATCH> { pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
+      | 
+      <FINALLY> Block() 
+    )
     { return jjtThis; }
 }
 
-ASTTryWithResourceStatement TryWithResourceStatement() : {}
+ASTTryWithResourceStatement TryWithResourceStatement() :
+{   
+   pushUnit(jjtThis, true); 
+}
 {
-    <TRY> <LPAREN> TryResource() <RPAREN> Block() ( (<CATCH> <LPAREN> TryVar() <RPAREN> Block() (<FINALLY> Block())?) | <FINALLY> Block() )?
+    <TRY> <LPAREN> TryResource() <RPAREN> Block() 
+    { 
+      popUnit(jjtThis); 
+    }
+    [ 
+      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
+      | 
+      <FINALLY> Block()
+    ]
     { return jjtThis; }
 }
 
@@ -678,9 +694,9 @@ ASTForeachStatement ForeachStatement() :
 
 void ForeachVar() : {}
 {
-    DeclareVar() (<COMMA> DeclareExtVar(false))?
+    DeclareVar() [ <COMMA> DeclareExtVar(false) ]
     |
-    Identifier(true) (<COMMA> Identifier(true))?
+    Identifier(true) [ <COMMA> Identifier(true) ]
 }
 
 void MultipleVar() #void : {}
