@@ -1374,8 +1374,7 @@ public class Interpreter extends InterpreterBase {
         final boolean lexical = options.isLexical();
         if (lexical) {
               // create lexical frame
-              LexicalFrame locals = new LexicalFrame(frame, block);
-              block = locals;
+              block = new LexicalFrame(frame, block);
         }
         try {
             // Initialize for-loop
@@ -1646,10 +1645,28 @@ public class Interpreter extends InterpreterBase {
             // if there is no catch block just rethrow
             if (num < 3)
                 throw t;
-            // Set catch variable
-            node.jjtGetChild(1).jjtAccept(this, t);
-            // execute catch block
-            node.jjtGetChild(2).jjtAccept(this, data);
+            ASTTryVar catchReference = (ASTTryVar) node.jjtGetChild(1);
+            ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
+            final int symbol = catchVariable.getSymbol();
+            final boolean lexical = options.isLexical() && symbol >= 0;
+            if (lexical) {
+                // create lexical frame
+                LexicalFrame locals = new LexicalFrame(frame, block);
+                if (!locals.declareSymbol(symbol)) {
+                    return redefinedVariable(node, catchVariable.getName());
+                }
+                block = locals;
+            }
+            try {
+                // Set catch variable
+                node.jjtGetChild(1).jjtAccept(this, t);
+                // execute catch block
+                node.jjtGetChild(2).jjtAccept(this, data);
+            } finally {
+                // restore lexical frame
+                if (lexical)
+                    block = block.pop();
+            }
         } finally {
             // execute finally block if any
             if (num == 2) {
@@ -1673,13 +1690,32 @@ public class Interpreter extends InterpreterBase {
             Object rman = operators.tryOverload(node, JexlOperator.TRY_WITH, r);
             if (JexlEngine.TRY_FAILED != rman)
                 r = rman;
-            if (resReference.jjtGetNumChildren() == 2) {
-               // Set variable
-               resReference.jjtGetChild(0).jjtAccept(this, r);
+
+            ASTTryVar resDeclaration = resReference.jjtGetChild(0) instanceof ASTTryVar ? (ASTTryVar) resReference.jjtGetChild(0) : null;
+            ASTIdentifier resVariable = resDeclaration != null ? (ASTIdentifier) resDeclaration.jjtGetChild(0) : null;
+            final int symbol = resVariable != null ? resVariable.getSymbol() : -1;
+            final boolean lexical = options.isLexical() && symbol >= 0;
+            if (lexical) {
+                // create lexical frame
+                LexicalFrame locals = new LexicalFrame(frame, block);
+                if (!locals.declareSymbol(symbol)) {
+                    return redefinedVariable(node, resVariable.getName());
+                }
+                block = locals;
             }
-            try (ResourceManager rm = new ResourceManager(r)) {
-                // execute try block
-                result = node.jjtGetChild(1).jjtAccept(this, data);
+            try {
+                if (resReference.jjtGetNumChildren() == 2) {
+                   // Set variable
+                   resReference.jjtGetChild(0).jjtAccept(this, r);
+                }
+                try (ResourceManager rm = new ResourceManager(r)) {
+                    // execute try block
+                    result = node.jjtGetChild(1).jjtAccept(this, data);
+                }
+            } finally {
+                // restore lexical frame
+                if (lexical)
+                    block = block.pop();
             }
         } catch (JexlException.Break stmtBreak) {
             String target = stmtBreak.getLabel();
@@ -1699,10 +1735,28 @@ public class Interpreter extends InterpreterBase {
             // if there is no catch block just rethrow
             if (num < 4)
                 InterpreterBase.<RuntimeException>doThrow(t);
-            // set catch variable
-            node.jjtGetChild(2).jjtAccept(this, t);
-            // execute catch block
-            node.jjtGetChild(3).jjtAccept(this, data);
+            ASTTryVar catchReference = (ASTTryVar) node.jjtGetChild(2);
+            ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
+            final int symbol = catchVariable.getSymbol();
+            final boolean lexical = options.isLexical() && symbol >= 0;
+            if (lexical) {
+                // create lexical frame
+                LexicalFrame locals = new LexicalFrame(frame, block);
+                if (!locals.declareSymbol(symbol)) {
+                    return redefinedVariable(node, catchVariable.getName());
+                }
+                block = locals;
+            }
+            try {
+                // Set catch variable
+                node.jjtGetChild(2).jjtAccept(this, t);
+                // execute catch block
+                node.jjtGetChild(3).jjtAccept(this, data);
+            } finally {
+                // restore lexical frame
+                if (lexical)
+                    block = block.pop();
+            }
         } finally {
             // execute finally block if any
             if (num == 3) {

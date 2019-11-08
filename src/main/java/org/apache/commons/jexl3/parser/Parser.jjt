@@ -385,7 +385,7 @@ ASTJexlScript JexlScript(Scope frame) :
    (
       LOOKAHEAD( LambdaLookahead() ) Lambda() (<SEMICOL>)?
       |
-      ( ( Statement() )*)
+      (GenericStatement())*
    ) <EOF>
    {
         popUnit(jjtThis);
@@ -416,13 +416,13 @@ void Annotation() #Annotation :
 
 void AnnotatedStatement() #AnnotatedStatement() : {}
 {
-    (LOOKAHEAD(<ANNOTATION>) Annotation())+ Statement()
+    (LOOKAHEAD(<ANNOTATION>) Annotation())+ (LOOKAHEAD({!getFeatures().isLexical()}) GenericStatement() | Statement())
 }
 
-void Statement() #void : {}
+void GenericStatement() #void : {}
 {
     <SEMICOL>
-    | LOOKAHEAD(<ANNOTATION>) AnnotatedStatement()
+    | AnnotatedStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(Expression()) ExpressionStatement()
@@ -447,9 +447,40 @@ void Statement() #void : {}
     | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVar()
 }
 
+void Statement() #void : {}
+{
+    <SEMICOL>
+    | AnnotatedStatement()
+    | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
+    | LOOKAHEAD(Expression()) ExpressionStatement()
+    | Block()
+    | IfStatement()
+    | LOOKAHEAD(<FOR> <LPAREN> ForeachVar() <COLON>) ForeachStatement()
+    | ForStatement()
+    | WhileStatement()
+    | DoWhileStatement()
+    | LOOKAHEAD(<TRY> <LPAREN>) TryWithResourceStatement()
+    | TryStatement()
+    | ThrowStatement()
+    | AssertStatement()
+    | SynchronizedStatement()
+    | LOOKAHEAD(SwitchStatementLookahead()) SwitchStatement()
+    | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
+    | ReturnStatement()
+    | YieldStatement()
+    | Continue()
+    | Remove()
+    | Break()
+}
+
+void StatementBranch() #void : {}
+{
+    LOOKAHEAD(1) Block() | LOOKAHEAD({!getFeatures().isLexical()}) GenericStatement() | Statement()
+}
+
 void LabelledStatementLookahead() #void() : {}
 {
-  <IDENTIFIER> <COLON> ( <LCURLY> | <FOR> | <WHILE> | <DO> | <SWITCH> )
+  <IDENTIFIER> <COLON> ( <LCURLY> | <IF> | <FOR> | <WHILE> | <DO> | <SWITCH> | <SYNCHRONIZED> | <TRY>)
 }
 
 void LabelledStatement() #void :
@@ -483,10 +514,16 @@ void LabelledStatement() #void :
     )
 }
 
-ASTBlock Block() #Block : {}
+ASTBlock Block() #Block :
+{ 
+   pushUnit(jjtThis); 
+}
 {
-    <LCURLY> { pushUnit(jjtThis); } ( Statement() )* { popUnit(jjtThis); } <RCURLY>
-    { return jjtThis; }
+    <LCURLY> (GenericStatement())* <RCURLY>
+    { 
+       popUnit(jjtThis);
+       return jjtThis; 
+    }
 }
 
 void ExpressionStatement() : {}
@@ -513,32 +550,48 @@ void AssignmentIdentifier() #void : {}
 
 ASTIfStatement IfStatement() : {}
 {
-    <IF> <LPAREN> Expression() <RPAREN>  (LOOKAHEAD(1) Block() | Statement())
-    (LOOKAHEAD(1) <ELSE> (LOOKAHEAD(1) Block() | Statement()) )?
+    <IF> <LPAREN> Expression() <RPAREN> StatementBranch()
+    [ LOOKAHEAD(1) <ELSE> StatementBranch() ]
     { return jjtThis; }
 }
 
 ASTWhileStatement WhileStatement() : {}
 {
-    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.loopCount -= 1; }
+    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
     { return jjtThis; }
 }
 
 ASTDoWhileStatement DoWhileStatement() : {}
 {
-    <DO> { branchScope.loopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) <WHILE> <LPAREN> Expression() <RPAREN> { branchScope.loopCount -= 1; }
+    <DO> { branchScope.loopCount += 1; } StatementBranch() <WHILE> <LPAREN> Expression() <RPAREN> { branchScope.loopCount -= 1; }
     { return jjtThis; }
 }
 
 ASTTryStatement TryStatement() : {}
 {
-    <TRY> Block() ( (<CATCH> <LPAREN> TryVar() <RPAREN> Block() (<FINALLY> Block())?) | <FINALLY> Block() )
+    <TRY> Block() 
+    ( 
+      <CATCH> { pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
+      | 
+      <FINALLY> Block() 
+    )
     { return jjtThis; }
 }
 
-ASTTryWithResourceStatement TryWithResourceStatement() : {}
+ASTTryWithResourceStatement TryWithResourceStatement() :
+{   
+   pushUnit(jjtThis, true); 
+}
 {
-    <TRY> <LPAREN> TryResource() <RPAREN> Block() ( (<CATCH> <LPAREN> TryVar() <RPAREN> Block() (<FINALLY> Block())?) | <FINALLY> Block() )?
+    <TRY> <LPAREN> TryResource() <RPAREN> Block() 
+    { 
+      popUnit(jjtThis); 
+    }
+    [ 
+      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
+      | 
+      <FINALLY> Block()
+    ]
     { return jjtThis; }
 }
 
@@ -642,7 +695,7 @@ ASTForStatement ForStatement() :
     pushUnit(jjtThis, true);
 }
 {
-    <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.loopCount -= 1; }
+    <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
     {
       popUnit(jjtThis); 
       return jjtThis;
@@ -669,7 +722,7 @@ ASTForeachStatement ForeachStatement() :
     pushUnit(jjtThis, true);
 }
 {
-    <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } (LOOKAHEAD(1) Block() | Statement()) { branchScope.foreachLoopCount -= 1; }
+    <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } StatementBranch() { branchScope.foreachLoopCount -= 1; }
     {
       popUnit(jjtThis); 
       return jjtThis;
@@ -678,9 +731,9 @@ ASTForeachStatement ForeachStatement() :
 
 void ForeachVar() : {}
 {
-    DeclareVar() (<COMMA> DeclareExtVar(false))?
+    DeclareVar() [ <COMMA> DeclareExtVar(false) ]
     |
-    Identifier(true) (<COMMA> Identifier(true))?
+    Identifier(true) [ <COMMA> Identifier(true) ]
 }
 
 void MultipleVar() #void : {}

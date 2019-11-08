@@ -67,6 +67,8 @@ Incompatible changes
 
 + Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
 
++ Variable declarations in lexical mode are restricted to blocks
+
 New features
 ------------
 + Java-like `switch` statement is introduced
