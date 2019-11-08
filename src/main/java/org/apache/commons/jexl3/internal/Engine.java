@@ -176,11 +176,13 @@ public class Engine extends JexlEngine {
      */
     public Engine(JexlBuilder conf) {
         // options:
-        this.strict = option(conf.strict(), true);
-        this.safe = option(conf.safe(), false);
-        this.silent = option(conf.silent(), false);
-        this.assertions = option(conf.assertions(), false);
+        this.options = conf.options().copy();
+        this.strict = options.isStrict();
+        this.safe = options.isSafe();
+        this.silent = options.isSilent();
+        this.assertions = options.isAssertions();
         this.cancellable = option(conf.cancellable(), !silent && strict);
+        options.setCancellable(cancellable);
         this.debug = option(conf.debug(), true);
         this.collectAll = option(conf.collectAll(), true);
         this.stackOverflow = conf.stackOverflow() > 0? conf.stackOverflow() : Integer.MAX_VALUE;
@@ -198,6 +200,9 @@ public class Engine extends JexlEngine {
         }
         this.logger = conf.logger() == null ? LogFactory.getLog(JexlEngine.class) : conf.logger();
         this.arithmetic = conf.arithmetic() == null ? new JexlArithmetic(this.strict) : conf.arithmetic();
+        options.setMathContext(arithmetic.getMathContext());
+        options.setMathScale(arithmetic.getMathScale());
+        options.setStrictArithmetic(arithmetic.isStrict());
         this.functions = conf.namespaces() == null ? Collections.<String, Object>emptyMap() : conf.namespaces();
         // parsing & features:
         JexlFeatures features = conf.features() == null? DEFAULT_FEATURES : conf.features();
@@ -210,8 +215,6 @@ public class Engine extends JexlEngine {
         if (uberspect == null) {
             throw new IllegalArgumentException("uberspect can not be null");
         }
-        // capture options
-        this.options = conf.options().copy().set(this);
     }
 
 
@@ -415,7 +418,7 @@ public class Engine extends JexlEngine {
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean);
             final Interpreter interpreter = createInterpreter(context, frame);
-            return node.jjtAccept(interpreter, null);
+            return interpreter.visitLexicalNode(node, null);
         } catch (JexlException xjexl) {
             if (silent) {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());
@@ -444,7 +447,7 @@ public class Engine extends JexlEngine {
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean, value);
             final Interpreter interpreter = createInterpreter(context, frame);
-            node.jjtAccept(interpreter, null);
+            interpreter.visitLexicalNode(node, null);
         } catch (JexlException xjexl) {
             if (silent) {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());

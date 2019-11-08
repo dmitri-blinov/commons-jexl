@@ -34,7 +34,7 @@ public class Options implements JexlOptions {
     /** The local shade bit. */
     protected static final int SHADE = 6;
     /** The antish var bit. */
-    protected static final int ANTISH_VAR = 5;
+    protected static final int ANTISH = 5;
     /** The lexical scope bit. */
     protected static final int LEXICAL = 4;
     /** The safe bit. */
@@ -45,8 +45,12 @@ public class Options implements JexlOptions {
     protected static final int STRICT = 1;
     /** The cancellable bit. */
     protected static final int CANCELLABLE = 0;
+    /** The flags names ordered. */
+    private static final String[] NAMES = {
+        "cancellable", "strict", "silent", "safe", "lexical", "antish", "lexicalShade"
+    };
     /** Default mask .*/
-    protected static final int DEFAULT = 1 /*<< CANCELLABLE*/ | 1 << STRICT | 1 << ANTISH_VAR;
+    protected static int DEFAULT = 1 /*<< CANCELLABLE*/ | 1 << STRICT | 1 << ANTISH | 1 << SAFE;
     /** The arithmetic math context. */
     private MathContext mathContext = null;
     /** The arithmetic math scale. */
@@ -76,40 +80,72 @@ public class Options implements JexlOptions {
     protected static boolean isSet(int ordinal, int mask) {
         return (mask & 1 << ordinal) != 0;
     }
-        
+
     /**
      * Default ctor.
      */
     public Options() {}
 
     /**
-     * Set options from engine.
-     * @param jexl the engine
-     * @return this instance
+     * Sets the default flags.
+     * <p>Used by tests to force default options.
+     * @param flags the flags to set
      */
-    @Override
-    public Options set(JexlEngine jexl) {
-        mathContext = jexl.getArithmetic().getMathContext();
-        mathScale = jexl.getArithmetic().getMathScale();
-        strictArithmetic = jexl.getArithmetic().isStrict();
-        set(STRICT, flags, jexl.isStrict());
-        set(SILENT, flags, jexl.isSilent());
-        set(SAFE, flags, jexl.isSafe());
-        set(CANCELLABLE, flags, jexl.isCancellable());
-        set(ASSERTIONS, flags, jexl.isAssertions());
-        return this;
-    }
-    
-    @Override
-    public JexlOptions copy() {
-        return new Options(this);
+    public static void setDefaultFlags(String...flags) {
+        DEFAULT = parseFlags(DEFAULT, flags);
     }
 
     /**
-     * Create a copy from another set of options.
-     * @param opts the source options to copy
+     * Parses flags by name.
+     * <p>A '+flag' or 'flag' will set flag as true, '-flag' set as false.
+     * The possible flag names are:
+     * cancellable, strict, silent, safe, lexical, antish, lexicalShade
+     * @param mask the initial mask state
+     * @param flags the flags to set
+     * @return the flag mask updated
      */
-    public Options(JexlOptions opts) {
+    public static int parseFlags(int mask, String...flags) {
+        for(String name : flags) {
+            boolean b = true;
+            if (name.charAt(0) == '+') {
+                name = name.substring(1);
+            } else if (name.charAt(0) == '-') {
+                name = name.substring(1);
+                b = false;
+            }
+            for(int flag = 0; flag < NAMES.length; ++flag) {
+                if (NAMES[flag].equals(name)) {
+                    if (b) {
+                        mask |= (1 << flag);
+                    } else {
+                        mask &= ~(1 << flag);
+                    }
+                    break;
+                }
+            }
+        }
+        return mask;
+    }
+
+    @Override
+    public Options set(JexlEngine jexl) {
+        if (jexl instanceof Engine) {
+            set(((Engine) jexl).options);
+        } else {
+            mathContext = jexl.getArithmetic().getMathContext();
+            mathScale = jexl.getArithmetic().getMathScale();
+            strictArithmetic = jexl.getArithmetic().isStrict();
+            set(STRICT, flags, jexl.isStrict());
+            set(SILENT, flags, jexl.isSilent());
+            set(SAFE, flags, jexl.isSafe());
+            set(CANCELLABLE, flags, jexl.isCancellable());
+            set(ASSERTIONS, flags, jexl.isAssertions());
+        }
+        return this;
+    }
+
+    @Override
+    public Options set(JexlOptions opts) {
         if (opts instanceof Options) {
             Options src = (Options) opts;
             mathContext = src.mathContext;
@@ -126,13 +162,22 @@ public class Options implements JexlOptions {
             mask = set(SAFE, mask, opts.isSafe());
             mask = set(CANCELLABLE, mask, opts.isCancellable());
             mask = set(ASSERTIONS, mask, opts.isAssertions());
+            mask = set(LEXICAL, mask, opts.isLexical());
+            mask = set(SHADE, mask, opts.isLexicalShade());
+            mask = set(ANTISH, mask, opts.isAntish());
             flags = mask;
         }
+        return this;
     }
-    
+
+    @Override
+    public Options copy() {
+        return new Options().set(this);
+    }
+
     @Override
     public void setAntish(boolean flag) {
-        flags = set(ANTISH_VAR, flags, flag);
+        flags = set(ANTISH, flags, flag);
     }
 
     @Override
@@ -154,17 +199,17 @@ public class Options implements JexlOptions {
     public void setStrict(boolean flag) {
         flags = set(STRICT, flags, flag);
     }
-            
+
     @Override
     public void setSafe(boolean flag) {
         flags = set(SAFE, flags, flag);
-    }    
+    }
 
     @Override
     public void setSilent(boolean flag) {
         flags = set(SILENT, flags, flag);
     }
-            
+
     @Override
     public void setCancellable(boolean flag) {
         flags = set(CANCELLABLE, flags, flag);
@@ -174,22 +219,22 @@ public class Options implements JexlOptions {
     public void setAssertions(boolean flag) {
         flags = set(ASSERTIONS, flags, flag);
     }
-            
+
     @Override
     public void setLexical(boolean flag) {
         flags = set(LEXICAL, flags, flag);
-    }    
-    
+    }
+
     @Override
     public void setLexicalShade(boolean flag) {
         flags = set(SHADE, flags, flag);
     }
-    
+
     @Override
     public boolean isAntish() {
-        return isSet(ANTISH_VAR, flags);
+        return isSet(ANTISH, flags);
     }
-    
+
     @Override
     public boolean isSilent() {
         return isSet(SILENT, flags);
@@ -199,7 +244,7 @@ public class Options implements JexlOptions {
     public boolean isStrict() {
         return isSet(STRICT, flags);
     }
-    
+
     @Override
     public boolean isSafe() {
         return isSet(SAFE, flags);
@@ -214,12 +259,12 @@ public class Options implements JexlOptions {
     public boolean isAssertions() {
         return isSet(ASSERTIONS, flags);
     }
-     
+
     @Override
     public boolean isLexical() {
         return isSet(LEXICAL, flags);
     }
-       
+
     @Override
     public boolean isLexicalShade() {
         return isSet(SHADE, flags);
@@ -234,10 +279,10 @@ public class Options implements JexlOptions {
     public MathContext getMathContext() {
         return mathContext;
     }
-    
+
     @Override
     public int getMathScale() {
         return mathScale;
     }
-    
+
 }

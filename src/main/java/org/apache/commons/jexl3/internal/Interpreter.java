@@ -1442,141 +1442,176 @@ public class Interpreter extends InterpreterBase {
         ASTForeachVar loopReference = (ASTForeachVar) node.jjtGetChild(0);
 
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
-        final int symbol = loopVariable.getSymbol();
-        final boolean lexical = options.isLexical() && symbol >= 0;
+        ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? (ASTIdentifier) loopReference.jjtGetChild(1) : null;
+
+        final boolean lexical = options.isLexical();
+
         if (lexical) {
             // create lexical frame
             LexicalFrame locals = new LexicalFrame(frame, block);
-            if (!locals.declareSymbol(symbol)) {
+            final int symbol = loopVariable.getSymbol();
+            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
+            if (loopSymbol && !locals.declareSymbol(symbol)) {
                 return redefinedVariable(node, loopVariable.getName());
+            }
+            if (loopValueVariable != null) {
+                final int valueSymbol = loopValueVariable.getSymbol();
+                if (loopSymbol && !locals.declareSymbol(valueSymbol)) {
+                    return redefinedVariable(node, loopValueVariable.getName());
+                }
             }
             block = locals;
         }
         try {
-                /* second objectNode is the variable to iterate */
-                Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
+            /* second objectNode is the variable to iterate */
+            Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
 
-                // make sure there is a value to iterate on
-                if (iterableValue != null) {
-                    if (loopReference.jjtGetNumChildren() > 1) {
+            // make sure there is a value to iterate on
+            if (iterableValue != null) {
+                int i = -1;
+                if (loopValueVariable != null) {
+                    // get an iterator for the collection/array etc via the introspector.
+                    Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
+                    Iterator<?> itemsIterator = forEach instanceof Iterator
+                                            ? (Iterator<?>) forEach
+                                            : uberspect.getIndexedIterator(iterableValue);
+                    if (itemsIterator != null) {
+                        try {
+                            /* third objectNode is the statement to execute */
+                            JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
 
-                        ASTIdentifier loopValueVariable = (ASTIdentifier) loopReference.jjtGetChild(1);
+                            final int symbol = loopVariable.getSymbol();
+                            final int valueSymbol = loopValueVariable.getSymbol();
+                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
 
-                        // get an iterator for the collection/array etc via the introspector.
-                        Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
-                        Iterator<?> itemsIterator = forEach instanceof Iterator
-                                                ? (Iterator<?>) forEach
-                                                : uberspect.getIndexedIterator(iterableValue);
-
-                        int i = -1;
-                        if (itemsIterator != null) {
-                            try {
-                                /* third objectNode is the statement to execute */
-                                JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                                while (itemsIterator.hasNext()) {
-                                    cancelCheck(node);
-                                    i += 1;
-                                    // set loopVariable to value of iterator
-                                    Object value = itemsIterator.next();
-                                    if (value instanceof Map.Entry<?,?>) {
-                                        Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
-                                        executeAssign(node, loopVariable, entry.getKey(), null, data);
-                                        executeAssign(node, loopValueVariable, entry.getValue(), null, data);
-                                    } else {
-                                        executeAssign(node, loopVariable, i, null, data);
-                                        executeAssign(node, loopValueVariable, value, null, data);
+                            while (itemsIterator.hasNext()) {
+                                cancelCheck(node);
+                                i += 1;
+                                // reset loop varaible
+                                if (lexical && i > 0) {
+                                    // clean up but remain current
+                                    block.pop();
+                                    // unlikely to fail 
+                                    if (loopSymbol && !block.declareSymbol(symbol)) {
+                                        return redefinedVariable(node, loopVariable.getName());
                                     }
-                                    if (statement != null) {
-                                        try {
-                                            // execute statement
-                                            result = statement.jjtAccept(this, data);
-                                        } catch (JexlException.Break stmtBreak) {
-                                            String target = stmtBreak.getLabel();
-                                            if (target == null || target.equals(node.getLabel())) {
-                                                break;
-                                            } else {
-                                                throw stmtBreak;
-                                            }
-                                        } catch (JexlException.Continue stmtContinue) {
-                                            String target = stmtContinue.getLabel();
-                                            if (target != null && !target.equals(node.getLabel())) {
-                                                throw stmtContinue;
-                                            }
-                                            // continue
-                                        } catch (JexlException.Remove stmtRemove) {
-                                            String target = stmtRemove.getLabel();
-                                            if (target != null && !target.equals(node.getLabel())) {
-                                                throw stmtRemove;
-                                            }
-                                            itemsIterator.remove();
-                                            i -= 1;
-                                            // and continue
+                                    if (loopSymbol && !block.declareSymbol(valueSymbol)) {
+                                        return redefinedVariable(node, loopValueVariable.getName());
+                                    }
+
+                                }
+                                // set loopVariable to value of iterator
+                                Object value = itemsIterator.next();
+                                if (value instanceof Map.Entry<?,?>) {
+                                    Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                                    executeAssign(node, loopVariable, entry.getKey(), null, data);
+                                    executeAssign(node, loopValueVariable, entry.getValue(), null, data);
+                                } else {
+                                    executeAssign(node, loopVariable, i, null, data);
+                                    executeAssign(node, loopValueVariable, value, null, data);
+                                }
+                                if (statement != null) {
+                                    try {
+                                        // execute statement
+                                        result = statement.jjtAccept(this, data);
+                                    } catch (JexlException.Break stmtBreak) {
+                                        String target = stmtBreak.getLabel();
+                                        if (target == null || target.equals(node.getLabel())) {
+                                            break;
+                                        } else {
+                                            throw stmtBreak;
                                         }
+                                    } catch (JexlException.Continue stmtContinue) {
+                                        String target = stmtContinue.getLabel();
+                                        if (target != null && !target.equals(node.getLabel())) {
+                                            throw stmtContinue;
+                                        }
+                                        // continue
+                                    } catch (JexlException.Remove stmtRemove) {
+                                        String target = stmtRemove.getLabel();
+                                        if (target != null && !target.equals(node.getLabel())) {
+                                            throw stmtRemove;
+                                        }
+                                        itemsIterator.remove();
+                                        i -= 1;
+                                        // and continue
                                     }
                                 }
-                            } finally {
-                                // closeable iterator handling
-                                closeIfSupported(itemsIterator);
                             }
-                        }
-
-                    } else {
-                        // get an iterator for the collection/array etc via the introspector.
-                        Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, iterableValue);
-                        Iterator<?> itemsIterator = forEach instanceof Iterator
-                                                ? (Iterator<?>) forEach
-                                                : uberspect.getIterator(iterableValue);
-                        if (itemsIterator != null) {
-                            try {
-
-                                /* third objectNode is the statement to execute */
-                                JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                                while (itemsIterator.hasNext()) {
-                                    cancelCheck(node);
-                                    // set loopVariable to value of iterator
-                                    Object value = itemsIterator.next();
-                                    executeAssign(node, loopVariable, value, null, data);
-
-                                    if (statement != null) {
-                                        try {
-                                            // execute statement
-                                            result = statement.jjtAccept(this, data);
-                                        } catch (JexlException.Break stmtBreak) {
-                                            String target = stmtBreak.getLabel();
-                                            if (target == null || target.equals(node.getLabel())) {
-                                                break;
-                                            } else {
-                                                throw stmtBreak;
-                                            }
-                                        } catch (JexlException.Continue stmtContinue) {
-                                            String target = stmtContinue.getLabel();
-                                            if (target != null && !target.equals(node.getLabel())) {
-                                                throw stmtContinue;
-                                            }
-                                            // continue
-                                        } catch (JexlException.Remove stmtRemove) {
-                                            String target = stmtRemove.getLabel();
-                                            if (target != null && !target.equals(node.getLabel())) {
-                                                throw stmtRemove;
-                                            }
-                                            itemsIterator.remove();
-                                            // and continue
-                                        }
-                                    }
-                                }
-                            } finally {
-                                // closeable iterator handling
-                                closeIfSupported(itemsIterator);
-                            }
+                        } finally {
+                            // closeable iterator handling
+                            closeIfSupported(itemsIterator);
                         }
                     }
-               }
+
+                } else {
+                    // get an iterator for the collection/array etc via the introspector.
+                    Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, iterableValue);
+                    Iterator<?> itemsIterator = forEach instanceof Iterator
+                                            ? (Iterator<?>) forEach
+                                            : uberspect.getIterator(iterableValue);
+                    if (itemsIterator != null) {
+                        try {
+                            /* third objectNode is the statement to execute */
+                            JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
+
+                            final int symbol = loopVariable.getSymbol();
+                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
+
+                            while (itemsIterator.hasNext()) {
+                                cancelCheck(node);
+                                i += 1;
+                                // reset loop varaible
+                                if (lexical && i > 0) {
+                                    // clean up but remain current
+                                    block.pop();
+                                    // unlikely to fail 
+                                    if (loopSymbol && !block.declareSymbol(symbol)) {
+                                        return redefinedVariable(node, loopVariable.getName());
+                                    }
+                                }
+                                // set loopVariable to value of iterator
+                                Object value = itemsIterator.next();
+                                executeAssign(node, loopVariable, value, null, data);
+
+                                if (statement != null) {
+                                    try {
+                                        // execute statement
+                                        result = statement.jjtAccept(this, data);
+                                    } catch (JexlException.Break stmtBreak) {
+                                        String target = stmtBreak.getLabel();
+                                        if (target == null || target.equals(node.getLabel())) {
+                                            break;
+                                        } else {
+                                            throw stmtBreak;
+                                        }
+                                    } catch (JexlException.Continue stmtContinue) {
+                                        String target = stmtContinue.getLabel();
+                                        if (target != null && !target.equals(node.getLabel())) {
+                                            throw stmtContinue;
+                                        }
+                                        // continue
+                                    } catch (JexlException.Remove stmtRemove) {
+                                        String target = stmtRemove.getLabel();
+                                        if (target != null && !target.equals(node.getLabel())) {
+                                            throw stmtRemove;
+                                        }
+                                        itemsIterator.remove();
+                                        // and continue
+                                    }
+                                }
+                            }
+                        } finally {
+                            // closeable iterator handling
+                            closeIfSupported(itemsIterator);
+                        }
+                    }
+                }
+            }
         } finally {
-              // restore lexical frame
-              if (lexical)
-                  block = block.pop();
+            // restore lexical frame
+            if (lexical)
+                block = block.pop();
         }
         return result;
     }
@@ -2434,6 +2469,21 @@ public class Interpreter extends InterpreterBase {
     }
 
     /**
+     * Runs a node.
+     * @param node the node
+     * @param data the usual data
+     * @return the return value
+     */
+    protected Object visitLexicalNode(JexlNode node, Object data) {
+        block = new LexicalFrame(frame, null);
+        try {
+            return node.jjtAccept(this, data);
+        } finally {
+            block = block.pop();
+        }
+    }
+
+    /**
      * Runs a closure.
      * @param closure the closure
      * @param data the usual data
@@ -2547,9 +2597,9 @@ public class Interpreter extends InterpreterBase {
             if (value == null
                 && !(identifier.jjtGetParent() instanceof ASTReference)
                 && !(context.has(name))) {
-                return jexl.safe
+                return isSafe()
                         ? null
-                        : unsolvableVariable(identifier, name, !(identifier.getSymbol() >= 0 || context.has(name)));
+                        : unsolvableVariable(identifier, name, true);
             }
             return value;
         } else {
