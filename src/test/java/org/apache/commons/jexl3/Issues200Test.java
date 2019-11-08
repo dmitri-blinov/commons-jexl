@@ -848,7 +848,7 @@ public class Issues200Test extends JexlTestCase {
         try {
             result = script.execute(ctxt, 0);
         } catch (JexlException xvar) {
-            Assert.fail("should not have failed!");
+            Assert.fail("should not have failed! " + xvar);
         }
         Assert.assertNull(result);
     }

@@ -294,14 +294,15 @@ public class PrimitivesTest extends JexlTestCase {
 
     @Test
     public void testRedeclaration() throws Exception {
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
         JexlContext jc = new MapContext();
 
-        JexlScript e = JEXL.createScript("long x = 42; int x = 42; x");
+        JexlScript e = jexl.createScript("long x = 42; int x = 42; x");
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Integer);
         Assert.assertEquals("Result is not true", 42, o);
 
-        e = JEXL.createScript("int x = 42; long x = 42; x");
+        e = jexl.createScript("int x = 42; long x = 42; x");
         o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o instanceof Long);
         Assert.assertEquals("Result is not true", 42L, o);

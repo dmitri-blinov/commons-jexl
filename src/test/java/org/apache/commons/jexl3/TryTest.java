@@ -101,20 +101,21 @@ public class TryTest extends JexlTestCase {
 
     @Test
     public void testBreakInsideTry() throws Exception {
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
         JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("for (var i : 42..43) try {break} finally {}; i");
+        JexlScript e = jexl.createScript("for (var i : 42..43) try {break} finally {}; i");
         Object o = e.execute(jc);
         Assert.assertEquals(42, o);
 
-        e = JEXL.createScript("for (var i : 42..43) try {} finally {break}; i");
+        e = jexl.createScript("for (var i : 42..43) try {} finally {break}; i");
         o = e.execute(jc);
         Assert.assertEquals(42, o);
 
-        e = JEXL.createScript("for (var i : 42..43) try {break} catch(var e) {}; i");
+        e = jexl.createScript("for (var i : 42..43) try {break} catch(var e) {}; i");
         o = e.execute(jc);
         Assert.assertEquals(42, o);
 
-        e = JEXL.createScript("for (var i : 42..43) try {42/0} catch(var e) {break}; i");
+        e = jexl.createScript("for (var i : 42..43) try {42/0} catch(var e) {break}; i");
         o = e.execute(jc);
         Assert.assertEquals(42, o);
     }

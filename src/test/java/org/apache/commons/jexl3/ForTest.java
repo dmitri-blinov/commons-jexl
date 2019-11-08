@@ -46,7 +46,8 @@ public class ForTest extends JexlTestCase {
 
     @Test
     public void testForInitialization() throws Exception {
-        JexlScript e = JEXL.createScript("for(var i = 0;;) break; i");
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0;;) break; i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 0, o);
@@ -58,19 +59,21 @@ public class ForTest extends JexlTestCase {
 
     @Test
     public void testForTermination() throws Exception {
-        JexlScript e = JEXL.createScript("for(var i = 0; i < 10;) i = i + 1; i");
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0; i < 10;) i = i + 1; i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 10, o);
 
-        e = JEXL.createScript("var i = 0; for(;i < 10;) i = i + 1; i");
+        e = jexl.createScript("var i = 0; for(;i < 10;) i = i + 1; i");
         o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 10, o);
     }
 
     @Test
     public void testForIncrement() throws Exception {
-        JexlScript e = JEXL.createScript("for(var i = 0; i < 10; i = i + 1); i");
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0; i < 10; i = i + 1); i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 10, o);
@@ -78,7 +81,8 @@ public class ForTest extends JexlTestCase {
 
     @Test
     public void testForBreak() throws Exception {
-        JexlScript e = JEXL.createScript("for(var i = 0; i < 10; i = i + 1) if (i > 5) break; i");
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0; i < 10; i = i + 1) if (i > 5) break; i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 6, o);
