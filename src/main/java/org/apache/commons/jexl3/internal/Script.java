@@ -18,6 +18,8 @@ package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlInfo;
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlScript;
@@ -28,6 +30,7 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.jexl3.JexlFeatures;
 
 import java.util.concurrent.Callable;
 
@@ -103,13 +106,29 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     /**
+     * Creates this script options for evaluation.
+     * <p>This also calls the pragma processor
+     * @param context the context
+     * @return the options
+     */
+    protected JexlOptions createOptions(JexlContext context) {
+        JexlOptions opts = jexl.createOptions(this, context);
+        // when parsing lexical, try hard to run lexical
+        JexlFeatures features = script.getFeatures();
+        if (features != null && features.isLexical()) {
+            opts.setLexical(true);
+        }
+        return opts;
+    }
+
+    /**
      * Creates this script interpreter.
      * @param context the context
      * @param frame the calling frame
      * @return  the interpreter
      */
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
-        return jexl.createInterpreter(context, frame);
+        return jexl.createInterpreter(context, frame, createOptions(context));
     }
 
     /**
@@ -395,6 +414,13 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     /**
+     * @return the info
+     */
+    public JexlInfo getInfo() {
+        return script.jexlInfo();
+    }
+
+    /**
      * Gets this script variables.
      * <p>Note that since variables can be in an ant-ish form (ie foo.bar.quux), each variable is returned as
      * a list of strings where each entry is a fragment of the variable ({"foo", "bar", "quux"} in the example.</p>
@@ -437,7 +463,7 @@ public class Script implements JexlScript, JexlExpression {
      */
     @Override
     public Callable callable(JexlContext context, Object... args) {
-        return new CallableScript(jexl.createInterpreter(context, script.createFrame(scriptArgs(args))));
+        return new CallableScript(createInterpreter(context, script.createFrame(scriptArgs(args))));
     }
 
     /**
