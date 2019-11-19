@@ -312,33 +312,37 @@ public class Engine extends JexlEngine {
     }
 
     /**
-     * Extracts the engine evaluation options from context.
+     * Extracts the engine evaluation options from context if available, the engine
+     * options otherwise.
+     * <p>This creates a copy of the options so they are immutable during
+     * execution.
      * @param context the context
      * @return the options if any
      */
     JexlOptions options(JexlContext context) {
-        JexlOptions jexlo = null;
+        // Make a copy of the handled options if any
         if (context instanceof JexlContext.OptionsHandle) {
-            jexlo = ((JexlContext.OptionsHandle) context).getEngineOptions();
-        }
-        if (jexlo == null) {
-            jexlo = options;
-            /** The following block for compatibility between 3.1 and 3.2*/
-            if (context instanceof JexlEngine.Options) {
-                jexlo = jexlo.copy();
-                JexlEngine jexl = this;
-                JexlEngine.Options opts = (JexlEngine.Options) context;
-                jexlo.setCancellable(option(opts.isCancellable(), jexl.isCancellable()));
-                jexlo.setAssertions(option(opts.isAssertions(), jexl.isAssertions()));
-                jexlo.setSilent(option(opts.isSilent(), jexl.isSilent()));
-                jexlo.setStrict(option(opts.isStrict(), jexl.isStrict()));
-                JexlArithmetic jexla = jexl.getArithmetic();
-                jexlo.setStrictArithmetic(option(opts.isStrictArithmetic(), jexla.isStrict()));
-                jexlo.setMathContext(opts.getArithmeticMathContext());
-                jexlo.setMathScale(opts.getArithmeticMathScale());
+            JexlOptions jexlo = ((JexlContext.OptionsHandle) context).getEngineOptions();
+            if (jexlo != null) {
+                return jexlo.isSharedInstance()? jexlo : jexlo.copy();
             }
         }
-        return jexlo;
+        // The following block for compatibility between 3.1 and 3.2
+        else if (context instanceof JexlEngine.Options) {
+            JexlOptions jexlo = options.copy();
+            JexlEngine jexl = this;
+            JexlEngine.Options opts = (JexlEngine.Options) context;
+            jexlo.setCancellable(option(opts.isCancellable(), jexl.isCancellable()));
+            jexlo.setAssertions(option(opts.isAssertions(), jexl.isAssertions()));
+            jexlo.setSilent(option(opts.isSilent(), jexl.isSilent()));
+            jexlo.setStrict(option(opts.isStrict(), jexl.isStrict()));
+            JexlArithmetic jexla = jexl.getArithmetic();
+            jexlo.setStrictArithmetic(option(opts.isStrictArithmetic(), jexla.isStrict()));
+            jexlo.setMathContext(opts.getArithmeticMathContext());
+            jexlo.setMathScale(opts.getArithmeticMathScale());
+            return jexlo;
+        }
+        return options;
     }
 
     /**
@@ -363,7 +367,7 @@ public class Engine extends JexlEngine {
             cache.clear();
         }
     }
-       
+
     /**
      * Sets options from this engine options.
      * @param opts the options to set
@@ -375,7 +379,7 @@ public class Engine extends JexlEngine {
         }
         return opts;
     }
-    
+
     /**
      * Creates a script evaluation options.
      * <p>This also calls the pragma processor if any
@@ -394,7 +398,7 @@ public class Engine extends JexlEngine {
             for(Map.Entry<String, Object> pragma : pragmas.entrySet()) {
                 String key = pragma.getKey();
                 Object value = pragma.getValue();
-                if (PRAGMA_OPTIONS.equals(key) && opts != null) {
+                if (PRAGMA_OPTIONS.equals(key)) {
                     if (value instanceof String) {
                         String[] vs = ((String) value).split(" ");
                         opts.setFlags(vs);
@@ -407,7 +411,7 @@ public class Engine extends JexlEngine {
         }
         return opts;
     }
-    
+
     /**
      * Creates an interpreter.
      * @param context a JexlContext; if null, the empty context is used instead.
