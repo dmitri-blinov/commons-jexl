@@ -325,10 +325,9 @@ public class Engine extends JexlEngine {
             JexlOptions jexlo = ((JexlContext.OptionsHandle) context).getEngineOptions();
             if (jexlo != null) {
                 return jexlo.isSharedInstance()? jexlo : jexlo.copy();
-            }
-        }
-        // The following block for compatibility between 3.1 and 3.2
-        else if (context instanceof JexlEngine.Options) {
+            } 
+        } else if (context instanceof JexlEngine.Options) {
+            // This condition and block for compatibility between 3.1 and 3.2
             JexlOptions jexlo = options.copy();
             JexlEngine jexl = this;
             JexlEngine.Options opts = (JexlEngine.Options) context;
@@ -434,7 +433,7 @@ public class Engine extends JexlEngine {
             throw new NullPointerException("source is null");
         }
         String source = trimSource(scriptText);
-        Scope scope = names == null ? null : new Scope(null, names);
+        Scope scope = names == null || names.length == 0? null : new Scope(null, names);
         JexlFeatures ftrs = features == null? scriptFeatures : features;
         ASTJexlScript tree = parse(info, ftrs, source, scope);
         return new Script(this, source, tree);
