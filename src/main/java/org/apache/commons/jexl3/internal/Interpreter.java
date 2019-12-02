@@ -1467,6 +1467,7 @@ public class Interpreter extends InterpreterBase {
             }
             block = locals;
         }
+
         try {
             /* second objectNode is the variable to iterate */
             Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
@@ -1492,19 +1493,6 @@ public class Interpreter extends InterpreterBase {
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
-                                // reset loop varaible
-                                if (lexical && i > 0) {
-                                    // clean up but remain current
-                                    block.pop();
-                                    // unlikely to fail
-                                    if (loopSymbol && !block.declareSymbol(symbol)) {
-                                        return redefinedVariable(node, loopVariable.getName());
-                                    }
-                                    if (loopSymbol && !block.declareSymbol(valueSymbol)) {
-                                        return redefinedVariable(node, loopValueVariable.getName());
-                                    }
-
-                                }
                                 // set loopVariable to value of iterator
                                 Object value = itemsIterator.next();
                                 if (value instanceof Map.Entry<?,?>) {
@@ -1566,15 +1554,6 @@ public class Interpreter extends InterpreterBase {
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
-                                // reset loop varaible
-                                if (lexical && i > 0) {
-                                    // clean up but remain current
-                                    block.pop();
-                                    // unlikely to fail
-                                    if (loopSymbol && !block.declareSymbol(symbol)) {
-                                        return redefinedVariable(node, loopVariable.getName());
-                                    }
-                                }
                                 // set loopVariable to value of iterator
                                 Object value = itemsIterator.next();
                                 executeAssign(node, loopVariable, value, null, data);

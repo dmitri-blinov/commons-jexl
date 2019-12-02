@@ -98,10 +98,6 @@ public class LexicalScope {
     public LexicalScope(Frame frame, LexicalScope scope) {
         if (frame != null) {
             this.frame = frame;
-            int argc = frame.getScope().getArgCount();
-            for(int a  = 0; a < argc; ++a) {
-                declareSymbol(a);
-            }
         } else {
             this.frame = scope != null ? scope.frame : null;
         }

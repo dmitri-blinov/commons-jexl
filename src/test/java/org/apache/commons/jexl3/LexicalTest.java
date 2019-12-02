@@ -473,11 +473,35 @@ public class LexicalTest {
     
     @Test
     public void testParameter1() throws Exception {
-        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlEngine jexl = new JexlBuilder().strict(true).safe(false).lexical(true).create();
         JexlContext jc = new MapContext();
-        String strs = "var s = function(x) { for (var i : 1..3) {if (i > 2) return x}}; s(42)";
+        String strs = "var s = function(x) { for (var i : 1..2) {if (i > 1) return x}}; s(42)";
         JexlScript s42 = jexl.createScript(strs);
         Object result = s42.execute(jc);
         Assert.assertEquals(42, result);
     }
+
+    @Test
+    public void test285() throws Exception {
+        JexlContext ctxt = new MapContext();
+        String src = "for(var b: ['g','i']) {var c = b}";
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(true).create();
+        JexlScript script = jexl.createScript(src);
+        Object result = script.execute(ctxt, (Object) null);
+        Assert.assertEquals("i", result);
+    }
+
+    @Test
+    public void test286() throws Exception {
+        JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        JexlEvalContext ctxt = new JexlEvalContext();
+        JexlOptions options = ctxt.getEngineOptions();
+        // ensure errors will throw
+        options.setLexical(true);
+        JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { return x; }})();");
+    }
+
+
 }

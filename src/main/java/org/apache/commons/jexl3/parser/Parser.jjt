@@ -692,7 +692,7 @@ void Break() #Break :
 
 ASTForStatement ForStatement() :
 {
-    pushUnit(jjtThis, true);
+    pushUnit(jjtThis);
 }
 {
     <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
@@ -719,7 +719,7 @@ void ForIncrementNode() : {}
 
 ASTForeachStatement ForeachStatement() : 
 {
-    pushUnit(jjtThis, true);
+    pushUnit(jjtThis);
 }
 {
     <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } StatementBranch() { branchScope.foreachLoopCount -= 1; }
@@ -1691,7 +1691,7 @@ void LambdaLookahead() #void() : {}
 void Lambda() #JexlLambda() :
 {
    pushFrame();
-   pushUnit(jjtThis, true);
+   pushUnit(jjtThis);
 }
 {
    LOOKAHEAD(2) <FUNCTION> Parameters() Block()

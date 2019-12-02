@@ -313,9 +313,9 @@ public abstract class JexlParser extends StringParser {
             Integer symbol = frame.getSymbol(name);
             if (symbol != null) {
                 // can not reuse a local as a global
-                if (!block.hasSymbol(symbol) && getFeatures().isLexical()) {
-                    throw new JexlException(identifier,  name + ": variable is not defined");
-                }
+                // if (!block.hasSymbol(symbol) && getFeatures().isLexical()) {
+                //    throw new JexlException(identifier,  name + ": variable is not defined");
+                // }
                 identifier.setSymbol(symbol, name);
             }
         }
