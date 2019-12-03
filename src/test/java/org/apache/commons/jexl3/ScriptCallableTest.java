@@ -121,7 +121,7 @@ public class ScriptCallableTest extends JexlTestCase {
         ctxt.set("latch", latch);
 
         JexlScript e = JEXL.createScript("latch.release(); while(true);");
-        final Script.Callable c = (Script.Callable) e.callable(ctxt);
+        final Script.CallableScript c = (Script.CallableScript) e.callable(ctxt);
         Object t = 42;
         Callable<Object> kc = new Callable<Object>() {
             @Override
