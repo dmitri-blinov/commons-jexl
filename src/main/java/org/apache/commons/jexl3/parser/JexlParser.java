@@ -69,7 +69,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * When parsing inner functions/lambda, need to stack the scope (sic).
      */
-    protected Deque<Scope> frames = new ArrayDeque<Scope>();
+    protected final Deque<Scope> frames = new ArrayDeque<Scope>();
     /**
      * The list of pragma declarations.
      */
@@ -89,7 +89,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Stack of lexical blocks.
      */
-    protected Deque<LexicalUnit> blocks = new ArrayDeque<LexicalUnit>();
+    protected final Deque<LexicalUnit> blocks = new ArrayDeque<LexicalUnit>();
 
     /**
      * A lexical unit is the container defining local symbols and their
@@ -260,31 +260,13 @@ public abstract class JexlParser extends StringParser {
 
     /**
      * Pushes a new lexical unit.
-     * <p>The merge flag allows the for(...) and lamba(...) constructs to
-     * merge in the next block since their loop-variable/parameter spill in the
-     * same lexical unit as their first block.
      * @param unit the new lexical unit
-     * @param merge whether the next unit merges in this one
      */
-    protected void pushUnit(LexicalUnit unit, boolean merge) {
-        if (merge) {
-            mergeBlock = true;
-        } else if (mergeBlock) {
-            mergeBlock = false;
-            return;
-        }
+    protected void pushUnit(LexicalUnit unit) {
         if (block != null) {
             blocks.push(block);
         }
         block = unit;
-    }
-
-    /**
-     * Pushes a block as new lexical unit.
-     * @param unit the lexical unit
-     */
-    protected void pushUnit(LexicalUnit unit) {
-        pushUnit(unit, false);
     }
 
     /**
@@ -313,9 +295,21 @@ public abstract class JexlParser extends StringParser {
             Integer symbol = frame.getSymbol(name);
             if (symbol != null) {
                 // can not reuse a local as a global
-                // if (!block.hasSymbol(symbol) && getFeatures().isLexical()) {
-                //    throw new JexlException(identifier,  name + ": variable is not defined");
-                // }
+                if (getFeatures().isLexical()) {
+                    // one of the lexical blocks above must declare it
+                    if (!block.hasSymbol(symbol)) {
+                        boolean declared = false;
+                        for (LexicalUnit u : blocks) {
+                            if (u.hasSymbol(symbol)) {
+                                declared = true;
+                                break;
+                            }
+                        }
+                        if (!declared) {
+                            throw new JexlException(identifier, name + ": variable is not defined");
+                        }
+                    }
+                }
                 identifier.setSymbol(symbol, name);
             }
         }
@@ -420,7 +414,7 @@ public abstract class JexlParser extends StringParser {
         var.setSymbol(symbol, name);
         // lexical feature error
         if (getFeatures().isLexical()) {
-            if (!declareSymbol(symbol, var.getType(), var.isFinal(), var.isRequired())) 
+            if (!declareSymbol(symbol, var.getType(), var.isFinal(), var.isRequired()))
                 throw new JexlException(var,  name + ": variable is already declared");
         } else {
             declareSymbol(symbol);

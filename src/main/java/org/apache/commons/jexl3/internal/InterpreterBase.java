@@ -20,6 +20,7 @@ package org.apache.commons.jexl3.internal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -66,7 +67,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     /** Cache executors. */
     protected final boolean cache;
     /** Cancellation support. */
-    protected volatile boolean cancelled = false;
+    protected final AtomicBoolean cancelled;
     /** Empty parameters for method matching. */
     protected static final Object[] EMPTY_PARAMS = new Object[0];
     /** The context to store/retrieve variables. */
@@ -103,6 +104,11 @@ public abstract class InterpreterBase extends ParserVisitor {
         } else {
             ns = Engine.EMPTY_NS;
         }
+        AtomicBoolean acancel = null;
+        if (this.context instanceof JexlContext.CancellationHandle) {
+            acancel = ((JexlContext.CancellationHandle) context).getCancellation();
+        }
+        this.cancelled = acancel != null? acancel : new AtomicBoolean(false);
         this.functions = jexl.functions;
         this.functors = null;
         this.operators = new Operators(this);
@@ -121,6 +127,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         arithmetic = ii.arithmetic;
         cache = ii.cache;
         ns = ii.ns;
+        cancelled = ii.cancelled;
         functions = ii.functions;
         functors = ii.functors;
         operators = ii.operators;
@@ -580,12 +587,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return false if already cancelled, true otherwise
      */
     protected  boolean cancel() {
-        if (cancelled) {
-            return false;
-        } else {
-            cancelled = true;
-            return true;
-        }
+        return cancelled.compareAndSet(false, true);
     }
 
     /**
@@ -593,7 +595,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return true if cancelled, false otherwise
      */
     protected boolean isCancelled() {
-        return cancelled | Thread.currentThread().isInterrupted();
+        return cancelled.get() | Thread.currentThread().isInterrupted();
     }
 
     /**

@@ -298,7 +298,7 @@ public class LexicalTest {
             Assert.fail(ww);
         }
     }
-        
+
     @Test
     public void testLexical6a() throws Exception {
         String str = "i = 0; { var i = 32; }; i";
@@ -307,7 +307,7 @@ public class LexicalTest {
         JexlContext ctxt = new MapContext();
         Object o = e.execute(ctxt);
         Assert.assertEquals(0, o);
-    }   
+    }
 
     @Test
     public void testLexical6b() throws Exception {
@@ -346,7 +346,7 @@ public class LexicalTest {
             Assert.assertNotNull(xany);
         }
     }
-    
+
     @Test
     public void testPragmaOptions() throws Exception {
         // same as 6d but using a pragma
@@ -362,7 +362,7 @@ public class LexicalTest {
             Assert.assertNotNull(xany);
         }
     }
-    
+
     @Test
     public void testPragmaNoop() throws Exception {
         // unknow pragma
@@ -373,8 +373,8 @@ public class LexicalTest {
         Object result = e.execute(ctxt);
         Assert.assertEquals(42, result);
     }
-    
-    
+
+
     @Test
     public void testScopeFrame() throws Exception {
         LexicalScope scope = new LexicalScope(null);
@@ -387,7 +387,7 @@ public class LexicalTest {
             Assert.assertFalse(scope.hasSymbol(i + 1));
         }
     }
-    
+
     @Test
     public void testContextualOptions0() throws Exception {
         JexlFeatures f= new JexlFeatures();
@@ -406,7 +406,7 @@ public class LexicalTest {
             Assert.assertNotNull(xf);
         }
     }
-    
+
     /**
      * Context augmented with a tryCatch.
      */
@@ -460,7 +460,7 @@ public class LexicalTest {
         // result is exception!
         Assert.assertTrue(result instanceof JexlException.Variable);
     }
-    
+
     @Test
     public void testParameter0() throws Exception {
         String str = "function(u) {}";
@@ -469,8 +469,8 @@ public class LexicalTest {
         Assert.assertEquals(1, e.getParameters().length);
         e = jexl.createScript(new JexlInfo("TestScript", 1, 1), str);
         Assert.assertEquals(1, e.getParameters().length);
-    } 
-    
+    }
+
     @Test
     public void testParameter1() throws Exception {
         JexlEngine jexl = new JexlBuilder().strict(true).safe(false).lexical(true).create();
@@ -480,28 +480,18 @@ public class LexicalTest {
         Object result = s42.execute(jc);
         Assert.assertEquals(42, result);
     }
-
+        
     @Test
-    public void test285() throws Exception {
-        JexlContext ctxt = new MapContext();
-        String src = "for(var b: ['g','i']) {var c = b}";
-        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(true).create();
-        JexlScript script = jexl.createScript(src);
-        Object result = script.execute(ctxt, (Object) null);
-        Assert.assertEquals("i", result);
-    }
-
-    @Test
-    public void test286() throws Exception {
+    public void testInnerAccess0() throws Exception {
         JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
-        JexlEvalContext ctxt = new JexlEvalContext();
-        JexlOptions options = ctxt.getEngineOptions();
-        // ensure errors will throw
-        options.setLexical(true);
-        JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { return x; }})();");
+        JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { var c = 0; {return x; }} })();");
     }
 
-
+    @Test
+    public void testInnerAccess1() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
+        JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { var c = 0; {return x; }} })();");
+    }
 }

@@ -375,10 +375,10 @@ TOKEN_MGR_DECLS : {
  *      Statements
  ***************************************/
 
-ASTJexlScript JexlScript(Scope frame) : 
+ASTJexlScript JexlScript(Scope frame) :
 {
-    jjtThis.setScope(frame);  
-    pushUnit(jjtThis, frame != null && frame.getArgCount() > 0);
+    jjtThis.setScope(frame);
+    pushUnit(jjtThis);
 }
 {
    (LOOKAHEAD(<PRAGMA>) Pragma())*
@@ -393,10 +393,10 @@ ASTJexlScript JexlScript(Scope frame) :
    }
 }
 
-ASTJexlScript JexlExpression(Scope frame) #JexlScript : 
+ASTJexlScript JexlExpression(Scope frame) #JexlScript :
 {
     jjtThis.setScope(frame);
-    pushUnit(jjtThis, true);
+    pushUnit(jjtThis);
 }
 {
    ( Expression() )? <EOF>
@@ -515,14 +515,14 @@ void LabelledStatement() #void :
 }
 
 ASTBlock Block() #Block :
-{ 
-   pushUnit(jjtThis); 
+{
+   pushUnit(jjtThis);
 }
 {
     <LCURLY> (GenericStatement())* <RCURLY>
-    { 
+    {
        popUnit(jjtThis);
-       return jjtThis; 
+       return jjtThis;
     }
 }
 
@@ -569,27 +569,27 @@ ASTDoWhileStatement DoWhileStatement() : {}
 
 ASTTryStatement TryStatement() : {}
 {
-    <TRY> Block() 
-    ( 
-      <CATCH> { pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
-      | 
-      <FINALLY> Block() 
+    <TRY> Block()
+    (
+      <CATCH> { pushUnit(jjtThis); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
+      |
+      <FINALLY> Block()
     )
     { return jjtThis; }
 }
 
 ASTTryWithResourceStatement TryWithResourceStatement() :
-{   
-   pushUnit(jjtThis, true); 
+{
+   pushUnit(jjtThis);
 }
 {
-    <TRY> <LPAREN> TryResource() <RPAREN> Block() 
-    { 
-      popUnit(jjtThis); 
+    <TRY> <LPAREN> TryResource() <RPAREN> Block()
+    {
+      popUnit(jjtThis);
     }
-    [ 
-      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis, true); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ] 
-      | 
+    [
+      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
+      |
       <FINALLY> Block()
     ]
     { return jjtThis; }
@@ -697,7 +697,7 @@ ASTForStatement ForStatement() :
 {
     <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
     {
-      popUnit(jjtThis); 
+      popUnit(jjtThis);
       return jjtThis;
     }
 }
@@ -717,14 +717,14 @@ void ForIncrementNode() : {}
     (Expression())?
 }
 
-ASTForeachStatement ForeachStatement() : 
+ASTForeachStatement ForeachStatement() :
 {
     pushUnit(jjtThis);
 }
 {
     <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } StatementBranch() { branchScope.foreachLoopCount -= 1; }
     {
-      popUnit(jjtThis); 
+      popUnit(jjtThis);
       return jjtThis;
     }
 }
@@ -1701,8 +1701,8 @@ void Lambda() #JexlLambda() :
    Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
    |
    Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
-{ 
-   popUnit(jjtThis); 
+{
+   popUnit(jjtThis);
 }
 }
 
