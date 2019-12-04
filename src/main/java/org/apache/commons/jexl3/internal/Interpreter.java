@@ -1420,8 +1420,10 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTForInitializationNode node, Object data) {
         Object result = null;
-        if (node.jjtGetNumChildren() > 0)
-            result = node.jjtGetChild(0).jjtAccept(this, data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            result = node.jjtGetChild(i).jjtAccept(this, data);
+        }
         return result;
     }
 
@@ -1436,8 +1438,10 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTForIncrementNode node, Object data) {
         Object result = null;
-        if (node.jjtGetNumChildren() > 0)
-            result = node.jjtGetChild(0).jjtAccept(this, data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            result = node.jjtGetChild(i).jjtAccept(this, data);
+        }
         return result;
     }
 

@@ -888,8 +888,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTForInitializationNode node, Object data) {
-        if (node.jjtGetNumChildren() > 0)
-            accept(node.jjtGetChild(0), data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            if (i > 0)
+                builder.append(',');
+            JexlNode child = node.jjtGetChild(i);
+            accept(child, data);
+        }
         return data;
     }
 
@@ -902,8 +907,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTForIncrementNode node, Object data) {
-        if (node.jjtGetNumChildren() > 0)
-            accept(node.jjtGetChild(0), data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            if (i > 0)
+                builder.append(',');
+            JexlNode child = node.jjtGetChild(i);
+            accept(child, data);
+        }
         return data;
     }
 

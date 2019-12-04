@@ -702,19 +702,24 @@ ASTForStatement ForStatement() :
     }
 }
 
+void ForInitializationExpression() #void : {}
+{
+    LOOKAHEAD(DeclareLocalVar()) Var() | Expression()
+}
+
 void ForInitializationNode() : {}
 {
-    (LOOKAHEAD(DeclareLocalVar()) Var() | Expression())?
+    [ ForInitializationExpression() (<COMMA> ForInitializationExpression() )* ]
 }
 
 void ForTerminationNode() : {}
 {
-    (ConditionalExpression())?
+    [ ConditionalExpression() ]
 }
 
 void ForIncrementNode() : {}
 {
-    (Expression())?
+    [ Expression() (<COMMA> Expression())* ]
 }
 
 ASTForeachStatement ForeachStatement() :
