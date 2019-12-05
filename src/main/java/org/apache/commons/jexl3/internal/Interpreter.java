@@ -1490,11 +1490,6 @@ public class Interpreter extends InterpreterBase {
                         try {
                             /* third objectNode is the statement to execute */
                             JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                            final int symbol = loopVariable.getSymbol();
-                            final int valueSymbol = loopValueVariable.getSymbol();
-                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
@@ -1552,10 +1547,6 @@ public class Interpreter extends InterpreterBase {
                         try {
                             /* third objectNode is the statement to execute */
                             JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                            final int symbol = loopVariable.getSymbol();
-                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
