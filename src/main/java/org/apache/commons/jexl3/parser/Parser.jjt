@@ -423,7 +423,7 @@ void GenericStatement() #void : {}
 {
     <SEMICOL>
     | AnnotatedStatement()
-    | FunctionStatement()
+    | LOOKAHEAD(<FUNCTION> <IDENTIFIER>) FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(Expression()) ExpressionStatement()
