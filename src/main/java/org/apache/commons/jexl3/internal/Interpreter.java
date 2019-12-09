@@ -75,6 +75,7 @@ import org.apache.commons.jexl3.parser.ASTForIncrementNode;
 import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
+import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
@@ -1277,6 +1278,17 @@ public class Interpreter extends InterpreterBase {
         cancelCheck(node);
         Object result = node.jjtGetChild(0).jjtAccept(this, data);
         return result;
+    }
+
+    @Override
+    protected Object visit(ASTFunctionStatement node, Object data) {
+        cancelCheck(node);
+        // Declare variable
+        JexlNode left = node.jjtGetChild(0);
+        left.jjtAccept(this, data);
+        // Create function
+        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(1));
+        return executeAssign(node, left, right, null, data);
     }
 
     @Override
@@ -3171,7 +3183,7 @@ public class Interpreter extends InterpreterBase {
                     frame.set(symbol, right);
                     // make the closure accessible to itself, ie hoist the currently set variable after frame creation
                     if (right instanceof Closure) {
-                        ((Closure) right).setHoisted(symbol, right);
+                         ((Closure) right).setHoisted(symbol, right);
                     }
                     return right; // 1
                 }

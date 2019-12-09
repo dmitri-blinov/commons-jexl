@@ -128,7 +128,7 @@
                 <tr>
                     <td>Statements</td>
                     <td>
-                        A statement can be the empty statement, the semicolon (<code>;</code>), block, control statement, variable declaration, multiple assignment, or an expression.
+                        A statement can be the empty statement, the semicolon (<code>;</code>), block, control statement, variable declaration, function definition, multiple assignment, or an expression.
                         Statements are optionally terminated with a semicolon.
                         A single statement or a statement block can be annotated.
                     </td>
@@ -244,8 +244,8 @@
                 <tr>
                     <td>Function definition</td>
                     <td>
-                        Defines a function within the script, usually associated with a local variable assignment.
-                        <code>var fun = function(x, y) { x + y }</code>
+                        Defines a function within the script, usually associated with a local variable assignment, e.g.
+                        <code>var fun = function(x, y) { x + y }</code> and <code>function fun(x,y) { x + y} </code> are equivalent.
                         Function parameters can be declared by using optional <code>var</code> keyword in parameter declaration list
                         <code>var fun = function(var x, var y) { x + y }</code>
                         A parameter can be defined as final by using <code>final</code> keyword in parameter declaration,
@@ -267,11 +267,11 @@
                         If a function has only one untyped non-final argument and does not accept variable number of arguments
                         then the parentheses around that argument may be omitted
                         <code>var fun = x -> { x * x }</code>
-                        <p>Note that functions can also use local variables and parameters from the outer scope they are declared in.
+                        <p>Note that functions can also capture local variables and parameters from the outer scope they are declared in.
                             The values of those variables are bound to the function context at a definition time and
                             remain unchanged afterwards. Such variables are also considered implicitly final inside the function scope.</p>
                         <code>var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7)</code>
-                        The function closure hoists 't' when defined; the result of the evaluation will
+                        The function closure captures 't' when defined; the result of the evaluation will
                         lead to <code>15 + 7 + 20 = 42</code>.
                     </td>
                 </tr>

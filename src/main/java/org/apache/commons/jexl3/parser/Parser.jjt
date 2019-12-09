@@ -423,6 +423,7 @@ void GenericStatement() #void : {}
 {
     <SEMICOL>
     | AnnotatedStatement()
+    | FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(Expression()) ExpressionStatement()
@@ -546,6 +547,31 @@ void AssignmentIdentifier() #void : {}
     UnderscoreLiteral()
     |
     Identifier(true)
+}
+
+void FunctionStatement() : {}
+{
+    <FUNCTION> FunctionVar() Function() 
+}
+
+void FunctionVar() #Var :
+{
+    Token t;    
+}
+{
+    t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
+}
+
+void Function() #JexlLambda() :
+{
+   pushFrame();
+   pushUnit(jjtThis);
+}
+{
+   Parameters() ( Block() | <LAMBDAE> Expression() )
+{
+   popUnit(jjtThis);
+}
 }
 
 ASTIfStatement IfStatement() : {}
