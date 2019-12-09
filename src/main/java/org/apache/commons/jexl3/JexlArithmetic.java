@@ -1445,7 +1445,8 @@ public class JexlArithmetic {
             return ((ThreadLocal) object).get();
         }
         if (object instanceof Optional) {
-            return ((Optional) object).get();
+            Optional o = (Optional) object;
+            return strict || o.isPresent() ? o.get() : null;
         }
         if (object instanceof AtomicReference) {
             return ((AtomicReference) object).get();
