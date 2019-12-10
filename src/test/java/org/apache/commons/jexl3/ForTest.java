@@ -96,4 +96,23 @@ public class ForTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 5+6+7+8+9, o);
     }
 
+    @Test
+    public void testForMultipleInitialization() throws Exception {
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0, var j = 1;;) return j");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
+    @Test
+    public void testForMultipleIncrement() throws Exception {
+        JexlEngine jexl = new JexlBuilder().safe(false).strict(true).lexical(false).create();
+        JexlScript e = jexl.createScript("for(var i = 0; i < 10; i = i + 1, i = i + 10); i");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 11, o);
+    }
+
+
 }

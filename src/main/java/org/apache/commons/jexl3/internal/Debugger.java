@@ -60,6 +60,7 @@ import org.apache.commons.jexl3.parser.ASTForTerminationNode;
 import org.apache.commons.jexl3.parser.ASTForIncrementNode;
 import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
+import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
@@ -888,8 +889,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTForInitializationNode node, Object data) {
-        if (node.jjtGetNumChildren() > 0)
-            accept(node.jjtGetChild(0), data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            if (i > 0)
+                builder.append(',');
+            JexlNode child = node.jjtGetChild(i);
+            accept(child, data);
+        }
         return data;
     }
 
@@ -902,8 +908,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTForIncrementNode node, Object data) {
-        if (node.jjtGetNumChildren() > 0)
-            accept(node.jjtGetChild(0), data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            if (i > 0)
+                builder.append(',');
+            JexlNode child = node.jjtGetChild(i);
+            accept(child, data);
+        }
         return data;
     }
 
@@ -1063,6 +1074,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
+    protected Object visit(ASTFunctionStatement node, Object data) {
+        builder.append("function ");
+        accept(node.jjtGetChild(0), data);
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
     protected Object visit(ASTIfStatement node, Object data) {
         final int numChildren = node.jjtGetNumChildren();
         // if (...) ...
@@ -1131,6 +1150,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             if (named) {
                 builder.append("function");
             }
+            boolean function = parent instanceof ASTFunctionStatement;
 
             Scope scope = node.getScope();
 
@@ -1149,7 +1169,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 }
             }
 
-            if (named || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
+            if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
                 builder.append('(');
 
             if (params != null && params.length > 0) {
@@ -1180,7 +1200,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     builder.append("...");
             }
 
-            if (named || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
+            if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
                 builder.append(')');
 
             if (named) {
@@ -1188,7 +1208,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             } else {
                 if (expr) {
                     builder.append("=>");
-                } else {
+                } else if (!function) {
                     builder.append("->");
                 }
             }

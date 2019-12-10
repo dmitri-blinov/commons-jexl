@@ -426,6 +426,7 @@ void GenericStatement() #void : {}
 {
     <SEMICOL>
     | AnnotatedStatement()
+    | LOOKAHEAD(<FUNCTION> <IDENTIFIER>) FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(Expression()) ExpressionStatement()
@@ -549,6 +550,31 @@ void AssignmentIdentifier() #void : {}
     UnderscoreLiteral()
     |
     Identifier(true)
+}
+
+void FunctionStatement() : {}
+{
+    <FUNCTION> FunctionVar() Function() 
+}
+
+void FunctionVar() #Var :
+{
+    Token t;    
+}
+{
+    t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
+}
+
+void Function() #JexlLambda() :
+{
+   pushFrame();
+   pushUnit(jjtThis);
+}
+{
+   Parameters() ( Block() | <LAMBDAE> Expression() )
+{
+   popUnit(jjtThis);
+}
 }
 
 ASTIfStatement IfStatement() : {}
@@ -705,19 +731,24 @@ ASTForStatement ForStatement() :
     }
 }
 
+void ForInitializationExpression() #void : {}
+{
+    LOOKAHEAD(DeclareLocalVar()) Var() | Expression()
+}
+
 void ForInitializationNode() : {}
 {
-    (LOOKAHEAD(DeclareLocalVar()) Var() | Expression())?
+    [ ForInitializationExpression() (<COMMA> ForInitializationExpression() )* ]
 }
 
 void ForTerminationNode() : {}
 {
-    (ConditionalExpression())?
+    [ ConditionalExpression() ]
 }
 
 void ForIncrementNode() : {}
 {
-    (Expression())?
+    [ Expression() (<COMMA> Expression())* ]
 }
 
 ASTForeachStatement ForeachStatement() :

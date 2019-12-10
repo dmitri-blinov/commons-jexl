@@ -75,6 +75,7 @@ import org.apache.commons.jexl3.parser.ASTForIncrementNode;
 import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
+import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
@@ -1280,6 +1281,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTFunctionStatement node, Object data) {
+        cancelCheck(node);
+        // Declare variable
+        JexlNode left = node.jjtGetChild(0);
+        left.jjtAccept(this, data);
+        // Create function
+        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(1));
+        return executeAssign(node, left, right, null, data);
+    }
+
+    @Override
     protected Object visit(ASTIfStatement node, Object data) {
         final int numChildren = node.jjtGetNumChildren();
         try {
@@ -1420,8 +1432,10 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTForInitializationNode node, Object data) {
         Object result = null;
-        if (node.jjtGetNumChildren() > 0)
-            result = node.jjtGetChild(0).jjtAccept(this, data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            result = node.jjtGetChild(i).jjtAccept(this, data);
+        }
         return result;
     }
 
@@ -1436,8 +1450,10 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTForIncrementNode node, Object data) {
         Object result = null;
-        if (node.jjtGetNumChildren() > 0)
-            result = node.jjtGetChild(0).jjtAccept(this, data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; ++i) {
+            result = node.jjtGetChild(i).jjtAccept(this, data);
+        }
         return result;
     }
 
@@ -1486,11 +1502,6 @@ public class Interpreter extends InterpreterBase {
                         try {
                             /* third objectNode is the statement to execute */
                             JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                            final int symbol = loopVariable.getSymbol();
-                            final int valueSymbol = loopValueVariable.getSymbol();
-                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
@@ -1548,10 +1559,6 @@ public class Interpreter extends InterpreterBase {
                         try {
                             /* third objectNode is the statement to execute */
                             JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
-
-                            final int symbol = loopVariable.getSymbol();
-                            final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-
                             while (itemsIterator.hasNext()) {
                                 cancelCheck(node);
                                 i += 1;
@@ -3176,7 +3183,7 @@ public class Interpreter extends InterpreterBase {
                     frame.set(symbol, right);
                     // make the closure accessible to itself, ie hoist the currently set variable after frame creation
                     if (right instanceof Closure) {
-                        ((Closure) right).setHoisted(symbol, right);
+                         ((Closure) right).setHoisted(symbol, right);
                     }
                     return right; // 1
                 }

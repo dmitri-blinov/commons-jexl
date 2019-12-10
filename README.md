@@ -67,8 +67,6 @@ Incompatible changes
 
 + Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
 
-+ Variable declarations in lexical mode are restricted to blocks
-
 New features
 ------------
 + Java-like `switch` statement is introduced
@@ -86,6 +84,8 @@ New features
 + Java-like `assert` statement is introduced
 
 + New `remove` flow-control statement is introduced
+
++ New function definition `function a() {}` statement is introduced
 
 + New `this` literal is introduced to allow easier access to the current evaluation context
 
