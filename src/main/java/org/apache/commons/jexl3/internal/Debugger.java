@@ -38,8 +38,10 @@ import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
+import org.apache.commons.jexl3.parser.ASTConditionLambda;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
+import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
@@ -1132,14 +1134,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 builder.append('\r');
             }
         }
-
+        // if single expression lambda
+        boolean expr = false;
         // if lambda, produce parameters
-        if (node instanceof ASTJexlLambda) {
-            boolean expr = false;
-
+        if (node instanceof ASTConditionLambda) {
+            expr = true;
+        } else if (node instanceof ASTJexlLambda) {
             if (node.jjtGetNumChildren() == 1) {
                JexlNode child = node.jjtGetChild(0);
-
                if (!(child instanceof ASTBlock))
                    expr = true;
             }
@@ -1202,7 +1204,6 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
             if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
                 builder.append(')');
-
             if (named) {
                 builder.append(' ');
             } else {
@@ -1216,7 +1217,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
         // no parameters or done with them
         int num = node.jjtGetNumChildren();
-        if (num == 1 && !(node instanceof ASTJexlLambda)) {
+        if (num == 1 && (expr || !(node instanceof ASTJexlLambda))) {
             data = accept(node.jjtGetChild(0), data);
         } else {
             for (int i = 0; i < num; ++i) {
@@ -1717,6 +1718,12 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTThisNode node, Object data) {
         check(node, "this", data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTCurrentNode node, Object data) {
+        check(node, "@", data);
         return data;
     }
 

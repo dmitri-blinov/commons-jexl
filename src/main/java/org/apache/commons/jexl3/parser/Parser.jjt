@@ -293,6 +293,11 @@ TOKEN_MGR_DECLS : {
   < ANNOTATION: "@" ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$" ])+ >
 }
 
+<*> TOKEN : /* CURRENT CONTEXT */
+{
+  < CURRENT: "@" > { popDot(); } /* Revert state to default. */
+}
+
 <DOT_ID> TOKEN : /* IDENTIFIERS */
 {
   < DOT_IDENTIFIER: ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$", "@" ])+ > { popDot(); } /* Revert state to default. */
@@ -1155,7 +1160,7 @@ void Selection() #SelectionNode : {}
       |
       StartCountSelection()
       |
-      Lambda()
+      SelectionExpression()
     ) <RPAREN>
 }
 
@@ -1167,6 +1172,18 @@ void StopCountSelection() #StopCountNode : {}
 void StartCountSelection() #StartCountNode : {}
 {
     (<gt> | <GT>) Expression()
+}
+
+void SelectionExpression() #ConditionLambda() :
+{
+   pushFrame();
+   pushUnit(jjtThis);
+}
+{
+   ConditionalExpression()
+{
+   popUnit(jjtThis);
+}
 }
 
 void ArrayProjection() #ProjectionNode : {}
@@ -1307,6 +1324,11 @@ void MethodReferenceIdentifier() #Identifier :
 void This() #void : {}
 {
     <THIS> #ThisNode
+}
+
+void Current() #void : {}
+{
+    <CURRENT> #CurrentNode
 }
 
 void Literal() #void : {}
@@ -1837,6 +1859,8 @@ void PrimaryExpression() #void : {}
     Identifier(true)
     |
     This()
+    |
+    Current()
     |
     Literal()
 }

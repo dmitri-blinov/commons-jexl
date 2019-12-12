@@ -210,6 +210,8 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTThisNode node, Object data);
 
+    protected abstract Object visit(ASTCurrentNode node, Object data);
+
     protected abstract Object visit(ASTTrueNode node, Object data);
 
     protected abstract Object visit(ASTFalseNode node, Object data);

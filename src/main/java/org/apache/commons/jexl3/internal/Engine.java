@@ -419,7 +419,19 @@ public class Engine extends JexlEngine {
      * @return an Interpreter
      */
     protected Interpreter createInterpreter(JexlContext context, Frame frame, JexlOptions opts) {
-        return new Interpreter(this, opts, context, frame);
+        return createInterpreter(context, frame, opts, null);
+    }
+
+    /**
+     * Creates an interpreter.
+     * @param context a JexlContext; if null, the empty context is used instead.
+     * @param frame   the interpreter frame
+     * @param opts    the evaluation options
+     * @param current the current evaluation object
+     * @return an Interpreter
+     */
+    protected Interpreter createInterpreter(JexlContext context, Frame frame, JexlOptions opts, Object current) {
+        return new Interpreter(this, opts, context, frame, current);
     }
 
     @Override

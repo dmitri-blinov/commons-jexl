@@ -54,6 +54,7 @@ import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
+import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
@@ -213,6 +214,8 @@ public class Interpreter extends InterpreterBase {
     protected final Frame frame;
     /** Block micro-frames. */
     protected LexicalFrame block = null;
+    /** Current evaluation target. */
+    protected Object current = null;
 
     /**
      * The thread local interpreter.
@@ -228,8 +231,21 @@ public class Interpreter extends InterpreterBase {
      * @param eFrame   the evaluation frame, arguments and local variables
      */
     protected Interpreter(Engine engine, JexlOptions opts, JexlContext aContext, Frame eFrame) {
+        this(engine, opts, aContext, eFrame, null);
+    }
+
+    /**
+     * Creates an interpreter.
+     * @param engine   the engine creating this interpreter
+     * @param aContext the evaluation context, global variables, methods and functions
+     * @param opts     the evaluation options, flags modifying evaluation behavior
+     * @param eFrame   the evaluation frame, arguments and local variables
+     * @param current  the current evaluation object
+     */
+    protected Interpreter(Engine engine, JexlOptions opts, JexlContext aContext, Frame eFrame, Object current) {
         super(engine, opts, aContext);
         this.frame = eFrame;
+        this.current = current;
     }
 
     /**
@@ -240,6 +256,7 @@ public class Interpreter extends InterpreterBase {
     protected Interpreter(Interpreter ii, JexlArithmetic jexla) {
         super(ii, jexla);
         frame = ii.frame;
+        current = ii.current;
     }
 
     /**
@@ -2101,6 +2118,11 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTCurrentNode node, Object data) {
+        return current;
+    }
+
+    @Override
     protected Object visit(ASTTrueNode node, Object data) {
         return Boolean.TRUE;
     }
@@ -2306,99 +2328,103 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTInlinePropertyAssignment node, Object data) {
+        Object prev = current;
+        current = data;
+        try {
+            int childCount = node.jjtGetNumChildren();
+            for (int i = 0; i < childCount; i++) {
+                cancelCheck(node);
 
-        int childCount = node.jjtGetNumChildren();
+                JexlNode p = node.jjtGetChild(i);
 
-        for (int i = 0; i < childCount; i++) {
-            cancelCheck(node);
+                if (p instanceof ASTInlinePropertyEntry) {
 
-            JexlNode p = node.jjtGetChild(i);
+                   Object[] entry = (Object[]) p.jjtAccept(this, null);
 
-            if (p instanceof ASTInlinePropertyEntry) {
+                   String name = String.valueOf(entry[0]);
+                   Object value = entry[1];
 
-               Object[] entry = (Object[]) p.jjtAccept(this, null);
+                   setAttribute(data, name, value, p, JexlOperator.PROPERTY_SET);
 
-               String name = String.valueOf(entry[0]);
-               Object value = entry[1];
+                } else if (p instanceof ASTInlinePropertyArrayEntry) {
 
-               setAttribute(data, name, value, p, JexlOperator.PROPERTY_SET);
+                   Object[] entry = (Object[]) p.jjtAccept(this, null);
 
-            } else if (p instanceof ASTInlinePropertyArrayEntry) {
+                   Object key = entry[0];
+                   Object value = entry[1];
 
-               Object[] entry = (Object[]) p.jjtAccept(this, null);
+                   setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
 
-               Object key = entry[0];
-               Object value = entry[1];
+                } else if (p instanceof ASTInlinePropertyNullEntry) {
 
-               setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
+                   ASTInlinePropertyNullEntry entry = (ASTInlinePropertyNullEntry) p;
 
-            } else if (p instanceof ASTInlinePropertyNullEntry) {
+                   JexlNode name = entry.jjtGetChild(0);
+                   Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, null);
+                   String property = String.valueOf(key);
 
-               ASTInlinePropertyNullEntry entry = (ASTInlinePropertyNullEntry) p;
+                   Object value = getAttribute(data, property, p);
 
-               JexlNode name = entry.jjtGetChild(0);
-               Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, null);
-               String property = String.valueOf(key);
+                   if (value == null) {
+                      value = entry.jjtAccept(this, null);
+                      setAttribute(data, property, value, p, JexlOperator.PROPERTY_SET);
+                   }
 
-               Object value = getAttribute(data, property, p);
+                } else if (p instanceof ASTInlinePropertyNEEntry) {
 
-               if (value == null) {
-                  value = entry.jjtAccept(this, null);
-                  setAttribute(data, property, value, p, JexlOperator.PROPERTY_SET);
-               }
+                   ASTInlinePropertyNEEntry entry = (ASTInlinePropertyNEEntry) p;
 
-            } else if (p instanceof ASTInlinePropertyNEEntry) {
+                   JexlNode name = entry.jjtGetChild(0);
+                   Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, null);
+                   String property = String.valueOf(key);
 
-               ASTInlinePropertyNEEntry entry = (ASTInlinePropertyNEEntry) p;
+                   Object value = getAttribute(data, property, p);
+                   Object right = entry.jjtAccept(this, null);
 
-               JexlNode name = entry.jjtGetChild(0);
-               Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, null);
-               String property = String.valueOf(key);
+                   Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
+                   boolean equals = (result != JexlEngine.TRY_FAILED)
+                              ? arithmetic.toBoolean(result)
+                              : arithmetic.equals(value, right);
+                   if (!equals) {
+                      setAttribute(data, property, right, p, JexlOperator.PROPERTY_SET);
+                   }
 
-               Object value = getAttribute(data, property, p);
-               Object right = entry.jjtAccept(this, null);
+                } else if (p instanceof ASTInlinePropertyArrayNullEntry) {
 
-               Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
-               boolean equals = (result != JexlEngine.TRY_FAILED)
-                          ? arithmetic.toBoolean(result)
-                          : arithmetic.equals(value, right);
-               if (!equals) {
-                  setAttribute(data, property, right, p, JexlOperator.PROPERTY_SET);
-               }
+                   ASTInlinePropertyArrayNullEntry entry = (ASTInlinePropertyArrayNullEntry) p;
 
-            } else if (p instanceof ASTInlinePropertyArrayNullEntry) {
+                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
+                   Object value = getAttribute(data, key, p);
 
-               ASTInlinePropertyArrayNullEntry entry = (ASTInlinePropertyArrayNullEntry) p;
+                   if (value == null) {
+                      value = entry.jjtAccept(this, null);
+                      setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
+                   }
 
-               Object key = entry.jjtGetChild(0).jjtAccept(this, null);
-               Object value = getAttribute(data, key, p);
+                } else if (p instanceof ASTInlinePropertyArrayNEEntry) {
 
-               if (value == null) {
-                  value = entry.jjtAccept(this, null);
-                  setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
-               }
+                   ASTInlinePropertyArrayNEEntry entry = (ASTInlinePropertyArrayNEEntry) p;
 
-            } else if (p instanceof ASTInlinePropertyArrayNEEntry) {
+                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
+                   Object value = getAttribute(data, key, p);
+                   Object right = entry.jjtAccept(this, null);
 
-               ASTInlinePropertyArrayNEEntry entry = (ASTInlinePropertyArrayNEEntry) p;
+                   Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
+                   boolean equals = (result != JexlEngine.TRY_FAILED)
+                              ? arithmetic.toBoolean(result)
+                              : arithmetic.equals(value, right);
+                   if (!equals) {
+                      setAttribute(data, key, right, p, JexlOperator.ARRAY_SET);
+                   }
 
-               Object key = entry.jjtGetChild(0).jjtAccept(this, null);
-               Object value = getAttribute(data, key, p);
-               Object right = entry.jjtAccept(this, null);
+                } else {
 
-               Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
-               boolean equals = (result != JexlEngine.TRY_FAILED)
-                          ? arithmetic.toBoolean(result)
-                          : arithmetic.equals(value, right);
-               if (!equals) {
-                  setAttribute(data, key, right, p, JexlOperator.ARRAY_SET);
-               }
-
-            } else {
-
-               // ASTReference
-               p.jjtAccept(this, data);
+                   // ASTReference
+                   p.jjtAccept(this, data);
+                }
             }
+        } finally {
+            current = prev;
         }
         return data;
     }
@@ -4140,7 +4166,6 @@ public class Interpreter extends InterpreterBase {
     }
 
     protected Iterator<?> prepareIndexedIterator(JexlNode node, Object iterableValue) {
-
         if (iterableValue != null) {
             Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
             Iterator<?> itemsIterator = forEach instanceof Iterator
@@ -4148,7 +4173,6 @@ public class Interpreter extends InterpreterBase {
                                     : uberspect.getIndexedIterator(iterableValue);
             return itemsIterator;
         }
-
         return null;
     }
 
@@ -4297,11 +4321,12 @@ public class Interpreter extends InterpreterBase {
         return itemsIterator != null ? new MapProjectionIterator(itemsIterator, node) : null;
     }
 
-    public class SelectionIterator extends IteratorBase {
-
+    public final class SelectionIterator extends IteratorBase {
+        // filtering expression
         protected final Closure closure;
-
+        // next available item of iterator
         protected Object nextItem;
+        // whether the next item is available
         protected boolean hasNextItem;
 
         protected SelectionIterator(Iterator<?> iterator, ASTJexlLambda filter) {
@@ -4316,13 +4341,17 @@ public class Interpreter extends InterpreterBase {
             } else {
                 Object data = null;
                 boolean selected = false;
-
-                do {
-                    data = itemsIterator.next();
-                    Object[] argv = prepareArgs((ASTJexlLambda) node, data);
-                    selected = arithmetic.toBoolean(closure.execute(null, argv));
-                } while (!selected && itemsIterator.hasNext());
-
+                Object prev = current;
+                try {
+                    do {
+                        data = itemsIterator.next();
+                        Object[] argv = prepareArgs((ASTJexlLambda) node, data);
+                        current = data;
+                        selected = arithmetic.toBoolean(closure.execute(null, argv));
+                    } while (!selected && itemsIterator.hasNext());
+                } finally {
+                    current = prev;
+                }
                 if (selected) {
                     hasNextItem = true;
                     nextItem = data;
@@ -4332,26 +4361,20 @@ public class Interpreter extends InterpreterBase {
 
         @Override
         public boolean hasNext() {
-
             if (!hasNextItem)
                 findNextItem();
-
             return hasNextItem;
         }
 
         @Override
         public Object next() {
             cancelCheck(node);
-
             if (!hasNextItem)
                 findNextItem();
-
             if (!hasNextItem)
                 throw new NoSuchElementException();
-
             i += 1;
             hasNextItem = false;
-
             return nextItem;
         }
 
@@ -4361,7 +4384,7 @@ public class Interpreter extends InterpreterBase {
         }
     }
 
-    public class StopCountIterator extends IteratorBase {
+    public final class StopCountIterator extends IteratorBase {
 
         protected final int limit;
 
@@ -4393,7 +4416,7 @@ public class Interpreter extends InterpreterBase {
         }
     }
 
-    public class StartCountIterator extends IteratorBase {
+    public final class StartCountIterator extends IteratorBase {
 
         protected StartCountIterator(Iterator<?> iterator, JexlNode node, int startCount) {
             super(iterator, node);
@@ -4450,6 +4473,8 @@ public class Interpreter extends InterpreterBase {
         }
 
         ASTJexlLambda script = (ASTJexlLambda) child;
+        if (script.jjtGetNumChildren() == 1 && script.jjtGetChild(0) instanceof ASTJexlLambda)
+            script = (ASTJexlLambda) script.jjtGetChild(0);
         Iterator<?> itemsIterator = prepareIndexedIterator(child, data);
         return itemsIterator != null ? new SelectionIterator(itemsIterator, script) : null;
     }

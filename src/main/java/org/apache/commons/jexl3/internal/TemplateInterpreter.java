@@ -24,6 +24,7 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.JexlNode;
 import java.io.Writer;
+import java.io.IOException;
 import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 
@@ -123,9 +124,9 @@ public class TemplateInterpreter extends Interpreter {
                     }
                 }
             }
-        } catch (java.io.IOException xio) {
+        } catch (IOException xio) {
             throw TemplateEngine.createException(info, "call print", null, xio);
-        } catch (java.lang.Exception xany) {
+        } catch (Exception xany) {
             throw TemplateEngine.createException(info, "invoke print", null, xany);
         }
     }

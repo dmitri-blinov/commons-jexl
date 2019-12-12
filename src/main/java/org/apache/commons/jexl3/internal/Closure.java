@@ -39,6 +39,8 @@ public class Closure extends Script {
     protected final int curried;
     /** The chained closure. */
     protected final Closure chained;
+    /** The caller. */
+    protected final Interpreter caller;
 
     /**
      * Creates a closure.
@@ -47,6 +49,7 @@ public class Closure extends Script {
      */
     protected Closure(Interpreter theCaller, ASTJexlLambda lambda) {
         super(theCaller.jexl, null, lambda);
+        caller = theCaller;
         frame = lambda.createFrame(theCaller.frame);
         context = theCaller.context;
         curried = 0;
@@ -76,10 +79,12 @@ public class Closure extends Script {
             } else {
                 frame = sf.assign(scriptArgs(args));
             }
+            caller = closure.caller;
             context = closure.context;
             curried = baseCurried + args.length;
             chained = closure.chained;
         } else {
+            caller = null;
             frame = script.createFrame(scriptArgs(args));
             context = null;
             curried = args.length;
@@ -94,6 +99,7 @@ public class Closure extends Script {
      */
     protected Closure(Closure base, Closure chained) {
         super(base.jexl, base.source, base.script);
+        caller = base.caller;
         frame = base.frame.assign();
         context = base.context;
         curried = base.curried;
@@ -139,6 +145,17 @@ public class Closure extends Script {
         } else {
             return super.toString();
         }
+    }
+
+    /**
+     * Creates this script interpreter.
+     * @param context the context
+     * @param frame the calling frame
+     * @return  the interpreter
+     */
+    @Override
+    protected Interpreter createInterpreter(JexlContext context, Frame frame) {
+        return jexl.createInterpreter(context, frame, createOptions(context), caller != null ? caller.current : null);
     }
 
     /**

@@ -57,8 +57,8 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("m", testMap);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("foo"));
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("bar"));
+        Assert.assertTrue(((Set)o).contains("foo"));
+        Assert.assertFalse(((Set)o).contains("bar"));
     }
 
     @Test
@@ -66,11 +66,11 @@ public class ProjectionTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("var s = {}; for (var i : [1]) s.add(i); s");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(1));
+        Assert.assertTrue(((Set)o).contains(1));
 
         e = JEXL.createScript("var s = {}; for (var i : [1]) s.add(i); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(1));
+        Assert.assertTrue(((Set)o).contains(1));
     }
 
     @Test
@@ -80,13 +80,13 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("m", testMap);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsKey("foo"));
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsValue("food"));
+        Assert.assertTrue(((Map)o).containsKey("foo"));
+        Assert.assertTrue(((Map)o).containsValue("food"));
 
         e = JEXL.createScript("var s = {:}; for (var i : ...m.{value:key}) s.put(i.key,i.value); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsKey("bar"));
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsValue("eat"));
+        Assert.assertTrue(((Map)o).containsKey("bar"));
+        Assert.assertTrue(((Map)o).containsValue("eat"));
     }
 
     @Test
@@ -96,8 +96,8 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("m", testMap);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsKey("foo"));
-        Assert.assertEquals(Boolean.TRUE, ((Map)o).containsValue("food"));
+        Assert.assertTrue(((Map)o).containsKey("foo"));
+        Assert.assertTrue(((Map)o).containsValue("food"));
     }
 
     @Test
@@ -107,8 +107,8 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("m", testMap);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("bar"));
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("eat"));
+        Assert.assertTrue(((Set)o).contains("bar"));
+        Assert.assertFalse(((Set)o).contains("eat"));
     }
 
     @Test
@@ -118,8 +118,8 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("m", testMap);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("bar"));
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("eat"));
+        Assert.assertTrue(((Set)o).contains("bar"));
+        Assert.assertFalse(((Set)o).contains("eat"));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("fruits", test);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(4));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(6));
+        Assert.assertTrue(((Set)o).contains(4));
+        Assert.assertTrue(((Set)o).contains(6));
     }
 
     @Test
@@ -140,23 +140,23 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("fruits", test);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(0));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(1));
+        Assert.assertTrue(((Set)o).contains(0));
+        Assert.assertTrue(((Set)o).contains(1));
 
         e = JEXL.createScript("var s = {}; for (var i : ...fruits.[(index, value) -> {value}]) s.add(i); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("banana"));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("kiwi"));
+        Assert.assertTrue(((Set)o).contains("banana"));
+        Assert.assertTrue(((Set)o).contains("kiwi"));
 
         e = JEXL.createScript("var s = {}; for (var i : ...fruits.[(index, value, dummy) -> {empty dummy ? value : index}]) s.add(i); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("banana"));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("apple"));
+        Assert.assertTrue(((Set)o).contains("banana"));
+        Assert.assertTrue(((Set)o).contains("apple"));
 
         e = JEXL.createScript("var s = {}; for (var i : ...fruits.[(index, value) -> {index},(index, value) -> {value}]) s.add(i[1]); s");
         o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("banana"));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("kiwi"));
+        Assert.assertTrue(((Set)o).contains("banana"));
+        Assert.assertTrue(((Set)o).contains("kiwi"));
     }
 
     @Test
@@ -166,8 +166,19 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("fruits", test);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains("banana"));
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains("kiwi"));
+        Assert.assertTrue(((Set)o).contains("banana"));
+        Assert.assertFalse(((Set)o).contains("kiwi"));
+    }
+
+    @Test
+    public void testListSelectionA() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {}; for (var i : ...fruits.(size(@) >= 5)) s.add(i); s");
+        JexlContext jc = new MapContext();
+        jc.set("fruits", test);
+
+        Object o = e.execute(jc);
+        Assert.assertTrue(((Set)o).contains("banana"));
+        Assert.assertFalse(((Set)o).contains("kiwi"));
     }
 
     @Test
@@ -177,8 +188,19 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("fruits", test);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains(4));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(6));
+        Assert.assertFalse(((Set)o).contains(4));
+        Assert.assertTrue(((Set)o).contains(6));
+    }
+
+    @Test
+    public void testListSelectionProjectionA() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {}; for (var i : ...fruits.(@.length() >= 5).[value -> {value.length()}]) s.add(i); s");
+        JexlContext jc = new MapContext();
+        jc.set("fruits", test);
+
+        Object o = e.execute(jc);
+        Assert.assertFalse(((Set)o).contains(4));
+        Assert.assertTrue(((Set)o).contains(6));
     }
 
     @Test
@@ -188,8 +210,19 @@ public class ProjectionTest extends JexlTestCase {
         jc.set("fruits", test);
 
         Object o = e.execute(jc);
-        Assert.assertEquals(Boolean.FALSE, ((Set)o).contains(4));
-        Assert.assertEquals(Boolean.TRUE, ((Set)o).contains(6));
+        Assert.assertFalse(((Set)o).contains(4));
+        Assert.assertTrue(((Set)o).contains(6));
+    }
+
+    @Test
+    public void testListProjectionSelectionA() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {}; for (var i : ...fruits.[value->{value.length()}].(@ >= 5)) s.add(i); s");
+        JexlContext jc = new MapContext();
+        jc.set("fruits", test);
+
+        Object o = e.execute(jc);
+        Assert.assertFalse(((Set)o).contains(4));
+        Assert.assertTrue(((Set)o).contains(6));
     }
 
 }
