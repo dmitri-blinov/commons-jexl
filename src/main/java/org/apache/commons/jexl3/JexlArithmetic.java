@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.internal.introspection.IndexedType;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -93,8 +94,13 @@ public class JexlArithmetic {
     /** The big decimal scale. */
     private final int mathScale;
 
+    /** The dynamic constructor. */
+    private final Constructor<? extends JexlArithmetic> ctor;
+
     /**
      * Creates a JexlArithmetic.
+     * <p>If you derive your own arithmetic, implement the
+     * other constructor that may be needed when dealing with options.
      *
      * @param astrict whether this arithmetic is strict or lenient
      */
@@ -104,6 +110,7 @@ public class JexlArithmetic {
 
     /**
      * Creates a JexlArithmetic.
+     * <p>The constructor to define in derived classes.
      *
      * @param astrict     whether this arithmetic is lenient or strict
      * @param bigdContext the math context instance to use for +,-,/,*,% operations on big decimals.
@@ -113,6 +120,13 @@ public class JexlArithmetic {
         this.strict = astrict;
         this.mathContext = bigdContext == null ? MathContext.DECIMAL128 : bigdContext;
         this.mathScale = bigdScale == Integer.MIN_VALUE ? BIGD_SCALE : bigdScale;
+        Constructor<? extends JexlArithmetic> actor = null;
+        try {
+            actor = getClass().getConstructor(boolean.class, MathContext.class, int.class);
+        } catch (Exception xany) {
+            // ignore
+        }
+        this.ctor = actor;
     }
 
     /**
@@ -203,6 +217,13 @@ public class JexlArithmetic {
      * @since 3.1
      */
     protected JexlArithmetic createWithOptions(boolean astrict, MathContext bigdContext, int bigdScale) {
+        if (ctor != null) {
+            try {
+                return ctor.newInstance(astrict, bigdContext, bigdScale);
+            } catch (Exception xany) {
+                // it was worth the try
+            }
+        }
         return new JexlArithmetic(astrict, bigdContext, bigdScale);
     }
 
@@ -1369,8 +1390,7 @@ public class JexlArithmetic {
      * @since 3.2
      */
     public Boolean empty(Object object) {
-        Boolean e = isEmpty(object);
-        return e == null ? Boolean.FALSE : e;
+        return object == null || isEmpty(object, false);
     }
 
     /**
@@ -1380,9 +1400,17 @@ public class JexlArithmetic {
      * @return the boolean or null if there is no arithmetic solution
      */
     public Boolean isEmpty(Object object) {
-        if (object == null) {
-            return Boolean.TRUE;
-        }
+        return isEmpty(object, object == null);
+    }
+
+    /**
+     * Check for emptiness of various types: Number, Collection, Array, Map, String.
+     *
+     * @param object the object to check the emptiness of
+     * @param def the default value if object emptyness can not be determined
+     * @return the boolean or null if there is no arithmetic solution
+     */
+    public Boolean isEmpty(Object object, Boolean def) {
         if (object instanceof Number) {
             double d = ((Number) object).doubleValue();
             return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
@@ -1403,19 +1431,27 @@ public class JexlArithmetic {
         if (object instanceof Iterator<?>) {
             return ((Iterator<?>) object).hasNext() ? Boolean.FALSE : Boolean.TRUE;
         }
-        return null;
+        return def;
     }
 
     /**
      * Calculate the <code>size</code> of various types: Collection, Array, Map, String.
      *
      * @param object the object to get the size of
-     * @return the size of object or null if there is no arithmetic solution
+     * @return the <i>size</i> of object, 0 if null, 1 if there is no <i>better</i> solution
      */
     public Integer size(Object object) {
-        if (object == null) {
-            return null;
-        }
+        return size(object, object == null? 0 : 1);
+    }
+
+    /**
+     * Calculate the <code>size</code> of various types: Collection, Array, Map, String.
+     *
+     * @param object the object to get the size of
+     * @param def the default value if object size can not be determined
+     * @return the size of object or null if there is no arithmetic solution
+     */
+    public Integer size(Object object, Integer def) {
         if (object instanceof CharSequence) {
             return ((CharSequence) object).length();
         }
@@ -1428,7 +1464,7 @@ public class JexlArithmetic {
         if (object instanceof Map<?, ?>) {
             return ((Map<?, ?>) object).size();
         }
-        return null;
+        return def;
     }
 
     /**
