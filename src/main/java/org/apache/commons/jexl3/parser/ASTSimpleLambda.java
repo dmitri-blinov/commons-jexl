@@ -17,14 +17,14 @@
 package org.apache.commons.jexl3.parser;
 
 /**
- * Condition Lambda (selection).
+ * Simple Lambda (expression or expicit definition).
  */
-public final class ASTConditionLambda extends ASTJexlLambda {
-    ASTConditionLambda(int id) {
+public final class ASTSimpleLambda extends ASTJexlLambda {
+    ASTSimpleLambda(int id) {
         super(id);
     }
 
-    ASTConditionLambda(Parser p, int id) {
+    ASTSimpleLambda(Parser p, int id) {
         super(p, id);
     }
 

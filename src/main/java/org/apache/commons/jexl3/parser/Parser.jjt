@@ -1160,7 +1160,7 @@ void Selection() #SelectionNode : {}
       |
       StartCountSelection()
       |
-      SelectionExpression()
+      SimpleLambda()
     ) <RPAREN>
 }
 
@@ -1174,7 +1174,7 @@ void StartCountSelection() #StartCountNode : {}
     (<gt> | <GT>) Expression()
 }
 
-void SelectionExpression() #ConditionLambda() :
+void SimpleLambda() :
 {
    pushFrame();
    pushUnit(jjtThis);

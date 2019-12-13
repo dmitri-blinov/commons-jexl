@@ -38,7 +38,7 @@ import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
-import org.apache.commons.jexl3.parser.ASTConditionLambda;
+import org.apache.commons.jexl3.parser.ASTSimpleLambda;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
@@ -1137,7 +1137,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         // if single expression lambda
         boolean expr = false;
         // if lambda, produce parameters
-        if (node instanceof ASTConditionLambda) {
+        if (node instanceof ASTSimpleLambda) {
             expr = true;
         } else if (node instanceof ASTJexlLambda) {
             if (node.jjtGetNumChildren() == 1) {
