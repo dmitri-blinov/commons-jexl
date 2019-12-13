@@ -1392,15 +1392,24 @@
                 <tr>
                     <td>Array projection</td>
                     <td>
-                        An array projection operator <code>a.[foo,bar]</code> can define one or more projection dimensions.
-                        In case of only one defined dimension <code>a.[foo]</code>, the projection operator creates an iterator
-                        that produces a single value. In case of more than one defined dimension <code>a.[foo,bar,quux]</code>,
+                        An array projection operator <code>a.[@foo,@bar]</code> can define one or more projection dimensions.
+                        In case of only one defined dimension <code>a.[@foo]</code>, the projection operator creates an iterator
+                        that produces a single value. In case of more than one defined dimension <code>a.[@foo,@bar,@quux]</code>,
                         the projection operator creates an iterator that produces an array of the corresponding values.
+                        The projection expression can be either as an attribute reference in the form of <code>@attr</code> or 
+                        be defined as a function. In its basic form the function that defines the projection rule takes one argument, 
+                        which accepts the current element of the iterable object. In extended form the projecting function can take two arguments 
+                        <code>(index,value) -> {index &lt; 10}</code> with the first argument <code>index</code> being the zero based index of the 
+                        current element of the iterable object, and the second <code>value</code> is the current element itself.
+                        <p>A Projection expression can also be specified as a simple expression, in that case 
+                        the currently projected object should be addressed with current object literal <code>@</code> e.g. 
+                        <code>a.[@.length()]</code> is equivalent to <code>a.[x -> {x.length()}]</code></p>
                     </td>
                     <td>Key-value projection</td>
                     <td>
-                        A key-value projection operator <code>a.{foo:bar}</code> creates an iterator
-                        that produces <code>Map.Entry</code> object with a key and a value.
+                        A key-value projection operator <code>a.{@foo:@bar}</code> creates an iterator
+                        that produces <code>Map.Entry</code> object with a key and a value. The projection expression 
+                        is the same as for array projection.
                     </td>
                     <td>Selection</td>
                     <td>

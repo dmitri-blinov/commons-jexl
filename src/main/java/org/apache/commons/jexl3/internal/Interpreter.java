@@ -44,6 +44,7 @@ import org.apache.commons.jexl3.parser.ASTArrayLiteral;
 import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTAssignment;
+import org.apache.commons.jexl3.parser.ASTAttributeReference;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
@@ -2760,6 +2761,15 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTAttributeReference node, Object data) {
+        if (data == null) {
+            return null;
+        }
+        Object id = node.getName();
+        return getAttribute(data, id, node);
+    }
+
+    @Override
     protected Object visit(final ASTReference node, Object data) {
         cancelCheck(node);
         final int numChildren = node.jjtGetNumChildren();
@@ -4190,7 +4200,7 @@ public class Interpreter extends InterpreterBase {
             i = 0;
         }
 
-        protected Object[] prepareArgs(ASTJexlLambda lambda, Object data) {
+        protected Object[] prepareArgs(ASTJexlScript lambda, Object data) {
 
             int argCount = lambda.getArgCount();
             boolean varArgs = lambda.isVarArgs();
@@ -4231,23 +4241,39 @@ public class Interpreter extends InterpreterBase {
 
         protected ProjectionIterator(Iterator<?> iterator, JexlNode projection) {
             super(iterator, projection);
-
             scripts = new HashMap<Integer,Closure> ();
             i = -1;
+            initClosure();
+        }
+
+        protected void initClosure() {
+            // can have multiple nodes
+            int numChildren = node.jjtGetNumChildren();
+            for (int i = 0; i < numChildren; i++) {
+                JexlNode child = node.jjtGetChild(i);
+                if (child instanceof ASTJexlLambda) {
+                    ASTJexlLambda script = (ASTJexlLambda) child;
+                    if (script.jjtGetNumChildren() == 1 && script.jjtGetChild(0) instanceof ASTJexlLambda)
+                        script = (ASTJexlLambda) script.jjtGetChild(0);
+                    scripts.put(i, new Closure(Interpreter.this, script));
+                }
+            }
         }
 
         protected Object evaluateProjection(int i, Object data) {
             JexlNode child = node.jjtGetChild(i);
 
             if (child instanceof ASTJexlLambda) {
-                ASTJexlLambda lambda = (ASTJexlLambda) child;
                 Closure c = scripts.get(i);
-                if (c == null) {
-                    c = new Closure(Interpreter.this, lambda);
-                    scripts.put(i, c);
-                }
+                ASTJexlScript lambda = c.getScript();
                 Object[] argv = prepareArgs(lambda, data);
-                return c.execute(null, argv);
+                Object prev = current;
+                try {
+                    current = data;
+                    return c.execute(null, argv);
+                } finally {
+                    current = prev;
+                }
             } else {
                 return child.jjtAccept(Interpreter.this, data);
             }
@@ -4260,16 +4286,11 @@ public class Interpreter extends InterpreterBase {
 
         @Override
         public Object next() {
-
             cancelCheck(node);
-
             Object data = itemsIterator.next();
-
             i += 1;
-
             // can have multiple nodes
             int numChildren = node.jjtGetNumChildren();
-
             if (numChildren == 1) {
                 return evaluateProjection(0, data);
             } else {
@@ -4301,16 +4322,11 @@ public class Interpreter extends InterpreterBase {
 
         @Override
         public Object next() {
-
             cancelCheck(node);
-
             Object data = itemsIterator.next();
-
             i += 1;
-
             Object key = evaluateProjection(0, data);
             Object value = evaluateProjection(1, data);
-
             return new AbstractMap.SimpleImmutableEntry<Object,Object> (key, value);
         }
     }

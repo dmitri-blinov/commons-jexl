@@ -1198,32 +1198,17 @@ void MapProjection() #MapProjectionNode : {}
 
 void ProjectionExpression() #void : {}
 {
-    LOOKAHEAD( LambdaLookahead() ) Lambda()
+    AttributeReference()
     |
-    (Identifier() ( LOOKAHEAD(2) ProjectionMemberExpression() )*) #Reference(>1)
+    SimpleLambda()
 }
 
-void ProjectionMemberExpression() #void : {}
+void AttributeReference() : 
 {
-    LOOKAHEAD(ProjectionMethodCall()) ProjectionMethodCall()
-    |
-    ProjectionMemberAccess()
+    Token t;
 }
-
-void ProjectionMemberAccess() #void : {}
 {
-    LOOKAHEAD(<LBRACKET>) ArrayAccess()
-    |
-    LOOKAHEAD(<QLBRACKET>) ArrayAccessSafe()
-    |
-    LOOKAHEAD(<DOT>) IdentifierAccess()
-    |
-    LOOKAHEAD(<QDOT>) IdentifierAccess()
-}
-
-void ProjectionMethodCall() #void : {}
-{
-    (ProjectionMemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
+    t=<ANNOTATION> { jjtThis.setName(t.image); }
 }
 
 void IteratorExpression() #void : {}
