@@ -1174,16 +1174,9 @@ void StartCountSelection() #StartCountNode : {}
     (<gt> | <GT>) Expression()
 }
 
-void SimpleLambda() :
+void SimpleLambda() #void : {}
 {
-   pushFrame();
-   pushUnit(jjtThis);
-}
-{
-   ConditionalExpression()
-{
-   popUnit(jjtThis);
-}
+   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda))
 }
 
 void ArrayProjection() #ProjectionNode : {}
