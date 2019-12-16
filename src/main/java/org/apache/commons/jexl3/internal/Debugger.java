@@ -2052,13 +2052,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTProjectionNode node, Object data) {
         int num = node.jjtGetNumChildren();
-        builder.append(".[");
+        builder.append(".{");
         for (int i = 0; i < num; ++i) {
             if (i > 0)
                 builder.append(',');
             accept(node.jjtGetChild(i), data);
         }
-        builder.append(']');
+        builder.append('}');
         return data;
     }
 
@@ -2074,9 +2074,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTSelectionNode node, Object data) {
-        builder.append(".(");
+        builder.append(".[");
         accept(node.jjtGetChild(0), data);
-        builder.append(')');
+        builder.append(']');
         return data;
     }
 
@@ -2093,7 +2093,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTReductionNode node, Object data) {
         int num = node.jjtGetNumChildren();
-        builder.append(".$(");
+        builder.append(".(");
         accept(node.jjtGetChild(0), data);
         if (num > 1) {
             builder.append(':');

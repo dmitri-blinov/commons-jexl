@@ -200,7 +200,6 @@ TOKEN_MGR_DECLS : {
       < DOTP : ".(" >
     | < DOTB : ".[" >
     | < DOTC : ".{" >
-    | < DOTS : ".@" >
 }
 
 <*> TOKEN : { /* CONDITIONALS */
@@ -1136,32 +1135,32 @@ void PointerExpression() #void : {}
 
 void EnumerationExpression() #void : {}
 {
-    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1) (LOOKAHEAD(<DOTS>) Reduction())?) #Reference(>1)
+    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1) (LOOKAHEAD(<DOTP>) Reduction())?) #Reference(>1)
 }
 
 void EnumerationAccess() #void : {}
 {
-    LOOKAHEAD(<DOTB>) ArrayProjection()
+    LOOKAHEAD(<DOTC> ProjectionExpression() <COLON>) MapProjection()
     |
-    LOOKAHEAD(<DOTC>) MapProjection()
+    LOOKAHEAD(<DOTC>) ArrayProjection()
     |
-    LOOKAHEAD(<DOTP>) Selection()
+    LOOKAHEAD(<DOTB>) Selection()
 }
 
 void Reduction() #ReductionNode : {}
 {
-    <DOTS> <LPAREN> [LOOKAHEAD(Expression() <COLON>) Expression() <COLON>] Lambda() <RPAREN>
+    <DOTP> <LPAREN> [LOOKAHEAD(Expression() <COLON>) Expression() <COLON>] Lambda() <RPAREN>
 }
 
 void Selection() #SelectionNode : {}
 {
-    <DOTP> (
+    <DOTB> (
       StopCountSelection()
       |
       StartCountSelection()
       |
       SimpleLambda()
-    ) <RPAREN>
+    ) <RBRACKET>
 }
 
 void StopCountSelection() #StopCountNode : {}
@@ -1181,7 +1180,7 @@ void SimpleLambda() #void : {}
 
 void ArrayProjection() #ProjectionNode : {}
 {
-    <DOTB> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() )* <RBRACKET>
+    <DOTC> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() )* <RCURLY>
 }
 
 void MapProjection() #MapProjectionNode : {}
