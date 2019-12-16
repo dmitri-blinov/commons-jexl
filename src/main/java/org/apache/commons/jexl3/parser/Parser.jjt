@@ -1192,7 +1192,7 @@ void ProjectionExpression() #void : {}
 {
     AttributeReference()
     |
-    SimpleLambda()
+    ProjectionLambda()
 }
 
 void AttributeReference() : 
@@ -1201,6 +1201,11 @@ void AttributeReference() :
 }
 {
     t=<ANNOTATION> { jjtThis.setName(t.image); }
+}
+
+void ProjectionLambda() #void : {}
+{
+   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda || jjtree.peekNode() instanceof ASTCurrentNode))
 }
 
 void IteratorExpression() #void : {}

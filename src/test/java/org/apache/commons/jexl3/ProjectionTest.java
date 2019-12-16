@@ -134,6 +134,17 @@ public class ProjectionTest extends JexlTestCase {
     }
 
     @Test
+    public void testSimpleLambdaProjection() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {:}; for (var i,j : ...fruits.{@ : @.length()}) s.put(i,j); s");
+        JexlContext jc = new MapContext();
+        jc.set("fruits", test);
+
+        Object o = e.execute(jc);
+        Assert.assertEquals(6, ((Map)o).get("banana"));
+        Assert.assertEquals(4, ((Map)o).get("kiwi"));
+    }
+
+    @Test
     public void testIndexedListProjection() throws Exception {
         JexlScript e = JEXL.createScript("var s = {}; for (var i : ...fruits.{(index, value) -> {index}}) s.add(i); s");
         JexlContext jc = new MapContext();

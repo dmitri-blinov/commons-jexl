@@ -4260,19 +4260,18 @@ public class Interpreter extends InterpreterBase {
 
         protected Object evaluateProjection(int i, Object data) {
             JexlNode child = node.jjtGetChild(i);
-
-            if (child instanceof ASTJexlLambda) {
-                Closure c = scripts.get(i);
-                Object[] argv = prepareArgs(c.getScript(), data);
-                Object prev = current;
-                try {
-                    current = data;
+            Object prev = current;
+            try {
+                current = data;
+                if (child instanceof ASTJexlLambda) {
+                    Closure c = scripts.get(i);
+                    Object[] argv = prepareArgs(c.getScript(), data);
                     return c.execute(null, argv);
-                } finally {
-                    current = prev;
+                } else {
+                    return child.jjtAccept(Interpreter.this, data);
                 }
-            } else {
-                return child.jjtAccept(Interpreter.this, data);
+            } finally {
+                current = prev;
             }
         }
 
