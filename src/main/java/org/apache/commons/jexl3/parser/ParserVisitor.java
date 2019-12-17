@@ -342,5 +342,5 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTStopCountNode node, Object data);
 
-    protected abstract Object visit(ASTReductionNode node, Object data);
+    protected abstract Object visit(ASTPipeNode node, Object data);
 }

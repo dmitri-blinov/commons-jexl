@@ -1423,21 +1423,34 @@
                         the currently checked object should be addressed with current object literal <code>@</code> e.g. 
                         <code>a.[@.length() > 10]</code> is equivalent to <code>a.[x -> {x.length() > 10}]</code></p>
                     </td>
-                    <td>Reduction</td>
+                </tr>
+            </table>
+        </section>
+        <section name="Pipes">
+            <table>
+                <tr>
+                    <th width="15%">Operator</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Pipe operator</td>
                     <td>
-                        A reduction operator <code>a.(defaultValue : (result,value) -> {result + value})</code> evaluates
-                        the specified function to yield a value from series of values returned by an iterable object.
-                        If the iterable object contains no data, the <code>defaultValue</code> will be returned, otherwise
-                        the function <code>(result,value) -> {result + value}</code> will be called for each value returned
+                        A pipe operator <code>a.(x -> {x + 1})</code> evaluates the specified expression or function upon its non-null left argument to yield a value, e.g.
+                        <code>foo.(x -> {x + 1})</code> is equivalent to <code>foo != null ? (x -> {x + 1})(foo) : null</code>.
+                        <p>If the left argument is an iterable object, a pipe operator <code>a.((result,value) -> {result + value})</code> will evaluate
+                        the specified function to yield a value from series of values returned by that iterable object.
+                        The function <code>(result,value) -> {result + value}</code> will be called for each value returned
                         by the iterable object. In its basic form the function takes two arguments, with the first argument
-                        <code>result</code> being a partial reduction operator result, and the second argument <code>value</code>
-                        being the next element of the iterable object. The function can also take only one argument
+                        <code>result</code> being a partial pipe operator result, and the second argument <code>value</code>
+                        being the current element of the iterable object. The function can also take only one argument
                         <code>result -> {result + 1}</code>, or take no arguments at all<code>() -> {nextid()}</code>.
                         In extended form the function can take three arguments <code>(result,index,value) -> {result + value}</code>
-                        with additional argument <code>index</code> being the zero based index of the next element of the iterable
-                        object.
-                        <p>Note that the default value of the reduction operator can be omitted
-                           <code>a.((result,value) -> {result + value})</code>, in that case the default value will be null</p>
+                        with additional argument <code>index</code> being the zero based index of the current element of the iterable
+                        object. 
+                        </p>
+                        <p>Pipe function can also be specified as a simple expression, in that case 
+                        the currently processed object should be addressed with current object literal <code>@</code> e.g. 
+                        <code>a.(@+1)</code> is equivalent to <code>a.(x -> {x+1})</code></p>
                     </td>
                 </tr>
             </table>

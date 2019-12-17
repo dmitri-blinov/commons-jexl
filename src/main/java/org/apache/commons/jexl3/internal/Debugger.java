@@ -117,11 +117,11 @@ import org.apache.commons.jexl3.parser.ASTNullAssignment;
 import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTNumberLiteral;
 import org.apache.commons.jexl3.parser.ASTOrNode;
+import org.apache.commons.jexl3.parser.ASTPipeNode;
 import org.apache.commons.jexl3.parser.ASTPointerNode;
 import org.apache.commons.jexl3.parser.ASTProjectionNode;
 import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
-import org.apache.commons.jexl3.parser.ASTReductionNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
 import org.apache.commons.jexl3.parser.ASTRegexLiteral;
@@ -2091,14 +2091,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(ASTReductionNode node, Object data) {
-        int num = node.jjtGetNumChildren();
+    protected Object visit(ASTPipeNode node, Object data) {
         builder.append(".(");
         accept(node.jjtGetChild(0), data);
-        if (num > 1) {
-            builder.append(':');
-            accept(node.jjtGetChild(1), data);
-        }
         builder.append(')');
         return data;
     }

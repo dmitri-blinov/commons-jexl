@@ -131,11 +131,11 @@ import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTNullpNode;
 import org.apache.commons.jexl3.parser.ASTNumberLiteral;
 import org.apache.commons.jexl3.parser.ASTOrNode;
+import org.apache.commons.jexl3.parser.ASTPipeNode;
 import org.apache.commons.jexl3.parser.ASTPointerNode;
 import org.apache.commons.jexl3.parser.ASTProjectionNode;
 import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
-import org.apache.commons.jexl3.parser.ASTReductionNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
 import org.apache.commons.jexl3.parser.ASTRegexLiteral;
@@ -2820,6 +2820,12 @@ public class Interpreter extends InterpreterBase {
                 } else {
                     antish = false;
                 }
+            } else if (objectNode instanceof ASTPipeNode) {
+                if (object == null) {
+                    break;
+                } else {
+                    antish = false;
+                }
             }
             // attempt to evaluate the property within the object (visit(ASTIdentifierAccess node))
             object = objectNode.jjtAccept(this, object);
@@ -4498,72 +4504,108 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTReductionNode node, Object data) {
-        int numChildren = node.jjtGetNumChildren();
+    protected Object visit(ASTPipeNode node, Object data) {
 
-        ASTJexlLambda reduction = null;
         Object result = null;
+        JexlNode pipe = node.jjtGetChild(0);
 
-        if (numChildren > 1) {
-            result = node.jjtGetChild(0).jjtAccept(this, null);
-            reduction = (ASTJexlLambda) node.jjtGetChild(1);
-        } else {
-            reduction = (ASTJexlLambda) node.jjtGetChild(0);
-        }
+        if (data instanceof Iterator<?>) {
 
-        Iterator<?> itemsIterator = prepareIndexedIterator(node, data);
+            Iterator<?> itemsIterator = (Iterator) data;
 
-        if (itemsIterator != null) {
             try {
-                Closure closure = new Closure(this, reduction);
-
-                boolean varArgs = reduction.isVarArgs();
-                int argCount = reduction.getArgCount();
-
                 int i = 0;
+                if (pipe instanceof ASTJexlLambda) {
 
-                while (itemsIterator.hasNext()) {
-                    Object value = itemsIterator.next();
+                    ASTJexlLambda script = (ASTJexlLambda) pipe;
 
-                    Object[] argv = null;
+                    Closure closure = new Closure(this, script);
 
-                    if (argCount == 0) {
-                        argv = EMPTY_PARAMS;
-                    } else if (argCount == 1) {
-                        argv = new Object[] {result};
-                    } else if (argCount == 2) {
-                        argv = new Object[] {result, value};
-                    } else if (argCount == 3) {
-                        argv = new Object[] {result, i, value};
-                    } else if (value instanceof Map.Entry<?,?>) {
-                        Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
-                        argv = new Object[] {result, i, entry.getKey(), entry.getValue()};
-                    } else if (!varArgs && value instanceof Object[]) {
+                    boolean varArgs = script.isVarArgs();
+                    int argCount = script.getArgCount();
 
-                        int len = ((Object[]) value).length;
-                        if (argCount > len + 1) {
-                           argv = new Object[len + 2];
-                           argv[0] = result;
-                           argv[2] = i;
-                           System.arraycopy(value, 0, argv, 2, len);
-                        } else if (argCount == len + 1) {
-                           argv = new Object[len + 1];
-                           argv[0] = result;
-                           System.arraycopy(value, 0, argv, 1, len);
+                    while (itemsIterator.hasNext()) {
+                        Object value = itemsIterator.next();
+
+                        Object[] argv = null;
+
+                        if (argCount == 0) {
+                            argv = EMPTY_PARAMS;
+                        } else if (argCount == 1) {
+                            argv = new Object[] {result};
+                        } else if (argCount == 2) {
+                            argv = new Object[] {result, value};
+                        } else if (argCount == 3) {
+                            argv = new Object[] {result, i, value};
+                        } else if (value instanceof Map.Entry<?,?>) {
+                            Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                            argv = new Object[] {result, i, entry.getKey(), entry.getValue()};
+                        } else if (!varArgs && value instanceof Object[]) {
+                            int len = ((Object[]) value).length;
+                            if (argCount > len + 1) {
+                               argv = new Object[len + 2];
+                               argv[0] = result;
+                               argv[2] = i;
+                               System.arraycopy(value, 0, argv, 2, len);
+                            } else if (argCount == len + 1) {
+                               argv = new Object[len + 1];
+                               argv[0] = result;
+                               System.arraycopy(value, 0, argv, 1, len);
+                            } else {
+                               argv = new Object[] {result, i, value};
+                            }
                         } else {
-                           argv = new Object[] {result, i, value};
+                            argv = new Object[] {result, i, value};
                         }
 
-                    } else {
-                        argv = new Object[] {result, i, value};
+                        Object prev = current;
+                        try {
+                            current = value;
+                            result = closure.execute(null, argv);
+                        } finally {
+                            current = prev;
+                        }
+
+                        i += 1;
                     }
 
-                    result = closure.execute(null, argv);
+                } else {
+                    while (itemsIterator.hasNext()) {
+                        Object value = itemsIterator.next();
 
-                    i += 1;
+                        Object prev = current;
+                        try {
+                            current = value;
+                            result = pipe.jjtAccept(this, null);
+                        } finally {
+                            current = prev;
+                        }
+                        i += 1;
+                    }
                 }
             } finally {
                 closeIfSupported(itemsIterator);
+            }
+        } else if (data != null) {
+            if (pipe instanceof ASTJexlLambda) {
+                ASTJexlLambda script = (ASTJexlLambda) pipe;
+                Closure closure = new Closure(this, script);
+                Object[] argv = {data};
+                Object prev = current;
+                try {
+                    current = data;
+                    result = closure.execute(null, argv);
+                } finally {
+                    current = prev;
+                }
+            } else {
+                Object prev = current;
+                try {
+                    current = data;
+                    result = pipe.jjtAccept(this, null);
+                } finally {
+                    current = prev;
+                }
             }
         }
 

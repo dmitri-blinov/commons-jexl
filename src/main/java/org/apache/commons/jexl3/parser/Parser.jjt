@@ -1135,7 +1135,7 @@ void PointerExpression() #void : {}
 
 void EnumerationExpression() #void : {}
 {
-    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1) (LOOKAHEAD(<DOTP>) Reduction())?) #Reference(>1)
+    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1)) #Reference(>1)
 }
 
 void EnumerationAccess() #void : {}
@@ -1145,11 +1145,6 @@ void EnumerationAccess() #void : {}
     LOOKAHEAD(<DOTC>) ArrayProjection()
     |
     LOOKAHEAD(<DOTB>) Selection()
-}
-
-void Reduction() #ReductionNode : {}
-{
-    <DOTP> <LPAREN> [LOOKAHEAD(Expression() <COLON>) Expression() <COLON>] Lambda() <RPAREN>
 }
 
 void Selection() #SelectionNode : {}
@@ -1874,11 +1869,18 @@ void MethodCall() #void : {}
     (MemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
 }
 
+void Pipe() #PipeNode : {}
+{
+    <DOTP> Expression() <RPAREN>
+}
+
 void MemberAccess() #void : {}
 {
     LOOKAHEAD(<LBRACKET>) ArrayAccess()
     |
     LOOKAHEAD(<QLBRACKET>) ArrayAccessSafe()
+    |
+    LOOKAHEAD(<DOTP>) Pipe()
     |
     LOOKAHEAD(<DOT> | <QDOT>) IdentifierAccess()
     |
