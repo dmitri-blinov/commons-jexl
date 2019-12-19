@@ -155,7 +155,7 @@ public class Closure extends Script {
      */
     @Override
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
-        return jexl.createInterpreter(context, frame, createOptions(context), caller != null ? caller.current : null);
+        return jexl.createInterpreter(context, frame, options(context), caller != null ? caller.current : null);
     }
 
     /**
