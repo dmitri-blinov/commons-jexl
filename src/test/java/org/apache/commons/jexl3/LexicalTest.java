@@ -590,7 +590,7 @@ public class LexicalTest {
             int n42;
             JexlOptions o;
 
-            n42 = (Integer) jexl.createScript("#pragma jexl.options none\n-42").execute(vars);
+            n42 = (Integer) jexl.createScript("#pragma jexl.options 'none'\n-42").execute(vars);
             Assert.assertEquals(-42, n42);
             o = vars.snatchOptions();
             Assert.assertNotNull(o);
@@ -600,7 +600,7 @@ public class LexicalTest {
             Assert.assertFalse(o.isLexical());
             Assert.assertFalse(o.isLexicalShade());
 
-            n42 = (Integer) jexl.createScript("#pragma jexl.options canonical\n42").execute(vars);
+            n42 = (Integer) jexl.createScript("#pragma jexl.options 'canonical'\n42").execute(vars);
             Assert.assertEquals(42, n42);
             o = vars.snatchOptions();
             Assert.assertNotNull(o);
