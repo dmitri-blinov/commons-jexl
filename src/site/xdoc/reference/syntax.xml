@@ -387,13 +387,13 @@
                         <p>Stream operators allows to perform transformations of iterable objects into iterators or values.
                         Stream operator can be a projection operator, selection operator or reduction operator</p>
                         <p>Projection operator creates an iterator that produces values specified in the projection.
-                        Projection operator can be either an array projection operator <code>a.[foo,bar]</code> or a
-                        key-value projection operator <code>a.{foo:bar}</code>.
-                        The projection dimensions can be defined either as the properties of the object, <code>a.[foo]</code>
-                        or as lambda expressions <code>a.[x - > {x.foo}]</code>.</p>
+                        Projection operator can be either an array projection operator <code>a.{@foo,@bar}</code> or a
+                        key-value projection operator <code>a.{@foo : @bar}</code>.
+                        The projection dimensions can be defined either as the properties of the object, <code>a.{@foo}</code>
+                        or as lambda expressions <code>a.{x - > {x.foo}}</code>.</p>
                         <p>Selection operator creates an iterator that produces only the values that satisfy the specified
-                        selection condition <code>a.(x - > {x.foo.length() > 10})</code></p>
-                        <p>Reduction operator evaluates a scalar value from iterable object <code>a.$(0 : (x,y) - > {x+y})</code></p>
+                        selection condition <code>a.[x - > {x.foo.length() > 10])</code></p>
+                        <p>Reduction operator evaluates a scalar value from iterable object <code>a.(0 : (x,y) - > {x+y})</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -533,6 +533,14 @@
                         or have non-standard names, e.g.
                         <code>this.val1</code>
                         <code>this["var"]</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Current object literal</td>
+                    <td>
+                        The literal <code>@</code> allows to explicitly access object that is currently being evaluated in selection operator
+                        or inline assignment operator, e.g.
+                        <code>foo{bar : @.bar + 1}</code> is equivalent to <code>foo{bar : foo.bar + 1}</code>
                     </td>
                 </tr>
                 <tr>
@@ -1384,40 +1392,65 @@
                 <tr>
                     <td>Array projection</td>
                     <td>
-                        An array projection operator <code>a.[foo,bar]</code> can define one or more projection dimensions.
-                        In case of only one defined dimension <code>a.[foo]</code>, the projection operator creates an iterator
-                        that produces a single value. In case of more than one defined dimension <code>a.[foo,bar,quux]</code>,
-                        the projection operator creates an iterator that produces an array of the corresponding values.
+                        An array projection operator <code>a.{@foo,@bar}</code> can define one or more projection dimensions.
+                        In case of only one defined dimension <code>a.[@foo]</code>, the projection operator creates an iterator
+                        that yields a single value on each iteration. In case of more than one defined dimension <code>a.{@foo,@bar,@quux}</code>,
+                        the projection operator creates an iterator that yields an array of the corresponding values.
+                        The projection expression can be either an attribute reference in the form of <code>@attr</code> or 
+                        a defined function. The function in its basic form defines the projection rule takes one argument, 
+                        which accepts the current element of the iterable object. In extended form the projecting function can take two arguments 
+                        <code>(index,value) -> {index &lt; 10}</code> with the first argument <code>index</code> being the zero based index of the 
+                        current element of the iterable object, and the second <code>value</code> is the current element itself.
+                        <p>A Projection expression can also be specified as a simple expression, in that case 
+                        the currently projected object should be addressed with current object literal <code>@</code> e.g. 
+                        <code>a.{@.length()}</code> is equivalent to <code>a.{x -> {x.length()}}</code></p>
                     </td>
                     <td>Key-value projection</td>
                     <td>
-                        A key-value projection operator <code>a.{foo:bar}</code> creates an iterator
-                        that produces <code>Map.Entry</code> object with a key and a value.
+                        A key-value projection operator <code>a.{@foo:@bar}</code> creates an iterator
+                        that yields <code>Map.Entry</code> object with a key and a value. The projection expression definition
+                        is the same as for array projection.
                     </td>
                     <td>Selection</td>
                     <td>
-                        A selection operator <code>a.(x -> {x.length() > 10})</code> creates an iterator
-                        that produces only the objects that satisfy the specified condition.
-                        In its basic form the function takes one argument which is the next element of the iterable object.
-                        In extended form the function can take two arguments <code>(index,value) -> {index &lt; 10}</code>
+                        A selection operator <code>a.[x -> {x.length() > 10])</code> creates an iterator
+                        that yields only the objects that satisfy the specified condition.
+                        In its basic form the function that defines the selection rule takes one argument, which accepts the next element of the iterable object.
+                        In extended form the filtering function can take two arguments <code>(index,value) -> {index &lt; 10}</code>
                         with the first argument <code>index</code> being the zero based index of the next element of the iterable
                         object, and the second <code>value</code> is the next element itself.
+                        <p>A selection expression can also be specified as a simple conditional expression, in that case 
+                        the currently checked object should be addressed with current object literal <code>@</code> e.g. 
+                        <code>a.[@.length() > 10]</code> is equivalent to <code>a.[x -> {x.length() > 10}]</code></p>
                     </td>
-                    <td>Reduction</td>
+                </tr>
+            </table>
+        </section>
+        <section name="Pipes">
+            <table>
+                <tr>
+                    <th width="15%">Operator</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Pipe operator</td>
                     <td>
-                        A reduction operator <code>a.@(defaultValue : (result,value) -> {result + value})</code> evaluates
-                        the specified function to produce a value from series of values returned by an iterable object.
-                        If the iterable object contains no data, the <code>defaultValue</code> will be returned, otherwise
-                        the function <code>(result,value) -> {result + value}</code> will be called for each value returned
+                        A pipe operator <code>a.(x -> {x + 1})</code> evaluates the specified expression or function upon its non-null left argument to yield a value, e.g.
+                        <code>foo.(x -> {x + 1})</code> is equivalent to <code>foo != null ? (x -> {x + 1})(foo) : null</code>.
+                        <p>If the left argument is an iterable object, a pipe operator <code>a.((result,value) -> {result + value})</code> will evaluate
+                        the specified function to yield a value from series of values returned by that iterable object.
+                        The function <code>(result,value) -> {result + value}</code> will be called for each value returned
                         by the iterable object. In its basic form the function takes two arguments, with the first argument
-                        <code>result</code> being a partial reduction operator result, and the second argument <code>value</code>
-                        being the next element of the iterable object. The function can also take only one argument
+                        <code>result</code> being a partial pipe operator result, and the second argument <code>value</code>
+                        being the current element of the iterable object. The function can also take only one argument
                         <code>result -> {result + 1}</code>, or take no arguments at all<code>() -> {nextid()}</code>.
                         In extended form the function can take three arguments <code>(result,index,value) -> {result + value}</code>
-                        with additional argument <code>index</code> being the zero based index of the next element of the iterable
-                        object.
-                        <p>Note that the default value of the reduction operator can be omitted
-                           <code>a.@((result,value) -> {result + value})</code>, in that case the default value will be null</p>
+                        with additional argument <code>index</code> being the zero based index of the current element of the iterable
+                        object. 
+                        </p>
+                        <p>Pipe function can also be specified as a simple expression, in that case 
+                        the currently processed object should be addressed with current object literal <code>@</code> e.g. 
+                        <code>a.(@+1)</code> is equivalent to <code>a.(x -> {x+1})</code></p>
                     </td>
                 </tr>
             </table>

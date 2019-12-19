@@ -123,7 +123,9 @@ New features
 
 + New iterator `...` operator is introduced
 
-+ New iterator processing (selection/projection/reduction) operators are introduced
++ New iterator processing (generator/selection/projection) operators are introduced
+
++ New pipe operator `foo.(x -> {x + 1})` is introduced
 
 + New multiple assignment statement `(x,_,y) = [2,1,3]` is introduced
 

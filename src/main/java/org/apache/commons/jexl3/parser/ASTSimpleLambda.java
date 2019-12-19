@@ -17,21 +17,22 @@
 package org.apache.commons.jexl3.parser;
 
 /**
- * Lambda (function).
+ * Simple Lambda (expression or expicit definition).
  */
-public class ASTJexlLambda extends ASTJexlScript {
-    ASTJexlLambda(int id) {
+public final class ASTSimpleLambda extends ASTJexlLambda {
+    ASTSimpleLambda(int id) {
         super(id);
     }
 
-    ASTJexlLambda(Parser p, int id) {
+    ASTSimpleLambda(Parser p, int id) {
         super(p, id);
     }
 
     /**
      * @return true if outermost script.
      */
+    @Override
     public boolean isTopLevel() {
-        return jjtGetParent() == null;
+        return false;
     }
 }

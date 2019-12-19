@@ -30,6 +30,7 @@ import org.apache.commons.jexl3.parser.ASTArrayLiteral;
 import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTAssignment;
+import org.apache.commons.jexl3.parser.ASTAttributeReference;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
@@ -40,6 +41,7 @@ import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
+import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
@@ -113,11 +115,11 @@ import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTNullpNode;
 import org.apache.commons.jexl3.parser.ASTNumberLiteral;
 import org.apache.commons.jexl3.parser.ASTOrNode;
+import org.apache.commons.jexl3.parser.ASTPipeNode;
 import org.apache.commons.jexl3.parser.ASTPointerNode;
 import org.apache.commons.jexl3.parser.ASTProjectionNode;
 import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
-import org.apache.commons.jexl3.parser.ASTReductionNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
 import org.apache.commons.jexl3.parser.ASTRegexLiteral;
@@ -393,6 +395,11 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(ASTAttributeReference node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(ASTReference node, Object data) {
         return visitNode(node, data);
     }
@@ -644,6 +651,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTThisNode node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTCurrentNode node, Object data) {
         return visitNode(node, data);
     }
 
@@ -958,7 +970,7 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
-    protected Object visit(ASTReductionNode node, Object data) {
+    protected Object visit(ASTPipeNode node, Object data) {
         return visitNode(node, data);
     }
 

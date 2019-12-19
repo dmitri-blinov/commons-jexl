@@ -30,6 +30,7 @@ import org.apache.commons.jexl3.parser.ASTArrayLiteral;
 import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTAssignment;
+import org.apache.commons.jexl3.parser.ASTAttributeReference;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
@@ -38,8 +39,10 @@ import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
+import org.apache.commons.jexl3.parser.ASTSimpleLambda;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
+import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
@@ -114,11 +117,11 @@ import org.apache.commons.jexl3.parser.ASTNullAssignment;
 import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTNumberLiteral;
 import org.apache.commons.jexl3.parser.ASTOrNode;
+import org.apache.commons.jexl3.parser.ASTPipeNode;
 import org.apache.commons.jexl3.parser.ASTPointerNode;
 import org.apache.commons.jexl3.parser.ASTProjectionNode;
 import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
 import org.apache.commons.jexl3.parser.ASTRangeNode;
-import org.apache.commons.jexl3.parser.ASTReductionNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
 import org.apache.commons.jexl3.parser.ASTRegexLiteral;
@@ -1132,14 +1135,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 builder.append('\r');
             }
         }
-
+        // if single expression lambda
+        boolean expr = false;
         // if lambda, produce parameters
-        if (node instanceof ASTJexlLambda) {
-            boolean expr = false;
-
+        if (node instanceof ASTSimpleLambda) {
+            expr = true;
+        } else if (node instanceof ASTJexlLambda) {
             if (node.jjtGetNumChildren() == 1) {
                JexlNode child = node.jjtGetChild(0);
-
                if (!(child instanceof ASTBlock))
                    expr = true;
             }
@@ -1202,7 +1205,6 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
             if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
                 builder.append(')');
-
             if (named) {
                 builder.append(' ');
             } else {
@@ -1216,7 +1218,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
         // no parameters or done with them
         int num = node.jjtGetNumChildren();
-        if (num == 1 && !(node instanceof ASTJexlLambda)) {
+        if (num == 1 && (expr || !(node instanceof ASTJexlLambda))) {
             data = accept(node.jjtGetChild(0), data);
         } else {
             for (int i = 0; i < num; ++i) {
@@ -1612,6 +1614,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
+    protected Object visit(ASTAttributeReference node, Object data) {
+        builder.append('@');
+        builder.append(node.getName());
+        return data;
+    }
+
+    @Override
     protected Object visit(ASTEnclosedExpression node, Object data) {
         JexlNode first = node.jjtGetChild(0);
         builder.append('(');
@@ -1717,6 +1726,12 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTThisNode node, Object data) {
         check(node, "this", data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTCurrentNode node, Object data) {
+        check(node, "@", data);
         return data;
     }
 
@@ -2037,13 +2052,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTProjectionNode node, Object data) {
         int num = node.jjtGetNumChildren();
-        builder.append(".[");
+        builder.append(".{");
         for (int i = 0; i < num; ++i) {
             if (i > 0)
                 builder.append(',');
             accept(node.jjtGetChild(i), data);
         }
-        builder.append(']');
+        builder.append('}');
         return data;
     }
 
@@ -2059,9 +2074,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTSelectionNode node, Object data) {
-        builder.append(".(");
+        builder.append(".[");
         accept(node.jjtGetChild(0), data);
-        builder.append(')');
+        builder.append(']');
         return data;
     }
 
@@ -2076,14 +2091,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(ASTReductionNode node, Object data) {
-        int num = node.jjtGetNumChildren();
-        builder.append(".$(");
+    protected Object visit(ASTPipeNode node, Object data) {
+        builder.append(".(");
         accept(node.jjtGetChild(0), data);
-        if (num > 1) {
-            builder.append(':');
-            accept(node.jjtGetChild(1), data);
-        }
         builder.append(')');
         return data;
     }

@@ -200,7 +200,6 @@ TOKEN_MGR_DECLS : {
       < DOTP : ".(" >
     | < DOTB : ".[" >
     | < DOTC : ".{" >
-    | < DOTS : ".@" >
 }
 
 <*> TOKEN : { /* CONDITIONALS */
@@ -291,6 +290,11 @@ TOKEN_MGR_DECLS : {
 <*> TOKEN : /* ANNOTATION */
 {
   < ANNOTATION: "@" ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$" ])+ >
+}
+
+<*> TOKEN : /* CURRENT CONTEXT */
+{
+  < CURRENT: "@" > { popDot(); } /* Revert state to default. */
 }
 
 <DOT_ID> TOKEN : /* IDENTIFIERS */
@@ -1131,32 +1135,27 @@ void PointerExpression() #void : {}
 
 void EnumerationExpression() #void : {}
 {
-    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1) (LOOKAHEAD(<DOTS>) Reduction())?) #Reference(>1)
+    ((IteratorExpression() (LOOKAHEAD(2) EnumerationAccess() )*) #EnumerationReference(>1)) #Reference(>1)
 }
 
 void EnumerationAccess() #void : {}
 {
-    LOOKAHEAD(<DOTB>) ArrayProjection()
+    LOOKAHEAD(<DOTC> ProjectionExpression() <COLON>) MapProjection()
     |
-    LOOKAHEAD(<DOTC>) MapProjection()
+    LOOKAHEAD(<DOTC>) ArrayProjection()
     |
-    LOOKAHEAD(<DOTP>) Selection()
-}
-
-void Reduction() #ReductionNode : {}
-{
-    <DOTS> <LPAREN> [LOOKAHEAD(Expression() <COLON>) Expression() <COLON>] Lambda() <RPAREN>
+    LOOKAHEAD(<DOTB>) Selection()
 }
 
 void Selection() #SelectionNode : {}
 {
-    <DOTP> (
+    <DOTB> (
       StopCountSelection()
       |
       StartCountSelection()
       |
-      Lambda()
-    ) <RPAREN>
+      SimpleLambda()
+    ) <RBRACKET>
 }
 
 void StopCountSelection() #StopCountNode : {}
@@ -1169,9 +1168,14 @@ void StartCountSelection() #StartCountNode : {}
     (<gt> | <GT>) Expression()
 }
 
+void SimpleLambda() #void : {}
+{
+   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda))
+}
+
 void ArrayProjection() #ProjectionNode : {}
 {
-    <DOTB> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() )* <RBRACKET>
+    <DOTC> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() )* <RCURLY>
 }
 
 void MapProjection() #MapProjectionNode : {}
@@ -1181,32 +1185,22 @@ void MapProjection() #MapProjectionNode : {}
 
 void ProjectionExpression() #void : {}
 {
-    LOOKAHEAD( LambdaLookahead() ) Lambda()
+    AttributeReference()
     |
-    (Identifier() ( LOOKAHEAD(2) ProjectionMemberExpression() )*) #Reference(>1)
+    ProjectionLambda()
 }
 
-void ProjectionMemberExpression() #void : {}
+void AttributeReference() : 
 {
-    LOOKAHEAD(ProjectionMethodCall()) ProjectionMethodCall()
-    |
-    ProjectionMemberAccess()
+    Token t;
+}
+{
+    t=<ANNOTATION> { jjtThis.setName(t.image); }
 }
 
-void ProjectionMemberAccess() #void : {}
+void ProjectionLambda() #void : {}
 {
-    LOOKAHEAD(<LBRACKET>) ArrayAccess()
-    |
-    LOOKAHEAD(<QLBRACKET>) ArrayAccessSafe()
-    |
-    LOOKAHEAD(<DOT>) IdentifierAccess()
-    |
-    LOOKAHEAD(<QDOT>) IdentifierAccess()
-}
-
-void ProjectionMethodCall() #void : {}
-{
-    (ProjectionMemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
+   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda || jjtree.peekNode() instanceof ASTCurrentNode))
 }
 
 void IteratorExpression() #void : {}
@@ -1307,6 +1301,11 @@ void MethodReferenceIdentifier() #Identifier :
 void This() #void : {}
 {
     <THIS> #ThisNode
+}
+
+void Current() #void : {}
+{
+    <CURRENT> #CurrentNode
 }
 
 void Literal() #void : {}
@@ -1838,6 +1837,8 @@ void PrimaryExpression() #void : {}
     |
     This()
     |
+    Current()
+    |
     Literal()
 }
 
@@ -1868,11 +1869,18 @@ void MethodCall() #void : {}
     (MemberAccess() (LOOKAHEAD(<LPAREN>) Arguments())+) #MethodNode(>1)
 }
 
+void Pipe() #PipeNode : {}
+{
+    <DOTP> Expression() <RPAREN>
+}
+
 void MemberAccess() #void : {}
 {
     LOOKAHEAD(<LBRACKET>) ArrayAccess()
     |
     LOOKAHEAD(<QLBRACKET>) ArrayAccessSafe()
+    |
+    LOOKAHEAD(<DOTP>) Pipe()
     |
     LOOKAHEAD(<DOT> | <QDOT>) IdentifierAccess()
     |

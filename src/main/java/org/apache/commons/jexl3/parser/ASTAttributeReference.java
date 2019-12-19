@@ -17,21 +17,38 @@
 package org.apache.commons.jexl3.parser;
 
 /**
- * Lambda (function).
+ * Attribute reference.
  */
-public class ASTJexlLambda extends ASTJexlScript {
-    ASTJexlLambda(int id) {
+public class ASTAttributeReference extends JexlNode {
+    private String name = null;
+
+    ASTAttributeReference(int id) {
         super(id);
     }
 
-    ASTJexlLambda(Parser p, int id) {
+    ASTAttributeReference(Parser p, int id) {
         super(p, id);
     }
 
-    /**
-     * @return true if outermost script.
-     */
-    public boolean isTopLevel() {
-        return jjtGetParent() == null;
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    void setName(String identifier) {
+        if (identifier.charAt(0) == '@') {
+            name = identifier.substring(1);
+        } else {
+            name = identifier;
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Object jjtAccept(ParserVisitor visitor, Object data) {
+        return visitor.visit(this, data);
     }
 }
