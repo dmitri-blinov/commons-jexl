@@ -1285,6 +1285,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 accept(node.jjtGetChild(i), data);
             }
         }
+        if (node.isOrdered()) {
+            if (num > 0)
+                builder.append(",");
+            builder.append("...");
+        }
         builder.append(" }");
         return data;
     }
@@ -1321,6 +1326,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             }
         } else {
             builder.append(':');
+        }
+        if (node.isOrdered()) {
+            if (num > 0)
+                builder.append(",");
+            builder.append("...");
         }
         builder.append(" }");
         return data;

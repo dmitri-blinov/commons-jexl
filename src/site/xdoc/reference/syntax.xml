@@ -578,7 +578,7 @@
                         <p>This syntax creates an <code>ArrayList&lt;Object&gt;</code>.</p>
                         <p>Empty list literal can be specified as <code>[...]</code></p>
                         <p>List comprehentions syntax can also be used to construct lists based on other iterable objects,
-                            like collections and arrays, e.g.<code>[1, 2, 3, ...[4, 5, 6],...]</code></p>
+                            like collections or arrays, e.g.<code>[1, 2, 3, ...[4, 5, 6],...]</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -599,9 +599,12 @@
                         with <code>}</code>, e.g.
                         <code>{ "one" , 2, "more"}</code>
                         <p>This syntax creates a <code>HashSet&lt;Object&gt;</code>.</p>
-                        <p>Empty set literal can be specified as <code>{}</code></p>
+                        <p>Ordered set can be created by specifying <code>...</code> at the end of the list, e.g.
+                        <code>{ "one" , 2, "more",...}</code> creates a <code>LinkedHashSet&lt;Object&gt;</code>.</p>
+                        <p>Empty set literal can be specified as <code>{}</code>, ordered empty set literal
+                        can be specified as <code>{...}</code></p>
                         <p>Set comprehentions syntax can also be used to construct sets based on other iterable objects,
-                            like collections and arrays, e.g.<code>{1, 2, 3, ...[4, 5, 6]}</code></p>
+                            like collections or arrays, e.g.<code>{1, 2, 3, ...[4, 5, 6]}</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -610,7 +613,9 @@
                         A <code>#{</code> followed by zero or more expressions separated by <code>,</code> and ending
                         with <code>}</code>, e.g.
                         <code>#{ "one" , 2, "more"}</code>
-                        <p>This syntax creates an immutable <code>Set&lt;Object&gt;</code>.</p>
+                        <p>Ordered set can be created by specifying <code>...</code> at the end of the list, e.g.
+                        <code>#{ "one" , 2, "more",...}</code></p>
+                        <p>Both syntax create an immutable <code>Set&lt;Object&gt;</code>.</p>
                         <p>Empty immutable set literal can be specified as <code>#{}</code></p>
                         <p>Set comprehentions can also be used like in conventional Set literal syntax</p>
                     </td>
@@ -622,7 +627,11 @@
                         with <code>}</code>, e.g.
                         <code>{ "one" : 1, "two" : 2, "three" : 3, "more": "many more" }</code>
                         <p>This syntax creates a <code>HashMap&lt;Object,Object&gt;</code>.</p>
-                        <p>Empty map literal can be specified as <code>{:}</code></p>
+                        <p>Ordered map can be created by specifying <code>...</code> at the end of the list, e.g.
+                        <code>{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code> creates a 
+                        <code>LinkedHashMap&lt;Object,Object&gt;</code>.</p>
+                        <p>Empty map literal can be specified as <code>{:}</code>, ordered empty map literal 
+                        can be specified as <code>{:...}</code>.</p>
                         <p>Map comprehentions syntax can also be used to construct maps based on other maps,
                              e.g.<code>{1:1, 2:2, 3:3, *:...{4:4, 5:5, 6:6}}</code></p>
                     </td>
@@ -633,7 +642,9 @@
                         A <code>#{</code> followed by zero or more sets of <code>key : value</code> pairs separated by <code>,</code> and ending
                         with <code>}</code>, e.g.
                         <code>#{ "one" : 1, "two" : 2, "three" : 3, "more": "many more" }</code>
-                        <p>This syntax creates an immutable <code>Map&lt;Object,Object&gt;</code>.</p>
+                        <p>Ordered immutable map can be created by specifying <code>...</code> at the end of the list, e.g.
+                        <code>#{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code></p> 
+                        <p>Both syntax create an immutable <code>Map&lt;Object,Object&gt;</code>.</p>
                         <p>Empty immutable map literal can be specified as <code>#{:}</code></p>
                         <p>Map comprehentions can also be used like in conventional Map literal syntax</p>
                     </td>

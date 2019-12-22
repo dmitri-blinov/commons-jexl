@@ -1501,29 +1501,34 @@ void PrimitiveType() #ClassLiteral() :
 
 void EmptyListLiteral() #ArrayLiteral() : {}
 {
-   <LBRACKET> <ELLIPSIS> { jjtThis.setExtended(true); } <RBRACKET>
+   <LBRACKET> [ <ELLIPSIS> { jjtThis.setExtended(); } ] <RBRACKET>
 }
 
 void ArrayLiteral() : {}
 {
    <LBRACKET>
-      (Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )*)? (LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(true); })?
+      Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
    <RBRACKET>
 }
 
-void ImmutableArrayLiteral() #ArrayLiteral() : {}
+void ImmutableArrayLiteral() #ArrayLiteral() :
 {
-   <HBRACKET> (Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )*)? <RBRACKET> { jjtThis.setImmutable(true); }
+   jjtThis.setImmutable(); 
+} 
+{
+   <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET> 
+}
+
+void EmptyMapLiteral() #MapLiteral() : {}
+{
+    <LCURLY> <COLON> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
 }
 
 void MapLiteral() : {}
 {
     <LCURLY>
-    (
-        <COLON>
-        |
-        MapElement() ( <COMMA> MapElement() )*
-    ) <RCURLY>
+        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ]
+    <RCURLY>
 }
 
 void MapElement() #void : {}
@@ -1543,24 +1548,48 @@ void MapEntryLiteral() : {}
     <LBRACKET> Expression() <COLON> Expression() <RBRACKET>
 }
 
-void ImmutableMapLiteral() #MapLiteral() : {}
+void ImmutableEmptyMapLiteral() #MapLiteral() :
+{
+    jjtThis.setImmutable();
+}
+{
+    <HCURLY> <COLON> <RCURLY>
+}
+
+void ImmutableMapLiteral() #MapLiteral() :
+{
+    jjtThis.setImmutable();
+}
 {
     <HCURLY>
-    (
-        <COLON>
-        |
-        MapElement() ( <COMMA> MapElement() )*
-    ) <RCURLY> { jjtThis.setImmutable(true); }
+        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ]
+    <RCURLY>
+}
+
+void EmptySetLiteral() #SetLiteral : {}
+{
+    <LCURLY> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
 }
 
 void SetLiteral() : {}
 {
-    <LCURLY> (Expression() ( <COMMA> Expression() )*)? <RCURLY>
+    <LCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> <ELLIPSIS> <RCURLY>) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
 }
 
-void ImmutableSetLiteral() #SetLiteral : {}
+void ImmutableEmptySetLiteral() #SetLiteral :
 {
-    <HCURLY> (Expression() ( <COMMA> Expression() )*)? <RCURLY> { jjtThis.setImmutable(true); }
+    jjtThis.setImmutable();
+}
+{
+    <HCURLY> <RCURLY>
+}
+
+void ImmutableSetLiteral() #SetLiteral :
+{
+    jjtThis.setImmutable();
+}
+{
+    <HCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> <ELLIPSIS> <RCURLY>) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
 }
 
 /***************************************
@@ -1804,21 +1833,21 @@ void PrimaryExpression() #void : {}
     |
     LOOKAHEAD( <LPAREN> ) ReferenceExpression()
     |
+    LOOKAHEAD( EmptyMapLiteral() ) EmptyMapLiteral()
+    |
     LOOKAHEAD( <LCURLY> MapElement() ) MapLiteral()
     |
-    LOOKAHEAD( <LCURLY> <COLON>) MapLiteral()
+    LOOKAHEAD( ImmutableEmptyMapLiteral() ) ImmutableEmptyMapLiteral()
     |
     LOOKAHEAD( <HCURLY> MapElement() ) ImmutableMapLiteral()
     |
-    LOOKAHEAD( <HCURLY> <COLON>) ImmutableMapLiteral()
+    LOOKAHEAD( EmptySetLiteral() ) EmptySetLiteral()
     |
     LOOKAHEAD( <LCURLY> Expression() (<COMMA> | <RCURLY>)) SetLiteral()
     |
-    LOOKAHEAD( <LCURLY> <RCURLY> ) SetLiteral()
+    LOOKAHEAD( ImmutableEmptySetLiteral() ) ImmutableEmptySetLiteral()
     |
     LOOKAHEAD( <HCURLY> Expression() (<COMMA> | <RCURLY>)) ImmutableSetLiteral()
-    |
-    LOOKAHEAD( <HCURLY> <RCURLY> ) ImmutableSetLiteral()
     |
     LOOKAHEAD( EmptyListLiteral() ) EmptyListLiteral()
     |

@@ -53,16 +53,16 @@ public final class ASTArrayLiteral extends JexlNode {
         return extended;
     }
 
-    public void setExtended(boolean value) {
-        extended = value;
+    public void setExtended() {
+        extended = true;
     }
 
     public boolean isImmutable() {
         return immutable;
     }
 
-    public void setImmutable(boolean value) {
-        immutable = value;
+    public void setImmutable() {
+        immutable = true;
     }
 
     @Override

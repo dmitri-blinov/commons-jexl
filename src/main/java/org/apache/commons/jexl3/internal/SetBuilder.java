@@ -17,6 +17,7 @@
 package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.JexlArithmetic;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,9 +31,10 @@ public class SetBuilder implements JexlArithmetic.SetBuilder {
     /**
      * Creates a new builder with specified set size.
      * @param size the initial set size
+     * @param ordered whether the set should be ordered
      */
-    public SetBuilder(int size) {
-        set = new HashSet<Object>(size);
+    public SetBuilder(int size, boolean ordered) {
+        set = ordered ? new LinkedHashSet<Object>(size) : new HashSet<Object>(size);
     }
 
     @Override

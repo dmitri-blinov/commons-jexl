@@ -2215,7 +2215,8 @@ public class Interpreter extends InterpreterBase {
         if (cached != null)
             return cached;
         int childCount = node.jjtGetNumChildren();
-        JexlArithmetic.SetBuilder mb = arithmetic.setBuilder(childCount);
+        boolean ordered = node.isOrdered();
+        JexlArithmetic.SetBuilder mb = arithmetic.setBuilder(childCount, ordered);
         for (int i = 0; i < childCount; i++) {
             cancelCheck(node);
             JexlNode child = node.jjtGetChild(i);
@@ -2236,16 +2237,14 @@ public class Interpreter extends InterpreterBase {
                 mb.add(entry);
             }
         }
+        Object result = mb.create();
         if (immutable) {
-            Object result = mb.create();
             if (result instanceof Set<?>)
                 result = Collections.unmodifiableSet((Set<?>) result);
             if (cacheable)
                 node.jjtSetValue(result);
-            return result;
-        } else {
-            return mb.create();
         }
+        return result;
     }
 
     @Override
@@ -2256,7 +2255,8 @@ public class Interpreter extends InterpreterBase {
         if (cached != null)
             return cached;
         int childCount = node.jjtGetNumChildren();
-        JexlArithmetic.MapBuilder mb = arithmetic.mapBuilder(childCount);
+        boolean ordered = node.isOrdered();
+        JexlArithmetic.MapBuilder mb = arithmetic.mapBuilder(childCount, ordered);
         for (int i = 0; i < childCount; i++) {
             cancelCheck(node);
             JexlNode child = node.jjtGetChild(i);

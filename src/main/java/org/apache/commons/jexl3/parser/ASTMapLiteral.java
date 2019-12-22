@@ -23,6 +23,8 @@ public final class ASTMapLiteral extends JexlNode {
     private boolean constant = false;
     /** Whether this array is immutable. */
     private boolean immutable = false;
+    /** Whether this set is ordered. */
+    private boolean ordered = false;
 
     ASTMapLiteral(int id) {
         super(id);
@@ -47,8 +49,16 @@ public final class ASTMapLiteral extends JexlNode {
         return immutable;
     }
 
-    public void setImmutable(boolean value) {
-        immutable = value;
+    public void setImmutable() {
+        immutable = true;
+    }
+
+    public boolean isOrdered() {
+        return ordered;
+    }
+
+    public void setOrdered() {
+        ordered = true;
     }
 
     @Override

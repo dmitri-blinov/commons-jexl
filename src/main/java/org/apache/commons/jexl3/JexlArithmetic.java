@@ -314,10 +314,11 @@ public class JexlArithmetic {
      * Called by the interpreter when evaluating a literal set.
      *
      * @param size the number of elements in the set
-     * @return the array builder
+     * @param ordered whether the set is ordered
+     * @return the set builder
      */
-    public SetBuilder setBuilder(int size) {
-        return new org.apache.commons.jexl3.internal.SetBuilder(size);
+    public SetBuilder setBuilder(int size, boolean ordered) {
+        return new org.apache.commons.jexl3.internal.SetBuilder(size, ordered);
     }
 
     /**
@@ -345,10 +346,11 @@ public class JexlArithmetic {
      * Called by the interpreter when evaluating a literal map.
      *
      * @param size the number of elements in the map
+     * @param ordered whether the map is ordered
      * @return the map builder
      */
-    public MapBuilder mapBuilder(int size) {
-        return new org.apache.commons.jexl3.internal.MapBuilder(size);
+    public MapBuilder mapBuilder(int size, boolean ordered) {
+        return new org.apache.commons.jexl3.internal.MapBuilder(size, ordered);
     }
 
     /**
