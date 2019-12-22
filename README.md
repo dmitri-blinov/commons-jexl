@@ -187,6 +187,10 @@ Enhancements
 
 + Immutable map `#{1:2,3:4}` literal constructs can be used
 
++ Ordered set `{1,2,3,...}` literal constructs can be used
+
++ Ordered map `{1:2,3:4,...}` literal constructs can be used
+
 + Array comprehensions `[...a]` can be used in array literals
 
 + Set comprehensions `{...a}` can be used in set literals
