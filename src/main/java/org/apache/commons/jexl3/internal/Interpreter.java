@@ -308,6 +308,8 @@ public class Interpreter extends InterpreterBase {
             }
         } catch (JexlException.Return xreturn) {
             return xreturn.getValue();
+        } catch (JexlException.Yield xyield) {
+            return xyield.getValue();
         } catch (JexlException.Cancel xcancel) {
             // cancelled |= Thread.interrupted();
             cancelled.weakCompareAndSet(false, Thread.interrupted());
@@ -1650,6 +1652,8 @@ public class Interpreter extends InterpreterBase {
             throw e;
         } catch (JexlException.Return e) {
             throw e;
+        } catch (JexlException.Yield e) {
+            throw e;
         } catch(JexlException.Cancel e) {
             throw e;
         } catch (Throwable t) {
@@ -1739,6 +1743,8 @@ public class Interpreter extends InterpreterBase {
         } catch (JexlException.Remove e) {
             throw e;
         } catch (JexlException.Return e) {
+            throw e;
+        } catch (JexlException.Yield e) {
             throw e;
         } catch(JexlException.Cancel e) {
             throw e;
@@ -4136,6 +4142,8 @@ public class Interpreter extends InterpreterBase {
                     return processAnnotation(stmt, index + 1, data);
                 } catch (JexlException.Return xreturn) {
                     return xreturn;
+                } catch (JexlException.Yield xyield) {
+                    return xyield;
                 } catch (JexlException.Break xbreak) {
                     return xbreak;
                 } catch (JexlException.Continue xcontinue) {

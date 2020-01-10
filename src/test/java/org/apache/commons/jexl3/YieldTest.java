@@ -54,6 +54,14 @@ public class YieldTest extends JexlTestCase {
     }
 
     @Test
+    public void testTryMask() throws Exception {
+        JexlScript e = JEXL.createScript("var a = ({ x = 'Hello'; try { yield 'World'} catch (ex) { yield 'Wrong'}}); a");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals("Block result is wrong", "World", o);
+    }
+
+    @Test
     public void testYieldBroken() throws Exception {
         try {
             JexlScript e = JEXL.createScript("if (true) { yield 42; }");
