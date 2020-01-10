@@ -1913,56 +1913,68 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTSwitchStatement node, Object data) {
-        Object result = null;
-        /* first objectNode is the switch expression */
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+
+        final boolean lexical = options.isLexical();
+        if (lexical) {
+              // create lexical frame
+              block = new LexicalFrame(frame, block);
+        }
         try {
-            int childCount = node.jjtGetNumChildren();
-            boolean matched = false;
-            Class scope = left != null ? left.getClass() : Void.class;
-            // check all cases first
-            for (int i = 1; i < childCount; i++) {
-                JexlNode child = node.jjtGetChild(i);
-                if (!matched && child instanceof ASTSwitchStatementCase) {
-                    JexlNode labels = child.jjtGetChild(0);
-                    // check all labels
-                    for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
-                        JexlNode label = labels.jjtGetChild(j);
-                        Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
-                        try {
-                            Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                            if (caseMatched == JexlEngine.TRY_FAILED)
-                                caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
-                            matched = arithmetic.toBoolean(caseMatched);
-                        } catch (ArithmeticException xrt) {
-                            throw new JexlException(node, "== error", xrt);
-                        }
-                        if (matched)
-                            break;
-                    }
-                }
-                // Fall through until break
-                if (matched)
-                    result = child.jjtAccept(this, data);
-            }
-            // otherwise jump to default case
-            if (!matched) {
+            Object result = null;
+            /* first objectNode is the switch expression */
+            Object left = node.jjtGetChild(0).jjtAccept(this, data);
+            try {
+                int childCount = node.jjtGetNumChildren();
+                boolean matched = false;
+                Class scope = left != null ? left.getClass() : Void.class;
+                // check all cases first
                 for (int i = 1; i < childCount; i++) {
                     JexlNode child = node.jjtGetChild(i);
-                    if (child instanceof ASTSwitchStatementDefault)
-                        matched = true;
+                    if (!matched && child instanceof ASTSwitchStatementCase) {
+                        JexlNode labels = child.jjtGetChild(0);
+                        // check all labels
+                        for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
+                            JexlNode label = labels.jjtGetChild(j);
+                            Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
+                            try {
+                                Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
+                                if (caseMatched == JexlEngine.TRY_FAILED)
+                                    caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                matched = arithmetic.toBoolean(caseMatched);
+                            } catch (ArithmeticException xrt) {
+                                throw new JexlException(node, "== error", xrt);
+                            }
+                            if (matched)
+                                break;
+                        }
+                    }
+                    // Fall through until break
                     if (matched)
                         result = child.jjtAccept(this, data);
                 }
+                // otherwise jump to default case
+                if (!matched) {
+                    for (int i = 1; i < childCount; i++) {
+                        JexlNode child = node.jjtGetChild(i);
+                        if (child instanceof ASTSwitchStatementDefault)
+                            matched = true;
+                        if (matched)
+                            result = child.jjtAccept(this, data);
+                    }
+                }
+            } catch (JexlException.Break stmtBreak) {
+                String target = stmtBreak.getLabel();
+                if (target != null && !target.equals(node.getLabel())) {
+                    throw stmtBreak;
+                }
+                // break
             }
-        } catch (JexlException.Break stmtBreak) {
-            String target = stmtBreak.getLabel();
-            if (target != null && !target.equals(node.getLabel())) {
-                throw stmtBreak;
-            }
-            // break
+            return result;
+        } finally {
+              // restore lexical frame
+              if (lexical)
+                  block = block.pop();
         }
-        return result;
     }
 
     @Override

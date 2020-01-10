@@ -664,10 +664,16 @@ void SwitchStatementLookahead() : {}
     <SWITCH> <LPAREN> Expression() <RPAREN> <LCURLY> (<CASE> (Literal() | Identifier()) <COLON> | <DCASE> <COLON>)
 }
 
-ASTSwitchStatement SwitchStatement() : {}
+ASTSwitchStatement SwitchStatement() :
+{
+    pushUnit(jjtThis);
+}
 {
     <SWITCH> <LPAREN> Expression() <RPAREN> { branchScope.switchCount += 1; } <LCURLY> SwitchStatementBlock() <RCURLY> { branchScope.switchCount -= 1; }
-    { return jjtThis; }
+    {
+      popUnit(jjtThis);
+      return jjtThis;
+    }
 }
 
 void SwitchStatementBlock() #void : {}
@@ -679,12 +685,12 @@ void SwitchStatementBlock() #void : {}
 
 void SwitchStatementCase() : {}
 {
-    <CASE> SwitchCaseLabel() <COLON> (Statement())*
+    <CASE> SwitchCaseLabel() <COLON> (GenericStatement())*
 }
 
 void SwitchStatementDefault() : {}
 {
-    <DCASE> <COLON> (Statement())*
+    <DCASE> <COLON> (GenericStatement())*
 }
 
 void ReturnStatement() : {}
