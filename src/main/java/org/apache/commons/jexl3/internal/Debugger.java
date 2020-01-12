@@ -1944,8 +1944,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         builder.append(" -> ");
         if (node.jjtGetNumChildren() > 1) {
-            for (int i = 1; i < node.jjtGetNumChildren(); i++)
-                acceptStatement(node.jjtGetChild(i), data);
+            acceptStatement(node.jjtGetChild(1), data);
         } else {
             builder.append(';');
         }
@@ -1966,8 +1965,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTSwitchExpressionDefault node, Object data) {
         builder.append("default -> ");
         if (node.jjtGetNumChildren() > 0) {
-            for (int i = 0; i < node.jjtGetNumChildren(); i++)
-                acceptStatement(node.jjtGetChild(i), data);
+            acceptStatement(node.jjtGetChild(0), data);
         } else {
             builder.append(';');
         }
