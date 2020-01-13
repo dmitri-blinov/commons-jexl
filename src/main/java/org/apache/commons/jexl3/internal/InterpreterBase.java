@@ -59,7 +59,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     /** The uberspect. */
     protected final JexlUberspect uberspect;
     /** The arithmetic handler. */
-    protected final JexlArithmetic arithmetic;
+    protected JexlArithmetic arithmetic;
     /** The context to store/retrieve variables. */
     protected final JexlContext context;
     /** The options. */
@@ -112,26 +112,6 @@ public abstract class InterpreterBase extends ParserVisitor {
         this.functions = jexl.functions;
         this.functors = null;
         this.operators = new Operators(this);
-    }
-
-    /**
-     * Copy constructor.
-     * @param ii the base to copy
-     * @param jexla the arithmetic instance to use (or null)
-     */
-    protected InterpreterBase(InterpreterBase ii, JexlArithmetic jexla) {
-        jexl = ii.jexl;
-        logger = ii.logger;
-        uberspect = ii.uberspect;
-        context = ii.context;
-        arithmetic = ii.arithmetic;
-        cache = ii.cache;
-        ns = ii.ns;
-        cancelled = ii.cancelled;
-        functions = ii.functions;
-        functors = ii.functors;
-        operators = ii.operators;
-        options = ii.options.copy();
     }
 
     /**

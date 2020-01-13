@@ -250,17 +250,6 @@ public class Interpreter extends InterpreterBase {
     }
 
     /**
-     * Copy constructor.
-     * @param ii  the interpreter to copy
-     * @param jexla the arithmetic instance to use (or null)
-     */
-    protected Interpreter(Interpreter ii, JexlArithmetic jexla) {
-        super(ii, jexla);
-        frame = ii.frame;
-        current = ii.current;
-    }
-
-    /**
      * Swaps the current thread local interpreter.
      * @param inter the interpreter or null
      * @return the previous thread local interpreter
@@ -4141,14 +4130,15 @@ public class Interpreter extends InterpreterBase {
                             + ", got " + jexla.getClass().getSimpleName()
                     );
                 }
-                Interpreter ii = new Interpreter(Interpreter.this, jexla);
-                Object r = cblock.jjtAccept(ii, data);
-                if (ii.isCancelled()) {
-                    Interpreter.this.cancel();
+                final JexlArithmetic old = arithmetic;
+                try {
+                    arithmetic = jexla;
+                    return cblock.jjtAccept(this, data);
+                } finally {
+                    arithmetic = old;
                 }
-                return r;
             } else {
-                return cblock.jjtAccept(Interpreter.this, data);
+                return cblock.jjtAccept(this, data);
             }
         }
         // tracking whether we processed the annotation
