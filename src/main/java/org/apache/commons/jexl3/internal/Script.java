@@ -162,6 +162,16 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     /**
+     * Creates this script interpreter.
+     * @param context the context
+     * @param args    the script arguments
+     * @return  the interpreter
+     */
+    protected Interpreter createInterpreter(JexlContext context, Object... args) {
+        return createInterpreter(context, createFrame(scriptArgs(args)));
+    }
+
+    /**
      * @return the engine that created this script
      */
     public JexlEngine getEngine() {
@@ -238,8 +248,7 @@ public class Script implements JexlScript, JexlExpression {
     @Override
     public Object execute(JexlContext context, Object... args) {
         checkCacheVersion();
-        Frame frame = createFrame(scriptArgs(args));
-        Interpreter interpreter = createInterpreter(context, frame);
+        Interpreter interpreter = createInterpreter(context, args);
         return interpreter.interpret(script);
     }
 
@@ -500,7 +509,7 @@ public class Script implements JexlScript, JexlExpression {
      */
     @Override
     public Callable callable(JexlContext context, Object... args) {
-        return new CallableScript(createInterpreter(context, script.createFrame(scriptArgs(args))));
+        return new CallableScript(createInterpreter(context, args));
     }
 
     /**
@@ -530,14 +539,12 @@ public class Script implements JexlScript, JexlExpression {
         }
 
         @Override
-        public Object call() throws Exception {
-            synchronized(this) {
-                if (result == interpreter) {
-                    checkCacheVersion();
-                    result = interpret();
-                }
-                return result;
+        public synchronized Object call() throws Exception {
+            if (result == interpreter) {
+                checkCacheVersion();
+                result = interpret();
             }
+            return result;
         }
 
         /**

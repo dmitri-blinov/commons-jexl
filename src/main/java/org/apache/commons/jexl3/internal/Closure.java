@@ -155,8 +155,22 @@ public class Closure extends Script {
      */
     @Override
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
+        if (context == null)
+            context = this.context;
         return jexl.createInterpreter(context, frame, options(context), caller != null ? caller.current : null);
     }
+
+    /**
+     * Creates this script interpreter.
+     * @param context the context
+     * @param args    the script arguments
+     * @return  the interpreter
+     */
+    @Override
+    protected Interpreter createInterpreter(JexlContext context, Object... args) {
+        return createInterpreter(context, getCallFrame(args));
+    }
+
 
     /**
      * Appends additional arguments to the existing vararg parameter, creates new call frame if needed.
@@ -300,8 +314,7 @@ public class Closure extends Script {
 
     @Override
     public Object execute(JexlContext context, Object... args) {
-        Frame local = getCallFrame(args);
-        Interpreter interpreter = createInterpreter(context != null ? context : this.context, local);
+        Interpreter interpreter = createInterpreter(context, args);
         Object result = interpreter.runClosure(this, null);
         if (chained == null)
             return result;
@@ -310,8 +323,7 @@ public class Closure extends Script {
 
     @Override
     public Callable callable(JexlContext context, Object... args) {
-        Frame local = getCallFrame(args);
-        return new CallableScript(createInterpreter(context != null ? context : this.context, local)) {
+        return new CallableScript(createInterpreter(context, args)) {
             @Override
             public Object interpret() {
                 Object result = interpreter.runClosure(Closure.this, null);
