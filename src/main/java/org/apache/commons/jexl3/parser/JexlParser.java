@@ -555,9 +555,7 @@ public abstract class JexlParser extends StringParser {
             if (!(node instanceof ASTSimpleLambda)) {
                 ASTJexlScript script = (ASTJexlScript) node;
                 // reaccess in case local variables have been declared
-                if (script.getScope() != frame) {
-                    script.setScope(frame);
-                }
+                script.setScope(frame);
                 popFrame();
             }
         } else if (ASSIGN_NODES.contains(node.getClass())) {

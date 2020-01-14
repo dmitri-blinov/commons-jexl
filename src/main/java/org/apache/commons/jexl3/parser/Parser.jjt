@@ -389,16 +389,16 @@ ASTJexlScript JexlScript(Scope frame) :
     pushUnit(jjtThis);
 }
 {
-   (LOOKAHEAD(<PRAGMA>) Pragma())*
-   (
-      LOOKAHEAD( LambdaLookahead() ) Lambda() (<SEMICOL>)?
-      |
-      (GenericStatement())*
-   ) <EOF>
-   {
-        popUnit(jjtThis);
-        return jjtThis.script();
-   }
+    (LOOKAHEAD(<PRAGMA>) Pragma())*
+    (
+       LOOKAHEAD( LambdaLookahead() ) Lambda() [ <SEMICOL> ]
+       |
+       (GenericStatement())*
+    ) <EOF>
+{
+    popUnit(jjtThis);
+    return jjtThis.script();
+}
 }
 
 ASTJexlScript JexlExpression(Scope frame) #JexlScript :
@@ -407,11 +407,11 @@ ASTJexlScript JexlExpression(Scope frame) #JexlScript :
     pushUnit(jjtThis);
 }
 {
-   ( Expression() )? <EOF>
-   {
-        popUnit(jjtThis);
-        return jjtThis.script();
-   }
+    [ Expression() ] <EOF>
+{
+    popUnit(jjtThis);
+    return jjtThis.script();
+}
 }
 
 void Annotation() #Annotation :
@@ -525,14 +525,14 @@ void LabelledStatement() #void :
 
 ASTBlock Block() #Block :
 {
-   pushUnit(jjtThis);
+    pushUnit(jjtThis);
 }
 {
     <LCURLY> (GenericStatement())* <RCURLY>
-    {
-       popUnit(jjtThis);
-       return jjtThis;
-    }
+{
+    popUnit(jjtThis);
+    return jjtThis;
+}
 }
 
 void ExpressionStatement() : {}
@@ -572,13 +572,13 @@ void FunctionVar() #Var :
 
 void Function() #JexlLambda() :
 {
-   pushFrame();
-   pushUnit(jjtThis);
+    pushFrame();
+    pushUnit(jjtThis);
 }
 {
-   Parameters() ( Block() | <LAMBDAE> Expression() )
+    Parameters() ( Block() | <LAMBDAE> Expression() )
 {
-   popUnit(jjtThis);
+    popUnit(jjtThis);
 }
 }
 
@@ -586,19 +586,25 @@ ASTIfStatement IfStatement() : {}
 {
     <IF> <LPAREN> Expression() <RPAREN> StatementBranch()
     [ LOOKAHEAD(1) <ELSE> StatementBranch() ]
-    { return jjtThis; }
+{
+    return jjtThis;
+}
 }
 
 ASTWhileStatement WhileStatement() : {}
 {
-    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
-    { return jjtThis; }
+    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }   
+{
+    return jjtThis;
+}
 }
 
 ASTDoWhileStatement DoWhileStatement() : {}
 {
     <DO> { branchScope.loopCount += 1; } StatementBranch() <WHILE> <LPAREN> Expression() <RPAREN> { branchScope.loopCount -= 1; }
-    { return jjtThis; }
+{
+    return jjtThis;
+}
 }
 
 ASTTryStatement TryStatement() : {}
@@ -609,12 +615,14 @@ ASTTryStatement TryStatement() : {}
       |
       <FINALLY> Block()
     )
-    { return jjtThis; }
+{ 
+   return jjtThis; 
+}
 }
 
 ASTTryWithResourceStatement TryWithResourceStatement() :
 {
-   pushUnit(jjtThis);
+    pushUnit(jjtThis);
 }
 {
     <TRY> <LPAREN> TryResource() <RPAREN> Block()
@@ -626,14 +634,16 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
       |
       <FINALLY> Block()
     ]
-    { return jjtThis; }
+{
+    return jjtThis;
+}
 }
 
 void TryResource() : {}
 {
-     LOOKAHEAD(TryVar() <assign>) TryVar() <assign> Expression()
-     |
-     Expression()
+    LOOKAHEAD(TryVar() <assign>) TryVar() <assign> Expression()
+    |
+    Expression()
 }
 
 void TryVar() : {}
@@ -656,7 +666,9 @@ void AssertStatement() : {}
 ASTSynchronizedStatement SynchronizedStatement() : {}
 {
     <SYNCHRONIZED> <LPAREN> Expression() <RPAREN> Block()
-    { return jjtThis; }
+{
+    return jjtThis;
+}
 }
 
 void SwitchStatementLookahead() : {}
@@ -670,10 +682,10 @@ ASTSwitchStatement SwitchStatement() :
 }
 {
     <SWITCH> <LPAREN> Expression() <RPAREN> { branchScope.switchCount += 1; } <LCURLY> SwitchStatementBlock() <RCURLY> { branchScope.switchCount -= 1; }
-    {
-      popUnit(jjtThis);
-      return jjtThis;
-    }
+{
+    popUnit(jjtThis);
+    return jjtThis;
+}
 }
 
 void SwitchStatementBlock() #void : {}
@@ -708,7 +720,7 @@ void Continue() #Continue :
     Token t = null;
 }
 {
-    <CONTINUE> (LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.continueSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } )?
+    <CONTINUE> [ LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.continueSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } ]
     { if (t == null && !branchScope.continueSupported()) { throwParsingException(jjtThis); } }
 }
 
@@ -717,7 +729,7 @@ void Remove() #Remove :
     Token t = null;
 }
 {
-    <REMOVE> (LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.removeSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } )?
+    <REMOVE> [ LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.removeSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } ]
     { if (t == null && !branchScope.removeSupported()) { throwParsingException(jjtThis); } }
 }
 
@@ -726,7 +738,7 @@ void Break() #Break :
     Token t = null;
 }
 {
-    <BREAK> (LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.breakSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } )?
+    <BREAK> [ LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.breakSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } ]
     { if (t == null && !branchScope.breakSupported()) { throwParsingException(jjtThis); } }
 }
 
@@ -736,10 +748,10 @@ ASTForStatement ForStatement() :
 }
 {
     <FOR> <LPAREN> ForInitializationNode() <SEMICOL> ForTerminationNode() <SEMICOL> ForIncrementNode() <RPAREN> { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
-    {
-      popUnit(jjtThis);
-      return jjtThis;
-    }
+{
+    popUnit(jjtThis);
+    return jjtThis;
+}
 }
 
 void ForInitializationExpression() #void : {}
@@ -768,10 +780,10 @@ ASTForeachStatement ForeachStatement() :
 }
 {
     <FOR> <LPAREN> ForeachVar() <COLON> Expression() <RPAREN> { branchScope.foreachLoopCount += 1; } StatementBranch() { branchScope.foreachLoopCount -= 1; }
-    {
-      popUnit(jjtThis);
-      return jjtThis;
-    }
+{
+    popUnit(jjtThis);
+    return jjtThis;
+}
 }
 
 void ForeachVar() : {}
@@ -804,13 +816,13 @@ void DeclareVar() #Var :
 
 void RequiredVarLookahead() #void() : {}
 {
-  <FINAL>
-  |
-  <VAR> <and>
-  |
-  (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
-  |
-  <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
+    <FINAL>
+    |
+    <VAR> <and>
+    |
+    (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
+    |
+    <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
 }
 
 void Var() #void : {}
@@ -892,41 +904,41 @@ Object PragmaValue() #void :
 
 void Expression() #void : {}
 {
-  AssignmentExpression()
+    AssignmentExpression()
 }
 
 void AssignmentExpression() #void : {}
 {
-  ConditionalExpression()
-  ( LOOKAHEAD(2) (
-    <plus_assign> Expression() #SetAddNode(2)
-    |
-    <mult_assign> Expression() #SetMultNode(2)
-    |
-    <div_assign> Expression() #SetDivNode(2)
-    |
-    <mod_assign> Expression() #SetModNode(2)
-    |
-    <and_assign> Expression() #SetAndNode(2)
-    |
-    <or_assign> Expression() #SetOrNode(2)
-    |
-    <xor_assign> Expression() #SetXorNode(2)
-    |
-    <minus_assign> Expression() #SetSubNode(2)
-    |
-    <shl_assign> Expression() #SetShlNode(2)
-    |
-    <sar_assign> Expression() #SetSarNode(2)
-    |
-    <shr_assign> Expression() #SetShrNode(2)
-    |
-    <null_assign> Expression() #NullAssignment(2)
-    |
-    <ne_assign> Expression() #NEAssignment(2)
-    |
-    <assign> Expression() #Assignment(2)
-  ) )*
+    ConditionalExpression()
+    ( LOOKAHEAD(2) (
+      <plus_assign> Expression() #SetAddNode(2)
+      |
+      <mult_assign> Expression() #SetMultNode(2)
+      |
+      <div_assign> Expression() #SetDivNode(2)
+      |
+      <mod_assign> Expression() #SetModNode(2)
+      |
+      <and_assign> Expression() #SetAndNode(2)
+      |
+      <or_assign> Expression() #SetOrNode(2)
+      |
+      <xor_assign> Expression() #SetXorNode(2)
+      |
+      <minus_assign> Expression() #SetSubNode(2)
+      |
+      <shl_assign> Expression() #SetShlNode(2)
+      |
+      <sar_assign> Expression() #SetSarNode(2)
+      |
+      <shr_assign> Expression() #SetShrNode(2)
+      |
+      <null_assign> Expression() #NullAssignment(2)
+      |
+      <ne_assign> Expression() #NEAssignment(2)
+      |
+      <assign> Expression() #Assignment(2)
+    ) )*
 }
 
 /***************************************
@@ -935,78 +947,78 @@ void AssignmentExpression() #void : {}
 
 void ConditionalExpression() #void : {}
 {
-  ConditionalOrExpression()
-  ( LOOKAHEAD(2) (
-    <QMARK> TernaryExpression()
-    |
-    <ELVIS> Expression() #ElvisNode(2)
-  ) )?
+    ConditionalOrExpression()
+    [ LOOKAHEAD(2) (
+      <QMARK> TernaryExpression()
+      |
+      <ELVIS> Expression() #ElvisNode(2)
+    ) ]
 }
 
 void TernaryExpression() #void : {}
 {
-  LOOKAHEAD(Expression() <COLON>) Expression() <COLON> Expression() #TernaryNode(3)
-  |
-  Expression() #TernaryNode(2)
+    LOOKAHEAD(Expression() <COLON>) Expression() <COLON> Expression() #TernaryNode(3)
+    |
+    Expression() #TernaryNode(2)
 }
 
 void ConditionalOrExpression() #void : {}
 {
-  ConditionalAndExpression()
-  ( LOOKAHEAD(2) (
-     (<OR>|<_OR>) ConditionalAndExpression() #OrNode(2)
-  ) )*
+    ConditionalAndExpression()
+    ( LOOKAHEAD(2) (
+       (<OR>|<_OR>) ConditionalAndExpression() #OrNode(2)
+    ) )*
 }
 
 void ConditionalAndExpression() #void : {}
 {
-  InclusiveOrExpression()
-  ( LOOKAHEAD(2) (
-     (<AND>|<_AND>) InclusiveOrExpression() #AndNode(2)
-  ) )*
+    InclusiveOrExpression()
+    ( LOOKAHEAD(2) (
+       (<AND>|<_AND>) InclusiveOrExpression() #AndNode(2)
+    ) )*
 }
 
 void InclusiveOrExpression() #void : {}
 {
-  ExclusiveOrExpression()
-  ( LOOKAHEAD(2) (
-     <or> ExclusiveOrExpression() #BitwiseOrNode(2)
-  ) )*
+    ExclusiveOrExpression()
+    ( LOOKAHEAD(2) (
+       <or> ExclusiveOrExpression() #BitwiseOrNode(2)
+    ) )*
 }
 
 void ExclusiveOrExpression() #void : {}
 {
-  AndExpression()
-  ( LOOKAHEAD(2) (
-     <xor> AndExpression() #BitwiseXorNode(2)
-  ) )*
+    AndExpression()
+    ( LOOKAHEAD(2) (
+       <xor> AndExpression() #BitwiseXorNode(2)
+    ) )*
 }
 
 void AndExpression() #void : {}
 {
-  EqualityExpression()
-  ( LOOKAHEAD(2) (
-     <and> EqualityExpression() #BitwiseAndNode(2)
-  ) )*
+    EqualityExpression()
+    ( LOOKAHEAD(2) (
+       <and> EqualityExpression() #BitwiseAndNode(2)
+    ) )*
 }
 
 void EqualityExpression() #void : {}
 {
-  RelationalExpression()
-  ( LOOKAHEAD(2) (
-     (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
-   |
-     (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
-   |
-     (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
-   |
-     <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
-   |
-     <is> RangeExpression() #ISNode(2) // identical
-   |
-     <ni> RangeExpression() #NINode(2) // not identical
+    RelationalExpression()
+    [ LOOKAHEAD(2) (
+       (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
+     |
+       (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
+     |
+       (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
+     |
+       <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
+     |
+       <is> RangeExpression() #ISNode(2) // identical
+     |
+       <ni> RangeExpression() #NINode(2) // not identical
 
-  ) )?
+    ) ]
 }
 
 void SetOperand() : {}
@@ -1023,37 +1035,37 @@ void RelationalExpressionOperand() #void : {}
 
 void RelationalExpression() #void : {}
 {
-  RangeExpression()
-  ( LOOKAHEAD(2) (
-    (<lt> |<LT>) RelationalExpressionOperand() #LTNode(2)
-   |
-    (<gt> | <GT>) RelationalExpressionOperand() #GTNode(2)
-   |
-    (<le> | <LE>) RelationalExpressionOperand() #LENode(2)
-   |
-    (<ge> | <GE>) RelationalExpressionOperand() #GENode(2)
-   |
-    <seq> RelationalExpressionOperand() #SWNode(2) // starts with
-   |
-    <sne> RelationalExpressionOperand() #NSWNode(2) // not starts with
-   |
-    <eeq> RelationalExpressionOperand() #EWNode(2) // ends with
-   |
-    <ene> RelationalExpressionOperand() #NEWNode(2) // not ends with
-   |
-    <iof> TypeReference() #IOFNode(2) // instanceof
-   |
-    <niof> TypeReference() #NIOFNode(2) // not instanceof
+    RangeExpression()
+    [ LOOKAHEAD(2) (
+      (<lt> |<LT>) RelationalExpressionOperand() #LTNode(2)
+     |
+      (<gt> | <GT>) RelationalExpressionOperand() #GTNode(2)
+     |
+      (<le> | <LE>) RelationalExpressionOperand() #LENode(2)
+     |
+      (<ge> | <GE>) RelationalExpressionOperand() #GENode(2)
+     |
+      <seq> RelationalExpressionOperand() #SWNode(2) // starts with
+     |
+      <sne> RelationalExpressionOperand() #NSWNode(2) // not starts with
+     |
+      <eeq> RelationalExpressionOperand() #EWNode(2) // ends with
+     |
+      <ene> RelationalExpressionOperand() #NEWNode(2) // not ends with
+     |
+      <iof> TypeReference() #IOFNode(2) // instanceof
+     |
+      <niof> TypeReference() #NIOFNode(2) // not instanceof
 
-  ) )?
+    ) ]
 }
 
 void RangeExpression() #void : {}
 {
-  ShiftExpression()
-  ( LOOKAHEAD(2) (
-     <range> ShiftExpression() #RangeNode(2) // range
-  ) )?
+    ShiftExpression()
+    ( LOOKAHEAD(2) (
+       <range> ShiftExpression() #RangeNode(2) // range
+    ) )?
 }
 
 /***************************************
@@ -1062,82 +1074,82 @@ void RangeExpression() #void : {}
 
 void ShiftExpression() #void : {}
 {
-  AdditiveExpression()
-  ( LOOKAHEAD(2) (
-    <shl> AdditiveExpression() #ShiftLeftNode(2)
-  |
-    <shr> AdditiveExpression() #ShiftRightUnsignedNode(2)
-  |
-    <sar> AdditiveExpression() #ShiftRightNode(2)
-  ) )*
+    AdditiveExpression()
+    ( LOOKAHEAD(2) (
+      <shl> AdditiveExpression() #ShiftLeftNode(2)
+    |
+      <shr> AdditiveExpression() #ShiftRightUnsignedNode(2)
+    |
+      <sar> AdditiveExpression() #ShiftRightNode(2)
+    ) )*
 }
 
 void AdditiveExpression() #void : {}
 {
-  MultiplicativeExpression()
-  ( LOOKAHEAD(2) (
-    <plus> MultiplicativeExpression() #AddNode(2)
-  |
-    <minus> MultiplicativeExpression() #SubNode(2)
-  ) )*
+    MultiplicativeExpression()
+    ( LOOKAHEAD(2) (
+      <plus> MultiplicativeExpression() #AddNode(2)
+    |
+      <minus> MultiplicativeExpression() #SubNode(2)
+    ) )*
 }
 
 void MultiplicativeExpression() #void : {}
 {
-  UnaryExpression()
-  ( LOOKAHEAD(2) (
-    <mult> UnaryExpression() #MulNode(2)
-  |
-    (<div>|<DIV>) UnaryExpression() #DivNode(2)
-  |
-    (<mod>|<MOD>) UnaryExpression() #ModNode(2)
-  ) )*
+    UnaryExpression()
+    ( LOOKAHEAD(2) (
+      <mult> UnaryExpression() #MulNode(2)
+    |
+      (<div>|<DIV>) UnaryExpression() #DivNode(2)
+    |
+      (<mod>|<MOD>) UnaryExpression() #ModNode(2)
+    ) )*
 }
 
 void UnaryExpression() #void : {}
 {
-  <minus> UnaryExpression() #UnaryMinusNode(1)
-  |
-  <unary_minus> UnaryExpression() #UnaryMinusNode(1)
-  |
-  <plus> UnaryExpression() #UnaryPlusNode(1)
-  |
-  <increment> UnaryExpression() #IncrementNode(1)
-  |
-  <decrement> UnaryExpression() #DecrementNode(1)
-  |
-  <mult> UnaryExpression() #IndirectNode(1)
-  |
-  <tilda> UnaryExpression() #BitwiseComplNode(1)
-  |
-  (<not>|<NOT>) UnaryExpression() #NotNode(1)
-  |
-  <EMPTY> UnaryExpression() #EmptyFunction(1)
-  |
-  <SIZE> UnaryExpression() #SizeFunction(1)
-  |
-  <ELLIPSIS> EnumerationExpression()
-  |
-  LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
-  |
-  PostfixExpression()
+    <minus> UnaryExpression() #UnaryMinusNode(1)
+    |
+    <unary_minus> UnaryExpression() #UnaryMinusNode(1)
+    |
+    <plus> UnaryExpression() #UnaryPlusNode(1)
+    |
+    <increment> UnaryExpression() #IncrementNode(1)
+    |
+    <decrement> UnaryExpression() #DecrementNode(1)
+    |
+    <mult> UnaryExpression() #IndirectNode(1)
+    |
+    <tilda> UnaryExpression() #BitwiseComplNode(1)
+    |
+    (<not>|<NOT>) UnaryExpression() #NotNode(1)
+    |
+    <EMPTY> UnaryExpression() #EmptyFunction(1)
+    |
+    <SIZE> UnaryExpression() #SizeFunction(1)
+    |
+    <ELLIPSIS> EnumerationExpression()
+    |
+    LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
+    |
+    PostfixExpression()
 }
 
 void PostfixExpression() #void : {}
 {
-  PointerExpression()
-  ( LOOKAHEAD(1) (
-    <increment> #IncrementPostfixNode(1)
-  |
-    <decrement> #DecrementPostfixNode(1)
-  ) )*
+    PointerExpression()
+    ( LOOKAHEAD(1) (
+      <increment> #IncrementPostfixNode(1)
+    |
+      <decrement> #DecrementPostfixNode(1)
+    ) )*
 }
 
 void PointerExpression() #void : {}
 {
-  <and> ValueExpression() #PointerNode(1)
-  |
-  NullableExpression()
+    <and> ValueExpression() #PointerNode(1)
+    |
+    NullableExpression()
 }
 
 void EnumerationExpression() #void : {}
@@ -1177,7 +1189,7 @@ void StartCountSelection() #StartCountNode : {}
 
 void SimpleLambda() #void : {}
 {
-   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda))
+    ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda))
 }
 
 void ArrayProjection() #ProjectionNode : {}
@@ -1207,14 +1219,14 @@ void AttributeReference() :
 
 void ProjectionLambda() #void : {}
 {
-   ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda || jjtree.peekNode() instanceof ASTCurrentNode))
+    ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda || jjtree.peekNode() instanceof ASTCurrentNode))
 }
 
 void IteratorExpression() #void : {}
 {
-  LOOKAHEAD(<LPAREN> Expression() <COLON>) <LPAREN> Expression() <COLON> Lambda() <RPAREN> #EnumerationNode(2)
-  |
-  NullableExpression() #EnumerationNode(1)
+    LOOKAHEAD(<LPAREN> Expression() <COLON>) <LPAREN> Expression() <COLON> Lambda() <RPAREN> #EnumerationNode(2)
+    |
+    NullableExpression() #EnumerationNode(1)
 }
 
 void SwitchExpression() : {}
@@ -1317,19 +1329,19 @@ void Current() #void : {}
 
 void Literal() #void : {}
 {
-  IntegerLiteral()
-  |
-  FloatLiteral()
-  |
-  BooleanLiteral()
-  |
-  JxltLiteral()
-  |
-  StringLiteral()
-  |
-  RegexLiteral()
-  |
-  NaNLiteral()
+    IntegerLiteral()
+    |
+    FloatLiteral()
+    |
+    BooleanLiteral()
+    |
+    JxltLiteral()
+    |
+    StringLiteral()
+    |
+    RegexLiteral()
+    |
+    NaNLiteral()
 }
 
 void UnderscoreLiteral() : {}
@@ -1349,113 +1361,113 @@ void NullLiteral() : {}
 
 void BooleanLiteral() #void : {}
 {
-  <TRUE> #TrueNode
-|
-  <FALSE> #FalseNode
+    <TRUE> #TrueNode
+    |
+    <FALSE> #FalseNode
 }
 
 void IntegerLiteral() #NumberLiteral :
 {
-  Token t;
+    Token t;
 }
 {
-  t=<INTEGER_LITERAL>
-  { jjtThis.setNatural(t.image); }
+    t=<INTEGER_LITERAL>
+    { jjtThis.setNatural(t.image); }
 }
 
 void FloatLiteral() #NumberLiteral:
 {
-  Token t;
+    Token t;
 }
 {
-  t=<FLOAT_LITERAL>
-  { jjtThis.setReal(t.image); }
+    t=<FLOAT_LITERAL>
+    { jjtThis.setReal(t.image); }
 }
 
 void StringLiteral() :
 {
-   Token t;
+    Token t;
 }
 {
-  t=<STRING_LITERAL>
-  { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
+    t=<STRING_LITERAL>
+    { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
 }
 
 void JxltLiteral() #JxltLiteral :
 {
-   Token t;
+    Token t;
 }
 {
-   t=<JXLT_LITERAL>
-   { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
+    t=<JXLT_LITERAL>
+    { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
 }
 
 void RegexLiteral() :
 {
-   Token t;
+    Token t;
 }
 {
-  t=<REGEX_LITERAL>
-  { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
+    t=<REGEX_LITERAL>
+    { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
 void TypeCastReference() #ClassLiteral() :
 {
-   Token t;
+    Token t;
 }
 {
-  (
-    t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
-    |
-    t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
-    |
-    t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
-    |
-    t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
-    |
-    t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
-    |
-    t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
-    |
-    t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
-    |
-    t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
-    |
-    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
-  )
-  (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    (
+      t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+      |
+      t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+      |
+      t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+      |
+      t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+      |
+      t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+      |
+      t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+      |
+      t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+      |
+      t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+      |
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+    )
+    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
 void TypeReference() #ClassLiteral() :
 {
-   Token t;
-   Class value;
+    Token t;
+    Class value;
 }
 {
-  (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })+
-  |
-  (
-      t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
-    | t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
-    | t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
-    | t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
-    | t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
-    | t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
-    | t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
-    | t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
-    | t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
-  )
-  (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })+
+    |
+    (
+        t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+      | t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+      | t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+      | t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+      | t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+      | t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+      | t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+      | t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+      | t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+    )
+    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
 void NewTypeReference() #ClassLiteral() :
 {
-   Token t;
-   Class value;
+    Token t;
+    Class value;
 }
 {
-  t=<QUALIFIED_IDENTIFIER>
-  { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+    t=<QUALIFIED_IDENTIFIER>
+    { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
 void ArrayTypeReference() #void : {}
@@ -1467,25 +1479,25 @@ void ArrayTypeReference() #void : {}
 
 void ObjectType() #ClassLiteral() :
 {
-   Token t;
-   Class value;
+    Token t;
+    Class value;
 }
 {
-  t=<QUALIFIED_IDENTIFIER>
-  { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+    t=<QUALIFIED_IDENTIFIER>
+    { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
 void InnerType() #Identifier() :
 {
-   Token t;
+    Token t;
 }
 {
-  t=<QUALIFIED_IDENTIFIER> { jjtThis.setSymbol(t.image); }
+    t=<QUALIFIED_IDENTIFIER> { jjtThis.setSymbol(t.image); }
 }
 
 void PrimitiveType() #ClassLiteral() :
 {
-   Token t;
+    Token t;
 }
 {
     t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
@@ -1507,22 +1519,22 @@ void PrimitiveType() #ClassLiteral() :
 
 void EmptyListLiteral() #ArrayLiteral() : {}
 {
-   <LBRACKET> [ <ELLIPSIS> { jjtThis.setExtended(); } ] <RBRACKET>
+    <LBRACKET> [ <ELLIPSIS> { jjtThis.setExtended(); } ] <RBRACKET>
 }
 
 void ArrayLiteral() : {}
 {
-   <LBRACKET>
-      Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
-   <RBRACKET>
+    <LBRACKET>
+       Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
+    <RBRACKET>
 }
 
 void ImmutableArrayLiteral() #ArrayLiteral() :
 {
-   jjtThis.setImmutable(); 
+    jjtThis.setImmutable(); 
 } 
 {
-   <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET> 
+    <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET> 
 }
 
 void EmptyMapLiteral() #MapLiteral() : {}
@@ -1604,7 +1616,7 @@ void ImmutableSetLiteral() #SetLiteral :
 
 void Arguments() #Arguments : {}
 {
-     <LPAREN> (Expression() (<COMMA> Expression())* )? <RPAREN>
+    <LPAREN> (Expression() (<COMMA> Expression())* )? <RPAREN>
 }
 
 void FunctionCallLookahead() #void : {}
@@ -1748,30 +1760,32 @@ void Parameters() #void : {}
 
 void LambdaLookahead() #void() : {}
 {
-  LOOKAHEAD(2) <FUNCTION> Parameters()
-  |
-  LOOKAHEAD(2) <FUNCTION> <LCURLY>
-  |
-  Parameters() ( <LAMBDA> | <LAMBDAE> )
-  |
-  Parameter() ( <LAMBDA> | <LAMBDAE> )
+    LOOKAHEAD(2) <FUNCTION> Parameters()
+    |
+    LOOKAHEAD(2) <FUNCTION> <LCURLY>
+    |
+    Parameters() ( <LAMBDA> | <LAMBDAE> )
+    |
+    Parameter() ( <LAMBDA> | <LAMBDAE> )
 }
 
 void Lambda() #JexlLambda() :
 {
-   pushFrame();
-   pushUnit(jjtThis);
+    pushFrame();
+    pushUnit(jjtThis);
 }
 {
-   LOOKAHEAD(2) <FUNCTION> Parameters() Block()
-   |
-   LOOKAHEAD(2) <FUNCTION> Block()
-   |
-   Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
-   |
-   Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+    (
+      LOOKAHEAD(2) <FUNCTION> Parameters() Block()
+      |
+      LOOKAHEAD(2) <FUNCTION> Block()
+      |
+      Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+      |
+      Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+    )
 {
-   popUnit(jjtThis);
+    popUnit(jjtThis);
 }
 }
 
@@ -1783,15 +1797,18 @@ void Lambda() #JexlLambda() :
 
 Token dotName() #void :
 {
-    Token t ;
+    Token t;
 }
 {
-   ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
-   | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD>
-   | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
-   | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
-   | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
-   | t=<VAR> | t=<FUNCTION> ) { return t ;}
+    ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
+    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD>
+    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
+    | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
+    | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
+    | t=<VAR> | t=<FUNCTION> ) 
+{
+    return t;
+}
 }
 
 void IdentifierAccess() #void :
