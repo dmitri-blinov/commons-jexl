@@ -397,6 +397,8 @@ ASTJexlScript JexlScript(Scope frame) :
     ) <EOF>
 {
     popUnit(jjtThis);
+    jjtThis.setScope(getFrame());
+    popFrame();
     return jjtThis.script();
 }
 }
@@ -410,6 +412,8 @@ ASTJexlScript JexlExpression(Scope frame) #JexlScript :
     [ Expression() ] <EOF>
 {
     popUnit(jjtThis);
+    jjtThis.setScope(getFrame());
+    popFrame();
     return jjtThis.script();
 }
 }
@@ -579,6 +583,8 @@ void Function() #JexlLambda() :
     Parameters() ( Block() | <LAMBDAE> Expression() )
 {
     popUnit(jjtThis);
+    jjtThis.setScope(frame);
+    popFrame();
 }
 }
 
@@ -1786,6 +1792,8 @@ void Lambda() #JexlLambda() :
     )
 {
     popUnit(jjtThis);
+    jjtThis.setScope(frame);
+    popFrame();
 }
 }
 

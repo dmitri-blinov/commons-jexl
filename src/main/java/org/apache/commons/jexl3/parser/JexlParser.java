@@ -552,12 +552,6 @@ public abstract class JexlParser extends StringParser {
             if (node instanceof ASTJexlLambda && !getFeatures().supportsLambda()) {
                 throwFeatureException(JexlFeatures.LAMBDA, node.jexlInfo());
             }
-            if (!(node instanceof ASTSimpleLambda)) {
-                ASTJexlScript script = (ASTJexlScript) node;
-                // reaccess in case local variables have been declared
-                script.setScope(frame);
-                popFrame();
-            }
         } else if (ASSIGN_NODES.contains(node.getClass())) {
             JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
