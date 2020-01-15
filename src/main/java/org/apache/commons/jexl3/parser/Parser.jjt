@@ -588,6 +588,20 @@ void Function() #JexlLambda() :
 }
 }
 
+void ExpressionLambda() #SimpleLambda :
+{
+    pushFrame();
+    pushUnit(jjtThis);
+}
+{
+    ConditionalExpression()
+{
+    popUnit(jjtThis);
+    jjtThis.setScope(frame);
+    popFrame();
+}
+}
+
 ASTIfStatement IfStatement() : {}
 {
     <IF> <LPAREN> Expression() <RPAREN> StatementBranch()
@@ -1179,7 +1193,7 @@ void Selection() #SelectionNode : {}
       |
       StartCountSelection()
       |
-      SimpleLambda()
+      ExpressionLambda()
     ) <RBRACKET>
 }
 
@@ -1191,11 +1205,6 @@ void StopCountSelection() #StopCountNode : {}
 void StartCountSelection() #StartCountNode : {}
 {
     (<gt> | <GT>) Expression()
-}
-
-void SimpleLambda() #void : {}
-{
-    ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda))
 }
 
 void ArrayProjection() #ProjectionNode : {}
@@ -1212,7 +1221,7 @@ void ProjectionExpression() #void : {}
 {
     AttributeReference()
     |
-    ProjectionLambda()
+    ExpressionLambda()
 }
 
 void AttributeReference() : 
@@ -1221,11 +1230,6 @@ void AttributeReference() :
 }
 {
     t=<ANNOTATION> { jjtThis.setName(t.image); }
-}
-
-void ProjectionLambda() #void : {}
-{
-    ConditionalExpression() #SimpleLambda(!(jjtree.peekNode() instanceof ASTJexlLambda || jjtree.peekNode() instanceof ASTCurrentNode))
 }
 
 void IteratorExpression() #void : {}

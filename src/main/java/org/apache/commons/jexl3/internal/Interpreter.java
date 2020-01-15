@@ -159,6 +159,7 @@ import org.apache.commons.jexl3.parser.ASTSetXorNode;
 import org.apache.commons.jexl3.parser.ASTShiftLeftNode;
 import org.apache.commons.jexl3.parser.ASTShiftRightNode;
 import org.apache.commons.jexl3.parser.ASTShiftRightUnsignedNode;
+import org.apache.commons.jexl3.parser.ASTSimpleLambda;
 import org.apache.commons.jexl3.parser.ASTSizeFunction;
 import org.apache.commons.jexl3.parser.ASTStartCountNode;
 import org.apache.commons.jexl3.parser.ASTStopCountNode;
@@ -4278,6 +4279,11 @@ public class Interpreter extends InterpreterBase {
             int numChildren = node.jjtGetNumChildren();
             for (int i = 0; i < numChildren; i++) {
                 JexlNode child = node.jjtGetChild(i);
+                if (child instanceof ASTSimpleLambda && child.jjtGetNumChildren() == 1) {
+                    JexlNode expr = child.jjtGetChild(0);
+                    if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
+                        child = expr;
+                }
                 if (child instanceof ASTJexlLambda) {
                     ASTJexlLambda script = (ASTJexlLambda) child;
                     scripts.put(i, new Closure(Interpreter.this, script));
@@ -4290,6 +4296,11 @@ public class Interpreter extends InterpreterBase {
             Object prev = current;
             try {
                 current = data;
+                if (child instanceof ASTSimpleLambda && child.jjtGetNumChildren() == 1) {
+                    JexlNode expr = child.jjtGetChild(0);
+                    if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
+                        child = expr;
+                }
                 if (child instanceof ASTJexlLambda) {
                     Closure c = scripts.get(i);
                     Object[] argv = prepareArgs(c.getScript(), data);
@@ -4506,6 +4517,9 @@ public class Interpreter extends InterpreterBase {
         }
 
         ASTJexlLambda script = (ASTJexlLambda) child;
+        if (script instanceof ASTSimpleLambda && script.jjtGetNumChildren() == 1 && script.jjtGetChild(0) instanceof ASTJexlLambda)
+           script = (ASTJexlLambda) script.jjtGetChild(0);
+
         Iterator<?> itemsIterator = prepareIndexedIterator(child, data);
         return itemsIterator != null ? new SelectionIterator(itemsIterator, script) : null;
     }
