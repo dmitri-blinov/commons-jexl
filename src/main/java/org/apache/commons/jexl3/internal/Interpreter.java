@@ -4123,7 +4123,7 @@ public class Interpreter extends InterpreterBase {
         final int last = stmt.jjtGetNumChildren() - 1;
         if (index == last) {
             JexlNode cblock = stmt.jjtGetChild(last);
-            // if the context has changed, might need a new interpreter
+            // if the context has changed, might need a new arithmetic
             final JexlArithmetic jexla = arithmetic.options(context);
             if (jexla != arithmetic) {
                 if (!arithmetic.getClass().equals(jexla.getClass())) {
