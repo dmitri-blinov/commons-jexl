@@ -4274,16 +4274,20 @@ public class Interpreter extends InterpreterBase {
             initClosure();
         }
 
+        protected JexlNode getProjectionExpresssion(JexlNode node) {
+            if (node instanceof ASTSimpleLambda && node.jjtGetNumChildren() == 1) {
+                JexlNode expr = node.jjtGetChild(0);
+                if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
+                    node = expr;
+            }
+            return node;
+        }
+
         protected void initClosure() {
             // can have multiple nodes
             int numChildren = node.jjtGetNumChildren();
             for (int i = 0; i < numChildren; i++) {
-                JexlNode child = node.jjtGetChild(i);
-                if (child instanceof ASTSimpleLambda && child.jjtGetNumChildren() == 1) {
-                    JexlNode expr = child.jjtGetChild(0);
-                    if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
-                        child = expr;
-                }
+                JexlNode child = getProjectionExpresssion(node.jjtGetChild(i));
                 if (child instanceof ASTJexlLambda) {
                     ASTJexlLambda script = (ASTJexlLambda) child;
                     scripts.put(i, new Closure(Interpreter.this, script));
@@ -4292,15 +4296,10 @@ public class Interpreter extends InterpreterBase {
         }
 
         protected Object evaluateProjection(int i, Object data) {
-            JexlNode child = node.jjtGetChild(i);
             Object prev = current;
             try {
                 current = data;
-                if (child instanceof ASTSimpleLambda && child.jjtGetNumChildren() == 1) {
-                    JexlNode expr = child.jjtGetChild(0);
-                    if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
-                        child = expr;
-                }
+                JexlNode child = getProjectionExpresssion(node.jjtGetChild(i));
                 if (child instanceof ASTJexlLambda) {
                     Closure c = scripts.get(i);
                     Object[] argv = prepareArgs(c.getScript(), data);
@@ -4527,15 +4526,13 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTStartCountNode node, Object data) {
         JexlNode child = node.jjtGetChild(0);
-        Integer startCount = arithmetic.toInteger(child.jjtAccept(this, null));
-        return startCount;
+        return arithmetic.toInteger(child.jjtAccept(this, null));
     }
 
     @Override
     protected Object visit(ASTStopCountNode node, Object data) {
         JexlNode child = node.jjtGetChild(0);
-        Integer stopCount = arithmetic.toInteger(child.jjtAccept(this, null));
-        return stopCount;
+        return arithmetic.toInteger(child.jjtAccept(this, null));
     }
 
     @Override
