@@ -727,7 +727,7 @@ void SwitchStatementDefault() : {}
 
 void ReturnStatement() : {}
 {
-    <RETURN> [ LOOKAHEAD(2) ExpressionStatement() ]
+    <RETURN> [ LOOKAHEAD(2) ExpressionStatement() ] { if (branchScope.yieldSupported()) { throwParsingException(jjtThis); } }
 }
 
 void YieldStatement() : {}

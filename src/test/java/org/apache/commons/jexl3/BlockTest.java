@@ -91,4 +91,15 @@ public class BlockTest extends JexlTestCase {
         Assert.assertEquals("Block result is wrong", "World", o);
     }
 
+    @Test
+    public void testEarlyReturn() throws Exception {
+        try {
+           JexlScript e = JEXL.createScript("var a = ({return 'World';}); a");
+           Assert.fail("Should have failed");
+        } catch (Exception ex) {
+
+        }
+    }
+
+
 }

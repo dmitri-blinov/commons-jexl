@@ -359,15 +359,16 @@
                         <code>var x = switch (a) {
                               case 0 -> "zero";
                               case 1 -> "one"
-                              default -> "-"
+                              default -> {yield "-";}
                             } </code>
                         <p>The multilabeled syntax is also supported:
                         <code>var x = switch (a) {
                               case 0, 1 -> "zero";
                               case 2 -> "one"
-                              default -> "-"
+                              default -> {yield "-";}
                             } </code>
                         </p>
+                        <p><strong>NOTE:</strong> The return statement is not allowed inside switch operator</p>
                     </td>
                 </tr>
                 <tr>
@@ -1226,7 +1227,9 @@
                 <tr>
                     <td>Block evaluation operator <code>({})</code></td>
                     <td>
-                        The block evaluation operator executes a block and returns last evaluated statement as a result.
+                        The block evaluation operator executes a statement block and returns the result of last evaluated statement, e.g.
+                        <code>var x = ({if (cond) yield 2 else yield 1})</code>
+                        <p><strong>NOTE:</strong> The return statement is not allowed inside block evaluation operator</p>
                         <p>Note that this operator can not be overloaded</p>
                     </td>
                 </tr>
