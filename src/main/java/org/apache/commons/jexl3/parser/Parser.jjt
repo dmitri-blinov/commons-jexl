@@ -693,7 +693,7 @@ ASTSynchronizedStatement SynchronizedStatement() : {}
 
 void SwitchStatementLookahead() : {}
 {
-    <SWITCH> <LPAREN> Expression() <RPAREN> <LCURLY> (<CASE> (Literal() | Identifier()) <COLON> | <DCASE> <COLON>)
+    <SWITCH> <LPAREN> Expression() <RPAREN> <LCURLY> (<CASE> SwitchCaseLabel() <COLON> | <DCASE> <COLON>)
 }
 
 ASTSwitchStatement SwitchStatement() :
