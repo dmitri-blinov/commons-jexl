@@ -813,9 +813,9 @@ void ForeachVar() : {}
     Identifier(true) [ <COMMA> Identifier(true) ]
 }
 
-void MultipleVar() #void : {}
+void MultipleVar() #MultipleInitialization : {}
 {
-    (MultipleDeclareVar() <assign> Expression()) #MultipleInitialization()
+    MultipleDeclareVar() <assign> Expression()
 }
 
 void MultipleDeclareVar() #MultipleIdentifier :
@@ -845,11 +845,11 @@ void RequiredVarLookahead() #void() : {}
     <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
 }
 
-void Var() #void : {}
+void Var() #Initialization : {}
 {
-    LOOKAHEAD(RequiredVarLookahead()) DeclareLocalVar() <assign> Expression() #Initialization(2)
+    LOOKAHEAD(RequiredVarLookahead()) DeclareLocalVar() <assign> Expression()
     |
-    DeclareLocalVar() [ <assign> Expression() #Initialization(2) ]
+    DeclareLocalVar() [ <assign> Expression() ]
 }
 
 void DeclareLocalVar() #Var :

@@ -3038,11 +3038,19 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTInitialization node, Object data) {
+        cancelCheck(node);
         JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
-        // Initialize variable
-        left.jjtAccept(this, data);
-        return executeAssign(node, left, right, null, data);
+        if (node.jjtGetNumChildren() == 2) {
+           // First evaluate the right part
+           Object right = node.jjtGetChild(1).jjtAccept(this, data);
+           // Then declare variable
+           left.jjtAccept(this, data);
+           // Initialize variable
+           return executeAssign(node, left, right, null, data);
+        } else {
+           // Just declare variable
+           return left.jjtAccept(this, data);
+        }
     }
 
     @Override
