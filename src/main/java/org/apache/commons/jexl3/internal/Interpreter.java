@@ -1865,30 +1865,33 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(ASTDoWhileStatement node, Object data) {
         Object result = null;
         /* last objectNode is the expression */
-        Node expressionNode = node.jjtGetChild(1);
+        Node expressionNode = node.jjtGetChild(node.jjtGetNumChildren() - 1);
         do {
             cancelCheck(node);
             // execute statement
-            try {
-                result = node.jjtGetChild(0).jjtAccept(this, data);
-            } catch (JexlException.Break stmtBreak) {
-                String target = stmtBreak.getLabel();
-                if (target == null || target.equals(node.getLabel())) {
-                    break;
-                } else {
-                    throw stmtBreak;
+            if (node.jjtGetNumChildren() > 1) {
+                try {
+                    result = node.jjtGetChild(0).jjtAccept(this, data);
+                } catch (JexlException.Break stmtBreak) {
+                    String target = stmtBreak.getLabel();
+                    if (target == null || target.equals(node.getLabel())) {
+                        break;
+                    } else {
+                        throw stmtBreak;
+                    }
+                } catch (JexlException.Continue stmtContinue) {
+                    String target = stmtContinue.getLabel();
+                    if (target != null && !target.equals(node.getLabel())) {
+                        throw stmtContinue;
+                    }
+                    // continue
                 }
-            } catch (JexlException.Continue stmtContinue) {
-                String target = stmtContinue.getLabel();
-                if (target != null && !target.equals(node.getLabel())) {
-                    throw stmtContinue;
-                }
-                // continue
             }
         } while (arithmetic.toBoolean(expressionNode.jjtAccept(this, data)));
 
         return result;
     }
+
 
     @Override
     protected Object visit(ASTSynchronizedStatement node, Object data) {

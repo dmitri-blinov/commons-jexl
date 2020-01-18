@@ -40,7 +40,14 @@ public class DoWhileTest extends JexlTestCase {
         e = JEXL.createScript("do {} while (false); 23");
         o = e.execute(jc);
         Assert.assertEquals(23, o);
+    }
 
+    @Test
+    public void testEmptyBody() throws Exception {
+        JexlScript e = JEXL.createScript("var i = 0; do ; while((i+=1) < 10); i");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals(10, o);       
     }
 
     @Test
