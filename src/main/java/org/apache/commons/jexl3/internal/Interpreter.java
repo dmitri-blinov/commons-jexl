@@ -1878,8 +1878,8 @@ public class Interpreter extends InterpreterBase {
         cancelCheck(node);
         final boolean lexical = options.isLexical();
         if (lexical) {
-              // create lexical frame
-              block = new LexicalFrame(frame, block);
+            // create lexical frame
+            block = new LexicalFrame(frame, block);
         }
         try {
             Object result = null;
@@ -1889,10 +1889,11 @@ public class Interpreter extends InterpreterBase {
                 final int childCount = node.jjtGetNumChildren();
                 boolean matched = false;
                 Class scope = left != null ? left.getClass() : Void.class;
-                // check all cases first
-                for (int i = 1; i < childCount; i++) {
+                int start = 0;
+                // check all non default cases first
+                l: for (int i = 1; i < childCount; i++) {
                     JexlNode child = node.jjtGetChild(i);
-                    if (!matched && child instanceof ASTSwitchStatementCase) {
+                    if (child instanceof ASTSwitchStatementCase) {
                         JexlNode labels = child.jjtGetChild(0);
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
@@ -1906,22 +1907,29 @@ public class Interpreter extends InterpreterBase {
                             } catch (ArithmeticException xrt) {
                                 throw new JexlException(node, "== error", xrt);
                             }
-                            if (matched)
-                                break;
+                            if (matched) {
+                                start = i;
+                                break l;
+                            }
                         }
                     }
-                    // Fall through until break
-                    if (matched)
-                        result = child.jjtAccept(this, data);
                 }
                 // otherwise jump to default case
                 if (!matched) {
                     for (int i = 1; i < childCount; i++) {
                         JexlNode child = node.jjtGetChild(i);
-                        if (child instanceof ASTSwitchStatementDefault)
+                        if (child instanceof ASTSwitchStatementDefault) {
                             matched = true;
-                        if (matched)
-                            result = child.jjtAccept(this, data);
+                            start = i;
+                            break;
+                        }
+                    }
+                }
+                // execute all cases starting from matched one
+                if (matched) {
+                    for (int i = start; i < childCount; i++) {
+                        JexlNode child = node.jjtGetChild(i);
+                        result = child.jjtAccept(this, data);
                     }
                 }
             } catch (JexlException.Break stmtBreak) {
@@ -1933,9 +1941,9 @@ public class Interpreter extends InterpreterBase {
             }
             return result;
         } finally {
-              // restore lexical frame
-              if (lexical)
-                  block = block.pop();
+            // restore lexical frame
+            if (lexical)
+                block = block.pop();
         }
     }
 
