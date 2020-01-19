@@ -1414,12 +1414,14 @@ public class Interpreter extends InterpreterBase {
             // Initialize for-loop
             Object result = node.jjtGetChild(0).jjtAccept(this, data);
             boolean when = false;
+            /* third objectNode is the statement to execute */
+            JexlNode statement = node.jjtGetNumChildren() > 3 ? node.jjtGetChild(3) : null;
             while (when = (Boolean) node.jjtGetChild(1).jjtAccept(this, data)) {
                 cancelCheck(node);
                 // Execute loop body
-                if (numChildren > 3) {
+                if (statement != null) {
                     try {
-                            result = node.jjtGetChild(3).jjtAccept(this, data);
+                        result = statement.jjtAccept(this, data);
                     } catch (JexlException.Break stmtBreak) {
                         String target = stmtBreak.getLabel();
                         if (target == null || target.equals(node.getLabel())) {
