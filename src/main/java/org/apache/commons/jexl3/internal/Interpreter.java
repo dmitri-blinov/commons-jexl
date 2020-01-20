@@ -251,6 +251,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     /**
+     * Copy constructor.
+     * @param ii  the interpreter to copy
+     * @param jexla the arithmetic instance to use (or null)
+     */
+    protected Interpreter(Interpreter ii, JexlArithmetic jexla) {
+        super(ii, jexla);
+        frame = ii.frame;
+        block = ii.block != null? new LexicalFrame(ii.block) : null;
+    }
+
+    /**
      * Swaps the current thread local interpreter.
      * @param inter the interpreter or null
      * @return the previous thread local interpreter
@@ -1787,9 +1798,9 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(ASTWhileStatement node, Object data) {
         cancelCheck(node);
         Object result = null;
-        /* first objectNode is the expression */
-        Node expressionNode = node.jjtGetChild(0);
-        while (arithmetic.toBoolean(expressionNode.jjtAccept(this, data))) {
+        /* first objectNode is the condition */
+        Node condition = node.jjtGetChild(0);
+        while (arithmetic.toBoolean(condition.jjtAccept(this, data))) {
             cancelCheck(node);
             if (node.jjtGetNumChildren() > 1) {
                 try {
@@ -2618,6 +2629,7 @@ public class Interpreter extends InterpreterBase {
             int symbol = identifier.getSymbol();
             // if we have a symbol, we have a scope thus a frame
             if (symbol >= 0 && frame.has(symbol)) {
+/*
                  if (options.isLexical() && options.isLexicalShade()) {
                      // if not in lexical block, undefined if (in its symbol) shade
                      LexicalScope b = block;
@@ -2628,6 +2640,12 @@ public class Interpreter extends InterpreterBase {
                          return undefinedVariable(identifier, name);
                      }
                  }
+*/
+
+                 if (options.isLexical() && isSymbolShaded(symbol, block)) {
+                     return undefinedVariable(identifier, name);
+                 }
+
                  Object value = frame.get(symbol);
                  if (value != Scope.UNDEFINED) {
                      return value;
@@ -3172,8 +3190,7 @@ public class Interpreter extends InterpreterBase {
             var = (ASTIdentifier) left;
             symbol = var.getSymbol();
             if (symbol >= 0 && options.isLexical()) {
-                // if not in lexical block, undefined if (in its symbol) shade
-                if (!block.hasSymbol(symbol) && options.isLexicalShade()) {
+                if (isSymbolShaded(symbol, block)) {
                     return undefinedVariable(var, var.getName());
                 }
             }

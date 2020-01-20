@@ -428,7 +428,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     /**
      * Gets printable class name
-     * @param ñ the type
+     * @param ï¿½ the type
      * @return class name value
      */
     protected String getClassName(Class c) {
@@ -1869,15 +1869,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             builder.append(label);
             builder.append(" : ");
         }
-        int num = node.jjtGetNumChildren();
         builder.append("do ");
-        if (num > 1) {
+        int nc = node.jjtGetNumChildren();
+        if (nc > 1) {
             acceptStatement(node.jjtGetChild(0), data);
         } else {
-            builder.append(" ; ");
+            builder.append(";");
         }
         builder.append(" while (");
-        accept(node.jjtGetChild(num - 1), data);
+        accept(node.jjtGetChild(nc - 1), data);
         builder.append(")");
         return data;
     }
