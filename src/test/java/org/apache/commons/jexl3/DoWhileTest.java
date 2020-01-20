@@ -43,14 +43,6 @@ public class DoWhileTest extends JexlTestCase {
     }
 
     @Test
-    public void testEmptyBody() throws Exception {
-        JexlScript e = JEXL.createScript("var i = 0; do ; while((i+=1) < 10); i");
-        JexlContext jc = new MapContext();
-        Object o = e.execute(jc);
-        Assert.assertEquals(10, o);       
-    }
-
-    @Test
     public void testWhileExecutesExpressionWhenLooping() throws Exception {
         JexlScript e = JEXL.createScript("do x = x + 1 while (x < 10)");
         JexlContext jc = new MapContext();
@@ -84,7 +76,7 @@ public class DoWhileTest extends JexlTestCase {
         Assert.assertEquals("x is wrong", new Integer(10), jc.get("x"));
         Assert.assertEquals("y is wrong", new Integer(512), jc.get("y"));
     }
-    
+
     @Test
     public void testForEachBreakInsideFunction() throws Exception {
         try {
@@ -95,7 +87,7 @@ public class DoWhileTest extends JexlTestCase {
             Assert.assertTrue(str.contains("break"));
         }
     }
-        
+
     @Test
     public void testForEachContinueInsideFunction() throws Exception {
         try {
@@ -106,42 +98,42 @@ public class DoWhileTest extends JexlTestCase {
             Assert.assertTrue(str.contains("continue"));
         }
     }
-            
+
     @Test
     public void testForEachLambda() throws Exception {
         JexlScript e = JEXL.createScript("(x)->{ for (i : 1..2) {  continue; var y = function() { 42; } break; } }");
         Assert.assertNotNull(e);
     }
-    
+
     @Test
     public void testEmptyBody() throws Exception {
         JexlScript e = JEXL.createScript("var i = 0; do ; while((i+=1) < 10); i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals(10, o);       
+        Assert.assertEquals(10, o);
     }
-    
+
     @Test
     public void testEmptyStmtBody() throws Exception {
         JexlScript e = JEXL.createScript("var i = 0; do {} while((i+=1) < 10); i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals(10, o);       
-    } 
-        
+        Assert.assertEquals(10, o);
+    }
+
     @Test
     public void testWhileEmptyBody() throws Exception {
         JexlScript e = JEXL.createScript("var i = 0; while((i+=1) < 10); i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals(10, o);       
+        Assert.assertEquals(10, o);
     }
-    
+
     @Test
     public void testWhileEmptyStmtBody() throws Exception {
         JexlScript e = JEXL.createScript("var i = 0; while((i+=1) < 10) {}; i");
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
-        Assert.assertEquals(10, o);       
+        Assert.assertEquals(10, o);
     }
 }

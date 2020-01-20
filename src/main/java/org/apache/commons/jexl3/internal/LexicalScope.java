@@ -93,6 +93,7 @@ public class LexicalScope {
 
     /**
      * Create a scope.
+     * @param frame the frame
      * @param scope the previous scope
      */
     public LexicalScope(Frame frame, LexicalScope scope) {
@@ -103,15 +104,15 @@ public class LexicalScope {
         }
         previous = scope;
     }
-        
+
     /**
      * Frame copy ctor base.
      * @param s the symbols mask
      * @param ms the more symbols bitset
      * @param pscope the previous scope
      */
-    protected LexicalScope(long s, BitSet ms, LexicalScope pscope) {
-        previous = pscope;
+    protected LexicalScope(long s, BitSet ms, Frame frame, LexicalScope pscope) {
+        this(frame, pscope);
         symbols = s;
         moreSymbols = ms != null? (BitSet) ms.clone() : null;
     }

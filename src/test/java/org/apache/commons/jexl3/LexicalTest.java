@@ -723,7 +723,7 @@ public class LexicalTest {
         JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
-        JexlScript script = jexl.createScript("@scale(13) @test var i = 42");
+        JexlScript script = jexl.createScript("@scale(13) @test {var i = 42}");
         JexlContext jc = new OptAnnotationContext();
         Object result = script.execute(jc);
         Assert.assertEquals(result, 42);
