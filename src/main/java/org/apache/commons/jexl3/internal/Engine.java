@@ -402,6 +402,17 @@ public class Engine extends JexlEngine {
         return new Interpreter(this, opts, context, frame, current);
     }
 
+    /**
+     * Creates a resumable interpreter.
+     * @param context a JexlContext; if null, the empty context is used instead.
+     * @param frame   the interpreter frame
+     * @param opts    the evaluation options
+     * @return an Interpreter
+     */
+    protected Interpreter createResumableInterpreter(JexlContext context, Frame frame, JexlOptions opts) {
+        return new ResumableInterpreter(this, opts, context, frame);
+    }
+
     @Override
     public Script createExpression(JexlInfo info, String expression) {
         return createScript(expressionFeatures, info, expression, null);

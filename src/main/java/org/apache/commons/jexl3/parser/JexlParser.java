@@ -741,13 +741,14 @@ public abstract class JexlParser extends StringParser {
         protected int foreachLoopCount = 0;
         protected int switchCount = 0;
         protected int yieldCount = 0;
+        protected int yieldReturnCount = 0;
 
         protected Deque<String> blockLabels = new ArrayDeque<String> ();
         protected Deque<String> loopLabels = new ArrayDeque<String> ();
         protected Deque<String> foreachLabels = new ArrayDeque<String> ();
 
         protected boolean breakSupported() {
-            return loopCount != 0 || foreachLoopCount != 0 || switchCount != 0;
+            return loopCount > 0 || foreachLoopCount > 0 || switchCount > 0;
         }
 
         protected boolean breakSupported(String label) {
@@ -755,11 +756,11 @@ public abstract class JexlParser extends StringParser {
         }
 
         protected boolean yieldSupported() {
-            return yieldCount != 0;
+            return yieldCount > 0 || yieldReturnCount > 0;
         }
 
         protected boolean continueSupported() {
-            return loopCount != 0 || foreachLoopCount != 0;
+            return loopCount > 0 || foreachLoopCount > 0;
         }
 
         protected boolean continueSupported(String label) {

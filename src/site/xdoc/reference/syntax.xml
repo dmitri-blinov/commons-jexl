@@ -343,13 +343,15 @@
                     <td>
                         Returns an iterator of iterable object, e.g.
                         <code>...[1,2,3]</code> will return an iterator producing items of the corresponding array.
-                        <p>Iterator can also be specified in a form of generator function e.g.
-                        <code>...(initValue : x -> {x &lt; 10 ? x + 2 : null})</code>.
-                        Generator iterator terminates only when the generator function returns null; If the <code>initValue</code>
-                        is null, then the initally empty iterator will be created.</p>
-                        <p>The generator function can also take two arguments <code>(index, value) -> {index &lt; 10 ? value + 2 : null}</code>
-                        with the first argument <code>index</code> being the zero based index of the next generated element of the sequence,
-                        and the second <code>value</code> is the previously generated element.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Generator Operator</td>
+                    <td>
+                        Iterator can also be specified in a form of generator function, e.g.
+                        <code>...{for (var i : 1..10) yield i}</code>.
+                        <p><strong>NOTE:</strong> The <code>yield</code> statement is not allowed inside 
+                        <code>synchronized</code> and <code>try</code> statements</p>
                     </td>
                 </tr>
                 <tr>
@@ -368,7 +370,7 @@
                               default -> {yield "-";}
                             } </code>
                         </p>
-                        <p><strong>NOTE:</strong> The return statement is not allowed inside switch operator</p>
+                        <p><strong>NOTE:</strong> The <code>return</code> statement is not allowed inside switch operator</p>
                     </td>
                 </tr>
                 <tr>
@@ -386,15 +388,15 @@
                     <td>Stream Operator</td>
                     <td>
                         <p>Stream operators allows to perform transformations of iterable objects into iterators or values.
-                        Stream operator can be a projection operator, selection operator or reduction operator</p>
-                        <p>Projection operator creates an iterator that produces values specified in the projection.
+                        Stream operator can be a projection operator, selection operator or pipe operator</p>
+                        <p>Projection operator creates an iterator that yields values specified in the projection.
                         Projection operator can be either an array projection operator <code>a.{@foo,@bar}</code> or a
                         key-value projection operator <code>a.{@foo : @bar}</code>.
                         The projection dimensions can be defined either as the properties of the object, <code>a.{@foo}</code>
                         or as lambda expressions <code>a.{x - > {x.foo}}</code>.</p>
-                        <p>Selection operator creates an iterator that produces only the values that satisfy the specified
+                        <p>Selection operator creates an iterator that yields only the values that satisfy the specified
                         selection condition <code>a.[x - > {x.foo.length() > 10])</code></p>
-                        <p>Reduction operator evaluates a scalar value from iterable object <code>a.(0 : (x,y) - > {x+y})</code></p>
+                        <p>Pipe operator evaluates a scalar value from iterable object <code>a.((result,value) -> {result + value})</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -1229,7 +1231,7 @@
                     <td>
                         The block evaluation operator executes a statement block and returns the result of last evaluated statement, e.g.
                         <code>var x = ({if (cond) yield 2 else yield 1})</code>
-                        <p><strong>NOTE:</strong> The return statement is not allowed inside block evaluation operator</p>
+                        <p><strong>NOTE:</strong> The <code>return</code> statement is not allowed inside block evaluation operator</p>
                         <p>Note that this operator can not be overloaded</p>
                     </td>
                 </tr>

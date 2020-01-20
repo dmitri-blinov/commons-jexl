@@ -90,14 +90,4 @@ public class ComprehensionTest extends JexlTestCase {
         Assert.assertEquals(Boolean.TRUE, o);
     }
 
-    @Test
-    public void testGeneratorIterator() throws Exception {
-        JexlContext jc = new MapContext();
-        Object o = JEXL.createScript("var x = ...(0 : x -> {x < 10 ? x + 2 : null}); return [...x]").execute(jc);
-        Assert.assertEquals(6, ((int[]) o).length);
-
-        o = JEXL.createScript("var x = ...(0 : (i,x) -> {i < 10 ? x + 2 : null}); return [...x]").execute(jc);
-        Assert.assertEquals(10, ((int[]) o).length);
-    }
-
 }

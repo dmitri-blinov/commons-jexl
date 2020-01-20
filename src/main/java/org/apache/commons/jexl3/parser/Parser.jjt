@@ -627,7 +627,10 @@ ASTDoWhileStatement DoWhileStatement() : {}
 }
 }
 
-ASTTryStatement TryStatement() : {}
+ASTTryStatement TryStatement() : 
+{
+    branchScope.yieldReturnCount -= 1;
+}
 {
     <TRY> Block()
     (
@@ -636,13 +639,15 @@ ASTTryStatement TryStatement() : {}
       <FINALLY> Block()
     )
 { 
-   return jjtThis; 
+    branchScope.yieldReturnCount += 1;
+    return jjtThis; 
 }
 }
 
 ASTTryWithResourceStatement TryWithResourceStatement() :
 {
     pushUnit(jjtThis);
+    branchScope.yieldReturnCount -= 1;
 }
 {
     <TRY> <LPAREN> TryResource() <RPAREN> Block()
@@ -655,6 +660,7 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
       <FINALLY> Block()
     ]
 {
+    branchScope.yieldReturnCount += 1;
     return jjtThis;
 }
 }
@@ -683,10 +689,14 @@ void AssertStatement() : {}
     <ASSERT> Expression() [ <COLON> Expression() ]
 }
 
-ASTSynchronizedStatement SynchronizedStatement() : {}
+ASTSynchronizedStatement SynchronizedStatement() :
+{
+    branchScope.yieldReturnCount -= 1;
+}
 {
     <SYNCHRONIZED> <LPAREN> Expression() <RPAREN> Block()
 {
+    branchScope.yieldReturnCount += 1;
     return jjtThis;
 }
 }
@@ -732,7 +742,7 @@ void ReturnStatement() : {}
 
 void YieldStatement() : {}
 {
-    <YIELD> Expression() { if (!branchScope.yieldSupported()) { throwParsingException(jjtThis); } }
+    <YIELD> Expression() { if (!branchScope.yieldSupported()) { throwParsingException(jjtThis); }; if (branchScope.yieldCount == 0) jjtThis.setReturn(); }
 }
 
 void Continue() #Continue :
@@ -1232,11 +1242,27 @@ void AttributeReference() :
     t=<ANNOTATION> { jjtThis.setName(t.image); }
 }
 
-void IteratorExpression() #void : {}
+void IteratorExpression() #EnumerationNode : {}
 {
-    LOOKAHEAD(<LPAREN> Expression() <COLON>) <LPAREN> Expression() <COLON> Lambda() <RPAREN> #EnumerationNode(2)
+    LOOKAHEAD(NullableExpression()) NullableExpression()
     |
-    NullableExpression() #EnumerationNode(1)
+    IteratorBlock()
+}
+
+void IteratorBlock() #SimpleLambda :
+{
+    pushFrame();
+    pushUnit(jjtThis);
+    branchScope.yieldReturnCount += 1;
+}
+{
+    Block()
+{
+    branchScope.yieldReturnCount -= 1;
+    popUnit(jjtThis);
+    jjtThis.setScope(frame);
+    popFrame();
+}
 }
 
 void SwitchExpression() : {}
