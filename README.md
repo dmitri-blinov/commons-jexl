@@ -26,7 +26,8 @@ enhancements and changes to the capabilities of the scripting language. More com
 gives the opportunity to familiarize yourself with the language faster, for example, the following Java-style code is perfectly valid 
 construct in JEXL Pro.
 
-`function bytesToHex(byte[] bytes, int offset, int count) {
+{code}
+function bytesToHex(byte[] bytes, int offset, int count) {
     final char[] hexArray = "0123456789ABCDEF".toCharArray();
     char[] hexChars = new char[count * 2];
     for (int j = 0; j < count; j++) {
@@ -35,7 +36,8 @@ construct in JEXL Pro.
         hexChars[j * 2 + 1] = hexArray[v & 0x0F];
     }
     return new String(hexChars);
-}`
+}
+{code}
 
 On the other hand, some other new language features allow for more compact and less error-prone code to be written.
 
