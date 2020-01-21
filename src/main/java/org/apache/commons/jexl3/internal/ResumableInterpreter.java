@@ -52,6 +52,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
+import org.apache.commons.jexl3.parser.ASTCatchVar;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;

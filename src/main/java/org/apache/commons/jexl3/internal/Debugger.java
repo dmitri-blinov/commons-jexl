@@ -38,6 +38,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
+import org.apache.commons.jexl3.parser.ASTCatchVar;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTSimpleLambda;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
@@ -979,6 +980,12 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTTryVar node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTCatchVar node, Object data) {
         accept(node.jjtGetChild(0), data);
         return data;
     }

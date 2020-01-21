@@ -634,7 +634,7 @@ ASTTryStatement TryStatement() :
 {
     <TRY> Block()
     (
-      <CATCH> { pushUnit(jjtThis); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
+      <CATCH> { pushUnit(jjtThis); } <LPAREN> CatchVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
       |
       <FINALLY> Block()
     )
@@ -655,7 +655,7 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
       popUnit(jjtThis);
     }
     [
-      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis); } <LPAREN> TryVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
+      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis); } <LPAREN> CatchVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
       |
       <FINALLY> Block()
     ]
@@ -675,6 +675,13 @@ void TryResource() : {}
 void TryVar() : {}
 {
     DeclareVar()
+    |
+    Identifier(true)
+}
+
+void CatchVar() : {}
+{
+    DeclareCatchVar()
     |
     Identifier(true)
 }
@@ -900,6 +907,19 @@ void DeclareExtVar(boolean isFinal) #ExtVar :
 {
     { if (isFinal) jjtThis.setFinal(); }
     [ <and> { jjtThis.setRequired(); } ]
+    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+}
+
+void DeclareCatchVar() #Var :
+{
+    Token t;
+}
+{
+    [ <FINAL> { jjtThis.setFinal(); } ]
+    ( <VAR>
+      |
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setType(Parser.resolveThrowableType(t.image)); }
+    )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 

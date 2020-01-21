@@ -52,6 +52,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
+import org.apache.commons.jexl3.parser.ASTCatchVar;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
@@ -1625,7 +1626,7 @@ public class Interpreter extends InterpreterBase {
             // if there is no catch block just rethrow
             if (num < 3)
                 throw t;
-            ASTTryVar catchReference = (ASTTryVar) node.jjtGetChild(1);
+            ASTCatchVar catchReference = (ASTCatchVar) node.jjtGetChild(1);
             ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
             final int symbol = catchVariable.getSymbol();
             final boolean lexical = options.isLexical() && symbol >= 0;
@@ -1718,7 +1719,7 @@ public class Interpreter extends InterpreterBase {
             // if there is no catch block just rethrow
             if (num < 4)
                 InterpreterBase.<RuntimeException>doThrow(t);
-            ASTTryVar catchReference = (ASTTryVar) node.jjtGetChild(2);
+            ASTCatchVar catchReference = (ASTCatchVar) node.jjtGetChild(2);
             ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
             final int symbol = catchVariable.getSymbol();
             final boolean lexical = options.isLexical() && symbol >= 0;
@@ -1753,6 +1754,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTTryVar node, Object data) {
+        ASTIdentifier variable = (ASTIdentifier) node.jjtGetChild(0);
+        executeAssign(node, variable, data, null, null);
+        return null;
+    }
+
+    @Override
+    protected Object visit(ASTCatchVar node, Object data) {
         ASTIdentifier variable = (ASTIdentifier) node.jjtGetChild(0);
         executeAssign(node, variable, data, null, null);
         return null;
