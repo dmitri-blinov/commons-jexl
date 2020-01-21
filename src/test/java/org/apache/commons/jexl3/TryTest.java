@@ -145,5 +145,32 @@ public class TryTest extends JexlTestCase {
         }
     }
 
+    @Test
+    public void testTypedCatch() throws Exception {
+        JexlScript e = JEXL.createScript("try {42/0} catch (Exception e) {return e}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertTrue(o instanceof Exception);
+    }
+
+    @Test
+    public void testMissedTypedCatch() throws Exception {
+        JexlScript e = JEXL.createScript("try {42/0} catch (IOException e) {return e}");
+        JexlContext jc = new MapContext();
+        try {
+            Object o = e.execute(jc);
+            Assert.fail("Should have failed");
+        } catch (Exception ex) {
+            // OK
+        }
+    }
+
+    @Test
+    public void testMultipleTypedCatch() throws Exception {
+        JexlScript e = JEXL.createScript("try {42/0} catch (IOException e) {return 1} catch (Exception e) {return 42}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals(42, o);
+    }
 
 }

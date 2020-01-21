@@ -634,9 +634,9 @@ ASTTryStatement TryStatement() :
 {
     <TRY> Block()
     (
-      <CATCH> { pushUnit(jjtThis); } <LPAREN> CatchVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
-      |
-      <FINALLY> Block()
+        (CatchBlock())+ [ <FINALLY> Block() ]
+        |
+        <FINALLY> Block()
     )
 { 
     branchScope.yieldReturnCount += 1;
@@ -654,14 +654,21 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
     {
       popUnit(jjtThis);
     }
-    [
-      <CATCH> { jjtThis.clearUnit(); pushUnit(jjtThis); } <LPAREN> CatchVar() <RPAREN> Block() { popUnit(jjtThis); } [ <FINALLY> Block() ]
-      |
-      <FINALLY> Block()
-    ]
+    (CatchBlock())* [ <FINALLY> Block() ]
 {
     branchScope.yieldReturnCount += 1;
     return jjtThis;
+}
+}
+
+void CatchBlock() : 
+{
+    pushUnit(jjtThis);
+}
+{
+    <CATCH> <LPAREN> CatchVar() <RPAREN> Block()
+{
+    popUnit(jjtThis); 
 }
 }
 
@@ -679,7 +686,7 @@ void TryVar() : {}
     Identifier(true)
 }
 
-void CatchVar() : {}
+void CatchVar() #void : {}
 {
     DeclareCatchVar()
     |

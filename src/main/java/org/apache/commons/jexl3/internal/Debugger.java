@@ -38,7 +38,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
-import org.apache.commons.jexl3.parser.ASTCatchVar;
+import org.apache.commons.jexl3.parser.ASTCatchBlock;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTSimpleLambda;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
@@ -962,18 +962,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         builder.append("try ");
         accept(node.jjtGetChild(0), data);
-        if (num == 2) {
-            builder.append(" finally ");
-            accept(node.jjtGetChild(1), data);
-        } else if (num >= 3) {
-            builder.append(" catch (");
-            accept(node.jjtGetChild(1), data);
-            builder.append(") ");
-            accept(node.jjtGetChild(2), data);
-            if (num == 4) {
+        for (int i = 1; i < num; ++i) {
+            JexlNode child = node.jjtGetChild(i);
+            if (!(child instanceof ASTCatchBlock))
                 builder.append(" finally ");
-                accept(node.jjtGetChild(3), data);
-            }
+            accept(child, data);
         }
         return data;
     }
@@ -985,8 +978,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(ASTCatchVar node, Object data) {
+    protected Object visit(ASTCatchBlock node, Object data) {
+        builder.append(" catch (");
         accept(node.jjtGetChild(0), data);
+        builder.append(") ");
+        accept(node.jjtGetChild(1), data);
         return data;
     }
 
@@ -998,18 +994,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         builder.append(")");
         accept(node.jjtGetChild(1), data);
-        if (num == 3) {
-            builder.append(" finally ");
-            accept(node.jjtGetChild(2), data);
-        } else if (num >= 4) {
-            builder.append(" catch (");
-            accept(node.jjtGetChild(2), data);
-            builder.append(") ");
-            accept(node.jjtGetChild(3), data);
-            if (num == 5) {
+        for (int i = 2; i < num; ++i) {
+            JexlNode child = node.jjtGetChild(i);
+            if (!(child instanceof ASTCatchBlock))
                 builder.append(" finally ");
-                accept(node.jjtGetChild(4), data);
-            }
+            accept(child, data);
         }
         return data;
     }

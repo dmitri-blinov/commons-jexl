@@ -52,7 +52,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
-import org.apache.commons.jexl3.parser.ASTCatchVar;
+import org.apache.commons.jexl3.parser.ASTCatchBlock;
 import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
@@ -1623,37 +1623,33 @@ public class Interpreter extends InterpreterBase {
         } catch(JexlException.Cancel e) {
             throw e;
         } catch (Throwable t) {
-            // if there is no catch block just rethrow
-            if (num < 3)
-                throw t;
-            ASTCatchVar catchReference = (ASTCatchVar) node.jjtGetChild(1);
-            ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
-            final int symbol = catchVariable.getSymbol();
-            final boolean lexical = options.isLexical() && symbol >= 0;
-            if (lexical) {
-                // create lexical frame
-                LexicalFrame locals = new LexicalFrame(frame, block);
-                if (!locals.declareSymbol(symbol)) {
-                    return redefinedVariable(node, catchVariable.getName());
+            boolean catched = false;
+            for (int i = 1; i < num; i++) {
+                JexlNode cb = node.jjtGetChild(i);
+                if (cb instanceof ASTCatchBlock) {
+                    JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
+
+                    if (catchVariable instanceof ASTVar) {
+                       // Check exception catch type
+                       Class type = ((ASTVar) catchVariable).getType();
+                       if (type != null && !type.isInstance(t))
+                           continue;
+                    }
+
+                    catched = true;
+                    cb.jjtAccept(this, t);
+                    break;
                 }
-                block = locals;
             }
-            try {
-                // Set catch variable
-                node.jjtGetChild(1).jjtAccept(this, t);
-                // execute catch block
-                node.jjtGetChild(2).jjtAccept(this, data);
-            } finally {
-                // restore lexical frame
-                if (lexical)
-                    block = block.pop();
-            }
+            // if there is no appropriate catch block just rethrow
+            if (!catched)
+                throw t;
         } finally {
             // execute finally block if any
-            if (num == 2) {
-                node.jjtGetChild(1).jjtAccept(this, data);
-            } else if (num == 4) {
-                node.jjtGetChild(3).jjtAccept(this, data);
+            if (num > 1) {
+                JexlNode fb = node.jjtGetChild(num - 1);
+                if (!(fb instanceof ASTCatchBlock)) 
+                    fb.jjtAccept(this, data);
             }
         }
         return result;
@@ -1716,37 +1712,33 @@ public class Interpreter extends InterpreterBase {
         } catch(JexlException.Cancel e) {
             throw e;
         } catch (Throwable t) {
-            // if there is no catch block just rethrow
-            if (num < 4)
-                InterpreterBase.<RuntimeException>doThrow(t);
-            ASTCatchVar catchReference = (ASTCatchVar) node.jjtGetChild(2);
-            ASTIdentifier catchVariable = (ASTIdentifier) catchReference.jjtGetChild(0);
-            final int symbol = catchVariable.getSymbol();
-            final boolean lexical = options.isLexical() && symbol >= 0;
-            if (lexical) {
-                // create lexical frame
-                LexicalFrame locals = new LexicalFrame(frame, block);
-                if (!locals.declareSymbol(symbol)) {
-                    return redefinedVariable(node, catchVariable.getName());
+            boolean catched = false;
+            for (int i = 2; i < num; i++) {
+                JexlNode cb = node.jjtGetChild(i);
+                if (cb instanceof ASTCatchBlock) {
+                    JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
+
+                    if (catchVariable instanceof ASTVar) {
+                       // Check exception catch type
+                       Class type = ((ASTVar) catchVariable).getType();
+                       if (type != null && !type.isInstance(t))
+                           continue;
+                    }
+
+                    catched = true;
+                    cb.jjtAccept(this, t);
+                    break;
                 }
-                block = locals;
             }
-            try {
-                // Set catch variable
-                node.jjtGetChild(2).jjtAccept(this, t);
-                // execute catch block
-                node.jjtGetChild(3).jjtAccept(this, data);
-            } finally {
-                // restore lexical frame
-                if (lexical)
-                    block = block.pop();
-            }
+            // if there is no appropriate catch block just rethrow
+            if (!catched)
+                InterpreterBase.<RuntimeException>doThrow(t);
         } finally {
             // execute finally block if any
-            if (num == 3) {
-                node.jjtGetChild(2).jjtAccept(this, data);
-            } else if (num == 5) {
-                node.jjtGetChild(4).jjtAccept(this, data);
+            if (num > 2) {
+                JexlNode fb = node.jjtGetChild(num - 1);
+                if (!(fb instanceof ASTCatchBlock))
+                    fb.jjtAccept(this, data);
             }
         }
         return result;
@@ -1760,9 +1752,29 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTCatchVar node, Object data) {
-        ASTIdentifier variable = (ASTIdentifier) node.jjtGetChild(0);
-        executeAssign(node, variable, data, null, null);
+    protected Object visit(ASTCatchBlock node, Object data) {
+        ASTIdentifier catchVariable = (ASTIdentifier) node.jjtGetChild(0);
+        final int symbol = catchVariable.getSymbol();
+        final boolean lexical = options.isLexical() && symbol >= 0;
+        if (lexical) {
+            // create lexical frame
+            LexicalFrame locals = new LexicalFrame(frame, block);
+            if (!locals.declareSymbol(symbol)) {
+                return redefinedVariable(node, catchVariable.getName());
+            }
+            block = locals;
+        }
+        try {
+            // Set catch variable
+            executeAssign(node, catchVariable, data, null, null);
+
+            // execute catch block
+            node.jjtGetChild(1).jjtAccept(this, null);
+        } finally {
+            // restore lexical frame
+            if (lexical)
+                block = block.pop();
+        }
         return null;
     }
 
@@ -2637,23 +2649,9 @@ public class Interpreter extends InterpreterBase {
             int symbol = identifier.getSymbol();
             // if we have a symbol, we have a scope thus a frame
             if (symbol >= 0 && frame.has(symbol)) {
-/*
-                 if (options.isLexical() && options.isLexicalShade()) {
-                     // if not in lexical block, undefined if (in its symbol) shade
-                     LexicalScope b = block;
-                     while(b != null && !b.hasSymbol(symbol)) {
-                         b = b.previous;
-                     }
-                     if (b == null) {
-                         return undefinedVariable(identifier, name);
-                     }
-                 }
-*/
-
                  if (options.isLexical() && isSymbolShaded(symbol, block)) {
                      return undefinedVariable(identifier, name);
                  }
-
                  Object value = frame.get(symbol);
                  if (value != Scope.UNDEFINED) {
                      return value;
