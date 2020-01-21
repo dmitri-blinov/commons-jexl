@@ -22,7 +22,22 @@ The Apache Commons JEXL Pro library is an experimental fork of the The Apache Co
 Idea of the fork
 ----------------
 The fork is intended to be source compatible with the latest JEXL version (3.2-SNAPSHOT), but provides some 
-enhancements and changes to the capabilities of the scripting language. 
+enhancements and changes to the capabilities of the scripting language. More compatibility with Java language syntax 
+gives the opportunity to familiarize yourself with the language faster, for example, the following Java-style code is perfectly valid 
+construct in JEXL Pro.
+
+`function bytesToHex(byte[] bytes, int offset, int count) {
+    final char[] hexArray = "0123456789ABCDEF".toCharArray();
+    char[] hexChars = new char[count * 2];
+    for (int j = 0; j < count; j++) {
+        int v = bytes[j+offset] & 0xFF;
+        hexChars[j * 2] = hexArray[v >>> 4];
+        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+    }
+    return new String(hexChars);
+}`
+
+On the other hand, some other new language features allow for more compact and less error-prone code to be written.
 
 I have no intention of promoting this fork as an alternative implementation, and I would be happy to have all 
 the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
