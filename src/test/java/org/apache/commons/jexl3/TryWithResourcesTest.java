@@ -276,4 +276,14 @@ public class TryWithResourcesTest extends JexlTestCase {
         }
     }
 
+    @Test
+    public void testTyped() throws Exception {
+        JexlContext jc = new MapContext();
+        jc.set("r", new StringReader("foo"));
+
+        JexlScript e = JEXL.createScript("try (StringWriter r = new StringWriter()) { r.write('World'); return r.toString()}");
+        Object o = e.execute(jc);
+        Assert.assertEquals("World", o);
+    }
+
 }

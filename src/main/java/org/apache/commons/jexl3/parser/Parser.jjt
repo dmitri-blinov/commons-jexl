@@ -681,7 +681,7 @@ void TryResource() : {}
 
 void TryVar() : {}
 {
-    DeclareVar()
+    DeclareTryVar()
     |
     Identifier(true)
 }
@@ -914,6 +914,19 @@ void DeclareExtVar(boolean isFinal) #ExtVar :
 {
     { if (isFinal) jjtThis.setFinal(); }
     [ <and> { jjtThis.setRequired(); } ]
+    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+}
+
+void DeclareTryVar() #Var :
+{
+    Token t;
+}
+{
+    [ <FINAL> { jjtThis.setFinal(); } ]
+    ( <VAR>
+      |
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveCloseableType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setType(Parser.resolveCloseableType(t.image)); }
+    )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 

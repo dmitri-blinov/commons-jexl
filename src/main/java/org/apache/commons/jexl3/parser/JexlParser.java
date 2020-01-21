@@ -744,6 +744,16 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Resolves a closeable type by its name.
+     * @param name the name of the type
+     * @return the Class
+     */
+    protected static Class resolveCloseableType(String name) {
+        Class result = resolveType(name);
+        return result != null && AutoCloseable.class.isAssignableFrom(result) ? result : null;
+    }
+
+    /**
      * The target scope class for break/continue/remove/yield statements.
      */
     protected class BranchScope {
