@@ -59,7 +59,7 @@ Incompatible changes
 + Java 8 is the new minimum supported version 
 
 + New reserved words are introduced. Those are:
-  `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove`
+  `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
   `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `yield` `_`.
   You may not longer use them as the names of the variables and methods. The exception is made for the `remove` identifer,
   as it is still may be used in method invocations.
@@ -165,6 +165,8 @@ Enhancements
 
 + Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
   so it is possible to pass a function as an argument to java methods that accept such interfaces
+
++ Functions can be declared as `static` to prevent variable capturing
 
 + Function parameters can use `var` keyword for parameter definition
 
