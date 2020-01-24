@@ -1342,7 +1342,7 @@ void Identifier(boolean top) :
 }
 {
     t=<IDENTIFIER> { jjtThis.setSymbol(top? checkVariable(jjtThis, t.image) : t.image); if (top && isFinalVariable(t.image)) jjtThis.setFinal(); }
-|
+    |
     t=<REGISTER> { jjtThis.setSymbol(t.image); }
 }
 
@@ -1447,8 +1447,7 @@ void IntegerLiteral() #NumberLiteral :
     Token t;
 }
 {
-    t=<INTEGER_LITERAL>
-    { jjtThis.setNatural(t.image); }
+    t=<INTEGER_LITERAL> { jjtThis.setNatural(t.image); }
 }
 
 void FloatLiteral() #NumberLiteral:
@@ -1456,8 +1455,7 @@ void FloatLiteral() #NumberLiteral:
     Token t;
 }
 {
-    t=<FLOAT_LITERAL>
-    { jjtThis.setReal(t.image); }
+    t=<FLOAT_LITERAL> { jjtThis.setReal(t.image); }
 }
 
 void StringLiteral() :
@@ -1465,8 +1463,7 @@ void StringLiteral() :
     Token t;
 }
 {
-    t=<STRING_LITERAL>
-    { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
+    t=<STRING_LITERAL> { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
 }
 
 void JxltLiteral() #JxltLiteral :
@@ -1474,8 +1471,7 @@ void JxltLiteral() #JxltLiteral :
     Token t;
 }
 {
-    t=<JXLT_LITERAL>
-    { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
+    t=<JXLT_LITERAL> { jjtThis.setLiteral(Parser.buildString(t.image, true)); }
 }
 
 void RegexLiteral() :
@@ -1483,8 +1479,7 @@ void RegexLiteral() :
     Token t;
 }
 {
-    t=<REGEX_LITERAL>
-    { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
+    t=<REGEX_LITERAL> { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
 void TypeCastReference() #ClassLiteral() :
@@ -1542,8 +1537,7 @@ void NewTypeReference() #ClassLiteral() :
     Class value;
 }
 {
-    t=<QUALIFIED_IDENTIFIER>
-    { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
 void ArrayTypeReference() #void : {}
@@ -1559,8 +1553,7 @@ void ObjectType() #ClassLiteral() :
     Class value;
 }
 {
-    t=<QUALIFIED_IDENTIFIER>
-    { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
 void InnerType() #Identifier() :
@@ -1601,7 +1594,7 @@ void EmptyListLiteral() #ArrayLiteral() : {}
 void ArrayLiteral() : {}
 {
     <LBRACKET>
-       Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
+        Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
     <RBRACKET>
 }
 
@@ -1868,7 +1861,6 @@ void Lambda() #JexlLambda() :
 }
 
 
-
 /***************************************
  *     References
  ***************************************/
@@ -1896,17 +1888,17 @@ void IdentifierAccess() #void :
 {
     <DOT> (
         t=dotName() { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-    |
+        |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccess
-    |
+        |
         t=<JXLT_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessJxlt
     )
     |
     <QDOT> (
         t=dotName() { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-    |
+        |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessSafe
-    |
+        |
         t=<JXLT_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessSafeJxlt
     )
 }
