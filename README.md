@@ -77,8 +77,8 @@ Incompatible changes
 
 + Passing a function more arguments than is specified in the function declaration now results in error
 
-+ Hoisted variables are effectively final. The reason is hoisted variables are in fact copies of the original variables,
-  so assigning a new value to the hoisted variable does not affect the original one. Such behaviour is misleading and thus restricted.
++ Captured variables are effectively final. The reason is captured variables are in fact copies of the original variables,
+  so assigning a new value to the captured variable does not affect the original one. Such behaviour is misleading and thus restricted.
 
 + Left-hand assignment expression can not use safe access operator `?.`
 
@@ -102,7 +102,7 @@ New features
 
 + New `remove` flow-control statement is introduced
 
-+ New function definition `function a() {}` statement is introduced
++ Javascript-like function definition `function a() {}` statement is introduced
 
 + New `this` literal is introduced to allow easier access to the current evaluation context
 
@@ -140,7 +140,11 @@ New features
 
 + New iterator `...` operator is introduced
 
-+ New iterator processing (generator/selection/projection) operators are introduced
++ New iterator generator `...{for (var i : 1 .. 10) yield i;}` operator is introduced
+
++ New iterator selection `a.[color == 'red']` operator is introduced
+
++ New iterator projection `a.{qty,price}` operator is introduced
 
 + New pipe operator `foo.(x -> {x + 1})` is introduced
 
