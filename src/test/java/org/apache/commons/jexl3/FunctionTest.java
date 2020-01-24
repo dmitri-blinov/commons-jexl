@@ -60,4 +60,15 @@ public class FunctionTest extends JexlTestCase {
         Assert.assertEquals(34, result);
     }
 
+    @Test
+    public void testStaticFunction() throws Exception {
+        JexlEngine jexl = createEngine();
+        JexlScript s = jexl.createScript("var a = 10; static function x() {return a}; x()");
+        JexlContext jc = new MapContext();
+        jc.set("a", 42);
+        Object result = s.execute(jc);
+        Assert.assertEquals(42, result);
+    }
+
+
 }

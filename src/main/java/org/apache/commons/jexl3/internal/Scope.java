@@ -60,6 +60,10 @@ public final class Scope {
      */
     private boolean varArgs;
     /**
+     * If scope is static.
+     */
+    private boolean isStatic;
+    /**
      * The number of local variables.
      */
     private int vars;
@@ -90,6 +94,13 @@ public final class Scope {
      * The empty string array.
      */
     private static final String[] EMPTY_STRS = new String[0];
+
+    /**
+     * Creates a new scope.
+     */
+    public Scope() {
+       this(null);
+    }
 
     /**
      * Creates a new scope with a list of parameters.
@@ -175,7 +186,7 @@ public final class Scope {
      */
     public Integer getSymbol(String name, boolean hoist) {
         Integer register = namedVariables != null ? namedVariables.get(name) : null;
-        if (register == null && hoist && parent != null) {
+        if (register == null && hoist && parent != null && !isStatic) {
             Integer pr = parent.getSymbol(name, true);
             if (pr != null) {
                 if (hoistedVariables == null) {
@@ -301,6 +312,13 @@ public final class Scope {
      */
     public void declareVarArgs() {
         varArgs = true;
+    }
+
+    /**
+     * Declares a scope to be static.
+     */
+    public void declareStatic() {
+        isStatic = true;
     }
 
     /**
@@ -445,6 +463,14 @@ public final class Scope {
      */
     public boolean isVarArgs() {
         return varArgs;
+    }
+
+    /**
+     * If this script has static scope.
+     * @return true or false
+     */
+    public boolean isStatic() {
+        return isStatic;
     }
 
     /**

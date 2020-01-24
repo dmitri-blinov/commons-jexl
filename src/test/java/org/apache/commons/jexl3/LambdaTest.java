@@ -83,6 +83,17 @@ public class LambdaTest extends JexlTestCase {
     }
 
     @Test
+    public void testStatucFunction() throws Exception {
+        JexlEngine jexl = createEngine();
+        String strs = "var a = 10; var s = static function { return a }; s()";
+        JexlScript s42 = jexl.createScript(strs);
+        JexlContext jc = new MapContext();
+        jc.set("a", 42);
+        Object result = s42.execute(jc);
+        Assert.assertEquals(42, result);
+    }
+
+    @Test
     public void testLambdaClosure() throws Exception {
         JexlEngine jexl = createEngine();
         String strs = "var t = 20; var s = function(x, y) { x + y + t}; s(15, 7)";

@@ -82,7 +82,7 @@
                         </ul>
                         <p>
                             <strong>N.B.</strong> the following keywords are reserved, and cannot be used as an identifier or the property name when using the dot operator:
-                            <code>or and eq ne lt gt le ge in div mod not this null true false instanceof new var final do while break continue remove yield function return try catch finally throw assert synchronized switch case default byte short int long char boolean float double</code>
+                            <code>or and eq ne lt gt le ge in div mod not this null true false instanceof new var final do while break continue remove yield static function return try catch finally throw assert synchronized switch case default byte short int long char boolean float double</code>
                             For example, the following is invalid:
                             <code>my.new.dotted.var1 // invalid ('new' is keyword)</code>
                             In such cases, quoted identifiers or the [ ] operator can be used, for example:
@@ -166,11 +166,11 @@
                         </ul>
                         The array syntax is also supported, e.g.
                         <code>String[] x</code>, or <code>int[] a</code>.
-                        Variable scope is either the entire script scope or the function definition block;
+                        In non-lexical mode the variable scope is either the entire script scope or the function definition block;
                         Local variables take precedence in resolution over contextual variables.
                         The values assigned to the strongly typed variables are implicitly cast to the defined type in non-strict arithmetic mode.
                         Primitive type variables are non-null, so it is impossible to declare a primitive type variable without initialization.
-                        When scripts are created with named parameters, those behave as local variables.
+                        When scripts are created with named parameters, those parameters behave as local variables.
                         <p>Variables can be declared as final using <code>final var x = 42</code>,
                            it is required to declare a final variable with initialization.
                         </p>
@@ -268,11 +268,16 @@
                         then the parentheses around that argument may be omitted
                         <code>var fun = x -> { x * x }</code>
                         <p>Note that functions can also capture local variables and parameters from the outer scope they are declared in.
-                            The values of those variables are bound to the function context at a definition time and
-                            remain unchanged afterwards. Such variables are also considered implicitly final inside the function scope.</p>
+                        The values of those variables are bound to the function context at a definition time and
+                        remain unchanged afterwards. Such variables are also considered implicitly final inside the function scope.
                         <code>var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7)</code>
                         The function closure captures 't' when defined; the result of the evaluation will
                         lead to <code>15 + 7 + 20 = 42</code>.
+                        To prevent a function from capturing enclosing variables the function should be declared as *static*, e.g. 
+                        <code>var t = 54; var s = static function(x, y) {x + y + t}; this.t = 20; s(15, 7)</code>
+                        The static function does not capture 't' when defined, but refers to the context variable instead; 
+                        the result of the evaluation will lead to <code>15 + 7 + 20 = 42</code>.
+                        </p>
                     </td>
                 </tr>
                 <tr>

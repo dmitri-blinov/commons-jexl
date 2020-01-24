@@ -157,6 +157,7 @@ TOKEN_MGR_DECLS : {
     | < FALSE : "false" > { popDot(); }
     | < RETURN : "return" > { popDot(); }
     | < YIELD : "yield" > { popDot(); }
+    | < STATIC : "static" > { popDot(); }
     | < FUNCTION : "function" > { popDot(); } /* Revert state to default if was DOT_ID. */
     | < LAMBDA : "->" | "\u2192" >
     | < LAMBDAE : "=>" | "\u21D2" >
@@ -435,7 +436,7 @@ void GenericStatement() #void : {}
 {
     <SEMICOL>
     | AnnotatedStatement()
-    | LOOKAHEAD(<FUNCTION> <IDENTIFIER>) FunctionStatement()
+    | LOOKAHEAD([ <STATIC> ] <FUNCTION> <IDENTIFIER>) FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(SwitchStatementLookahead()) SwitchStatement()
@@ -561,9 +562,12 @@ void AssignmentIdentifier() #void : {}
     Identifier(true)
 }
 
-void FunctionStatement() : {}
+void FunctionStatement() :
 {
-    <FUNCTION> FunctionVar() Function() 
+    boolean isStatic = false;
+}
+{
+    [ <STATIC> { isStatic = true; } ] <FUNCTION> FunctionVar() Function(isStatic) 
 }
 
 void FunctionVar() #Var :
@@ -574,12 +578,13 @@ void FunctionVar() #Var :
     t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
 }
 
-void Function() #JexlLambda() :
+void Function(boolean isStatic) #JexlLambda() :
 {
     pushFrame();
     pushUnit(jjtThis);
 }
 {
+    { if (isStatic) frame.declareStatic(); }
     Parameters() ( Block() | <LAMBDAE> Expression() )
 {
     popUnit(jjtThis);
@@ -1829,11 +1834,11 @@ void Parameters() #void : {}
 
 void LambdaLookahead() #void() : {}
 {
-    LOOKAHEAD(2) <FUNCTION> Parameters()
+    LOOKAHEAD(3) [ <STATIC> ] <FUNCTION> <LPAREN>
     |
-    LOOKAHEAD(2) <FUNCTION> <LCURLY>
+    LOOKAHEAD(3) [ <STATIC> ] <FUNCTION> <LCURLY>
     |
-    Parameters() ( <LAMBDA> | <LAMBDAE> )
+    [ <STATIC> ] Parameters() ( <LAMBDA> | <LAMBDAE> )
     |
     Parameter() ( <LAMBDA> | <LAMBDAE> )
 }
@@ -1845,11 +1850,11 @@ void Lambda() #JexlLambda() :
 }
 {
     (
-      LOOKAHEAD(2) <FUNCTION> Parameters() Block()
+      LOOKAHEAD(3) [ <STATIC> { frame.declareStatic(); } ] <FUNCTION> Parameters() Block()
       |
-      LOOKAHEAD(2) <FUNCTION> Block()
+      LOOKAHEAD(3) [ <STATIC> { frame.declareStatic(); } ] <FUNCTION> Block()
       |
-      Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+      [ <STATIC> { frame.declareStatic(); } ] Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
       |
       Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
     )
@@ -1875,7 +1880,7 @@ Token dotName() #void :
     | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
     | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
     | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
-    | t=<VAR> | t=<FUNCTION> ) 
+    | t=<VAR> | t=<FUNCTION> | t=<STATIC> ) 
 {
     return t;
 }
