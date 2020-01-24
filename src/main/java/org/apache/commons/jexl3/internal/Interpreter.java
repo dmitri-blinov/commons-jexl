@@ -119,6 +119,7 @@ import org.apache.commons.jexl3.parser.ASTMulNode;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
 import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTMultiVar;
 import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
@@ -1624,26 +1625,41 @@ public class Interpreter extends InterpreterBase {
             throw e;
         } catch (Throwable t) {
             boolean catched = false;
+            Throwable ex = t;
+            if (t instanceof JexlException && t.getCause() instanceof ArithmeticException) {
+                ex = t.getCause();
+            }
             for (int i = 1; i < num; i++) {
                 JexlNode cb = node.jjtGetChild(i);
                 if (cb instanceof ASTCatchBlock) {
                     JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
-
-                    if (catchVariable instanceof ASTVar) {
-                       // Check exception catch type
-                       Class type = ((ASTVar) catchVariable).getType();
-                       if (type != null && !type.isInstance(t))
-                           continue;
+                    if (catchVariable instanceof ASTMultiVar) {
+                        List<Class> types = ((ASTMultiVar) catchVariable).getTypes();
+                        for (Class type : types) {
+                            if (type.isInstance(ex)) {
+                                catched = true;
+                                break;
+                            }
+                        }
+                    } else if (catchVariable instanceof ASTVar) {
+                        // Check exception catch type
+                        Class type = ((ASTVar) catchVariable).getType();
+                        if (type == null || type.isInstance(ex)) {
+                            catched = true;
+                        }
+                    } else {
+                        catched = true;
                     }
-
-                    catched = true;
-                    cb.jjtAccept(this, t);
+                }
+                if (catched) {
+                    cb.jjtAccept(this, ex);
                     break;
                 }
             }
             // if there is no appropriate catch block just rethrow
-            if (!catched)
+            if (!catched) {
                 throw t;
+            }
         } finally {
             // execute finally block if any
             if (num > 1) {
@@ -1713,26 +1729,41 @@ public class Interpreter extends InterpreterBase {
             throw e;
         } catch (Throwable t) {
             boolean catched = false;
+            Throwable ex = t;
+            if (t instanceof JexlException && t.getCause() instanceof ArithmeticException) {
+                ex = t.getCause();
+            }
             for (int i = 2; i < num; i++) {
                 JexlNode cb = node.jjtGetChild(i);
                 if (cb instanceof ASTCatchBlock) {
                     JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
-
-                    if (catchVariable instanceof ASTVar) {
-                       // Check exception catch type
-                       Class type = ((ASTVar) catchVariable).getType();
-                       if (type != null && !type.isInstance(t))
-                           continue;
+                    if (catchVariable instanceof ASTMultiVar) {
+                        List<Class> types = ((ASTMultiVar) catchVariable).getTypes();
+                        for (Class type : types) {
+                            if (type.isInstance(ex)) {
+                                catched = true;
+                                break;
+                            }
+                        }
+                    } else if (catchVariable instanceof ASTVar) {
+                        // Check exception catch type
+                        Class type = ((ASTVar) catchVariable).getType();
+                        if (type == null || type.isInstance(ex)) {
+                            catched = true;
+                        }
+                    } else {
+                        catched = true;
                     }
-
-                    catched = true;
-                    cb.jjtAccept(this, t);
+                }
+                if (catched) {
+                    cb.jjtAccept(this, ex);
                     break;
                 }
             }
             // if there is no appropriate catch block just rethrow
-            if (!catched)
+            if (!catched) {
                 InterpreterBase.<RuntimeException>doThrow(t);
+            }
         } finally {
             // execute finally block if any
             if (num > 2) {
@@ -2638,6 +2669,11 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTExtVar node, Object data) {
+        return visit((ASTVar) node, data);
+    }
+
+    @Override
+    protected Object visit(ASTMultiVar node, Object data) {
         return visit((ASTVar) node, data);
     }
 

@@ -173,4 +173,12 @@ public class TryTest extends JexlTestCase {
         Assert.assertEquals(42, o);
     }
 
+    @Test
+    public void testMultiCatch() throws Exception {
+        JexlScript e = JEXL.createScript("try {42/0} catch (IOException | ArithmeticException e) {return 42}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals(42, o);
+    }
+
 }

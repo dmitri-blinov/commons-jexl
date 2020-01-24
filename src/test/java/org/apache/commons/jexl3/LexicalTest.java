@@ -739,4 +739,16 @@ public class LexicalTest {
         Object result = script.execute(null);
         Assert.assertEquals(result, 42);
     }
+
+    @Test
+    public void testHoisted() throws Exception {
+        JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        JexlScript script = jexl.createScript("var x = 10; var a = function(b) {{/*var q; */return x + b}}; a(32)");
+        JexlContext jc = new MapContext();
+        Object result = script.execute(null);
+        Assert.assertEquals(result, 42);
+    }
+
 }

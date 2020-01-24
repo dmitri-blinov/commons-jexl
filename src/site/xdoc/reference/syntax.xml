@@ -1660,7 +1660,7 @@
                               ...
                             } </code>
                         Where <code>e</code> is a local variable.</p>
-                        <p>The following typed/multiple syntax is also supported:
+                        <p>The following multiblock syntax is also supported:
                         <code>try {
                               return 42/0;
                             } catch (IOException e) {
@@ -1668,8 +1668,16 @@
                             } catch (Exception e) {
                               ...
                             } </code>
-                        Where <code>e</code> is a local variable. The variable should be subtype of Throwable type.
+                        Where <code>e</code> is a local variable. The variable type should be subtype of Throwable type.
                         Only the first catch section that matches the exception type will be executed</p>
+                        <p>The following multitype syntax is also supported:
+                        <code>try {
+                              return 42/0;
+                            } catch (IOException | ArithmeticException e) {
+                              ...
+                            } </code>
+                        Where <code>e</code> is a local variable. The variable type should be subtype of Throwable type.
+                        The local variable is implicitly final</p>
                         <p>Note that in non-lexical mode the catch variable <code>e</code> is accessible inside <code>finally</code> block and
                           after the whole statement evaluation</p>
                         <p>Either one of the <code>catch</code> block, the <code>finally</code> block or both can be specified for the
@@ -1703,7 +1711,7 @@
                         <p>The one or many <code>catch</code> blocks, the <code>finally</code> block or both can be specified for the
                         statement as described for the <code>try</code> statement</p>
                         <p>Note that in non-lexical mode the resource variable <code>e</code> is accessible inside the <code>catch</code> or <code>finally</code> block and
-                          after the whole statement evaluation</p>
+                        after the whole statement evaluation</p>
                         <p>The syntax without variable declaration is also supported:
                         <code>try (lock()) {
                               return 42/0;
