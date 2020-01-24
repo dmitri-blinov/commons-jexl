@@ -39,7 +39,16 @@ function bytesToHex(byte[] bytes, int offset, int count) {
 }
 ```
 
-On the other hand, some other new language features allow for more compact and less error-prone code to be written.
+On the other hand, some other new language features allow for more compact and less error-prone code to be written, for example, instead of writing
+
+```
+var x = [...]; for (var i : items) if (i.color == 'red') x += i.price;
+```
+one can write
+
+```
+var x = [...{items.[@color == 'red'].{@price}}]
+```
 
 I have no intention of promoting this fork as an alternative implementation, and I would be happy to have all 
 the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
@@ -142,9 +151,9 @@ New features
 
 + New iterator generator `...{for (var i : 1 .. 10) yield i;}` operator is introduced
 
-+ New iterator selection `a.[color == 'red']` operator is introduced
++ New iterator selection `a.[@color == 'red']` operator is introduced
 
-+ New iterator projection `a.{qty,price}` operator is introduced
++ New iterator projection `a.{@qty,@price}` operator is introduced
 
 + New pipe operator `foo.(x -> {x + 1})` is introduced
 
@@ -202,7 +211,7 @@ Enhancements
 
 + Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
 
-+ Foreach statement may also define additional `counter` variable `for (var x,i : list)` along with the current loop value variable
++ Foreach statement may also define additional `counter` variable `for (var i,x : list)` along with the current loop value variable
 
 + Immutable list `#[1,2,3]` literal constructs can be used 
 
@@ -222,7 +231,7 @@ Enhancements
 
 + Function argument comprehensions `func(...a)` can be used 
 
-+ Binary format `0b...` for natural literals 
++ Java-like binary format `0b...` support for natural literals 
 
 + Java-like support for underscores in numeric literals
 
