@@ -3273,9 +3273,9 @@ public class Interpreter extends InterpreterBase {
                         throw new JexlException(node, "not null value required for: " + var.getName());
 
                     frame.set(symbol, right);
-                    // make the closure accessible to itself, ie hoist the currently set variable after frame creation
+                    // make the closure accessible to itself, ie capture the currently set variable after frame creation
                     if (right instanceof Closure) {
-                         ((Closure) right).setHoisted(symbol, right);
+                         ((Closure) right).setCaptured(symbol, right);
                     }
                     return right; // 1
                 }

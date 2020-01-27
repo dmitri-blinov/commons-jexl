@@ -74,9 +74,9 @@ public final class Scope {
      */
     private Map<String, Integer> namedVariables = null;
     /**
-     * The map of local hoisted variables to parent scope variables, ie closure.
+     * The map of local captured variables to parent scope variables, ie closure.
      */
-    private Map<Integer, Integer> hoistedVariables = null;
+    private Map<Integer, Integer> capturedVariables = null;
     /**
      * The map of variable types.
      * Each variable may be associated with specific type
@@ -90,6 +90,10 @@ public final class Scope {
      * The set of non-null variables.
      */
     private Set<Integer> requiredVariables = null;
+    /**
+     * The map of default values for local variables, ie parameters.
+     */
+    private Map<Integer, Object> defaultValues = null;
     /**
      * The empty string array.
      */
@@ -169,8 +173,22 @@ public final class Scope {
     }
 
     /**
+     * Adds identifier as a local symbol.
+     * @param name the symbol name
+     * @return the symbol index
+     */
+    public Integer addSymbol(String name) {
+        if (namedVariables == null) {
+            namedVariables = new LinkedHashMap<String, Integer>();
+        }
+        Integer register = namedVariables.size();
+        namedVariables.put(name, register);
+        return register;
+    }
+
+    /**
      * Checks whether an identifier is a local variable or argument, ie a symbol.
-     * If this fails, attempt to solve by hoisting parent stacked.
+     * If this fails, attempt to solve by capturing parent stacked.
      * @param name the symbol name
      * @return the symbol index
      */
@@ -181,47 +199,44 @@ public final class Scope {
     /**
      * Checks whether an identifier is a local variable or argument, ie a symbol.
      * @param name the symbol name
-     * @param hoist whether solving by hoisting parent stacked is allowed
+     * @param capture whether solving by capturing parent stacked is allowed
      * @return the symbol index
      */
-    public Integer getSymbol(String name, boolean hoist) {
+    public Integer getSymbol(String name, boolean capture) {
         Integer register = namedVariables != null ? namedVariables.get(name) : null;
-        if (register == null && hoist && parent != null && !isStatic) {
+        if (register == null && capture && parent != null && !isStatic) {
             Integer pr = parent.getSymbol(name, true);
             if (pr != null) {
-                if (hoistedVariables == null) {
-                    hoistedVariables = new LinkedHashMap<Integer, Integer>();
-                }
-                if (namedVariables == null) {
-                    namedVariables = new LinkedHashMap<String, Integer>();
-                }
-                register = namedVariables.size();
-                namedVariables.put(name, register);
-                hoistedVariables.put(register, pr);
-                Class type = parent.getVariableType(pr);
-                if (type != null) {
-                    if (variableTypes == null) {
-                        variableTypes = new HashMap<Integer, Class>();
-                    }
-                    variableTypes.put(register, type);
-                }
-                // Make hoisted variables final by default
-                if (finalVariables == null) {
-                    finalVariables = new HashSet<Integer>();
-                }
-                finalVariables.add(register);
+                register = addSymbol(name);
+                setVariableCaptured(register, pr);
+                // Preserve captured variable type
+                setVariableType(register, parent.getVariableType(pr));
+                // Make captured variables final by default
+                setVariableFinal(register);
             }
         }
         return register;
     }
 
     /**
-     * Checks whether a given symbol is hoisted.
+     * Checks whether a given symbol is captured.
      * @param symbol the symbol number
-     * @return true if hoisted, false otherwise
+     * @return true if captured, false otherwise
      */
-    public boolean isHoistedSymbol(int symbol) {
-        return hoistedVariables != null && hoistedVariables.containsKey(symbol);
+    public boolean isCapturedSymbol(int symbol) {
+        return capturedVariables != null && capturedVariables.containsKey(symbol);
+    }
+
+    /**
+     * Sets the local variable as captured.
+     * @param symbol the symbol index
+     * @param register the parent frame register
+     */
+    protected void setVariableCaptured(int symbol, int register) {
+        if (capturedVariables == null) {
+            capturedVariables = new LinkedHashMap<Integer, Integer>();
+        }
+        capturedVariables.put(symbol, register);
     }
 
     /**
@@ -234,12 +249,37 @@ public final class Scope {
     }
 
     /**
+     * Sets the local variable type.
+     * @param symbol the symbol index
+     * @param type the variable class
+     */
+    protected void setVariableType(int symbol, Class type) {
+        if (type != null) {
+            if (variableTypes == null) {
+                variableTypes = new HashMap<Integer, Class>();
+            }
+            variableTypes.put(symbol, type);
+        }
+    }
+
+    /**
      * Returns if the local variable is declared final.
      * @param symbol the symbol index
      * @return true if final, false otherwise
      */
     public boolean isVariableFinal(int symbol) {
         return finalVariables == null ? false : finalVariables.contains(symbol);
+    }
+
+    /**
+     * Sets the local variable as declared final.
+     * @param symbol the symbol index
+     */
+    protected void setVariableFinal(int symbol) {
+        if (finalVariables == null) {
+            finalVariables = new HashSet<Integer>();
+        }
+        finalVariables.add(symbol);
     }
 
     /**
@@ -252,6 +292,40 @@ public final class Scope {
     }
 
     /**
+     * Sets the local variable as declared required.
+     * @param symbol the symbol index
+     */
+    protected void setVariableRequired(int symbol) {
+        if (requiredVariables == null) {
+            requiredVariables = new HashSet<Integer>();
+        }
+        requiredVariables.add(symbol);
+    }
+
+    /**
+     * Sets the local variable default value.
+     * @param symbol the symbol index
+     * @param value the variable default value
+     */
+    protected void setVariableValue(int symbol, Object value) {
+        if (value != null) {
+            if (defaultValues == null) {
+                defaultValues = new HashMap<Integer, Object>();
+            }
+            defaultValues.put(symbol, value);
+        }
+    }
+
+    /**
+     * Returns the local variable default value.
+     * @param symbol the symbol index
+     * @return the variable value
+     */
+    public Object getVariableValue(int symbol) {
+        return defaultValues == null ? null : defaultValues.get(symbol);
+    }
+
+    /**
      * Declares a parameter.
      * <p>
      * This method creates an new entry in the symbol map.
@@ -260,7 +334,7 @@ public final class Scope {
      * @return the register index storing this variable
      */
     public int declareParameter(String name) {
-        return declareParameter(name, null, false, false);
+        return declareParameter(name, null, false, false, null);
     }
 
     /**
@@ -272,36 +346,26 @@ public final class Scope {
      * @param type the parameter class
      * @param isFinal if the declared parameter is final
      * @param isRequired if the declared parameter is non-null
+     * @param value the default parameter value
      * @return the register index storing this variable
      */
-    public int declareParameter(String name, Class type, boolean isFinal, boolean isRequired) {
-        if (namedVariables == null) {
-            namedVariables = new LinkedHashMap<String, Integer>();
-        } else if (vars > 0) {
+    public int declareParameter(String name, Class type, boolean isFinal, boolean isRequired, Object value) {
+        if (vars > 0) {
             throw new IllegalStateException("cant declare parameters after variables");
         }
-        Integer register = namedVariables.get(name);
+        Integer register = getSymbol(name, false);
         if (register == null) {
-            register = namedVariables.size();
-            namedVariables.put(name, register);
+            register = addSymbol(name);
             parms += 1;
-            if (type != null) {
-                if (variableTypes == null) {
-                    variableTypes = new HashMap<Integer, Class>();
-                }
-                variableTypes.put(register, type);
-            }
+            setVariableType(register, type);
             if (isFinal) {
-                if (finalVariables == null) {
-                    finalVariables = new HashSet<Integer>();
-                }
-                finalVariables.add(register);
+                setVariableFinal(register);
             }
             if (isRequired) {
-                if (requiredVariables == null) {
-                    requiredVariables = new HashSet<Integer>();
-                }
-                requiredVariables.add(register);
+                setVariableRequired(register);
+            }
+            if (value != null) {
+                setVariableValue(register, value);
             }
         }
         return register;
@@ -345,63 +409,34 @@ public final class Scope {
      * @return the register index storing this variable
      */
     public int declareVariable(String name, Class type, boolean isFinal, boolean isRequired) {
-        if (namedVariables == null) {
-            namedVariables = new LinkedHashMap<String, Integer>();
-        }
-        Integer register = namedVariables.get(name);
+        Integer register = getSymbol(name, false);
         if (register == null) {
-            register = namedVariables.size();
-            namedVariables.put(name, register);
+            register = addSymbol(name);
             vars += 1;
-            if (type != null) {
-                if (variableTypes == null) {
-                    variableTypes = new HashMap<Integer, Class>();
-                }
-                variableTypes.put(register, type);
-            }
+            setVariableType(register, type);
             if (isFinal) {
-                if (finalVariables == null) {
-                    finalVariables = new HashSet<Integer>();
-                }
-                finalVariables.add(register);
+                setVariableFinal(register);
             }
             if (isRequired) {
-                if (requiredVariables == null) {
-                    requiredVariables = new HashSet<Integer>();
-                }
-                requiredVariables.add(register);
+                setVariableRequired(register);
             }
-            // check if local is redefining hoisted
+            // check if local is redefining captured
             if (parent != null) {
                 Integer pr = parent.getSymbol(name, true);
                 if (pr != null) {
-                    if (hoistedVariables == null) {
-                        hoistedVariables = new LinkedHashMap<Integer, Integer>();
-                    }
-                    hoistedVariables.put(register, pr);
+                    setVariableCaptured(register, pr);
                 }
             }
         } else {
             if (isVariableFinal(register)) {
                 throw new IllegalStateException("final variable can not be redeclared");
             }
-            if (type != null) {
-                if (variableTypes == null) {
-                    variableTypes = new HashMap<Integer, Class>();
-                }
-                variableTypes.put(register, type);
-            }
+            setVariableType(register, type);
             if (isFinal) {
-                if (finalVariables == null) {
-                    finalVariables = new HashSet<Integer>();
-                }
-                finalVariables.add(register);
+                setVariableFinal(register);
             }
             if (isRequired) {
-                if (requiredVariables == null) {
-                    requiredVariables = new HashSet<Integer>();
-                }
-                requiredVariables.add(register);
+                setVariableRequired(register);
             }
         }
         return register;
@@ -409,7 +444,7 @@ public final class Scope {
 
     /**
      * Creates a frame by copying values up to the number of parameters.
-     * <p>This captures the hoisted variables values.</p>
+     * <p>This captures the captured variables values.</p>
      * @param frame the caller frame
      * @param args the arguments
      * @return the arguments array
@@ -418,10 +453,10 @@ public final class Scope {
         if (namedVariables != null) {
             Object[] arguments = new Object[namedVariables.size()];
             Arrays.fill(arguments, UNDECLARED);
-            if (frame != null && hoistedVariables != null && parent != null) {
-                for (Map.Entry<Integer, Integer> hoist : hoistedVariables.entrySet()) {
-                    Integer target = hoist.getKey();
-                    Integer source = hoist.getValue();
+            if (frame != null && capturedVariables != null && parent != null) {
+                for (Map.Entry<Integer, Integer> entry : capturedVariables.entrySet()) {
+                    Integer target = entry.getKey();
+                    Integer source = entry.getValue();
                     Object arg = frame.get(source);
                     arguments[target] = arg;
                 }
@@ -433,16 +468,16 @@ public final class Scope {
     }
 
     /**
-     * Gets the hoisted index of a given symbol, ie the target index of a symbol in a child frame.
+     * Gets the captured index of a given symbol, ie the target index of a symbol in a child frame.
      * @param symbol the symbol index
-     * @return the target symbol index or null if the symbol is not hoisted
+     * @return the target symbol index or null if the symbol is not captured
      */
-    public Integer getHoisted(int symbol) {
-        if (hoistedVariables != null) {
-            for (Map.Entry<Integer, Integer> hoist : hoistedVariables.entrySet()) {
-                Integer source = hoist.getValue();
+    public Integer getCaptured(int symbol) {
+        if (capturedVariables != null) {
+            for (Map.Entry<Integer, Integer> entry : capturedVariables.entrySet()) {
+                Integer source = entry.getValue();
                 if (source == symbol) {
-                    return hoist.getKey();
+                    return entry.getKey();
                 }
             }
         }
@@ -512,7 +547,7 @@ public final class Scope {
     }
 
     /**
-     * Gets this script local variable, i.e. symbols assigned to local variables excluding hoisted variables.
+     * Gets this script local variable, i.e. symbols assigned to local variables excluding captured variables.
      * @return the local variable names
      */
     public String[] getLocalVariables() {
@@ -520,7 +555,7 @@ public final class Scope {
             List<String> locals = new ArrayList<String>(vars);
             for (Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
                 int symnum = entry.getValue();
-                if (symnum >= parms && (hoistedVariables == null || !hoistedVariables.containsKey(symnum))) {
+                if (symnum >= parms && !isCapturedSymbol(symnum)) {
                     locals.add(entry.getKey());
                 }
             }

@@ -701,8 +701,8 @@ public class Engine extends JexlEngine {
             }
             ASTIdentifier identifier = (ASTIdentifier) node;
             int symbol = identifier.getSymbol();
-            // symbols that are hoisted are considered "global" variables
-            if (symbol >= 0 && script != null && !script.isHoistedSymbol(symbol)) {
+            // symbols that are captured are considered "global" variables
+            if (symbol >= 0 && script != null && !script.isCapturedSymbol(symbol)) {
                 collector.collect(null);
             } else {
                 // start collecting from identifier

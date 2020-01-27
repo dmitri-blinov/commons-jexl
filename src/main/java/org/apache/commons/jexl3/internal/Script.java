@@ -369,6 +369,26 @@ public class Script implements JexlScript, JexlExpression {
             result = args;
         }
 
+        // Check the default parameter values
+        if (result != null && params != null) {
+            for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
+                int pos = i - curried;
+                // Check if the passed arguments list is shorter than the parameters list
+                if (pos >= result.length) {
+                    String name = params[i];
+                    int symbol = frame.getSymbol(name);
+                    Object value = frame.getVariableValue(symbol);
+                    if (value != null) {
+                        Object[] e = new Object[result.length + pos + 1];
+                        if (result.length > 0)
+                            System.arraycopy(result, 0, e, 0, result.length);
+                        result = e;
+                        result[pos] = value;
+                    }
+                }
+            }
+        }
+
         // Check if type-casting of all the arguments (except the vararg) is needed
         if (result != null && params != null) {
             for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {

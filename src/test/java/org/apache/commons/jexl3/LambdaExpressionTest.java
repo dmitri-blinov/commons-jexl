@@ -113,7 +113,7 @@ public class LambdaExpressionTest extends JexlTestCase {
     public void testRecurse2() throws Exception {
         JexlEngine jexl = new Engine();
         JexlContext jc = new MapContext();
-        // adding some hoisted vars to get it confused
+        // adding some captured vars to get it confused
         try {
             JexlScript script = jexl.createScript(
                     "var y = 1; var z = 1; "

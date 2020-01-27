@@ -409,7 +409,7 @@ public abstract class JexlParser extends StringParser {
             frame = new Scope(null, (String[]) null);
         }
         Integer symbol = frame.getSymbol(name, false);
-        if (symbol != null && frame.isVariableFinal(symbol) && !frame.isHoistedSymbol(symbol)) {
+        if (symbol != null && frame.isVariableFinal(symbol) && !frame.isCapturedSymbol(symbol)) {
             throwParsingException(var);
         }
         symbol = frame.declareVariable(name);
@@ -444,7 +444,7 @@ public abstract class JexlParser extends StringParser {
      * @param token the parameter name token
      */
     protected void declareParameter(Token token) {
-        declareParameter(token, null, false, false);
+        declareParameter(token, null, false, false, null);
     }
 
     /**
@@ -453,16 +453,18 @@ public abstract class JexlParser extends StringParser {
      * @param token the parameter name token
      * @param type the parameter class if any
      * @param isFinal whether the declared parameter is final
+     * @param isRequired whether the declared parameter is required
+     * @param value the parameter default value
      */
-    protected void declareParameter(Token token, Class type, boolean isFinal, boolean isRequired) {
+    protected void declareParameter(Token token, Class type, boolean isFinal, boolean isRequired, Object value) {
         String identifier = token.image;
         if (!allowVariable(identifier)) {
             throwFeatureException(JexlFeatures.LOCAL_VAR, token);
         }
         if (frame == null) {
-            frame = new Scope(null, (String[]) null);
+            frame = new Scope();
         }
-        int symbol = frame.declareParameter(identifier, type, isFinal, isRequired);
+        int symbol = frame.declareParameter(identifier, type, isFinal, isRequired, value);
         // not sure how declaring a parameter could fail...
         // lexical feature error
         if (!block.declareSymbol(symbol) && getFeatures().isLexical()) {
@@ -477,7 +479,18 @@ public abstract class JexlParser extends StringParser {
      * @param token the parameter name toekn
      */
     protected void declareVarArgSupport() {
+        if (frame == null) {
+            frame = new Scope();
+        }
         frame.declareVarArgs();
+    }
+
+    /**
+     * If this script expects a variable number of arguments.
+     * @return true or false
+     */
+    protected boolean isVarArgs() {
+        return frame != null ? frame.isVarArgs() : false;
     }
 
     /**

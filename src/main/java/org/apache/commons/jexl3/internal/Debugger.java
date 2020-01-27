@@ -1167,7 +1167,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     Class type = scope.getVariableType(symbol);
                     boolean isFinal = scope.isVariableFinal(symbol);
                     boolean isRequired = scope.isVariableRequired(symbol);
-                    if (isFinal || isRequired || type != null) {
+                    Object value = scope.getVariableValue(symbol);
+                    if (isFinal || isRequired || type != null || value != null) {
                         varSyntax = true;
                         break;
                     }
@@ -1200,6 +1201,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                         builder.append("&");
                     }
                     builder.append(visitParameter(param, data));
+                    Object value = scope.getVariableValue(symbol);
+                    if (value != null) {
+                        builder.append(" = ");
+                        builder.append(String.valueOf(value));
+                    }
                 }
                 if (node.isVarArgs())
                     builder.append("...");

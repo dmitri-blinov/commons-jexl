@@ -200,7 +200,7 @@ public class AnnotationTest extends JexlTestCase {
     }
     
     @Test
-    public void testHoistingStatement() throws Exception {
+    public void testCapturingStatement() throws Exception {
         AnnotationContext jc = new AnnotationContext();
         JexlScript e = JEXL.createScript("var t = 1; @synchronized for(var x : [2,3,7]) t *= x; t");
         Object r = e.execute(jc);

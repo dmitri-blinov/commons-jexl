@@ -61,7 +61,7 @@ public class LexicalFrame extends LexicalScope {
     @Override
     public boolean declareSymbol(int symbol) {
         boolean declared = super.declareSymbol(symbol);
-        if (declared && frame.getScope().isHoistedSymbol(symbol)) {
+        if (declared && frame.getScope().isCapturedSymbol(symbol)) {
             if (stack == null) {
                 stack = new ArrayDeque<Object>() ;
             }
@@ -94,7 +94,7 @@ public class LexicalFrame extends LexicalScope {
             }
             moreSymbols.clear();
         }
-        // restore values of hoisted symbols that were overwritten
+        // restore values of captured symbols that were overwritten
         if (stack != null) {
             while(!stack.isEmpty()) {
                 Object value = stack.pop();

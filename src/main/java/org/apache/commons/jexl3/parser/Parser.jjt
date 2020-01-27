@@ -1802,12 +1802,35 @@ void Parameter() #void :
     t=<IDENTIFIER> { declareParameter(t); }
 }
 
+Object ConstantLiteral() #void : 
+{
+    Token t;
+}
+{
+    t = <INTEGER_LITERAL> { return NumberParser.parseInteger(t.image); }
+    |
+    t = <FLOAT_LITERAL> { return NumberParser.parseDouble(t.image); }
+    |
+    t = <TRUE> { return Boolean.TRUE; }
+    |
+    t = <FALSE> { return Boolean.FALSE; }
+    |
+    t = <NULL> { return null; }
+    |
+    t = <STRING_LITERAL> { return Parser.buildString(t.image, true); }
+    |
+    t = <REGEX_LITERAL> { return Parser.buildRegex(t.image); }
+    |
+    t = <NAN_LITERAL> { return Double.NaN; }
+}
+
 void VarParameter() #void :
 {
     Token t;
     Class type = null;
     boolean isFinal = false;
     boolean isRequired = false;
+    Object value = null;
 }
 {
     [ <FINAL> { isFinal = true; } ]
@@ -1834,15 +1857,20 @@ void VarParameter() #void :
 
       ) (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
-    [ <and> { isRequired = true; } ] t=<IDENTIFIER> { declareParameter(t, type, isFinal, isRequired); }
+    [ <and> { isRequired = true; } ] 
+    t = <IDENTIFIER> [ <assign> value = ConstantLiteral() | <ELLIPSIS> { declareVarArgSupport(); } ]
+    { declareParameter(t, type, isFinal, isRequired, value); }
 }
 
 void Parameters() #void : {}
 {
-    <LPAREN> [
-      (LOOKAHEAD(VarParameter()) VarParameter() (<COMMA> VarParameter())* | Parameter() (<COMMA> Parameter())*)
-      [ <ELLIPSIS> { declareVarArgSupport(); } ]
-    ] <RPAREN>
+    <LPAREN>
+      [
+        LOOKAHEAD(VarParameter()) VarParameter() (LOOKAHEAD( {getToken(1).kind == COMMA && !isVarArgs()} ) <COMMA> VarParameter())*
+        |
+        Parameter() (<COMMA> Parameter())* [ <ELLIPSIS> { declareVarArgSupport(); } ]
+      ]      
+    <RPAREN>
 }
 
 void LambdaLookahead() #void() : {}

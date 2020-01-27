@@ -202,12 +202,12 @@ public class ASTJexlScript extends JexlNode implements JexlParser.LexicalUnit  {
     }
 
     /**
-     * Checks whether a given symbol is hoisted.
+     * Checks whether a given symbol is captured.
      * @param symbol the symbol number
-     * @return true if hoisted, false otherwise
+     * @return true if captured, false otherwise
      */
-    public boolean isHoistedSymbol(int symbol) {
-        return scope != null? scope.isHoistedSymbol(symbol) : false;
+    public boolean isCapturedSymbol(int symbol) {
+        return scope != null? scope.isCapturedSymbol(symbol) : false;
     }
 
     /**
