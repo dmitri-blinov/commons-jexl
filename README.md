@@ -189,6 +189,8 @@ Enhancements
 
 + Function parameters can be declared as non-null `function(var &x)`
 
++ Function parameters can have default values `function(var x = 0)` 
+
 + Return statement expression can be omitted, implying `null` as a result
 
 + Local variables can be declared strongly typed by using java class or primitive types `int i = 0`
