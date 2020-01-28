@@ -957,7 +957,9 @@ void DeclareMultiCatchVar() #MultiVar :
 {
     LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(1).image) != null && getToken(2).kind == or} ) 
     t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); }
-    ( LOOKAHEAD(<or>) <or> t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); } )+
+    ( LOOKAHEAD({ getToken(1).kind == or && getToken(2).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(2).image) != null}) 
+        <or> t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); } 
+    )+
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
