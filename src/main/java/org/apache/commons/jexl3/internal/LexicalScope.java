@@ -82,6 +82,12 @@ public class LexicalScope {
     /** The frame */
     protected final Frame frame;
 
+    /**
+     * Default ctor.
+     */
+    public LexicalScope() {
+        this(null);
+    }
 
     /**
      * Default ctor.

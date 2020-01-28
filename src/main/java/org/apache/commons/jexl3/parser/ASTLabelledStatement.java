@@ -19,7 +19,7 @@ package org.apache.commons.jexl3.parser;
 /**
  * Labeled Statement.
  */
-public class ASTLabelledStatement extends JexlNode {
+public class ASTLabelledStatement extends JexlLexicalNode {
 
     private String label = null;
 

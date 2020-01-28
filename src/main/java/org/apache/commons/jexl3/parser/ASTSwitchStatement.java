@@ -21,8 +21,7 @@ import org.apache.commons.jexl3.internal.LexicalScope;
 /**
  * Switch/case statement.
  */
-public class ASTSwitchStatement extends ASTLabelledStatement implements JexlParser.LexicalUnit {
-    private LexicalScope locals = null;
+public class ASTSwitchStatement extends ASTLabelledStatement {
 
     public ASTSwitchStatement(int id) {
         super(id);
@@ -36,36 +35,4 @@ public class ASTSwitchStatement extends ASTLabelledStatement implements JexlPars
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
     }
-
-    @Override
-    public boolean declareSymbol(int symbol) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol);
-    }
-
-    @Override
-    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol, c, fin, req);
-    }
-
-    @Override
-    public int getSymbolCount() {
-        return locals == null? 0 : locals.getSymbolCount();
-    }
-
-    @Override
-    public boolean hasSymbol(int symbol) {
-        return locals == null? false : locals.hasSymbol(symbol);
-    }
-
-    @Override
-    public void clearUnit() {
-        locals = null;
-    }
-
 }

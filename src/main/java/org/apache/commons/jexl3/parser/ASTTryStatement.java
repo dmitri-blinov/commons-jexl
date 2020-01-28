@@ -21,9 +21,7 @@ import org.apache.commons.jexl3.internal.LexicalScope;
 /**
  * try/catch/finally statement.
  */
-public class ASTTryStatement extends ASTLabelledStatement implements JexlParser.LexicalUnit {
-
-    private LexicalScope locals = null;
+public class ASTTryStatement extends ASTLabelledStatement {
 
     public ASTTryStatement(int id) {
         super(id);
@@ -36,36 +34,5 @@ public class ASTTryStatement extends ASTLabelledStatement implements JexlParser.
     @Override
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
-    }
-
-    @Override
-    public boolean declareSymbol(int symbol) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol);
-    }
-
-    @Override
-    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol, c, fin, req);
-    }
-
-    @Override
-    public int getSymbolCount() {
-        return locals == null? 0 : locals.getSymbolCount();
-    }
-
-    @Override
-    public boolean hasSymbol(int symbol) {
-        return locals == null? false : locals.hasSymbol(symbol);
-    }
-
-    @Override
-    public void clearUnit() {
-        locals = null;
     }
 }

@@ -25,15 +25,13 @@ import org.apache.commons.jexl3.internal.LexicalScope;
 /**
  * Enhanced script to allow parameters declaration.
  */
-public class ASTJexlScript extends JexlNode implements JexlParser.LexicalUnit  {
+public class ASTJexlScript extends JexlLexicalNode {
     /** The pragmas. */
     private Map<String, Object> pragmas = null;
     /** Features. */
     private JexlFeatures features = null;
     /** The script scope. */
     private Scope scope = null;
-    /** The local symbol set. */
-    private LexicalScope locals =  null;
 
     public ASTJexlScript(int id) {
         super(id);
@@ -42,38 +40,7 @@ public class ASTJexlScript extends JexlNode implements JexlParser.LexicalUnit  {
     public ASTJexlScript(Parser p, int id) {
         super(p, id);
     }
-    
-    @Override
-    public boolean declareSymbol(int symbol) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol);
-    }
-
-    @Override
-    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
-        if (locals == null) {
-            locals  = new LexicalScope(null);
-        }
-        return locals.declareSymbol(symbol, c, fin, req);
-    }
-    
-    @Override
-    public int getSymbolCount() {
-        return locals == null? 0 : locals.getSymbolCount();
-    }
-
-    @Override
-    public boolean hasSymbol(int symbol) {
-        return locals == null? false : locals.hasSymbol(symbol);
-    }
-    
-    @Override
-    public void clearUnit() {
-        locals = null;
-    }
-    
+        
     /**
      * Consider script with no parameters that return lambda as parametric-scripts.
      * @return the script
@@ -216,7 +183,7 @@ public class ASTJexlScript extends JexlNode implements JexlParser.LexicalUnit  {
      * @return true if final, false otherwise
      */
     public boolean isVariableFinal(int symbol) {
-        return locals != null? locals.isVariableFinal(symbol) : false;
+        return scope != null? scope.isVariableFinal(symbol) : false;
     }
 
 }
