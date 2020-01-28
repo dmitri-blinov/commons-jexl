@@ -181,8 +181,14 @@ import org.apache.commons.jexl3.parser.ASTNullpNode;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.Locale;
 import java.util.regex.Pattern;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
 import org.apache.commons.jexl3.parser.StringParser;
 
@@ -1117,6 +1123,38 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         return p;
     }
 
+    /**
+     * A formatter for default values of parameters.
+     * @param data the data to format
+     * @return the formatted value
+     */
+    protected String formatDefaultValue(Object data) {
+        if (data instanceof String) {
+            String img = ((String) data).replace("'", "\\'");
+            return "'" + img + "'";
+        } else if (data instanceof Pattern) {
+            String img = data.toString().replace("/", "\\/");
+            return "~/" + img + "/";
+        } else if (data instanceof BigDecimal) {
+            DecimalFormat BIGDF = new DecimalFormat("0.0b", new DecimalFormatSymbols(Locale.ENGLISH));
+            return BIGDF.format((BigDecimal) data);
+        } else if (data instanceof Number && Double.isNaN(((Number) data).doubleValue())) {
+            return "NaN";
+        } else {
+            StringBuilder strb = new StringBuilder(String.valueOf(data));
+            if (data instanceof Float) {
+                strb.append('f');
+            } else if (data instanceof Double) {
+                strb.append('d');
+            } else if (data instanceof BigInteger) {
+                strb.append('h');
+            } else if (data instanceof Long) {
+                strb.append('l');
+            }
+            return strb.toString();
+        }
+    }
+
     @Override
     protected Object visit(ASTJexlScript node, Object data) {
         // dump pragmas
@@ -1204,7 +1242,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     Object value = scope.getVariableValue(symbol);
                     if (value != null) {
                         builder.append(" = ");
-                        builder.append(String.valueOf(value));
+                        builder.append(formatDefaultValue(value));
                     }
                 }
                 if (node.isVarArgs())

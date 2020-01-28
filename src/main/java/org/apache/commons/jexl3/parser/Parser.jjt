@@ -38,6 +38,7 @@ package org.apache.commons.jexl3.parser;
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlFeatures;
@@ -1821,7 +1822,7 @@ Object ConstantLiteral() #void :
     |
     t = <STRING_LITERAL> { return Parser.buildString(t.image, true); }
     |
-    t = <REGEX_LITERAL> { return Parser.buildRegex(t.image); }
+    t = <REGEX_LITERAL> { return Pattern.compile(Parser.buildRegex(t.image)); }
     |
     t = <NAN_LITERAL> { return Double.NaN; }
 }

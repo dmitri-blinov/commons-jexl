@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 import org.junit.Assert;
 import org.junit.Test;
 import org.apache.commons.logging.Log;
@@ -79,6 +81,55 @@ public class DefaultParametersTest extends JexlTestCase {
         e = JEXL.createScript("var x = function(var a = 42, var b, var c = 21) {c}; x()");
         o = e.execute(null);
         Assert.assertEquals("Result is not 21", 21, o);
+    }
+
+    @Test
+    public void testStringType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = 'World') {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", "World", o);
+    }
+
+    @Test
+    public void testRegexType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = ~/ABC.*/) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", "ABC.*", String.valueOf(o));
+    }
+
+    @Test
+    public void testNumericType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = 42.0) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", 42.0, o);
+    }
+
+    @Test
+    public void testBigIntegerType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = 42H) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", BigInteger.valueOf(42L), o);
+    }
+
+    @Test
+    public void testBigDecimalType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = 42.0B) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", BigDecimal.valueOf(42.0), o);
+    }
+
+    @Test
+    public void testBooleanType() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = true) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", Boolean.TRUE, o);
+    }
+
+    @Test
+    public void testNull() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(var a = null) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertNull("Result is not as expected", o);
     }
 
 }
