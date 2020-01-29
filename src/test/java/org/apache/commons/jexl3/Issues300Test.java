@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -344,4 +347,116 @@ public class Issues300Test {
         result = script.execute(ctxt, 21);
         Assert.assertEquals(42, result);
     }
+
+    @Test
+    public void test322a() throws Exception {
+        JexlEngine jexl = new JexlBuilder().strict(true).create();
+        JxltEngine jxlt = jexl.createJxltEngine();
+        JexlContext context = new MapContext();
+
+        String[] ins = new String[]{
+            "${'{'}", "${\"{\"}", "${\"{}\"}", "${'{42}'}", "${\"{\\\"\\\"}\"}"
+        };
+        String[] ctls = new String[]{
+            "{", "{", "{}", "{42}", "{\"\"}"
+        };
+        StringWriter strw;
+        JxltEngine.Template template;
+        String output;
+
+        for (int i = 0; i < ins.length; ++i) {
+            String src = ins[i];
+            try {
+                template = jxlt.createTemplate("$$", new StringReader(src));
+            } catch(JexlException xany) {
+                Assert.fail(src);
+                throw xany;
+            }
+            strw = new StringWriter();
+            template.evaluate(context, strw);
+            output = strw.toString();
+            Assert.assertEquals(ctls[i], output);
+        }
+    }
+    
+    public static class User322 {
+        public String getName() {
+            return "user322";
+        }
+    }
+    
+    public static class Session322 {
+        public User322 getUser() {
+            return new User322();
+        }
+    }
+    
+    @Test
+    public void test322b() throws Exception {
+        MapContext ctxt = new MapContext();
+        String src = "L'utilisateur ${session.user.name} s'est connecte";
+        JexlEngine jexl = new JexlBuilder().strict(true).create();
+        JxltEngine jxlt = jexl.createJxltEngine();
+        StringWriter strw;
+        JxltEngine.Template template;
+        String output;
+        template = jxlt.createTemplate("$$", new StringReader(src));
+        
+        ctxt.set("session", new Session322());
+        strw = new StringWriter();
+        template.evaluate(ctxt, strw);
+        output = strw.toString();
+        Assert.assertEquals("L'utilisateur user322 s'est connecte", output);
+        
+        ctxt.set("session.user", new User322());
+        strw = new StringWriter();
+        template.evaluate(ctxt, strw);
+        output = strw.toString();
+        Assert.assertEquals("L'utilisateur user322 s'est connecte", output);
+        
+        ctxt.set("session.user.name", "user322");
+        strw = new StringWriter();
+        template.evaluate(ctxt, strw);
+        output = strw.toString();
+        Assert.assertEquals("L'utilisateur user322 s'est connecte", output);
+    }
+    
+    @Ignore
+    public void test323() throws Exception {
+        // Create or retrieve an engine
+        JexlEngine jexl = new JexlBuilder().safe(false).create();
+        // on recent code: JexlEngine jexl = new JexlBuilder().safe(false).create();
+
+        // Populate to identical global variables
+        JexlContext jc = new MapContext();
+        jc.set("NormalVariable", null);
+        jc.set("ant.variable", null);
+
+        // Evaluate the value of the normal variable
+        JexlExpression expression1 = jexl.createExpression("NormalVariable");
+        Object o1 = expression1.evaluate(jc);
+        Assert.assertEquals(null, o1);
+
+        // Evaluate the value of the ant-style variable
+        JexlExpression expression2 = jexl.createExpression("ant.variable");
+        Object o2 = expression2.evaluate(jc); // <-- BUG: throws exception instead of returning null
+        Assert.assertEquals(null, o2);
+    }
+    
+    @Test
+    public void test324() throws Exception {
+        JexlEngine jexl = new JexlBuilder().create();
+        String src42 = "new('java.lang.Integer', 42)";
+        JexlExpression expr0 = jexl.createExpression(src42);
+        Assert.assertEquals(42, expr0.evaluate(null));
+        String parsed = expr0.getParsedText();
+        Assert.assertEquals(src42, parsed);
+        try {
+            JexlExpression expr = jexl.createExpression("new()");
+            Assert.fail("should not parse");
+        } catch (JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.toString().contains("parsing error"));
+        }
+    }
+    
 }

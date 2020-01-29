@@ -40,6 +40,7 @@ import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
 import org.apache.commons.jexl3.parser.ASTReference;
+import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
@@ -140,13 +141,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @param closeable the object we'd like to close
      */
     protected void closeIfSupported(Object closeable) {
-        if (closeable instanceof AutoCloseable) {
-            try {
-                ((AutoCloseable)closeable).close();
-            } catch (Exception xignore) {
-                logger.warn(xignore);
-            }
-        } else if (closeable != null) {
+        if (closeable != null) {
             JexlMethod mclose = uberspect.getMethod(closeable, "close", EMPTY_PARAMS);
             if (mclose != null) {
                 try {
@@ -266,24 +261,20 @@ public abstract class InterpreterBase extends ParserVisitor {
     }
 
     /**
-     * Checks whether a symbol is a shade or actually accessible.
-     * @param symbol the symbol
-     * @param block the block to check from (canoot be null)
-     * @return true is symbol is just a shade, false otherwise
+     * Defines a variable.
+     * @param var the variable to define
+     * @param frame the frame in which it will be defined
+     * @return true if definition succeeded, false otherwise
      */
-    protected boolean isSymbolShaded(int symbol, LexicalScope block) {
-        if (!options.isLexicalShade()) {
+    protected boolean defineVariable(ASTVar var, LexicalFrame frame) {
+        int symbol = var.getSymbol();
+        if (symbol < 0) {
             return false;
         }
-        // if not in lexical block, undefined if (in its symbol) shade
-        LexicalScope b = block;
-        while (b != null) {
-            if (b.hasSymbol(symbol)) {
-                return false;
-            }
-            b = b.previous;
+        if (var.isRedefined()) {
+            return false;
         }
-        return true;
+        return frame.defineSymbol(symbol, var.isCaptured());
     }
 
     /**
@@ -296,11 +287,11 @@ public abstract class InterpreterBase extends ParserVisitor {
     protected Object getVariable(Frame frame, LexicalScope block, ASTIdentifier identifier) {
         int symbol = identifier.getSymbol();
         // if we have a symbol, we have a scope thus a frame
+        if (options.isLexicalShade() && identifier.isShaded()) {
+            return undefinedVariable(identifier, identifier.getName());
+        }
         if (symbol >= 0) {
             if (frame.has(symbol)) {
-                if (options.isLexical() && isSymbolShaded(symbol, block)) {
-                    return undefinedVariable(identifier, identifier.getName());
-                }
                 Object value = frame.get(symbol);
                 if (value != Scope.UNDEFINED) {
                     return value;

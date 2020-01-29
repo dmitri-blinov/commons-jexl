@@ -20,7 +20,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
- * The set of valued symbols declared in a lexical scope.
+ * The set of valued symbols defined in a lexical frame.
  * <p>The symbol identifiers are determined by the functional scope.
  */
 public class LexicalFrame extends LexicalScope {
@@ -29,10 +29,10 @@ public class LexicalFrame extends LexicalScope {
     /**
      * Lexical frame ctor.
      * @param scriptf the script frame
-     * @param previous the previous lexical frame
+     * @param outerf the previous lexical frame
      */
-    public LexicalFrame(Frame frame, LexicalFrame previous) {
-        super(frame, previous);
+    public LexicalFrame(Frame scriptf, LexicalFrame outerf) {
+        super(scriptf, outerf);
     }
 
     /**
@@ -45,10 +45,10 @@ public class LexicalFrame extends LexicalScope {
     }
 
     /**
-     * Declare the arguments.
-     * @return the number of arguments
+     * Define the arguments.
+     * @return this frame
      */
-    public LexicalFrame declareArgs() {
+    public LexicalFrame defineArgs() {
         if (frame != null) {
             int argc = frame.getScope().getArgCount();
             for(int a  = 0; a < argc; ++a) {
@@ -58,10 +58,15 @@ public class LexicalFrame extends LexicalScope {
         return this;
     }
 
-    @Override
-    public boolean declareSymbol(int symbol) {
-        boolean declared = super.declareSymbol(symbol);
-        if (declared && frame.getScope().isCapturedSymbol(symbol)) {
+   /**
+    * Defines a symbol.
+    * @param symbol the symbol to define
+    * @param capture whether this redefines a captured symbol
+    * @return true if symbol is defined, false otherwise
+    */
+   public boolean defineSymbol(int symbol, boolean capture) {
+        boolean declared = addSymbol(symbol);
+        if (declared && capture) {
             if (stack == null) {
                 stack = new ArrayDeque<Object>() ;
             }

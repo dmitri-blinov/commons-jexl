@@ -16,13 +16,11 @@
  */
 package org.apache.commons.jexl3.parser;
 
-import org.apache.commons.jexl3.internal.LexicalScope;
-
 /**
  * Declares a block.
  */
 public class ASTBlock extends ASTLabelledStatement {
-    
+
     public ASTBlock(int id) {
         super(id);
     }

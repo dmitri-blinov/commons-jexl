@@ -287,13 +287,22 @@ public class LexicalTest {
         Assert.assertEquals(ctl, output);
     }
 
+    public static class DebugContext extends MapContext {
+        public DebugContext() {
+            super();
+        }
+        public Object debug(Object arg) {
+            return arg;
+        }
+    }
+
     @Test
     public void testLexical5() throws Exception {
         JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
-        JexlContext ctxt = new MapContext();
+        JexlContext ctxt = new DebugContext();
         JexlScript script;
         Object result;
-        script = jexl.createScript("var x = 42; var z = 169; var y = () -> { {var x = -42; }; return x; }; y()");
+            script = jexl.createScript("var x = 42; var y = () -> { {var x = debug(-42); }; return x; }; y()");
         try {
             result = script.execute(ctxt);
             Assert.assertEquals(42, result);
@@ -381,10 +390,10 @@ public class LexicalTest {
 
     @Test
     public void testScopeFrame() throws Exception {
-        LexicalScope scope = new LexicalScope(null);
+        LexicalScope scope = new LexicalScope();
         for(int i = 0; i < 128; i += 2) {
-            Assert.assertTrue(scope.declareSymbol(i));
-            Assert.assertFalse(scope.declareSymbol(i));
+            Assert.assertTrue(scope.addSymbol(i));
+            Assert.assertFalse(scope.addSymbol(i));
         }
         for(int i = 0; i < 128; i += 2) {
             Assert.assertTrue(scope.hasSymbol(i));
@@ -484,7 +493,7 @@ public class LexicalTest {
         Object result = s42.execute(jc);
         Assert.assertEquals(42, result);
     }
-        
+
     @Test
     public void testInnerAccess0() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -502,7 +511,7 @@ public class LexicalTest {
         JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
         JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { var c = 0; {return x; }} })();");
     }
-        
+
     @Test
     public void testForVariable0() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -516,7 +525,7 @@ public class LexicalTest {
            // OK
         }
     }
-           
+
     @Test
     public void testForVariable1() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -531,7 +540,7 @@ public class LexicalTest {
            Assert.assertTrue(ex instanceof JexlException);
         }
     }
-      
+
     @Test
     public void testUndeclaredVariable() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -546,7 +555,7 @@ public class LexicalTest {
            Assert.assertTrue(ex instanceof JexlException);
         }
     }
-    
+
     @Test
     public void testLexical6a1() throws Exception {
         String str = "i = 0; { var i = 32; }; i";
@@ -556,7 +565,7 @@ public class LexicalTest {
         JexlScript e = jexl.createScript(str);
         JexlContext ctxt = new MapContext();
         Object o = e.execute(ctxt);
-        Assert.assertEquals(0, o);    
+        Assert.assertEquals(0, o);
     }
 
     public static class VarContext extends MapContext implements JexlContext.PragmaProcessor, JexlContext.OptionsHandle {
@@ -582,8 +591,8 @@ public class LexicalTest {
         public JexlOptions getEngineOptions() {
             return options;
         }
-    } 
-       
+    }
+
     @Test
     public void testInternalLexicalFeatures() throws Exception {
         String str = "42";
@@ -605,7 +614,7 @@ public class LexicalTest {
         Assert.assertTrue(opts.isLexical());
         Assert.assertTrue(opts.isLexicalShade());
     }
-    
+
     @Test
     public void testOptionsPragma() throws Exception {
         try {
@@ -663,7 +672,7 @@ public class LexicalTest {
         JexlFeatures ft1= runVarLoop(true, src1);
         JexlFeatures ff2 = runVarLoop(false, src2);
         JexlFeatures ft2= runVarLoop(true, src2);
-        
+
         // and check some features features
         Assert.assertEquals(ff0, ff1);
         Assert.assertEquals(ft0, ft1);
@@ -698,7 +707,7 @@ public class LexicalTest {
             throw xany;
         }
     }
-    
+
     public static class OptAnnotationContext extends JexlEvalContext implements JexlContext.AnnotationProcessor {
         @Override
         public Object processAnnotation(String name, Object[] args, Callable<Object> statement) throws Exception {
@@ -717,7 +726,7 @@ public class LexicalTest {
             return statement.call();
         }
     }
-    
+
     @Test
     public void testAnnotation() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -728,7 +737,7 @@ public class LexicalTest {
         Object result = script.execute(jc);
         Assert.assertEquals(result, 42);
     }
-         
+
     @Test
     public void testNamed() throws Exception {
         JexlFeatures f = new JexlFeatures();
@@ -740,4 +749,14 @@ public class LexicalTest {
         Assert.assertEquals(result, 42);
     }
 
+    @Test
+    public void testCaptured() throws Exception {
+        JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        JexlScript script = jexl.createScript("var x = 10; var a = function(var b) {for (var q : 1 ..10) {return x + b}}; a(32)");
+        JexlContext jc = new MapContext();
+        Object result = script.execute(null);
+        Assert.assertEquals(result, 42);
+    }    
 }

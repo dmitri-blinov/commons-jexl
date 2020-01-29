@@ -16,8 +16,6 @@
  */
 package org.apache.commons.jexl3.parser;
 
-import org.apache.commons.jexl3.internal.LexicalScope;
-
 /**
  * Declares a for each loop.
  */

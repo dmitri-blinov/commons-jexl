@@ -283,8 +283,10 @@ public class Closure extends Script {
     }
 
     /**
-     * Sets the captured index of a given symbol, ie the target index of a parent captured symbol in this closure's frame.
-     * <p>This is meant to allow a locally defined function to "see" and call itself as a local (captured) variable;
+     * Sets the captured index of a given symbol, ie the target index of a parent
+     * captured symbol in this closure's frame.
+     * <p>This is meant to allow a locally defined function to "see" and call
+     * itself as a local (captured) variable;
      * in other words, this allows recursive call of a function.
      * @param symbol the symbol index (in the caller of this closure)
      * @param value the value to set in the local frame

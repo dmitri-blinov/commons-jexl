@@ -83,7 +83,7 @@ public class LexicalScope {
     protected final Frame frame;
 
     /**
-     * Default ctor.
+     * Create a scope.
      */
     public LexicalScope() {
         this(null);
@@ -115,7 +115,6 @@ public class LexicalScope {
      * Frame copy ctor base.
      * @param s the symbols mask
      * @param ms the more symbols bitset
-     * @param pscope the previous scope
      */
     protected LexicalScope(long s, BitSet ms, Frame frame, LexicalScope pscope) {
         this(frame, pscope);
@@ -189,7 +188,7 @@ public class LexicalScope {
         return previous != null ? previous.isVariableRequired(s) : frame.getScope().isVariableRequired(s);
     }
     /**
-     * Declares a local symbol.
+     * Adds a symbol in this scope.
      *
      * @param symbol the symbol index
      * @param c the variable type
@@ -197,8 +196,8 @@ public class LexicalScope {
      * @param req whether the variable is required
      * @return true if was not already declared, false if lexical clash (error)
      */
-    public boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
-        boolean result = declareSymbol(symbol);
+    public boolean addSymbol(int symbol, Class c, boolean fin, boolean req) {
+        boolean result = addSymbol(symbol);
         if (result) {
             setModifiers(symbol, c, fin, req);
         }
@@ -206,28 +205,11 @@ public class LexicalScope {
     }
 
     /**
-     * Declares a local symbol.
-     *
-     * @param symbol the symbol index
-     * @return true if was not already declared, false if lexical clash (error)
-     */
-    public boolean declareSymbol(int symbol) {
-        LexicalScope walk = previous;
-        while (walk != null) {
-            if (walk.hasSymbol(symbol)) {
-                return false;
-            }
-            walk = walk.previous;
-        }
-        return addSymbol(symbol);
-    }
-
-    /**
      * Adds a symbol in this scope.
      * @param symbol the symbol
      * @return true if registered, false if symbol was already registered
      */
-    protected final boolean addSymbol(int symbol) {
+    public final boolean addSymbol(int symbol) {
         if (symbol < LONGBITS) {
             if ((symbols & (1L << symbol)) != 0L) {
                 return false;

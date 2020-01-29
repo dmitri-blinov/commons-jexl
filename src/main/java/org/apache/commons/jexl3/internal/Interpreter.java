@@ -24,6 +24,7 @@ import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlScript;
@@ -1493,23 +1494,20 @@ public class Interpreter extends InterpreterBase {
         Object result = null;
         /* first objectNode is the loop variable */
         ASTForeachVar loopReference = (ASTForeachVar) node.jjtGetChild(0);
-
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
         ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? (ASTIdentifier) loopReference.jjtGetChild(1) : null;
-
-        final boolean lexical = options.isLexical();
-
+        final boolean lexical = options.isLexical();// && node.getSymbolCount() > 0;
         if (lexical) {
             // create lexical frame
-            LexicalFrame locals = new LexicalFrame(frame, block);
+            final LexicalFrame locals = new LexicalFrame(frame, block);
             final int symbol = loopVariable.getSymbol();
             final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-            if (loopSymbol && !locals.declareSymbol(symbol)) {
+            if (loopSymbol && !defineVariable((ASTVar) loopVariable, locals)) {
                 return redefinedVariable(node, loopVariable.getName());
             }
             if (loopValueVariable != null) {
                 final int valueSymbol = loopValueVariable.getSymbol();
-                if (loopSymbol && !locals.declareSymbol(valueSymbol)) {
+                if (loopSymbol && !defineVariable((ASTVar) loopValueVariable, locals)) {
                     return redefinedVariable(node, loopValueVariable.getName());
                 }
             }
@@ -1664,7 +1662,7 @@ public class Interpreter extends InterpreterBase {
             // execute finally block if any
             if (num > 1) {
                 JexlNode fb = node.jjtGetChild(num - 1);
-                if (!(fb instanceof ASTCatchBlock)) 
+                if (!(fb instanceof ASTCatchBlock))
                     fb.jjtAccept(this, data);
             }
         }
@@ -1692,7 +1690,7 @@ public class Interpreter extends InterpreterBase {
             if (lexical) {
                 // create lexical frame
                 LexicalFrame locals = new LexicalFrame(frame, block);
-                if (!locals.declareSymbol(symbol)) {
+                if (!defineVariable((ASTVar) resVariable, locals)) {
                     return redefinedVariable(node, resVariable.getName());
                 }
                 block = locals;
@@ -1790,7 +1788,7 @@ public class Interpreter extends InterpreterBase {
         if (lexical) {
             // create lexical frame
             LexicalFrame locals = new LexicalFrame(frame, block);
-            if (!locals.declareSymbol(symbol)) {
+            if (!defineVariable((ASTVar) catchVariable, locals)) {
                 return redefinedVariable(node, catchVariable.getName());
             }
             block = locals;
@@ -2606,7 +2604,7 @@ public class Interpreter extends InterpreterBase {
      */
     protected Object runClosure(Closure closure, Object data) {
         ASTJexlScript script = closure.getScript();
-        block = new LexicalFrame(frame, block).declareArgs();
+        block = new LexicalFrame(frame, block).defineArgs();
         try {
             JexlNode body = script.jjtGetChild(script.jjtGetNumChildren() - 1);
             return interpret(body);
@@ -2620,7 +2618,7 @@ public class Interpreter extends InterpreterBase {
         if (script instanceof ASTJexlLambda && !((ASTJexlLambda) script).isTopLevel()) {
             return Closure.create(this, (ASTJexlLambda) script);
         } else {
-            block = new LexicalFrame(frame, block).declareArgs();
+            block = new LexicalFrame(frame, block).defineArgs();
             try {
                 final int numChildren = script.jjtGetNumChildren();
                 Object result = null;
@@ -2648,7 +2646,7 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTVar node, Object data) {
         int symbol = node.getSymbol();
-        if (options.isLexical() && !block.declareSymbol(symbol)) {
+        if (options.isLexical() && !defineVariable(node, block)) {
             return redefinedVariable(node, node.getName());
         }
         // if we have a var, we have a scope thus a frame
@@ -2684,14 +2682,16 @@ public class Interpreter extends InterpreterBase {
         if (data == null) {
             int symbol = identifier.getSymbol();
             // if we have a symbol, we have a scope thus a frame
-            if (symbol >= 0 && frame.has(symbol)) {
-                 if (options.isLexical() && isSymbolShaded(symbol, block)) {
-                     return undefinedVariable(identifier, name);
-                 }
-                 Object value = frame.get(symbol);
-                 if (value != Scope.UNDEFINED) {
-                     return value;
-                 }
+            if (options.isLexicalShade() && identifier.isShaded()) {
+                return undefinedVariable(identifier, identifier.getName());
+            }
+            if (symbol >= 0) {
+                if (frame.has(symbol)) {
+                    Object value = frame.get(symbol);
+                    if (value != Scope.UNDEFINED) {
+                        return value;
+                    }
+                }
             }
             Object value = context.get(name);
             if (value == null && !context.has(name) && identifier.jjtGetParent() instanceof ASTExpressionStatement) {
@@ -3232,7 +3232,7 @@ public class Interpreter extends InterpreterBase {
             var = (ASTIdentifier) left;
             symbol = var.getSymbol();
             if (symbol >= 0 && options.isLexical()) {
-                if (isSymbolShaded(symbol, block)) {
+                if (options.isLexicalShade() && var.isShaded()) {
                     return undefinedVariable(var, var.getName());
                 }
             }
@@ -3275,7 +3275,7 @@ public class Interpreter extends InterpreterBase {
                     frame.set(symbol, right);
                     // make the closure accessible to itself, ie capture the currently set variable after frame creation
                     if (right instanceof Closure) {
-                         ((Closure) right).setCaptured(symbol, right);
+                          ((Closure) right).setCaptured(symbol, right);
                     }
                     return right; // 1
                 }
@@ -4123,7 +4123,11 @@ public class Interpreter extends InterpreterBase {
         TemplateEngine.TemplateExpression tp = (TemplateEngine.TemplateExpression) node.jjtGetValue();
         if (tp == null) {
             TemplateEngine jxlt = jexl.jxlt();
-            tp = jxlt.parseExpression(node.jexlInfo(), node.getLiteral(), frame != null ? frame.getScope() : null);
+            JexlInfo info = node.jexlInfo();
+            if (this.block != null) {
+                info = new JexlNode.Info(node, info);
+            }
+            tp = jxlt.parseExpression(info, node.getLiteral(), frame != null ? frame.getScope() : null);
             node.jjtSetValue(tp);
         }
         if (tp != null) {

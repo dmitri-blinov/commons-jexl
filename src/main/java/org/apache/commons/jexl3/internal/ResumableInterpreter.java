@@ -615,23 +615,21 @@ public class ResumableInterpreter extends Interpreter {
         Object result = null;
         /* first objectNode is the loop variable */
         ASTForeachVar loopReference = (ASTForeachVar) node.jjtGetChild(0);
-
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
         ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? (ASTIdentifier) loopReference.jjtGetChild(1) : null;
-
         final boolean lexical = options.isLexical();
 
         if (lexical && !suspended) {
             // create lexical frame
-            LexicalFrame locals = new LexicalFrame(frame, block);
+            final LexicalFrame locals = new LexicalFrame(frame, block);
             final int symbol = loopVariable.getSymbol();
             final boolean loopSymbol = symbol >= 0 && loopVariable instanceof ASTVar;
-            if (loopSymbol && !locals.declareSymbol(symbol)) {
+            if (loopSymbol && !defineVariable((ASTVar) loopVariable, locals)) {
                 return redefinedVariable(node, loopVariable.getName());
             }
             if (loopValueVariable != null) {
                 final int valueSymbol = loopValueVariable.getSymbol();
-                if (loopSymbol && !locals.declareSymbol(valueSymbol)) {
+                if (loopSymbol && !defineVariable((ASTVar) loopValueVariable, locals)) {
                     return redefinedVariable(node, loopValueVariable.getName());
                 }
             }

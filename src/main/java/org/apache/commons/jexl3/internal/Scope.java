@@ -188,7 +188,7 @@ public final class Scope {
 
     /**
      * Checks whether an identifier is a local variable or argument, ie a symbol.
-     * If this fails, attempt to solve by capturing parent stacked.
+     * If this fails, look in parents for symbol that can be captured.
      * @param name the symbol name
      * @return the symbol index
      */
@@ -199,7 +199,7 @@ public final class Scope {
     /**
      * Checks whether an identifier is a local variable or argument, ie a symbol.
      * @param name the symbol name
-     * @param capture whether solving by capturing parent stacked is allowed
+     * @param capture whether solving by capturing a parent symbol is allowed
      * @return the symbol index
      */
     public Integer getSymbol(String name, boolean capture) {
@@ -454,9 +454,9 @@ public final class Scope {
             Object[] arguments = new Object[namedVariables.size()];
             Arrays.fill(arguments, UNDECLARED);
             if (frame != null && capturedVariables != null && parent != null) {
-                for (Map.Entry<Integer, Integer> entry : capturedVariables.entrySet()) {
-                    Integer target = entry.getKey();
-                    Integer source = entry.getValue();
+                for (Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
+                    Integer target = capture.getKey();
+                    Integer source = capture.getValue();
                     Object arg = frame.get(source);
                     arguments[target] = arg;
                 }
@@ -474,10 +474,10 @@ public final class Scope {
      */
     public Integer getCaptured(int symbol) {
         if (capturedVariables != null) {
-            for (Map.Entry<Integer, Integer> entry : capturedVariables.entrySet()) {
-                Integer source = entry.getValue();
+            for (Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
+                Integer source = capture.getValue();
                 if (source == symbol) {
-                    return entry.getKey();
+                    return capture.getKey();
                 }
             }
         }

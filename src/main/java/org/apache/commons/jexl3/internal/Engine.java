@@ -271,11 +271,6 @@ public class Engine extends JexlEngine {
     }
 
     @Override
-    public boolean isSafe() {
-        return this.safe;
-    }
-
-    @Override
     public boolean isCancellable() {
         return this.cancellable;
     }

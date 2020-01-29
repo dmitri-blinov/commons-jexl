@@ -20,7 +20,6 @@ import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.internal.Scope;
 import java.util.Map;
 import org.apache.commons.jexl3.internal.Frame;
-import org.apache.commons.jexl3.internal.LexicalScope;
 
 /**
  * Enhanced script to allow parameters declaration.
@@ -40,7 +39,7 @@ public class ASTJexlScript extends JexlLexicalNode {
     public ASTJexlScript(Parser p, int id) {
         super(p, id);
     }
-        
+
     /**
      * Consider script with no parameters that return lambda as parametric-scripts.
      * @return the script
@@ -59,7 +58,8 @@ public class ASTJexlScript extends JexlLexicalNode {
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
     }
-      /**
+
+    /**
      * Sets this script pragmas.
      * @param thePragmas the pragmas
      */
@@ -118,7 +118,7 @@ public class ASTJexlScript extends JexlLexicalNode {
     public Frame createFrame(Frame caller, Object... values) {
         return scope != null? scope.createFrame(caller, values) : null;
     }
-    
+
     /**
      * Creates an array of arguments by copying values up to the number of parameters.
      * @param values the argument values

@@ -63,7 +63,7 @@ public final class Parser extends JexlParser
             branchScope = new BranchScope();
             ReInit(new java.io.StringReader(jexlSrc));
             ASTJexlScript script = jexlFeatures.supportsScript()? JexlScript(scope) : JexlExpression(scope);
-            script.jjtSetValue(info);
+            script.jjtSetValue(info.detach());
             script.setFeatures(jexlFeatures);
             script.setPragmas(pragmas != null
                              ? Collections.<String,Object>unmodifiableMap(pragmas)
@@ -72,8 +72,8 @@ public final class Parser extends JexlParser
         } catch (TokenMgrError xtme) {
             throw new JexlException.Tokenization(info, xtme).clean();
         } catch (ParseException xparse) {
-            Token errortok = token.next;
-            throw new JexlException.Parsing(info.at(errortok.beginLine, errortok.beginColumn), token.image).clean();
+            Token errortok = errorToken(jj_lastpos, jj_scanpos, token.next, token);
+            throw new JexlException.Parsing(info.at(errortok.beginLine, errortok.beginColumn), errortok.image).clean();
         } finally {
             token_source.defaultLexState = DEFAULT;
             cleanup(previous);
@@ -568,12 +568,12 @@ void FunctionStatement() :
     boolean isStatic = false;
 }
 {
-    [ <STATIC> { isStatic = true; } ] <FUNCTION> FunctionVar() Function(isStatic) 
+    [ <STATIC> { isStatic = true; } ] <FUNCTION> FunctionVar() Function(isStatic)
 }
 
 void FunctionVar() #Var :
 {
-    Token t;    
+    Token t;
 }
 {
     t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
@@ -619,7 +619,7 @@ ASTIfStatement IfStatement() : {}
 
 ASTWhileStatement WhileStatement() : {}
 {
-    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }   
+    <WHILE> <LPAREN> Expression() <RPAREN>  { branchScope.loopCount += 1; } StatementBranch() { branchScope.loopCount -= 1; }
 {
     return jjtThis;
 }
@@ -633,7 +633,7 @@ ASTDoWhileStatement DoWhileStatement() : {}
 }
 }
 
-ASTTryStatement TryStatement() : 
+ASTTryStatement TryStatement() :
 {
     branchScope.yieldReturnCount -= 1;
 }
@@ -644,9 +644,9 @@ ASTTryStatement TryStatement() :
         |
         <FINALLY> Block()
     )
-{ 
+{
     branchScope.yieldReturnCount += 1;
-    return jjtThis; 
+    return jjtThis;
 }
 }
 
@@ -667,14 +667,14 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
 }
 }
 
-void CatchBlock() : 
+void CatchBlock() :
 {
     pushUnit(jjtThis);
 }
 {
     <CATCH> <LPAREN> CatchVar() <RPAREN> Block()
 {
-    popUnit(jjtThis); 
+    popUnit(jjtThis);
 }
 }
 
@@ -956,10 +956,10 @@ void DeclareMultiCatchVar() #MultiVar :
     Token t;
 }
 {
-    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(1).image) != null && getToken(2).kind == or} ) 
+    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(1).image) != null && getToken(2).kind == or} )
     t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); }
-    ( LOOKAHEAD({ getToken(1).kind == or && getToken(2).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(2).image) != null}) 
-        <or> t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); } 
+    ( LOOKAHEAD({ getToken(1).kind == or && getToken(2).kind == IDENTIFIER && Parser.resolveThrowableType(getToken(2).image) != null})
+        <or> t=<IDENTIFIER> { jjtThis.addType(Parser.resolveThrowableType(t.image)); }
     )+
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
@@ -1295,7 +1295,7 @@ void ProjectionExpression() #void : {}
     ExpressionLambda()
 }
 
-void AttributeReference() : 
+void AttributeReference() :
 {
     Token t;
 }
@@ -1621,10 +1621,10 @@ void ArrayLiteral() : {}
 
 void ImmutableArrayLiteral() #ArrayLiteral() :
 {
-    jjtThis.setImmutable(); 
-} 
+    jjtThis.setImmutable();
+}
 {
-    <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET> 
+    <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET>
 }
 
 void EmptyMapLiteral() #MapLiteral() : {}
@@ -1749,7 +1749,7 @@ void Constructor() #void : {}
 
 void ForNameConstructor() #ConstructorNode() : {}
 {
-    <LPAREN> [ Expression() ( <COMMA> Expression() )* ] <RPAREN>
+    <LPAREN> Expression() ( <COMMA> Expression() )* <RPAREN>
 }
 
 void QualifiedConstructor() #QualifiedConstructorNode() : {}
@@ -1805,7 +1805,7 @@ void Parameter() #void :
     t=<IDENTIFIER> { declareParameter(t); }
 }
 
-Object ConstantLiteral() #void : 
+Object ConstantLiteral() #void :
 {
     Token t;
 }
@@ -1860,7 +1860,7 @@ void VarParameter() #void :
 
       ) (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
-    [ <and> { isRequired = true; } ] 
+    [ <and> { isRequired = true; } ]
     t = <IDENTIFIER> [ <assign> value = ConstantLiteral() | <ELLIPSIS> { declareVarArgSupport(); } ]
     { declareParameter(t, type, isFinal, isRequired, value); }
 }
@@ -1872,7 +1872,7 @@ void Parameters() #void : {}
         LOOKAHEAD(VarParameter()) VarParameter() (LOOKAHEAD( {getToken(1).kind == COMMA && !isVarArgs()} ) <COMMA> VarParameter())*
         |
         Parameter() (<COMMA> Parameter())* [ <ELLIPSIS> { declareVarArgSupport(); } ]
-      ]      
+      ]
     <RPAREN>
 }
 
@@ -1924,7 +1924,7 @@ Token dotName() #void :
     | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
     | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
     | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
-    | t=<VAR> | t=<FUNCTION> | t=<STATIC> ) 
+    | t=<VAR> | t=<FUNCTION> | t=<STATIC> )
 {
     return t;
 }
