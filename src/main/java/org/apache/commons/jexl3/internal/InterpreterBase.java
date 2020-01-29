@@ -142,13 +142,17 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected void closeIfSupported(Object closeable) {
         if (closeable != null) {
-            JexlMethod mclose = uberspect.getMethod(closeable, "close", EMPTY_PARAMS);
-            if (mclose != null) {
-                try {
-                    mclose.invoke(closeable, EMPTY_PARAMS);
-                } catch (Exception xignore) {
-                    logger.warn(xignore);
+            try {
+                if (closeable instanceof AutoCloseable) {
+                    ((AutoCloseable)closeable).close();
+                } else {
+                    JexlMethod mclose = uberspect.getMethod(closeable, "close", EMPTY_PARAMS);
+                    if (mclose != null) {
+                       mclose.invoke(closeable, EMPTY_PARAMS);
+                    }
                 }
+            } catch (Exception xignore) {
+                logger.warn(xignore);
             }
         }
     }
