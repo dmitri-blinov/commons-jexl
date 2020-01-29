@@ -1295,8 +1295,31 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTExpressionStatement node, Object data) {
         cancelCheck(node);
-        Object result = node.jjtGetChild(0).jjtAccept(this, data);
-        return result;
+        // Try unknown identifier as a method
+        JexlNode child = node.jjtGetChild(0);
+        if (child instanceof ASTIdentifier) {
+            ASTIdentifier identifier = (ASTIdentifier) child;
+            String name = identifier.getName();
+            int symbol = identifier.getSymbol();
+            if (symbol < 0 && !context.has(name)) {
+               JexlMethod vm = uberspect.getMethod(arithmetic, name, EMPTY_PARAMS);
+               if (vm != null) {
+                   try {
+                      Object eval = vm.invoke(arithmetic, EMPTY_PARAMS);
+                      if (cache && vm.isCacheable()) {
+                          Funcall funcall = new ArithmeticFuncall(vm, false);
+                          identifier.jjtSetValue(funcall);
+                      }
+                      return eval;
+                   } catch (JexlException xthru) {
+                       throw xthru;
+                   } catch (Exception xany) {
+                       throw invocationException(identifier, name, xany);
+                   }
+               }
+            }
+        }
+        return child.jjtAccept(this, data);
     }
 
     @Override
@@ -2678,50 +2701,9 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTIdentifier identifier, Object data) {
         cancelCheck(identifier);
-        String name = identifier.getName();
-        if (data == null) {
-            int symbol = identifier.getSymbol();
-            // if we have a symbol, we have a scope thus a frame
-            if (options.isLexicalShade() && identifier.isShaded()) {
-                return undefinedVariable(identifier, identifier.getName());
-            }
-            if (symbol >= 0) {
-                if (frame.has(symbol)) {
-                    Object value = frame.get(symbol);
-                    if (value != Scope.UNDEFINED) {
-                        return value;
-                    }
-                }
-            }
-            Object value = context.get(name);
-            if (value == null && !context.has(name) && identifier.jjtGetParent() instanceof ASTExpressionStatement) {
-               JexlMethod vm = uberspect.getMethod(arithmetic, name, EMPTY_PARAMS);
-               if (vm != null) {
-                   try {
-                      Object eval = vm.invoke(arithmetic, EMPTY_PARAMS);
-                      if (cache && vm.isCacheable()) {
-                          Funcall funcall = new ArithmeticFuncall(vm, false);
-                          identifier.jjtSetValue(funcall);
-                      }
-                      return eval;
-                   } catch (JexlException xthru) {
-                       throw xthru;
-                   } catch (Exception xany) {
-                       throw invocationException(identifier, name, xany);
-                   }
-               }
-            }
-            if (value == null
-                && !(identifier.jjtGetParent() instanceof ASTReference)
-                && !(context.has(name))) {
-                return isSafe()
-                        ? null
-                        : unsolvableVariable(identifier, name, true);
-            }
-            return value;
-        } else {
-            return getAttribute(data, name, identifier);
-        }
+        return data != null
+                ? getAttribute(data, identifier.getName(), identifier)
+                : getVariable(frame, block, identifier);
     }
 
     @Override
