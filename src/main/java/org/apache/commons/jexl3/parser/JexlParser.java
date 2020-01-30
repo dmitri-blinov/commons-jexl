@@ -20,10 +20,13 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlInfo;
+import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.internal.Scope;
 import org.apache.commons.jexl3.internal.LexicalScope;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -793,6 +796,32 @@ public abstract class JexlParser extends StringParser {
     protected static Class resolveCloseableType(String name) {
         Class result = resolveType(name);
         return result != null && AutoCloseable.class.isAssignableFrom(result) ? result : null;
+    }
+
+    /**
+     * Resolves a static field of the type by its name.
+     * @param c the the type
+     * @param name the name of the field
+     * @return the value or null if not resolved
+     */
+    protected Object resolveStaticField(Token t, Class<?> c, String name) {
+        if (name == null)
+            return null;
+        if (c == null) {
+            c = Object.class;
+        } else {
+            c = JexlArithmetic.getWrapperClass(c);
+        }
+        try {
+            Field field = c.getDeclaredField(name);
+            if (Modifier.isStatic(field.getModifiers())) {
+                return field.get(null);
+            }
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            //
+        }
+        throwParsingException(null, t);
+        return null;
     }
 
     /**

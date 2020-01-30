@@ -1805,34 +1805,13 @@ void Parameter() #void :
     t=<IDENTIFIER> { declareParameter(t); }
 }
 
-Object ConstantLiteral() #void :
-{
-    Token t;
-}
-{
-    t = <INTEGER_LITERAL> { return NumberParser.parseInteger(t.image); }
-    |
-    t = <FLOAT_LITERAL> { return NumberParser.parseDouble(t.image); }
-    |
-    t = <TRUE> { return Boolean.TRUE; }
-    |
-    t = <FALSE> { return Boolean.FALSE; }
-    |
-    t = <NULL> { return null; }
-    |
-    t = <STRING_LITERAL> { return Parser.buildString(t.image, true); }
-    |
-    t = <REGEX_LITERAL> { return Pattern.compile(Parser.buildRegex(t.image)); }
-    |
-    t = <NAN_LITERAL> { return Double.NaN; }
-}
-
 void VarParameter() #void :
 {
     Token t;
     Class type = null;
     boolean isFinal = false;
     boolean isRequired = false;
+    Token v;
     Object value = null;
 }
 {
@@ -1861,7 +1840,31 @@ void VarParameter() #void :
       ) (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
     [ <and> { isRequired = true; } ]
-    t = <IDENTIFIER> [ <assign> value = ConstantLiteral() | <ELLIPSIS> { declareVarArgSupport(); } ]
+    t = <IDENTIFIER> 
+    [ 
+       <assign> 
+       (
+           v = <INTEGER_LITERAL> { value = NumberParser.parseInteger(v.image); }
+           |
+           v = <FLOAT_LITERAL> { value = NumberParser.parseDouble(v.image); }
+           |
+           v = <TRUE> { value = Boolean.TRUE; }
+           |
+           v = <FALSE> { value = Boolean.FALSE; }
+           |
+           v = <NULL> { value = null; }
+           |
+           v = <STRING_LITERAL> { value = Parser.buildString(v.image, true); }
+           |
+           v = <REGEX_LITERAL> { value = Pattern.compile(Parser.buildRegex(v.image)); }
+           |
+           v = <NAN_LITERAL> { value = Double.NaN; }
+           |
+           v = <IDENTIFIER> { value = resolveStaticField(v, type, v.image); }
+       )
+       |
+       <ELLIPSIS> { declareVarArgSupport(); } 
+    ]
     { declareParameter(t, type, isFinal, isRequired, value); }
 }
 

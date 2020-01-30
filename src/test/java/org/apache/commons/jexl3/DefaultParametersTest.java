@@ -132,4 +132,21 @@ public class DefaultParametersTest extends JexlTestCase {
         Assert.assertNull("Result is not as expected", o);
     }
 
+    @Test
+    public void testConstant() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(int a = MAX_VALUE) {a}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", Integer.MAX_VALUE, o);
+    }
+
+    @Test
+    public void testUndefinedConstant() throws Exception {
+        try {
+            JexlScript e = JEXL.createScript("var x = function(int a = MAX_VALUE1) {a}; x()");
+            Assert.fail("Should have failed");
+        } catch (Exception ex) {
+            // OK
+        }
+    }
+
 }
