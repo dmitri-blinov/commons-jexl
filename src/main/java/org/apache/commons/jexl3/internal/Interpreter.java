@@ -2839,16 +2839,14 @@ public class Interpreter extends InterpreterBase {
                     break;
                 }
             } else if (objectNode instanceof ASTArrayAccessSafe) {
+                antish = false;
                 if (object == null) {
                     break;
-                } else {
-                    antish = false;
                 }
             } else if (objectNode instanceof ASTPipeNode) {
+                antish = false;
                 if (object == null) {
                     break;
-                } else {
-                    antish = false;
                 }
             }
             // attempt to evaluate the property within the object (visit(ASTIdentifierAccess node))
@@ -2928,7 +2926,7 @@ public class Interpreter extends InterpreterBase {
                 if (defined && !arithmetic.isStrict()) {
                     return null;
                 }
-                if (!defined || !(node.jjtGetParent() instanceof ASTJexlScript)) {
+                if (!defined || !(node.jjtGetParent() instanceof ASTExpressionStatement)) {
                     return unsolvableVariable(node, aname, !defined);
                 }
             }
