@@ -279,7 +279,13 @@ public abstract class JexlNode extends SimpleNode {
         JexlNode node = this;
         for (JexlNode walk = node.jjtGetParent(); walk != null; walk = walk.jjtGetParent()) {
             // protect only the condition part of the ternary
-            if (walk instanceof ASTTernaryNode || walk instanceof ASTNullpNode || walk instanceof ASTElvisNode || walk instanceof ASTNullAssignment || walk instanceof ASTNEAssignment || walk instanceof ASTEQNode || walk instanceof ASTNENode) {
+            if (walk instanceof ASTTernaryNode
+                || walk instanceof ASTNullpNode
+                || walk instanceof ASTElvisNode
+                || walk instanceof ASTNullAssignment
+                || walk instanceof ASTNEAssignment
+                || walk instanceof ASTEQNode
+                || walk instanceof ASTNENode) {
                 return node == walk.jjtGetChild(0);
             }
             if (!(walk instanceof ASTReference || walk instanceof ASTArrayAccess)) {
