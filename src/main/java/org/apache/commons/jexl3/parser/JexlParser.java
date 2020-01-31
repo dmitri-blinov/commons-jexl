@@ -695,7 +695,7 @@ public abstract class JexlParser extends StringParser {
         throw xparse != null ? xparse : new JexlException.Parsing(xinfo, msg);
     }
 
-    protected static String[] implicitPackages = {"java.lang.","java.util.","java.io.","java.net."};
+    protected static String[] implicitPackages = {"java.lang.","java.util.stream.","java.util.","java.io.","java.net."};
 
     /**
      * Constructs an array type
