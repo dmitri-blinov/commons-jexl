@@ -110,6 +110,15 @@ public class MethodReferenceTest extends JexlTestCase {
     }
 
     @Test
+    public void testIntStatic() throws Exception {
+        JexlContext context = new MapContext();
+        context.set("Integer", Integer.class);
+        JexlScript rm = JEXL.createScript("{'3', '-6', '8'}.stream().mapToInt(Integer::decode).map(Integer::signum).sum()");
+        Object o = rm.execute(context);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
+    @Test
     public void testConstructor() throws Exception {
         JexlContext context = new MapContext();
         context.set("Character", Character.class);

@@ -68,15 +68,30 @@ public class MethodReference {
                 argCount++;
             if (Void.TYPE == type) {
                 switch (argCount) {
-                    case 0 : return new MethodReferenceRunnable(theCaller, target, method);
-                    case 1 : return new MethodReferenceConsumer(theCaller, target, method);
-                    case 2 : return new MethodReferenceBiConsumer(theCaller, target, method);
+                    case 0: 
+                        return new MethodReferenceRunnable(theCaller, target, method);
+                    case 1:
+                        return new MethodReferenceConsumer(theCaller, target, method);
+                    case 2:
+                        return new MethodReferenceBiConsumer(theCaller, target, method);
                 }
             } else {
                 switch (argCount) {
-                    case 0 : return new MethodReferenceSupplier(theCaller, target, method);
-                    case 1 : return new MethodReferenceFunction(theCaller, target, method);
-                    case 2 : return new MethodReferenceBiFunction(theCaller, target, method);
+                    case 0:
+                        return new MethodReferenceSupplier(theCaller, target, method);
+                    case 1:
+                        Class pc = parms.length == 1 ? parms[0] : null;
+                        if (pc == Integer.class || pc == Integer.TYPE) {
+                            return new MethodReferenceIntFunction(theCaller, target, method);
+                        } else if (pc == Long.class || pc == Long.TYPE) {
+                            return new MethodReferenceLongFunction(theCaller, target, method);
+                        } else if (pc == Double.class || pc == Double.TYPE) {
+                            return new MethodReferenceDoubleFunction(theCaller, target, method);
+                        } else {
+                            return new MethodReferenceFunction(theCaller, target, method);
+                        }
+                    case 2:
+                        return new MethodReferenceBiFunction(theCaller, target, method);
                 }
             }
             return new MethodReference(theCaller, target, method);
@@ -260,6 +275,204 @@ public class MethodReference {
 
         @Override
         public long applyAsLong(int arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+    }
+
+    /**
+     * Implements the @FunctionalInterface interfaces with one integer-compatible argument to help delegation.
+     */
+    public static class MethodReferenceIntFunction extends MethodReference implements 
+          Function<Integer, Object>, IntFunction<Object>,
+          IntPredicate, IntToDoubleFunction, IntToLongFunction,
+          ToDoubleFunction<Integer>, ToIntFunction<Integer>, ToLongFunction<Integer>,
+          IntUnaryOperator {
+        /**
+         * The base constructor.
+         * @param intrprtr the interpreter to use
+         */
+        protected MethodReferenceIntFunction(Interpreter theCaller, Object target, JexlMethod method) {
+            super(theCaller, target, method);
+        }
+
+        protected Object eval(Object arg) {
+            return invoke(arg);
+        }
+
+        @Override
+        public Object apply(Integer arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public Object apply(int arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public boolean test(int arg) {
+            return jexl.getArithmetic().toBoolean(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(int arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(Integer arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(int arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(Integer arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(int arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(Integer arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+    }
+
+    /**
+     * Implements the @FunctionalInterface interfaces with one long-compatible argument to help delegation.
+     */
+    public static class MethodReferenceLongFunction extends MethodReference implements 
+          Function<Long, Object>, LongFunction<Object>,
+          LongPredicate, LongToDoubleFunction, LongToIntFunction,
+          ToDoubleFunction<Long>, ToIntFunction<Long>, ToLongFunction<Long>,
+          LongUnaryOperator {
+        /**
+         * The base constructor.
+         * @param intrprtr the interpreter to use
+         */
+        protected MethodReferenceLongFunction(Interpreter theCaller, Object target, JexlMethod method) {
+            super(theCaller, target, method);
+        }
+
+        protected Object eval(Object arg) {
+            return invoke(arg);
+        }
+
+        @Override
+        public Object apply(Long arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public Object apply(long arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public boolean test(long arg) {
+            return jexl.getArithmetic().toBoolean(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(long arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(Long arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(long arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(Long arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(long arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(Long arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+    }
+
+    /**
+     * Implements the @FunctionalInterface interfaces with one double-compatible argument to help delegation.
+     */
+    public static class MethodReferenceDoubleFunction extends MethodReference implements 
+          Function<Double, Object>, DoubleFunction<Object>,
+          DoublePredicate, DoubleToLongFunction, DoubleToIntFunction,
+          ToDoubleFunction<Double>, ToIntFunction<Double>, ToLongFunction<Double>,
+          DoubleUnaryOperator {
+        /**
+         * The base constructor.
+         * @param intrprtr the interpreter to use
+         */
+        protected MethodReferenceDoubleFunction(Interpreter theCaller, Object target, JexlMethod method) {
+            super(theCaller, target, method);
+        }
+
+        protected Object eval(Object arg) {
+            return invoke(arg);
+        }
+
+        @Override
+        public Object apply(Double arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public Object apply(double arg) {
+            return eval(arg);
+        }
+
+        @Override
+        public boolean test(double arg) {
+            return jexl.getArithmetic().toBoolean(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(double arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public int applyAsInt(Double arg) {
+            return jexl.getArithmetic().toInteger(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(double arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public double applyAsDouble(Double arg) {
+            return jexl.getArithmetic().toDouble(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(double arg) {
+            return jexl.getArithmetic().toLong(eval(arg));
+        }
+
+        @Override
+        public long applyAsLong(Double arg) {
             return jexl.getArithmetic().toLong(eval(arg));
         }
     }
