@@ -183,6 +183,7 @@ import org.apache.commons.jexl3.parser.ASTTryStatement;
 import org.apache.commons.jexl3.parser.ASTTryVar;
 import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTTryResource;
+import org.apache.commons.jexl3.parser.ASTTypeLiteral;
 import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
 import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;

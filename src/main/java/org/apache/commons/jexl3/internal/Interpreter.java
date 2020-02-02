@@ -184,6 +184,7 @@ import org.apache.commons.jexl3.parser.ASTTryStatement;
 import org.apache.commons.jexl3.parser.ASTTryVar;
 import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTTryResource;
+import org.apache.commons.jexl3.parser.ASTTypeLiteral;
 import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
 import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
@@ -826,7 +827,7 @@ public class Interpreter extends InterpreterBase {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         if (left != null) {
             Class k = left.getClass();
-            ASTClassLiteral right = (ASTClassLiteral) node.jjtGetChild(1);
+            ASTTypeLiteral right = (ASTTypeLiteral) node.jjtGetChild(1);
             Class type = right.getLiteral();
             int i = right.getArray();
             while (i-- > 0) {
@@ -846,7 +847,7 @@ public class Interpreter extends InterpreterBase {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         if (left != null) {
             Class k = left.getClass();
-            ASTClassLiteral right = (ASTClassLiteral) node.jjtGetChild(1);
+            ASTTypeLiteral right = (ASTTypeLiteral) node.jjtGetChild(1);
             Class type = right.getLiteral();
             int i = right.getArray();
             while (i-- > 0) {
@@ -1184,7 +1185,7 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTCastNode node, Object data) {
         // Type
-        ASTClassLiteral type = (ASTClassLiteral) node.jjtGetChild(0);
+        ASTTypeLiteral type = (ASTTypeLiteral) node.jjtGetChild(0);
         Class c = type.getType();
         // Value
         Object val = node.jjtGetChild(1).jjtAccept(this, data);
@@ -2219,6 +2220,11 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTClassLiteral node, Object data) {
         return node.getLiteral();
+    }
+
+    @Override
+    protected Object visit(ASTTypeLiteral node, Object data) {
+        return node.getType();
     }
 
     @Override

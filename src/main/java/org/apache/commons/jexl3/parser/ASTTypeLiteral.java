@@ -16,53 +16,49 @@
  */
 package org.apache.commons.jexl3.parser;
 
-public class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class> {
+public final class ASTTypeLiteral extends ASTClassLiteral {
 
     /** The actual literal value; the inherited 'value' member may host a cached getter. */
 
-    private Class literal;
+    private Class type;
+    private int array;
 
-    ASTClassLiteral(int id) {
+    ASTTypeLiteral(int id) {
         super(id);
     }
 
-    ASTClassLiteral(Parser p, int id) {
+    ASTTypeLiteral(Parser p, int id) {
         super(p, id);
     }
 
     @Override
     public String toString() {
+        if (array == 0)
+            return super.toString();
         StringBuilder result = new StringBuilder();
-        if (literal != null) {
-            String qn = literal.getName();
-            Package pack = literal.getPackage();
-            String p = pack != null ? pack.getName() : null;
-            if (p == null || p.equals("java.lang") || p.equals("java.util") || p.equals("java.io") || p.equals("java.net")
-                || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger")) {
-                result.append(literal.getSimpleName());
-            } else {
-                result.append(literal.getName());
-            }
-        }
+        result.append(super.toString());
+        for (int i = 0; i < array; i++)
+            result.append("[]");
         return result.toString();
     }
 
-    /**
-     * Gets the literal value.
-     * @return the Pattern literal
-     */
-    @Override
-    public Class getLiteral() {
-        return literal;
-    }
-
-    @Override
-    protected boolean isConstant(boolean literal) {
-        return true;
+    public Class getType() {
+        return type;
     }
 
     void setLiteral(Class literal) {
-        this.literal = literal;
+        super.setLiteral(literal);
+        type = literal;
+        array = 0;
+    }
+
+    void setArray() {
+        array++;
+        type = JexlParser.arrayType(type);
+    }
+
+    public int getArray() {
+        return array;
     }
 
     @Override

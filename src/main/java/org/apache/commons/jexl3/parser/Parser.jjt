@@ -159,6 +159,7 @@ TOKEN_MGR_DECLS : {
     | < RETURN : "return" > { popDot(); }
     | < YIELD : "yield" > { popDot(); }
     | < STATIC : "static" > { popDot(); }
+    | < CLASS : "class" > { popDot(); }
     | < FUNCTION : "function" > { popDot(); } /* Revert state to default if was DOT_ID. */
     | < LAMBDA : "->" | "\u2192" >
     | < LAMBDAE : "=>" | "\u21D2" >
@@ -1503,7 +1504,34 @@ void RegexLiteral() :
     t=<REGEX_LITERAL> { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
-void TypeCastReference() #ClassLiteral() :
+void ClassLiteral() :
+{
+    Token t;
+}
+{
+    (
+      t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+      |
+      t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+      |
+      t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+      |
+      t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+      |
+      t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+      |
+      t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+      |
+      t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+      |
+      t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+      |
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+    )
+    <DOT> <CLASS>
+}
+
+void TypeCastReference() #TypeLiteral() :
 {
     Token t;
 }
@@ -1530,7 +1558,7 @@ void TypeCastReference() #ClassLiteral() :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
-void TypeReference() #ClassLiteral() :
+void TypeReference() #TypeLiteral() :
 {
     Token t;
     Class value;
@@ -1552,7 +1580,7 @@ void TypeReference() #ClassLiteral() :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
-void NewTypeReference() #ClassLiteral() :
+void NewTypeReference() #TypeLiteral() :
 {
     Token t;
     Class value;
@@ -1568,7 +1596,7 @@ void ArrayTypeReference() #void : {}
     ObjectType()
 }
 
-void ObjectType() #ClassLiteral() :
+void ObjectType() #TypeLiteral() :
 {
     Token t;
     Class value;
@@ -1585,7 +1613,7 @@ void InnerType() #Identifier() :
     t=<QUALIFIED_IDENTIFIER> { jjtThis.setSymbol(t.image); }
 }
 
-void PrimitiveType() #ClassLiteral() :
+void PrimitiveType() #TypeLiteral() :
 {
     Token t;
 }
@@ -1923,7 +1951,7 @@ Token dotName() #void :
 }
 {
     ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
-    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD>
+    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD> | t=<CLASS>
     | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
     | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
     | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
@@ -2008,13 +2036,15 @@ void PrimaryExpression() #void : {}
     |
     LOOKAHEAD( FunctionCallLookahead() ) FunctionCall()
     |
-    Identifier(true)
-    |
     This()
     |
     Current()
     |
     Literal()
+    |
+    LOOKAHEAD( ClassLiteral() ) ClassLiteral()
+    |
+    Identifier(true)
 }
 
 void NullableExpression() #void : {}

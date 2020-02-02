@@ -541,6 +541,21 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Null literal</td>
+                    <td>
+                        The null value is represented as in java using the literal <code>null</code>, e.g.
+                        <code>val1 == null</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Class literals</td>
+                    <td>
+                        Starts with type name and ends with <code>.class</code> suffix, e.g.
+                        <code>byte.class</code> returns <code>Byte.TYPE</code> constant.
+                        The type name can be either a java primitive type name or a simple class name, as defined for <code>instanceof</code> operator.
+                    </td>
+                </tr>
+                <tr>
                     <td>This literal</td>
                     <td>
                         The literal <code>this</code> allows to explicitly access contextual variables in situations when they are covered by local variables
@@ -555,13 +570,6 @@
                         The literal <code>@</code> allows to explicitly access object that is currently being evaluated in selection operator
                         or inline assignment operator, e.g.
                         <code>foo{bar : @.bar + 1}</code> is equivalent to <code>foo{bar : foo.bar + 1}</code>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Null literal</td>
-                    <td>
-                        The null value is represented as in java using the literal <code>null</code>, e.g.
-                        <code>val1 == null</code>
                     </td>
                 </tr>
                 <tr>
