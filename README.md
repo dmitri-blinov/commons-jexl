@@ -93,6 +93,8 @@ Incompatible changes
 
 + Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
 
++ Class literals `Integer.class` cover variable access if variable name can be resolved as a class name 
+
 New features
 ------------
 + Java-like `switch` statement is introduced
@@ -135,7 +137,9 @@ New features
 
 + Java-like `yield` statement is introduced
 
-+ Java-like `()` type-cast operator is introduced
++ Java-like type-cast `()` operator is introduced
+
++ Java-like class `Integer.class` literals are introduced
 
 + Javascript-like `===` and `!==` identity operators are introduced
 
