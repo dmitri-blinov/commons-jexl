@@ -111,29 +111,19 @@ New features
 
 + Java-like `assert` statement is introduced
 
-+ New `remove` flow-control statement is introduced
++ Java-like `this` literal is introduced to allow easier access to the current evaluation context
 
-+ Javascript-like function definition `function a() {}` statement is introduced
++ Java-like bitwise shift `<<`,`>>`,`>>>` operators are introduced 
 
-+ New `this` literal is introduced to allow easier access to the current evaluation context
++ Java-like shift self-assignment `<<=`,`>>=`,`>>>=` operators are introduced 
 
-+ Java-like `<<`,`>>`,`>>>` bitwise shift operators are introduced 
-
-+ Java-like `<<=`,`>>=`,`>>>=` self-assignment operators are introduced 
-
-+ Java-like `++` and `--` increment/decrement operators are introduced. Prefix and postfix forms are supported
++ Java-like increment/decrement `++` and `--`  operators are introduced. Prefix and postfix forms are supported
 
 + Java-like `instanceof` operator is introduced
 
-+ Groovy-like `!instanceof` operator is introduced
++ Java-like method reference `::` operator is introduced
 
-+ Groovy-like `?=` conditional assignment operator is introduced
-
-+ New `:=` equality conditional assignment operator is introduced
-
-+ Java-like `::` method reference operator is introduced
-
-+ Java-like `switch` expression operator is introduced
++ Java-like switch expression `switch` operator is introduced
 
 + Java-like `yield` statement is introduced
 
@@ -141,35 +131,45 @@ New features
 
 + Java-like class `Integer.class` literals are introduced
 
++ Groovy-like `!instanceof` operator is introduced
+
++ Groovy-like `?=` conditional assignment operator is introduced
+
++ Javascript-like function definition `function a() {}` statement is introduced
+
 + Javascript-like `===` and `!==` identity operators are introduced
 
-+ C-like `&` pointer and `*` pointer dereference operators are introduced
++ C-like pointer `&` and pointer dereference `*` operators are introduced
 
-+ C#-like `?[]` safe array access operator is introduced
++ C#-like safe array access `?[]` operator is introduced
 
-+ New Map.Entry literal `[a : b]` is introduced
++ New equality conditional assignment `:=` operator is introduced
+
++ New flow-control `remove` statement is introduced
+
++ New Map.Entry `[a : b]` literal is introduced
 
 + New block evaluation `({})` operator is introduced
 
-+ New iterator `...` operator is introduced
++ New iterator `...arr` operator is introduced
 
 + New iterator generator `...{for (var i : 1 .. 10) yield i;}` operator is introduced
 
-+ New iterator selection `a.[@color == 'red']` operator is introduced
++ New iterator selection `a.[@.color == 'red']` operator is introduced
 
 + New iterator projection `a.{@qty,@price}` operator is introduced
 
-+ New pipe operator `foo.(x -> {x + 1})` is introduced
++ New pipe `foo.(x -> {x + 1})` operator is introduced
 
 + New multiple assignment statement `(x,_,y) = [2,1,3]` is introduced
 
 + New inline property assignment `a{b:3,c:4}` construct is introduced
 
-+ New set operators *any* `?()` and *all* `??()` that can be used in relational operators are introduced
++ New set operators *any* `?()` and *all* `??()` that can be used in conjunction with relational operators are introduced
 
 Enhancements
 ------------
-+ Labeled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used. 
++ Java-like labelled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used. 
   The defined labels can be further specified for inner `break`, `continue` and `remove` flow-control statements
 
 + Multidimensional arrays can be accessed by using new syntax `arr[x,y]` as well as by using older syntax `arr[x][y]`
@@ -178,18 +178,18 @@ Enhancements
 
 + Single expression functions can be defined by using `=>` fat arrow operator without outer curly braces
 
-+ Variable argument functions can be defined by using `...` syntax after the last function argument
++ Variadic functions can be defined by using `...` syntax after the last function argument
 
-+ Functions now implement almost all basic java8 `@FunctionalInterface` interfaces, 
-  so it is possible to pass a function as an argument to java methods that accept such interfaces
++ Function closures implement all basic java-8 `@FunctionalInterface` interfaces, 
+  so that it is possible to pass a function closure as an argument to java method that accepts such interfaces
 
-+ Functions can be declared as `static` to prevent variable capturing
++ Function can be declared as `static` to prevent variable capturing
 
 + Function parameters can use `var` keyword for parameter definition
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
 
-+ Functions can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
++ Function can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
 
 + Function parameters can be declared as `final`
 
@@ -211,13 +211,13 @@ Enhancements
 
 + Operator `new` supports Java-like object creation syntax `new String()`
 
-+ Operator `new` supports initialized array creation syntax `new String[] {'abc','def'}`
++ Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
+
++ Operator `new` supports Java-like initialized array creation syntax `new String[] {'abc','def'}`
 
 + Operator `new` supports initialized collection creation syntax `new LinkedHashSet {'abc','def'}`
 
 + Operator `new` supports initialized map creation syntax `new LinkedHashMap {'abc' : 1, 'def' : 2}`
-
-+ Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
 
 + Foreach statement may also define additional `counter` variable `for (var i,x : list)` along with the current loop value variable
 
