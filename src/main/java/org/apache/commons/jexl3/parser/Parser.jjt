@@ -198,6 +198,7 @@ TOKEN_MGR_DECLS : {
     | < FLOAT :   "float" > { popDot(); }
     | < DOUBLE :  "double" > { popDot(); }
     | < BOOLEAN : "boolean" > { popDot(); }
+    | < VOID :    "void" > { popDot(); }
 }
 
 <*> TOKEN : { /* STREAMS */
@@ -438,7 +439,7 @@ void GenericStatement() #void : {}
 {
     <SEMICOL>
     | AnnotatedStatement()
-    | LOOKAHEAD([ <STATIC> ] <FUNCTION> <IDENTIFIER>) FunctionStatement()
+    | LOOKAHEAD(FunctionStatementLookahead()) FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) Var()
     | LOOKAHEAD(SwitchStatementLookahead()) SwitchStatement()
@@ -496,7 +497,7 @@ void StatementBranch() #void : {}
 
 void LabelledStatementLookahead() #void() : {}
 {
-  <IDENTIFIER> <COLON> ( <LCURLY> | <IF> | <FOR> | <WHILE> | <DO> | <SWITCH> | <SYNCHRONIZED> | <TRY>)
+    <IDENTIFIER> <COLON> ( <LCURLY> | <IF> | <FOR> | <WHILE> | <DO> | <SWITCH> | <SYNCHRONIZED> | <TRY>)
 }
 
 void LabelledStatement() #void :
@@ -564,12 +565,53 @@ void AssignmentIdentifier() #void : {}
     Identifier(true)
 }
 
+void FunctionStatementLookahead() #void() : {}
+{
+    [ <STATIC> ] FunctionType() FunctionVar() <LPAREN>
+}
+
 void FunctionStatement() :
 {
     boolean isStatic = false;
+    Class type = null;
 }
 {
-    [ <STATIC> { isStatic = true; } ] <FUNCTION> FunctionVar() Function(isStatic)
+    [ <STATIC> { isStatic = true; } ] type = FunctionType() FunctionVar() Function(isStatic, type)
+}
+
+Class FunctionType() #TypeLiteral() :
+{
+    Token t;
+}
+{
+    ( <FUNCTION>
+      |
+      (
+        t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+        |
+        t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+        |
+        t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+        |
+        t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+        |
+        t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+        |
+        t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+        |
+        t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+        |
+        t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+        |
+        t=<VOID> { jjtThis.setLiteral(Void.TYPE); }
+        |
+        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+      )
+      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    )
+{
+    return jjtThis.getType();
+}
 }
 
 void FunctionVar() #Var :
@@ -580,13 +622,14 @@ void FunctionVar() #Var :
     t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
 }
 
-void Function(boolean isStatic) #JexlLambda() :
+void Function(boolean isStatic, Class type) #JexlLambda() :
 {
     pushFrame();
     pushUnit(jjtThis);
+    if (isStatic) declareStaticSupport();
+    if (type != null) declareReturnType(type);
 }
 {
-    { if (isStatic) frame.declareStatic(); }
     Parameters() ( Block() | <LAMBDAE> Expression() )
 {
     popUnit(jjtThis);
@@ -760,7 +803,7 @@ void SwitchStatementDefault() : {}
 
 void ReturnStatement() : {}
 {
-    <RETURN> [ LOOKAHEAD(2) ExpressionStatement() ] { if (branchScope.yieldSupported()) { throwParsingException(jjtThis); } }
+    <RETURN> LOOKAHEAD( {!isDeclaredVoid()} ) ( [ LOOKAHEAD(2) ExpressionStatement() ] { if (branchScope.yieldSupported()) { throwParsingException(jjtThis); } } )
 }
 
 void YieldStatement() : {}
@@ -1925,11 +1968,11 @@ void Lambda() #JexlLambda() :
 }
 {
     (
-      LOOKAHEAD(3) [ <STATIC> { frame.declareStatic(); } ] <FUNCTION> Parameters() Block()
+      LOOKAHEAD(3) [ Static() ] <FUNCTION> Parameters() Block()
       |
-      LOOKAHEAD(3) [ <STATIC> { frame.declareStatic(); } ] <FUNCTION> Block()
+      LOOKAHEAD(3) [ Static() ] <FUNCTION> Block()
       |
-      [ <STATIC> { frame.declareStatic(); } ] Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+      [ Static() ] Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
       |
       Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
     )
@@ -1938,6 +1981,11 @@ void Lambda() #JexlLambda() :
     jjtThis.setScope(frame);
     popFrame();
 }
+}
+
+void Static() #void : {}
+{
+    <STATIC> { frame.declareStatic(); }
 }
 
 
@@ -1952,7 +2000,7 @@ Token dotName() #void :
 {
     ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
     | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD> | t=<CLASS>
-    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE>
+    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE> | t=<VOID>
     | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
     | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
     | t=<VAR> | t=<FUNCTION> | t=<STATIC> )

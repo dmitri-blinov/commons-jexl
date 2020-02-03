@@ -70,5 +70,33 @@ public class FunctionTest extends JexlTestCase {
         Assert.assertEquals(42, result);
     }
 
+    @Test
+    public void testPrimitiveTypedFunction() throws Exception {
+        JexlEngine jexl = createEngine();
+        JexlScript s = jexl.createScript("long x() {return 42}; x()");
+        JexlContext jc = new MapContext();
+        Object result = s.execute(jc);
+        Assert.assertEquals(42L, result);
+    }
+
+    @Test
+    public void testVoidTypedFunction() throws Exception {
+        JexlEngine jexl = createEngine();
+        JexlScript s = jexl.createScript("void x() {42; }; x()");
+        JexlContext jc = new MapContext();
+        Object result = s.execute(jc);
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void testVoidMustNotReturnValue() throws Exception {
+        JexlEngine jexl = createEngine();
+        try {
+            JexlScript s = jexl.createScript("void x() {return 42; }; x()");
+            Assert.fail("Should have failed");
+        } catch (JexlException ex) {
+
+        }
+    }
 
 }

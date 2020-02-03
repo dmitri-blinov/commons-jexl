@@ -64,6 +64,10 @@ public final class Scope {
      */
     private boolean isStatic;
     /**
+     * Return type
+     */
+    private Class returnType;
+    /**
      * The number of local variables.
      */
     private int vars;
@@ -386,6 +390,13 @@ public final class Scope {
     }
 
     /**
+     * Declares return type
+     */
+    public void declareReturnType(Class type) {
+        returnType = type;
+    }
+
+    /**
      * Declares a local variable.
      * <p>
      * This method creates an new entry in the symbol map.
@@ -506,6 +517,14 @@ public final class Scope {
      */
     public boolean isStatic() {
         return isStatic;
+    }
+
+    /**
+     * Return type of the script.
+     * @return class
+     */
+    public Class getReturnType() {
+        return returnType;
     }
 
     /**

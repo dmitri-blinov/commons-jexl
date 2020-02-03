@@ -34,11 +34,7 @@ public class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (literal != null) {
-            String qn = literal.getName();
-            Package pack = literal.getPackage();
-            String p = pack != null ? pack.getName() : null;
-            if (p == null || p.equals("java.lang") || p.equals("java.util") || p.equals("java.io") || p.equals("java.net")
-                || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger")) {
+            if (JexlParser.isSimpleName(literal)) {
                 result.append(literal.getSimpleName());
             } else {
                 result.append(literal.getName());

@@ -223,7 +223,7 @@ public abstract class JexlParser extends StringParser {
         if (frame != null) {
             frames.push(frame);
         }
-        frame = new Scope(frame, (String[]) null);
+        frame = new Scope(frame);
         if (branchScope != null) {
             branchScopes.push(branchScope);
         }
@@ -426,7 +426,7 @@ public abstract class JexlParser extends StringParser {
      * Declares a local variable.
      * <p> This method creates an new entry in the symbol map. </p>
      * @param var the identifier used to declare
-     * @param token      the variable name toekn
+     * @param token the variable name token
      */
     protected void declareVariable(ASTVar var, Token token) {
         String name = token.image;
@@ -434,7 +434,7 @@ public abstract class JexlParser extends StringParser {
             throwFeatureException(JexlFeatures.LOCAL_VAR, token);
         }
         if (frame == null) {
-            frame = new Scope(null, (String[]) null);
+            frame = new Scope();
         }
         Integer symbol = frame.getSymbol(name, false);
         if (symbol != null && frame.isVariableFinal(symbol) && !frame.isCapturedSymbol(symbol)) {
@@ -506,9 +506,17 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Declares a static scope.
+     */
+    protected void declareStaticSupport() {
+        if (frame == null) {
+            frame = new Scope();
+        }
+        frame.declareStatic();
+    }
+
+    /**
      * Declares a local vararg parameter.
-     * <p> This method creates an new entry in the symbol map. </p>
-     * @param token the parameter name toekn
      */
     protected void declareVarArgSupport() {
         if (frame == null) {
@@ -522,7 +530,28 @@ public abstract class JexlParser extends StringParser {
      * @return true or false
      */
     protected boolean isVarArgs() {
-        return frame != null ? frame.isVarArgs() : false;
+        return frame != null && frame.isVarArgs();
+    }
+
+    /**
+     * Declares a return type.
+     * @param type the return type
+     */
+    protected void declareReturnType(Class type) {
+        if (type == null)
+            return;
+        if (frame == null) {
+            frame = new Scope();
+        }
+        frame.declareReturnType(type);
+    }
+
+    /**
+     * If this script expects a variable number of arguments.
+     * @return true or false
+     */
+    protected boolean isDeclaredVoid() {
+        return frame != null && frame.getReturnType() == Void.TYPE;
     }
 
     /**
@@ -698,6 +727,25 @@ public abstract class JexlParser extends StringParser {
     protected static String[] implicitPackages = {"java.lang.","java.util.stream.","java.util.","java.io.","java.net."};
 
     /**
+     * Checks whether the class has simple name 
+     * @param c the type
+     * @return true if class has simple name
+     */
+    protected static boolean isSimpleName(Class c) {
+        String qn = c.getName();
+        Package pack = c.getPackage();
+        String p = pack != null ? pack.getName() : null;
+        if (p == null || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger"))
+            return true;
+        p = p + ".";
+        for (String packageName : implicitPackages) {
+            if (p.equals(packageName))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Constructs an array type
      * @param c the component type
      * @return the Class
@@ -723,6 +771,7 @@ public abstract class JexlParser extends StringParser {
             case "long" : return Long.TYPE;
             case "float" : return Float.TYPE;
             case "double" : return Double.TYPE;
+            case "void" : return Void.TYPE;
             case "Character" : return Character.class;
             case "Boolean" : return Boolean.class;
             case "Byte" : return Byte.class;

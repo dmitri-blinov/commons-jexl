@@ -302,7 +302,30 @@ public class Interpreter extends InterpreterBase {
                 throw new JexlException.StackOverflow(node.jexlInfo(), "jexl (" + jexl.stackOverflow + ")", null);
             }
             cancelCheck(node);
-            return node.jjtAccept(this, null);
+            Object result = null;
+            try {
+                result = node.jjtAccept(this, null);
+            } catch (JexlException.Return xreturn) {
+                result = xreturn.getValue();
+            } catch (JexlException.Yield xyield) {
+                result = xyield.getValue();
+            }
+            // Check return type
+            Scope s = frame != null ? frame.getScope() : null;
+            Class type = s != null ? s.getReturnType() : null;
+            if (type != null) {
+                if (type == Void.TYPE) {
+                    return null;
+                }
+                if (arithmetic.isStrict()) {
+                    result = arithmetic.implicitCast(type, result);
+                } else {
+                    result = arithmetic.cast(type, result);
+                }
+                if (type.isPrimitive() && result == null)
+                    throw new JexlException(node, "not null return value required");
+            }
+            return result;
         } catch (StackOverflowError xstack) {
             JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
             if (!isSilent()) {
@@ -311,10 +334,6 @@ public class Interpreter extends InterpreterBase {
             if (logger.isWarnEnabled()) {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());
             }
-        } catch (JexlException.Return xreturn) {
-            return xreturn.getValue();
-        } catch (JexlException.Yield xyield) {
-            return xyield.getValue();
         } catch (JexlException.Cancel xcancel) {
             // cancelled |= Thread.interrupted();
             cancelled.weakCompareAndSet(false, Thread.interrupted());
@@ -1326,11 +1345,12 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTFunctionStatement node, Object data) {
         cancelCheck(node);
+        int pos = node.jjtGetNumChildren() > 2 ? 1 : 0;
         // Declare variable
-        JexlNode left = node.jjtGetChild(0);
+        JexlNode left = node.jjtGetChild(pos);
         left.jjtAccept(this, data);
         // Create function
-        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(1));
+        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(pos + 1));
         return executeAssign(node, left, right, null, data);
     }
 

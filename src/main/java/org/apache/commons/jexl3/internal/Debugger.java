@@ -1087,9 +1087,25 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTFunctionStatement node, Object data) {
-        builder.append("function ");
-        accept(node.jjtGetChild(0), data);
-        accept(node.jjtGetChild(1), data);
+        final int numChildren = node.jjtGetNumChildren();
+        // Last node is function
+        ASTJexlScript script = (ASTJexlScript) node.jjtGetChild(numChildren - 1);
+        if (script.getScope().isStatic())
+            builder.append("static ");
+        if (numChildren > 2) {
+            // Type
+            accept(node.jjtGetChild(0), data);
+            // Name
+            accept(node.jjtGetChild(1), data);
+            // Function
+            accept(script, data);
+        } else {
+            builder.append("function ");
+            // Name
+            accept(node.jjtGetChild(0), data);
+            // Function
+            accept(script, data);
+        }
         return data;
     }
 
