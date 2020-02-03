@@ -69,7 +69,7 @@ Incompatible changes
 
 + New reserved words are introduced. Those are:
   `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
-  `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `yield` `_`.
+  `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `void` `class` `yield` `_`.
   You may not longer use them as the names of the variables and methods. The exception is made for the `remove` identifer,
   as it is still may be used in method invocations.
 
@@ -188,6 +188,8 @@ Enhancements
 + Function parameters can use `var` keyword for parameter definition
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
+
++ Functions can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
 
 + Function parameters can be declared as `final`
 
