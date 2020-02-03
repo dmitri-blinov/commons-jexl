@@ -50,4 +50,13 @@ public class ClassLiteralTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", Integer.class, o);
     }
+
+    @Test
+    public void testVoid() throws Exception {
+        JexlContext jc = new MapContext();
+        JexlScript e = JEXL.createScript("void . class");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", Void.TYPE, o);
+    }
+
 }
