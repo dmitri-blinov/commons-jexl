@@ -1345,12 +1345,11 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTFunctionStatement node, Object data) {
         cancelCheck(node);
-        int pos = node.jjtGetNumChildren() > 2 ? 1 : 0;
         // Declare variable
-        JexlNode left = node.jjtGetChild(pos);
+        JexlNode left = node.jjtGetChild(0);
         left.jjtAccept(this, data);
         // Create function
-        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(pos + 1));
+        Object right = Closure.create(this, (ASTJexlLambda) node.jjtGetChild(1));
         return executeAssign(node, left, right, null, data);
     }
 

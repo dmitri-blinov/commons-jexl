@@ -731,7 +731,7 @@ public abstract class JexlParser extends StringParser {
      * @param c the type
      * @return true if class has simple name
      */
-    protected static boolean isSimpleName(Class c) {
+    public static boolean isSimpleName(Class c) {
         String qn = c.getName();
         Package pack = c.getPackage();
         String p = pack != null ? pack.getName() : null;

@@ -579,38 +579,39 @@ void FunctionStatement() :
     [ <STATIC> { isStatic = true; } ] type = FunctionType() FunctionVar() Function(isStatic, type)
 }
 
-Class FunctionType() #TypeLiteral() :
+Class FunctionType() #void() :
 {
     Token t;
+    Class type = null;
 }
 {
     ( <FUNCTION>
       |
       (
-        t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+        t=<INT> { type = Integer.TYPE; }
         |
-        t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+        t=<LONG> { type = Long.TYPE; }
         |
-        t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+        t=<SHORT> { type = Short.TYPE; }
         |
-        t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+        t=<BYTE> { type = Byte.TYPE; }
         |
-        t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+        t=<CHAR> { type = Character.TYPE; }
         |
-        t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+        t=<BOOLEAN> { type = Boolean.TYPE; }
         |
-        t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+        t=<FLOAT> { type = Float.TYPE; }
         |
-        t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+        t=<DOUBLE> { type = Double.TYPE; }
         |
-        t=<VOID> { jjtThis.setLiteral(Void.TYPE); }
-        |
-        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
       )
-      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
+      |
+      t=<VOID> { type = Void.TYPE; }
     )
 {
-    return jjtThis.getType();
+    return type;
 }
 }
 

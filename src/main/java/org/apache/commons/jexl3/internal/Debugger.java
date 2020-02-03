@@ -180,6 +180,7 @@ import org.apache.commons.jexl3.parser.ASTAnnotation;
 import org.apache.commons.jexl3.parser.ASTNullpNode;
 
 import org.apache.commons.jexl3.parser.JexlNode;
+import org.apache.commons.jexl3.parser.JexlParser;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
 import java.math.BigDecimal;
@@ -451,11 +452,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
 
         if (literal != null) {
-            String qn = literal.getName();
-            Package pack = literal.getPackage();
-            String p = pack != null ? pack.getName() : null;
-            if (p == null || p.equals("java.lang") || p.equals("java.util") || p.equals("java.io") || p.equals("java.net")
-                || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger")) {
+            if (JexlParser.isSimpleName(literal)) {
                 result.append(literal.getSimpleName());
             } else {
                 result.append(literal.getName());
@@ -1087,25 +1084,20 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTFunctionStatement node, Object data) {
-        final int numChildren = node.jjtGetNumChildren();
         // Last node is function
-        ASTJexlScript script = (ASTJexlScript) node.jjtGetChild(numChildren - 1);
+        ASTJexlScript script = (ASTJexlScript) node.jjtGetChild(1);
         if (script.getScope().isStatic())
             builder.append("static ");
-        if (numChildren > 2) {
-            // Type
-            accept(node.jjtGetChild(0), data);
-            // Name
-            accept(node.jjtGetChild(1), data);
-            // Function
-            accept(script, data);
+        Class type = script.getScope().getReturnType();
+        if (type != null) {
+            builder.append(getClassName(type));
         } else {
             builder.append("function ");
-            // Name
-            accept(node.jjtGetChild(0), data);
-            // Function
-            accept(script, data);
         }
+        // Name
+        accept(node.jjtGetChild(0), data);
+        // Function
+        accept(script, data);
         return data;
     }
 
