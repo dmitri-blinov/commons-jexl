@@ -21,13 +21,16 @@ The Apache Commons JEXL Pro library is an experimental fork of the The Apache Co
 
 Idea of the fork
 ----------------
-The fork is intended to be source compatible with the latest JEXL version (3.2-SNAPSHOT), but provides some 
-enhancements and changes to the capabilities of the scripting language. More compatibility with Java language syntax 
-gives the opportunity to familiarize yourself with the language faster, for example, the following Java-style code is perfectly valid 
-construct in JEXL Pro.
+While JEXL in its latest version (3.2-SNAPSHOT) is already a mature Java object manipulation language which supports many great features,
+I feel that something more can be done to fill the gap between what functionality Java objects expose to the environment and 
+how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some 
+enhancements and changes to the capabilities of the scripting language. In result, compatibility with Java language is greatly improved,
+as the majority of modern Java syntax is now supported. Such compatibility gives the script writers the opportunity to start using
+the language faster, for example, the following Java-style code is perfectly valid 
+construct in JEXL Pro and gives the same results as in Java:
 
 ```
-function bytesToHex(byte[] bytes, int offset, int count) {
+String bytesToHex(byte[] bytes, int offset, int count) {
     final char[] hexArray = "0123456789ABCDEF".toCharArray();
     char[] hexChars = new char[count * 2];
     for (int j = 0; j < count; j++) {
@@ -39,7 +42,8 @@ function bytesToHex(byte[] bytes, int offset, int count) {
 }
 ```
 
-On the other hand, some other new language features allow for more compact and less error-prone code to be written, for example, instead of writing
+On the other hand, some new language features and more syntactic sugar are aimed at productivity and will allow for more compact and 
+less error-prone code to be written, for example, instead of writing
 
 ```
 var x = [...]; for (var i : items) if (i.color == 'red') x += i.price;
@@ -47,9 +51,13 @@ var x = [...]; for (var i : items) if (i.color == 'red') x += i.price;
 one can write
 
 ```
-var x = [...{items.[@color == 'red'].{@price}}]
+var x = [...{items.[@.color == 'red'].{@price}}]
 ```
 
+There are also some under-the-hood performance and memory usage improvements.
+
+Development Roadmap 
+----------------------
 I have no intention of promoting this fork as an alternative implementation, and I would be happy to have all 
 the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
 the JEXL community would benefit from remains at the descretion of the Apache JEXL team.
@@ -58,9 +66,9 @@ Language Compatibility
 ----------------------
 The library tends to maintain as much syntax compatibility with the original syntax as possible, but there are
 some changes that may break your existing scripts. The main reason for this comes from the introduction of the new 
-reserved words to support new syntax constructs, so your variables may no longer be named by one of those that were introduced. 
-There are also some minor tweaks to the original syntax in order to clarify language structure and align language 
-constructs with other popular scripting languages, to minimize the learning curve. 
+reserved words to support new syntax constructs, so your variables may no longer be named by one of those keywords 
+that are introduced. There are also some minor tweaks to the original syntax in order to streamline language structure and 
+align some language constructs with other popular scripting languages, to minimize the learning curve and syntactic diversity. 
 These changes are all reflected in the documentation, but the breef summary is given below.
 
 Incompatible changes
