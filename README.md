@@ -58,7 +58,8 @@ There are also some under-the-hood performance and memory usage improvements.
 
 Development Roadmap 
 ----------------------
-I have no intention of promoting this fork as an alternative implementation, and I would be happy to have all 
+The fork is feature complete and stable in both design and implementation, though minor enhancements are likely to come.
+I have no intention of promoting this fork as an alternative to the main library, and I would be happy to have all 
 the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
 the JEXL community would benefit from remains at the descretion of the Apache JEXL team.
 
@@ -78,11 +79,10 @@ Incompatible changes
 + New reserved words are introduced. Those are:
   `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
   `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `void` `class` `yield` `_`.
-  You may not longer use them as the names of the variables and methods. The exception is made for the `remove` identifer,
-  as it is still may be used in method invocations.
+  You may not longer use them as the names of the variables.
 
-+ Pragmas can only be defined at the beginning of the script. The reason is the pragmas are not executable constructs, 
-  so it is pointless and misleading to have them incorporated in flow-control structures somewhere in the middle.
++ Pragmas can only be defined at the beginning of the script. The reason for this is that the pragmas are not executable constructs, 
+  so it is pointless and misleading to have them being incorporated in flow-control structures somewhere in the middle.
 
 + Literal `null` can not have any properies, so it is forbidden to use it in expressions like `null.prop`.
   If, for some reason, you still want to do this, use parentheses like `(null).prop`.
@@ -92,16 +92,17 @@ Incompatible changes
 
 + Precedence of the `match` operator (`=~`) and `not-match` operator (`!~`) is changed to be that of other equality operators.
 
-+ Passing a function more arguments than is specified in the function declaration now results in error
++ Passing to a function more arguments than is specified in the function declaration now results in error
 
-+ Captured variables are effectively final. The reason is captured variables are in fact copies of the original variables,
-  so assigning a new value to the captured variable does not affect the original one. Such behaviour is misleading and thus restricted.
++ Captured variables are final by default. The reason for this is that captured variables are in fact copies of the original variables,
+  so assigning a new value to a captured variable does not affect the original variable in outer scope. 
+  Such behaviour is misleading and thus restricted.
 
 + Left-hand assignment expression can not use safe access operator `?.`
 
 + Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
 
-+ Class literals `Integer.class` cover variable access if variable name can be resolved as a class name 
++ Class literals `Integer.class` may cover variable access if the variable name can be resolved as a class name 
 
 New features
 ------------
@@ -182,11 +183,11 @@ Enhancements
 
 + Multidimensional arrays can be accessed by using new syntax `arr[x,y]` as well as by using older syntax `arr[x][y]`
 
-+ Array element assignment operator `x[0] = value` now tries to perform implicit type cast of the assigned value
++ Array element assignment operator `arr[x] = value` now tries to perform implicit type cast of the assigned value
 
 + Single expression functions can be defined by using `=>` fat arrow operator without outer curly braces
 
-+ Variadic functions can be defined by using `...` syntax after the last function argument
++ Variadic functions can be defined by using `(a...)` syntax after the last function argument
 
 + Function closures implement all basic java-8 `@FunctionalInterface` interfaces, 
   so that it is possible to pass a function closure as an argument to java method that accepts such interfaces
@@ -227,7 +228,7 @@ Enhancements
 
 + Operator `new` supports initialized map creation syntax `new LinkedHashMap {'abc' : 1, 'def' : 2}`
 
-+ Foreach statement may also define additional `counter` variable `for (var i,x : list)` along with the current loop value variable
++ Foreach statement may also define additional `counter` variable `for (var counter,x : list)` along with the current loop value variable
 
 + Immutable list `#[1,2,3]` literal constructs can be used 
 
