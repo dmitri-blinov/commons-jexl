@@ -1197,11 +1197,6 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             }
 
             JexlNode parent = node.jjtGetParent();
-            // use lambda syntax if not assigned
-            boolean named = (parent instanceof ASTAssignment || parent instanceof ASTNullAssignment) && !expr;
-            if (named) {
-                builder.append("function");
-            }
             boolean function = parent instanceof ASTFunctionStatement;
 
             Scope scope = node.getScope();
@@ -1221,8 +1216,20 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     }
                 }
             }
+            Class retType = scope.getReturnType();
 
-            if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
+            // use lambda syntax if not assigned
+            boolean named = (parent instanceof ASTAssignment || parent instanceof ASTNullAssignment) && !expr;
+
+            if (retType != null) {
+                builder.append(getClassName(retType));
+            } else if (named) {
+                builder.append("function");
+            }
+
+            boolean parens = named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax || retType != null;
+
+            if (parens)
                 builder.append('(');
 
             if (params != null && params.length > 0) {
@@ -1258,8 +1265,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     builder.append("...");
             }
 
-            if (named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax)
+            if (parens)
                 builder.append(')');
+
             if (named) {
                 builder.append(' ');
             } else {

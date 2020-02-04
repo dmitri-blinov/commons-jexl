@@ -585,30 +585,31 @@ Class FunctionType() #void() :
     Class type = null;
 }
 {
-    ( <FUNCTION>
-      |
-      (
-        t=<INT> { type = Integer.TYPE; }
-        |
-        t=<LONG> { type = Long.TYPE; }
-        |
-        t=<SHORT> { type = Short.TYPE; }
-        |
-        t=<BYTE> { type = Byte.TYPE; }
-        |
-        t=<CHAR> { type = Character.TYPE; }
-        |
-        t=<BOOLEAN> { type = Boolean.TYPE; }
-        |
-        t=<FLOAT> { type = Float.TYPE; }
-        |
-        t=<DOUBLE> { type = Double.TYPE; }
-        |
-        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-      )
-      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
-      |
-      t=<VOID> { type = Void.TYPE; }
+    (
+       <FUNCTION>
+       |
+       (
+         t=<INT> { type = Integer.TYPE; }
+         |
+         t=<LONG> { type = Long.TYPE; }
+         |
+         t=<SHORT> { type = Short.TYPE; }
+         |
+         t=<BYTE> { type = Byte.TYPE; }
+         |
+         t=<CHAR> { type = Character.TYPE; }
+         |
+         t=<BOOLEAN> { type = Boolean.TYPE; }
+         |
+         t=<FLOAT> { type = Float.TYPE; }
+         |
+         t=<DOUBLE> { type = Double.TYPE; }
+         |
+         LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+       )
+       ( LOOKAHEAD( <LBRACKET> ) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
+       |
+       t=<VOID> { type = Void.TYPE; }
     )
 {
     return type;
@@ -957,7 +958,8 @@ void DeclareLocalVar() #Var :
 
       ) (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
     )
-    [ <and> { jjtThis.setRequired(); } ] t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    [ <and> { jjtThis.setRequired(); } ]
+    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
 void DeclareExtVar(boolean isFinal) #ExtVar :
@@ -1023,14 +1025,21 @@ Object PragmaValue() #void :
     Token v;
 }
 {
-      LOOKAHEAD(1) v=<INTEGER_LITERAL> { return NumberParser.parseInteger(v.image); }
-    | LOOKAHEAD(1) v=<FLOAT_LITERAL> { return NumberParser.parseDouble(v.image); }
-    | LOOKAHEAD(1) v=<STRING_LITERAL> { return Parser.buildString(v.image, true); }
-    | LOOKAHEAD(1) v=<QUALIFIED_IDENTIFIER> { return v.image; }
-    | LOOKAHEAD(1) <TRUE> { return true; }
-    | LOOKAHEAD(1) <FALSE> { return false; }
-    | LOOKAHEAD(1) <NULL> { return null; }
-    | LOOKAHEAD(1) <NAN_LITERAL> { return Double.NaN; }
+    v=<INTEGER_LITERAL> { return NumberParser.parseInteger(v.image); }
+    |
+    v=<FLOAT_LITERAL> { return NumberParser.parseDouble(v.image); }
+    |
+    v=<STRING_LITERAL> { return Parser.buildString(v.image, true); }
+    |
+    v=<QUALIFIED_IDENTIFIER> { return v.image; }
+    |
+    v=<TRUE> { return true; }
+    |
+    v=<FALSE> { return false; }
+    |
+    v=<NULL> { return null; }
+    |
+    v=<NAN_LITERAL> { return Double.NaN; }
 }
 
 
@@ -1955,11 +1964,12 @@ void Parameters() #void : {}
 
 void LambdaLookahead() #void() : {}
 {
-    LOOKAHEAD(3) [ <STATIC> ] <FUNCTION> <LPAREN>
-    |
-    LOOKAHEAD(3) [ <STATIC> ] <FUNCTION> <LCURLY>
-    |
-    [ <STATIC> ] Parameters() ( <LAMBDA> | <LAMBDAE> )
+    [ <STATIC> ] 
+    (
+        FunctionType() ( <LPAREN> | <LCURLY> )
+        |
+        Parameters() ( <LAMBDA> | <LAMBDAE> )
+    )
     |
     Parameter() ( <LAMBDA> | <LAMBDAE> )
 }
@@ -1968,27 +1978,24 @@ void Lambda() #JexlLambda() :
 {
     pushFrame();
     pushUnit(jjtThis);
+    Class type = null;
 }
 {
     (
-      LOOKAHEAD(3) [ Static() ] <FUNCTION> Parameters() Block()
-      |
-      LOOKAHEAD(3) [ Static() ] <FUNCTION> Block()
-      |
-      [ Static() ] Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
-      |
-      Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+        [ <STATIC> { declareStaticSupport(); } ]
+        (
+          LOOKAHEAD( FunctionType() ) type = FunctionType() { declareReturnType(type); } [ LOOKAHEAD( <LPAREN> ) Parameters() ]  Block()
+          |
+          Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
+        )
+        |
+        Parameter() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
     )
 {
     popUnit(jjtThis);
     jjtThis.setScope(frame);
     popFrame();
 }
-}
-
-void Static() #void : {}
-{
-    <STATIC> { frame.declareStatic(); }
 }
 
 

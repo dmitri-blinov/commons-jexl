@@ -140,4 +140,14 @@ public class PrimitiveParametersTest extends JexlTestCase {
         }
     }
 
+    @Test
+    public void testReturnType() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = jexl.createScript("var x = long (int a, int b) {a+b;}; x(42)");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 42L, o);
+    }
+
+
 }
