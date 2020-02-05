@@ -152,6 +152,8 @@ public abstract class JexlNode extends SimpleNode {
      * @return true if node is assignable, false otherwise
      */
     public boolean isLeftValue() {
+        if (isConstant())
+            return false;
         JexlNode walk = this;
         do {
             if (walk instanceof ASTMultipleIdentifier) {

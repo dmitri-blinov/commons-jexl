@@ -1095,7 +1095,7 @@ void ConditionalExpression() #void : {}
     ConditionalOrExpression()
     [ LOOKAHEAD(2) (
       <QMARK> TernaryExpression()
-      |
+    |
       <ELVIS> Expression() #ElvisNode(2)
     ) ]
 }
@@ -1151,18 +1151,17 @@ void EqualityExpression() #void : {}
 {
     RelationalExpression()
     [ LOOKAHEAD(2) (
-       (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
-     |
-       (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
-     |
-       (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
-     |
-       <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
-     |
-       <is> RangeExpression() #ISNode(2) // identical
-     |
-       <ni> RangeExpression() #NINode(2) // not identical
-
+      (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
+    |
+      (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
+    |
+      (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
+    |
+      <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
+    |
+      <is> RangeExpression() #ISNode(2) // identical
+    |
+      <ni> RangeExpression() #NINode(2) // not identical
     ) ]
 }
 
@@ -1183,34 +1182,33 @@ void RelationalExpression() #void : {}
     RangeExpression()
     [ LOOKAHEAD(2) (
       (<lt> |<LT>) RelationalExpressionOperand() #LTNode(2)
-     |
+    |
       (<gt> | <GT>) RelationalExpressionOperand() #GTNode(2)
-     |
+    |
       (<le> | <LE>) RelationalExpressionOperand() #LENode(2)
-     |
+    |
       (<ge> | <GE>) RelationalExpressionOperand() #GENode(2)
-     |
+    |
       <seq> RelationalExpressionOperand() #SWNode(2) // starts with
-     |
+    |
       <sne> RelationalExpressionOperand() #NSWNode(2) // not starts with
-     |
+    |
       <eeq> RelationalExpressionOperand() #EWNode(2) // ends with
-     |
+    |
       <ene> RelationalExpressionOperand() #NEWNode(2) // not ends with
-     |
+    |
       <iof> TypeReference() #IOFNode(2) // instanceof
-     |
+    |
       <niof> TypeReference() #NIOFNode(2) // not instanceof
-
     ) ]
 }
 
 void RangeExpression() #void : {}
 {
     ShiftExpression()
-    ( LOOKAHEAD(2) (
+    [ LOOKAHEAD(2) (
        <range> ShiftExpression() #RangeNode(2) // range
-    ) )?
+    ) ]
 }
 
 /***************************************
