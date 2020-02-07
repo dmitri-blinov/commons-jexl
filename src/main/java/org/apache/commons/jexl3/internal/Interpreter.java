@@ -2823,7 +2823,7 @@ public class Interpreter extends InterpreterBase {
         JexlNode objectNode = null;
         JexlNode ptyNode = null;
         StringBuilder ant = null;
-        boolean antish = !(parent instanceof ASTReference);
+        boolean antish = !(parent instanceof ASTReference) && options.isAntish();
         int v = 1;
         main:
         for (int c = 0; c < numChildren; c++) {
@@ -2867,6 +2867,11 @@ public class Interpreter extends InterpreterBase {
                 if (object == null) {
                     break;
                 }
+            } else if (objectNode instanceof ASTInlinePropertyAssignment) {
+                antish = false;
+                if (object == null) {
+                    break;
+                }
             }
             // attempt to evaluate the property within the object (visit(ASTIdentifierAccess node))
             object = objectNode.jjtAccept(this, object);
@@ -2887,11 +2892,6 @@ public class Interpreter extends InterpreterBase {
                         // not an identifier, not antish
                         ptyNode = objectNode;
                         break main;
-                    }
-                    // *... and continue
-                    if (!options.isAntish()) {
-                        antish = false;
-                        continue;
                     }
                     // skip the first node case since it was trialed in jjtAccept above and returned null
                     if (c == 0) {
