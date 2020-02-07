@@ -51,6 +51,7 @@ import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
+import org.apache.commons.jexl3.parser.ASTBooleanLiteral;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTCastNode;
 import org.apache.commons.jexl3.parser.ASTCatchBlock;
@@ -71,7 +72,6 @@ import org.apache.commons.jexl3.parser.ASTEnumerationNode;
 import org.apache.commons.jexl3.parser.ASTEnumerationReference;
 import org.apache.commons.jexl3.parser.ASTExpressionStatement;
 import org.apache.commons.jexl3.parser.ASTExtVar;
-import org.apache.commons.jexl3.parser.ASTFalseNode;
 import org.apache.commons.jexl3.parser.ASTForStatement;
 import org.apache.commons.jexl3.parser.ASTForInitializationNode;
 import org.apache.commons.jexl3.parser.ASTForTerminationNode;
@@ -179,7 +179,6 @@ import org.apache.commons.jexl3.parser.ASTSynchronizedStatement;
 import org.apache.commons.jexl3.parser.ASTTernaryNode;
 import org.apache.commons.jexl3.parser.ASTThisNode;
 import org.apache.commons.jexl3.parser.ASTThrowStatement;
-import org.apache.commons.jexl3.parser.ASTTrueNode;
 import org.apache.commons.jexl3.parser.ASTTryStatement;
 import org.apache.commons.jexl3.parser.ASTTryVar;
 import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
@@ -2192,7 +2191,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTNullLiteral node, Object data) {
-        return null;
+        return node.getLiteral();
     }
 
     @Override
@@ -2206,13 +2205,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTTrueNode node, Object data) {
-        return Boolean.TRUE;
-    }
-
-    @Override
-    protected Object visit(ASTFalseNode node, Object data) {
-        return Boolean.FALSE;
+    protected Object visit(ASTBooleanLiteral node, Object data) {
+        return node.getLiteral();
     }
 
     @Override

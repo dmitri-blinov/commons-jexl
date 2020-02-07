@@ -1518,11 +1518,11 @@ void NullLiteral() : {}
     <NULL>
 }
 
-void BooleanLiteral() #void : {}
+void BooleanLiteral() : {}
 {
-    <TRUE> #TrueNode
+    <TRUE> { jjtThis.setLiteral(Boolean.TRUE); }
     |
-    <FALSE> #FalseNode
+    <FALSE> { jjtThis.setLiteral(Boolean.FALSE); }
 }
 
 void IntegerLiteral() #NumberLiteral :
