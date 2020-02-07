@@ -4570,76 +4570,70 @@ public class Interpreter extends InterpreterBase {
         return arithmetic.toInteger(child.jjtAccept(this, null));
     }
 
+    protected Object[] preparePipeLambdaArgs(ASTJexlLambda script, Object result, int i, Object value) {
+        boolean varArgs = script.isVarArgs();
+        int argCount = script.getArgCount();
+
+        // Result
+        Object[] argv = null;
+
+        if (argCount == 0) {
+            argv = EMPTY_PARAMS;
+        } else if (argCount == 1) {
+            argv = new Object[] {result};
+        } else if (argCount == 2) {
+            argv = new Object[] {result, value};
+        } else if (argCount == 3) {
+            argv = new Object[] {result, i, value};
+        } else if (value instanceof Map.Entry<?,?>) {
+            Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+            argv = new Object[] {result, i, entry.getKey(), entry.getValue()};
+        } else if (!varArgs && value instanceof Object[]) {
+            int len = ((Object[]) value).length;
+            if (argCount > len + 1) {
+               argv = new Object[len + 2];
+               argv[0] = result;
+               argv[2] = i;
+               System.arraycopy(value, 0, argv, 2, len);
+            } else if (argCount == len + 1) {
+               argv = new Object[len + 1];
+               argv[0] = result;
+               System.arraycopy(value, 0, argv, 1, len);
+            } else {
+               argv = new Object[] {result, i, value};
+            }
+        } else {
+            argv = new Object[] {result, i, value};
+        }
+        return argv;
+    }
+
     @Override
     protected Object visit(ASTPipeNode node, Object data) {
-
-        Object result = null;
         JexlNode pipe = node.jjtGetChild(0);
-
+        Object result = null;
         if (data instanceof Iterator<?>) {
-
             Iterator<?> itemsIterator = (Iterator) data;
-
             try {
                 int i = 0;
                 if (pipe instanceof ASTJexlLambda) {
-
                     ASTJexlLambda script = (ASTJexlLambda) pipe;
-
                     Closure closure = new Closure(this, script);
-
-                    boolean varArgs = script.isVarArgs();
-                    int argCount = script.getArgCount();
 
                     while (itemsIterator.hasNext()) {
                         Object value = itemsIterator.next();
-
-                        Object[] argv = null;
-
-                        if (argCount == 0) {
-                            argv = EMPTY_PARAMS;
-                        } else if (argCount == 1) {
-                            argv = new Object[] {result};
-                        } else if (argCount == 2) {
-                            argv = new Object[] {result, value};
-                        } else if (argCount == 3) {
-                            argv = new Object[] {result, i, value};
-                        } else if (value instanceof Map.Entry<?,?>) {
-                            Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
-                            argv = new Object[] {result, i, entry.getKey(), entry.getValue()};
-                        } else if (!varArgs && value instanceof Object[]) {
-                            int len = ((Object[]) value).length;
-                            if (argCount > len + 1) {
-                               argv = new Object[len + 2];
-                               argv[0] = result;
-                               argv[2] = i;
-                               System.arraycopy(value, 0, argv, 2, len);
-                            } else if (argCount == len + 1) {
-                               argv = new Object[len + 1];
-                               argv[0] = result;
-                               System.arraycopy(value, 0, argv, 1, len);
-                            } else {
-                               argv = new Object[] {result, i, value};
-                            }
-                        } else {
-                            argv = new Object[] {result, i, value};
-                        }
-
                         Object prev = current;
                         try {
                             current = value;
-                            result = closure.execute(null, argv);
+                            result = closure.execute(null, preparePipeLambdaArgs(script, result, i, value));
                         } finally {
                             current = prev;
                         }
-
                         i += 1;
                     }
-
                 } else {
                     while (itemsIterator.hasNext()) {
                         Object value = itemsIterator.next();
-
                         Object prev = current;
                         try {
                             current = value;
@@ -4657,11 +4651,10 @@ public class Interpreter extends InterpreterBase {
             if (pipe instanceof ASTJexlLambda) {
                 ASTJexlLambda script = (ASTJexlLambda) pipe;
                 Closure closure = new Closure(this, script);
-                Object[] argv = {data};
                 Object prev = current;
                 try {
                     current = data;
-                    result = closure.execute(null, argv);
+                    result = closure.execute(null, new Object[] {data});
                 } finally {
                     current = prev;
                 }
@@ -4675,7 +4668,6 @@ public class Interpreter extends InterpreterBase {
                 }
             }
         }
-
         return result;
     }
 

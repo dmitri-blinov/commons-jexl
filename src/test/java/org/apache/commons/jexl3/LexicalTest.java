@@ -759,4 +759,5 @@ public class LexicalTest {
         Object result = script.execute(null);
         Assert.assertEquals(result, 42);
     }    
+
 }

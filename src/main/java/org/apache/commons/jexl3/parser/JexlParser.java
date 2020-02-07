@@ -353,9 +353,9 @@ public abstract class JexlParser extends StringParser {
      */
     protected boolean isFinalVariable(String image) {
         if (frame != null) {
-            Integer register = frame.getSymbol(image);
-            if (register != null) {
-                return frame.isVariableFinal(register);
+            Integer symbol = frame.getSymbol(image);
+            if (symbol != null) {
+                return frame.isVariableFinal(symbol);
             }
         }
         return false;
