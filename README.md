@@ -26,7 +26,7 @@ I feel that something more can be done to fill the gap between what functionalit
 how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some 
 enhancements and changes to the capabilities of the scripting language. In result, compatibility with Java language is greatly improved,
 as the majority of modern Java syntax is now supported. Such compatibility gives the script writers the opportunity to start using
-the language faster, for example, the following Java-style code is perfectly valid 
+the language faster, for example, the following Java code snippet is perfectly valid 
 construct in JEXL Pro and gives the same results as in Java:
 
 ```
