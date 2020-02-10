@@ -60,6 +60,11 @@ public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit 
     }
 
     @Override
+    public boolean isSymbolFinal(int symbol) {
+        return locals == null? false : locals.isVariableFinal(symbol);
+    }
+
+    @Override
     public LexicalScope getLexicalScope() {
         return locals;
     }

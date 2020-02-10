@@ -121,6 +121,13 @@ public abstract class JexlParser extends StringParser {
         boolean hasSymbol(int symbol);
 
         /**
+         * Checks whether a symbol is declared final in this lexical unit.
+         * @param symbol the symbol
+         * @return true if declared final, false otherwise
+         */
+        boolean isSymbolFinal(int symbol);
+
+        /**
          * @return the number of local variables declared in this unit
          */
         int getSymbolCount();
@@ -355,7 +362,23 @@ public abstract class JexlParser extends StringParser {
         if (frame != null) {
             Integer symbol = frame.getSymbol(image);
             if (symbol != null) {
-                return frame.isVariableFinal(symbol);
+                if (frame.isVariableFinal(symbol)) {
+                    return true;
+                } else if (getFeatures().isLexical()) {
+                    if (block.hasSymbol(symbol) && block.isSymbolFinal(symbol))
+                        return true;
+                    // one of the lexical blocks above should declare it
+                    for (LexicalUnit u : blocks) {
+                        // stop at first new scope reset, aka lambda
+                        if (u instanceof ASTJexlLambda) {
+                            break;
+                        }
+                        if (u.hasSymbol(symbol) && u.isSymbolFinal(symbol)) {
+                            return true;
+                        }
+                    }
+                }
+
             }
         }
         return false;

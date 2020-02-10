@@ -165,7 +165,11 @@ public class LexicalScope {
     public Class typeof(int s) {
         if (modifiers != null && modifiers.containsKey(s))
             return modifiers.get(s).getType();
-        return previous != null ? previous.typeof(s) : frame.getScope().getVariableType(s);
+        if (previous != null) 
+            return previous.typeof(s);
+        if (frame != null && frame.getScope() != null)
+            return frame.getScope().getVariableType(s);
+        return null;
     }
     /**
      * Returns if the local variable is declared final.
@@ -175,7 +179,11 @@ public class LexicalScope {
     public boolean isVariableFinal(int s) {
         if (modifiers != null && modifiers.containsKey(s))
             return modifiers.get(s).isFinal();
-        return previous != null ? previous.isVariableFinal(s) : frame.getScope().isVariableFinal(s);
+        if (previous != null)
+            return previous.isVariableFinal(s);
+        if (frame != null && frame.getScope() != null)
+            return frame.getScope().isVariableFinal(s);
+        return false;
     }
     /**
      * Returns if the local variable is declared non-null.
@@ -185,7 +193,11 @@ public class LexicalScope {
     public boolean isVariableRequired(int s) {
         if (modifiers != null && modifiers.containsKey(s))
             return modifiers.get(s).isRequired();
-        return previous != null ? previous.isVariableRequired(s) : frame.getScope().isVariableRequired(s);
+        if (previous != null)
+            return previous.isVariableRequired(s);
+        if (frame != null && frame.getScope() != null)
+            return frame.getScope().isVariableRequired(s);
+        return false;
     }
     /**
      * Adds a symbol in this scope.
