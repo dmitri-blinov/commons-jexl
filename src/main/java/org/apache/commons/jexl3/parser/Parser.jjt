@@ -588,6 +588,8 @@ Class FunctionType() #void() :
     (
        <FUNCTION>
        |
+       t=<VOID> { type = Void.TYPE; }
+       |
        (
          t=<INT> { type = Integer.TYPE; }
          |
@@ -608,8 +610,6 @@ Class FunctionType() #void() :
          LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
        )
        ( LOOKAHEAD( <LBRACKET> ) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
-       |
-       t=<VOID> { type = Void.TYPE; }
     )
 {
     return type;
@@ -1802,22 +1802,20 @@ void Arguments() #Arguments : {}
 
 void FunctionCallLookahead() #void : {}
 {
-    LOOKAHEAD(2) <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>
+    <IDENTIFIER> ( <LPAREN> | <COLON> <IDENTIFIER> <LPAREN>)
     |
-    LOOKAHEAD(2) <IDENTIFIER> <LPAREN>
+    <REGISTER> <LPAREN>
     |
-    LOOKAHEAD(2) <REGISTER> <LPAREN>
+    <REMOVE> <LPAREN>
     |
-    LOOKAHEAD(2) <REMOVE> <LPAREN>
-    |
-    LOOKAHEAD(2) <CLASS> <LPAREN>
+    <CLASS> <LPAREN>
 }
 
 void FunctionCall() #void : {}
 {
-    LOOKAHEAD(2) NamespaceIdentifier() Arguments() #FunctionNode(2)
-    |
     LOOKAHEAD(2) Identifier(true) Arguments() #FunctionNode(2)
+    |
+    LOOKAHEAD(2) NamespaceIdentifier() Arguments() #FunctionNode(2)
     |
     LOOKAHEAD(2) RemoveIdentifier() Arguments() #FunctionNode(2)
     |

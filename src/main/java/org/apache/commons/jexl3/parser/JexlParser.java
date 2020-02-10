@@ -321,6 +321,7 @@ public abstract class JexlParser extends StringParser {
         if (frame != null) {
             Integer symbol = frame.getSymbol(name);
             if (symbol != null) {
+                identifier.setSymbol(symbol, name);
                 boolean declared = true;
                 if (frame.isCapturedSymbol(symbol)) {
                     // captured are declared in all cases
@@ -334,13 +335,16 @@ public abstract class JexlParser extends StringParser {
                                 declared = true;
                                 break;
                             }
+                            // stop at first new scope reset, aka lambda
+                            if (u instanceof ASTJexlLambda) {
+                                break;
+                            }
                         }
                     }
                     if (!declared && info instanceof JexlNode.Info) {
                         declared = isSymbolDeclared((JexlNode.Info) info, symbol);
                     }
                 }
-                identifier.setSymbol(symbol, name);
                 if (!declared) {
                     identifier.setShaded(true);
                     if (getFeatures().isLexicalShade()) {
@@ -365,20 +369,19 @@ public abstract class JexlParser extends StringParser {
                 if (frame.isVariableFinal(symbol)) {
                     return true;
                 } else if (getFeatures().isLexical()) {
-                    if (block.hasSymbol(symbol) && block.isSymbolFinal(symbol))
-                        return true;
+                    if (block.hasSymbol(symbol))
+                        return block.isSymbolFinal(symbol);
                     // one of the lexical blocks above should declare it
                     for (LexicalUnit u : blocks) {
+                        if (u.hasSymbol(symbol)) {
+                            return u.isSymbolFinal(symbol);
+                        }
                         // stop at first new scope reset, aka lambda
                         if (u instanceof ASTJexlLambda) {
                             break;
                         }
-                        if (u.hasSymbol(symbol) && u.isSymbolFinal(symbol)) {
-                            return true;
-                        }
                     }
                 }
-
             }
         }
         return false;
@@ -777,6 +780,8 @@ public abstract class JexlParser extends StringParser {
         return c != null ? Array.newInstance(c, 0).getClass() : null;
     }
 
+    private static Class NOT_A_CLASS = (new Object() {}).getClass();
+
     /**
      * Resolves a type by its name.
      * @param name the name of the type
@@ -812,7 +817,8 @@ public abstract class JexlParser extends StringParser {
         if (Character.isLowerCase(name.charAt(0)) && name.indexOf(".") == -1)
             return null;
 
-        return classes.computeIfAbsent(name, x -> {return forName(x);});
+        Class result = classes.computeIfAbsent(name, x -> forName(x));
+        return result != NOT_A_CLASS ? result : null;
     }
 
     /**
@@ -827,14 +833,15 @@ public abstract class JexlParser extends StringParser {
                 try {
                     return Class.forName(className);
                 } catch (ClassNotFoundException ex) {
+                    // Maybe
                 }
             }
-            return null;
+            return NOT_A_CLASS;
         }
         try {
             return Class.forName(name);
         } catch (ClassNotFoundException ex) {
-            return null;
+            return NOT_A_CLASS;
         }
     }
 
