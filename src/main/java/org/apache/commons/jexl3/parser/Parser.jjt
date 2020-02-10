@@ -37,6 +37,8 @@ PARSER_BEGIN(Parser)
 package org.apache.commons.jexl3.parser;
 
 import java.util.Collections;
+import java.util.Collection;
+import java.util.Map;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
@@ -567,7 +569,7 @@ void AssignmentIdentifier() #void : {}
 
 void FunctionStatementLookahead() #void() : {}
 {
-    [ <STATIC> ] FunctionType() FunctionVar() <LPAREN>
+    [ <STATIC> ] (<FUNCTION> | FunctionType()) FunctionVar() <LPAREN>
 }
 
 void FunctionStatement() :
@@ -576,7 +578,7 @@ void FunctionStatement() :
     Class type = null;
 }
 {
-    [ <STATIC> { isStatic = true; } ] type = FunctionType() FunctionVar() Function(isStatic, type)
+    [ <STATIC> { isStatic = true; } ] (<FUNCTION> | type = FunctionType()) FunctionVar() Function(isStatic, type)
 }
 
 Class FunctionType() #void() :
@@ -586,8 +588,6 @@ Class FunctionType() #void() :
 }
 {
     (
-       <FUNCTION>
-       |
        t=<VOID> { type = Void.TYPE; }
        |
        (
@@ -1652,6 +1652,24 @@ void NewTypeReference() #TypeLiteral() :
     t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
+void NewMapTypeReference() #TypeLiteral() :
+{
+    Token t;
+    Class value;
+}
+{
+    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null || !Map.class.isAssignableFrom(value)) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+}
+
+void NewCollectionTypeReference() #TypeLiteral() :
+{
+    Token t;
+    Class value;
+}
+{
+    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null || !Collection.class.isAssignableFrom(value)) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+}
+
 void ArrayTypeReference() #void : {}
 {
     PrimitiveType()
@@ -1872,12 +1890,12 @@ void InitializedArrayConstructor() #InitializedArrayConstructorNode() : {}
 
 void InitializedCollectionConstructor() #InitializedCollectionConstructorNode() : {}
 {
-    NewTypeReference() InitializedCollectionLiteral()
+    NewCollectionTypeReference() InitializedCollectionLiteral()
 }
 
 void InitializedMapConstructor() #InitializedMapConstructorNode() : {}
 {
-    NewTypeReference() InitializedMapLiteral()
+    NewMapTypeReference() InitializedMapLiteral()
 }
 
 void InitializedCollectionLiteral() #void() : {}
@@ -1976,7 +1994,9 @@ void LambdaLookahead() #void() : {}
 {
     [ <STATIC> ] 
     (
-        FunctionType() ( <LPAREN> | <LCURLY> )
+        <FUNCTION> ( <LPAREN> | <LCURLY> )
+        |
+        FunctionType() Parameters() <LCURLY>
         |
         Parameters() ( <LAMBDA> | <LAMBDAE> )
     )
@@ -1994,7 +2014,9 @@ void Lambda() #JexlLambda() :
     (
         [ <STATIC> { declareStaticSupport(); } ]
         (
-          LOOKAHEAD( FunctionType() ) type = FunctionType() { declareReturnType(type); } [ LOOKAHEAD( <LPAREN> ) Parameters() ]  Block()
+          <FUNCTION> [ Parameters() ] Block()
+          |
+          LOOKAHEAD( FunctionType() ) type = FunctionType() { declareReturnType(type); } Parameters() Block()
           |
           Parameters() ( <LAMBDA> Block() | <LAMBDAE> Expression() )
         )
