@@ -17,9 +17,6 @@
 //CSOFF: FileLength
 package org.apache.commons.jexl3.internal;
 
-import java.util.Iterator;
-import java.util.concurrent.Callable;
-
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
