@@ -787,7 +787,7 @@ public abstract class JexlParser extends StringParser {
      * @param name the name of the type
      * @return the Class
      */
-    protected static Class resolveType(String name) {
+    public static Class resolveType(String name) {
         if (name == null || "".equals(name))
             return null;
         switch (name) {

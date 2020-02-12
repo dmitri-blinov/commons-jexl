@@ -42,6 +42,7 @@ import org.apache.commons.jexl3.parser.ASTMethodNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.JexlNode;
+import org.apache.commons.jexl3.parser.JexlParser;
 import org.apache.commons.jexl3.parser.ParserVisitor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -304,12 +305,14 @@ public abstract class InterpreterBase extends ParserVisitor {
         }
         String name = identifier.getName();
         Object value = context.get(name);
-        if (value == null
-            && !(identifier.jjtGetParent() instanceof ASTReference)
-            && !(context.has(name))) {
-                return isSafe()
-                    ? null
-                    : unsolvableVariable(identifier, name, true); // undefined
+        if (value == null && !context.has(name)) {
+            if (identifier.jjtGetParent() instanceof ASTReference) {
+                Class type = JexlParser.resolveType(name);
+                if (type != null)
+                    return type;
+            } else {
+                return isSafe() ? null : unsolvableVariable(identifier, name, true); // undefined
+            }
         }
         return value;
     }
