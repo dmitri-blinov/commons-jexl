@@ -32,6 +32,11 @@ public final class ASTJxltLiteral extends JexlNode {
         this.literal = literal;
     }
 
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
+
     /**
      * Gets the literal value.
      * @return the string literal

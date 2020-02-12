@@ -45,6 +45,7 @@ public final class ASTSetLiteral extends JexlNode {
         return constant;
     }
 
+    @Override
     public boolean isImmutable() {
         return immutable;
     }

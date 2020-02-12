@@ -148,6 +148,16 @@ public abstract class JexlNode extends SimpleNode {
     }
 
     /**
+     * Whether this node is an immutable node Its value can not change after the first evaluation and can be cached
+     * indefinitely.
+     *
+     * @return true if immutable, false otherwise
+     */
+    public boolean isImmutable() {
+        return this instanceof JexlNode.Constant<?>;
+    }
+
+    /**
      * Whether this node is a left value.
      * @return true if node is assignable, false otherwise
      */

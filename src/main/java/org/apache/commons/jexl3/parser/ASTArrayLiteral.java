@@ -57,6 +57,7 @@ public final class ASTArrayLiteral extends JexlNode {
         extended = true;
     }
 
+    @Override
     public boolean isImmutable() {
         return immutable;
     }

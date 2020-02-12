@@ -45,6 +45,7 @@ public final class ASTMapLiteral extends JexlNode {
         return constant;
     }
 
+    @Override
     public boolean isImmutable() {
         return immutable;
     }
