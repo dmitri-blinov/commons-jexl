@@ -140,6 +140,8 @@ New features
 
 + Java-like class `Integer.class` literals are introduced
 
++ Java-like static class field/method access can be resolved via direct type specification `Integer.MAX_VALUE` if not shaded by local or context variables
+
 + Groovy-like `!instanceof` operator is introduced
 
 + Groovy-like `?=` conditional assignment operator is introduced
