@@ -207,4 +207,23 @@ public class ForEachTest extends JexlTestCase {
             Assert.assertTrue(str.contains("break"));
         }
     }
+
+    @Test
+    public void testForEachTyped() throws Exception {
+        JexlScript e = JEXL.createScript("for(String item : list) item");
+        JexlContext jc = new MapContext();
+        jc.set("list", new Object[]{"Hello", "World"});
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not last evaluated expression", "World", o);
+    }
+
+    @Test
+    public void testForEachFinal() throws Exception {
+        JexlScript e = JEXL.createScript("for(final String item : list) item");
+        JexlContext jc = new MapContext();
+        jc.set("list", new Object[]{"Hello", "World"});
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not last evaluated expression", "World", o);
+    }
+
 }

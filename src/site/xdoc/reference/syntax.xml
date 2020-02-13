@@ -1579,14 +1579,19 @@
                         <code>for (var item : list) {
                             x = x + item;
                             }</code>
-
                         Where <code>item</code> is a local variable.</p>
+                        <p>The following typed variable syntax is also supported:
+                        <code>for (Integer item : list) {
+                            x = x + item;
+                            }</code>
+                        Where <code>item</code> is a local variable of Integer class. 
+                        The actual values of iterable object will be implicitly cast to the specified type.</p>
                         <p>The labeled syntax is also supported:
                         <code>foo : for (var item : list) {
                             x = x + item;
                             } </code>
                         Where the label <code>foo</code> can be used in the inner <code>break</code>,<code>continue</code> and <code>remove</code> statements.</p>
-                        <p>Note that the loop variable <code>item</code> is accessible after loop evaluation</p>
+                        <p>Note that in non-lexical mode the loop variable <code>item</code> is accessible after loop evaluation</p>
                         <p>The syntax with a key and a value variable is also supported:
                         <code>for (var i, item : list) {
                             if (i lt 3) x = x + item;

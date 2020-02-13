@@ -852,14 +852,14 @@ ASTForStatement ForStatement() :
 }
 }
 
-void ForInitializationExpression() #void : {}
-{
-    LOOKAHEAD(DeclareLocalVar()) Var() | Expression()
-}
-
 void ForInitializationNode() : {}
 {
     [ ForInitializationExpression() (<COMMA> ForInitializationExpression() )* ]
+}
+
+void ForInitializationExpression() #void : {}
+{
+    LOOKAHEAD(DeclareLocalVar()) Var() | Expression()
 }
 
 void ForTerminationNode() : {}
@@ -888,20 +888,9 @@ void ForeachVar() : {}
 {
     DeclareVar() [ <COMMA> DeclareExtVar(false) ]
     |
+    LOOKAHEAD(DeclareForVar()) DeclareForVar()
+    |
     Identifier(true) [ <COMMA> Identifier(true) ]
-}
-
-void MultipleVar() #MultipleInitialization : {}
-{
-    MultipleDeclareVar() <assign> Expression()
-}
-
-void MultipleDeclareVar() #MultipleIdentifier :
-{
-    boolean isFinal = false;
-}
-{
-    [ <FINAL> { isFinal = true; jjtThis.setFinal(); } ] <VAR> <LPAREN> DeclareExtVar(isFinal) (<COMMA> DeclareExtVar(isFinal))* <RPAREN>
 }
 
 void DeclareVar() #Var :
@@ -912,22 +901,42 @@ void DeclareVar() #Var :
     <VAR> t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
-void RequiredVarLookahead() #void() : {}
+void DeclareExtVar(boolean isFinal) #ExtVar :
 {
-    <FINAL>
-    |
-    <VAR> <and>
-    |
-    (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
-    |
-    <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
+    Token t;
+}
+{
+    { if (isFinal) jjtThis.setFinal(); }
+    [ <and> { jjtThis.setRequired(); } ]
+    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
-void Var() #Initialization : {}
+void DeclareForVar() #Var :
 {
-    LOOKAHEAD(RequiredVarLookahead()) DeclareLocalVar() <assign> Expression()
-    |
-    DeclareLocalVar() [ <assign> Expression() ]
+    Token t;
+}
+{
+    [ <FINAL> { jjtThis.setFinal(); } ]
+    ( <INT> { jjtThis.setType(Integer.TYPE); }
+      |
+      <LONG> { jjtThis.setType(Long.TYPE); }
+      |
+      <SHORT> { jjtThis.setType(Short.TYPE); }
+      |
+      <BYTE> { jjtThis.setType(Byte.TYPE); }
+      |
+      <CHAR> { jjtThis.setType(Character.TYPE); }
+      |
+      <BOOLEAN> { jjtThis.setType(Boolean.TYPE); }
+      |
+      <FLOAT> { jjtThis.setType(Float.TYPE); }
+      |
+      <DOUBLE> { jjtThis.setType(Double.TYPE); }
+      |
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
+
+    ) (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
+    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
 void DeclareLocalVar() #Var :
@@ -962,14 +971,35 @@ void DeclareLocalVar() #Var :
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
 
-void DeclareExtVar(boolean isFinal) #ExtVar :
+void RequiredVarLookahead() #void() : {}
 {
-    Token t;
+    <FINAL>
+    |
+    <VAR> <and>
+    |
+    (<BYTE> | <SHORT> | <INT> | <LONG> | <CHAR> | <BOOLEAN> | <FLOAT> | <DOUBLE>) ((<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER> | <IDENTIFIER>)
+    |
+    <IDENTIFIER> LOOKAHEAD( { Parser.resolveType(getToken(0).image) != null } ) (<LBRACKET> <RBRACKET>)+ <and> <IDENTIFIER>
+}
+
+void Var() #Initialization : {}
+{
+    LOOKAHEAD(RequiredVarLookahead()) DeclareLocalVar() <assign> Expression()
+    |
+    DeclareLocalVar() [ <assign> Expression() ]
+}
+
+void MultipleVar() #MultipleInitialization : {}
+{
+    MultipleDeclareVar() <assign> Expression()
+}
+
+void MultipleDeclareVar() #MultipleIdentifier :
+{
+    boolean isFinal = false;
 }
 {
-    { if (isFinal) jjtThis.setFinal(); }
-    [ <and> { jjtThis.setRequired(); } ]
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    [ <FINAL> { isFinal = true; jjtThis.setFinal(); } ] <VAR> <LPAREN> DeclareExtVar(isFinal) (<COMMA> DeclareExtVar(isFinal))* <RPAREN>
 }
 
 void DeclareTryVar() #Var :
