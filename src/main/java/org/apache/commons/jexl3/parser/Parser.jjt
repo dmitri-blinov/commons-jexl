@@ -584,6 +584,7 @@ void FunctionStatement() :
 Class FunctionType() #void() :
 {
     Token t;
+    Token te;
     Class type = null;
 }
 {
@@ -609,6 +610,7 @@ Class FunctionType() #void() :
          |
          LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
          t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
        )
        ( LOOKAHEAD( <LBRACKET> ) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
     )
@@ -919,6 +921,8 @@ void DeclareExtVar(boolean isFinal) #ExtVar :
 void DeclareForVar() #Var :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
@@ -940,6 +944,7 @@ void DeclareForVar() #Var :
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
       t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setType(type); } )*
     ) 
     (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
@@ -948,6 +953,8 @@ void DeclareForVar() #Var :
 void DeclareLocalVar() #Var :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
@@ -971,6 +978,7 @@ void DeclareLocalVar() #Var :
         |
         LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
         t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
+        ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setType(type); } )*
       ) 
       (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
     )
@@ -1009,30 +1017,20 @@ void MultipleDeclareVar() #MultipleIdentifier :
     [ <FINAL> { isFinal = true; jjtThis.setFinal(); } ] <VAR> <LPAREN> DeclareExtVar(isFinal) (<COMMA> DeclareExtVar(isFinal))* <RPAREN>
 }
 
-void DeclareTypedVar(Class type) #Var :
-{
-    Token t;
-}
-{
-    [ <FINAL> { jjtThis.setFinal(); } ]
-    ( <VAR>
-      |
-      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(type, getToken(1).image) != null } ) 
-      t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(type, t.image)); }
-    )
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
-}
-
 void DeclareTryVar() #Var :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
     ( <VAR>
       |
-      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(AutoCloseable.class, getToken(1).image) != null } ) 
-      t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(AutoCloseable.class, t.image)); }
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
+      t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+      { if (type == null || !AutoCloseable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
@@ -1040,13 +1038,17 @@ void DeclareTryVar() #Var :
 void DeclareCatchVar() #Var :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     [ <FINAL> { jjtThis.setFinal(); } ]
     ( <VAR>
       |
-      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(Throwable.class, getToken(1).image) != null } ) 
-      t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(Throwable.class, t.image)); }
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
+      t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+      { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
@@ -1054,12 +1056,18 @@ void DeclareCatchVar() #Var :
 void DeclareMultiCatchVar() #MultiVar :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
-    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(Throwable.class, getToken(1).image) != null && getToken(2).kind == or} )
-    t=<IDENTIFIER> { jjtThis.addType(Parser.resolveType(Throwable.class, t.image)); }
+    LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null && getToken(2).kind == or} )
+    t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+    ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+    { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.addType(type); }
     ( LOOKAHEAD({ getToken(1).kind == or && getToken(2).kind == IDENTIFIER && Parser.resolveType(Throwable.class, getToken(2).image) != null})
-        <or> t=<IDENTIFIER> { jjtThis.addType(Parser.resolveType(Throwable.class, t.image)); }
+        <or> t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+        ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+        { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.addType(type); }
     )+
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
 }
@@ -1621,36 +1629,44 @@ void RegexLiteral() :
 void ClassLiteral() :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     (
-      t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+      t=<INT> { type = Integer.TYPE; }
       |
-      t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+      t=<LONG> { type = Long.TYPE; }
       |
-      t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+      t=<SHORT> { type = Short.TYPE; }
       |
-      t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+      t=<BYTE> { type = Byte.TYPE; }
       |
-      t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+      t=<CHAR> { type = Character.TYPE; }
       |
-      t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+      t=<BOOLEAN> { type = Boolean.TYPE; }
       |
-      t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+      t=<FLOAT> { type = Float.TYPE; }
       |
-      t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+      t=<DOUBLE> { type = Double.TYPE; }
       |
-      t=<VOID> { jjtThis.setLiteral(Void.TYPE); }
+      t=<VOID> { type = Void.TYPE; }
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
-      t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+      t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(jjtThis); } )*
     )
     <DOT> <CLASS>
+{ 
+    jjtThis.setLiteral(type); 
+}
 }
 
 void TypeCastReference() #TypeLiteral() :
 {
     Token t;
+    Token te;
+    Class type;
 }
 {
     (
@@ -1672,6 +1688,7 @@ void TypeCastReference() #TypeLiteral() :
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
       t=<IDENTIFIER> { jjtThis.setLiteral(Parser.resolveType(t.image)); }
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getLiteral(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setLiteral(type); } )*
     )
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
@@ -1698,31 +1715,13 @@ void TypeReference() #TypeLiteral() :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
-void NewTypeReference() #TypeLiteral() :
+void NewTypeReference(Class type) #TypeLiteral() :
 {
     Token t;
     Class value;
 }
 {
-    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
-}
-
-void NewMapTypeReference() #TypeLiteral() :
-{
-    Token t;
-    Class value;
-}
-{
-    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null || !Map.class.isAssignableFrom(value)) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
-}
-
-void NewCollectionTypeReference() #TypeLiteral() :
-{
-    Token t;
-    Class value;
-}
-{
-    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null || !Collection.class.isAssignableFrom(value)) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+    t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveInstantiableType(t.image); if (value == null || type != null && !type.isAssignableFrom(value)) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
 void ArrayTypeReference() #void : {}
@@ -1920,7 +1919,7 @@ void ForNameConstructor() #ConstructorNode() : {}
 
 void QualifiedConstructor() #QualifiedConstructorNode() : {}
 {
-    NewTypeReference() Arguments()
+    NewTypeReference(null) Arguments()
 }
 
 void ArrayConstructor() #ArrayConstructorNode() : {}
@@ -1945,12 +1944,12 @@ void InitializedArrayConstructor() #InitializedArrayConstructorNode() : {}
 
 void InitializedCollectionConstructor() #InitializedCollectionConstructorNode() : {}
 {
-    NewCollectionTypeReference() InitializedCollectionLiteral()
+    NewTypeReference(Collection.class) InitializedCollectionLiteral()
 }
 
 void InitializedMapConstructor() #InitializedMapConstructorNode() : {}
 {
-    NewMapTypeReference() InitializedMapLiteral()
+    NewTypeReference(Map.class) InitializedMapLiteral()
 }
 
 void InitializedCollectionLiteral() #void() : {}
@@ -1974,6 +1973,7 @@ void Parameter() #void :
 void VarParameter() #void :
 {
     Token t;
+    Token te;
     Class type = null;
     boolean isFinal = false;
     boolean isRequired = false;
@@ -2003,6 +2003,7 @@ void VarParameter() #void :
          |
          LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
          t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
+         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
       ) 
       (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )

@@ -444,14 +444,16 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         StringBuilder result = new StringBuilder();
         Class literal = c;
         int array = 0;
-
         while (literal.isArray()) {
             array++;
             literal = literal.getComponentType();
         }
-
         if (literal != null) {
-            if (JexlParser.isSimpleName(literal)) {
+            if (literal.isMemberClass()) {
+                result.append(getClassName(literal.getEnclosingClass()));
+                result.append(".");
+            }
+            if (literal.isMemberClass() || JexlParser.isSimpleName(literal)) {
                 result.append(literal.getSimpleName());
             } else {
                 result.append(literal.getName());

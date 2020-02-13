@@ -83,7 +83,7 @@ public class LambdaTest extends JexlTestCase {
     }
 
     @Test
-    public void testStatucFunction() throws Exception {
+    public void testStaticFunction() throws Exception {
         JexlEngine jexl = createEngine();
         String strs = "var a = 10; var s = static function { return a }; s()";
         JexlScript s42 = jexl.createScript(strs);
@@ -177,7 +177,7 @@ public class LambdaTest extends JexlTestCase {
         Set<List<String>> hvars;
         String strs;
 
-        // hosted variables are NOT local variables
+        // captured variables are NOT local variables
         strs = "(x)->{ (y)->{ x + y } }";
         s42 = jexl.createScript(strs);
         result = s42.execute(ctx, 15);

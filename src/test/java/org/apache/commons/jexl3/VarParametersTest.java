@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3;
 
+import java.util.AbstractMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -60,6 +62,15 @@ public class VarParametersTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("function(String x, String y) { x + y }");
         Object o = e.execute(jc, "4", "2");
         Assert.assertEquals("Result is not as expected", "42", o);
+    }
+
+    @Test
+    public void testNestedType() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = JEXL.createScript("function(Map.Entry x) { x.key + x.value }");
+        Object o = e.execute(jc, new AbstractMap.SimpleEntry(40,2));
+        Assert.assertEquals("Result is not as expected", 42, o);
     }
 
     @Test

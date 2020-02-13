@@ -816,7 +816,6 @@ public abstract class JexlParser extends StringParser {
 
         if (Character.isLowerCase(name.charAt(0)) && name.indexOf(".") == -1)
             return null;
-
         Class result = classes.computeIfAbsent(name, x -> forName(x));
         return result != NOT_A_CLASS ? result : null;
     }
@@ -834,6 +833,22 @@ public abstract class JexlParser extends StringParser {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Resolves a nested type by its name.
+     * @param type the type
+     * @param name the name of the nested type
+     * @return the Class or null otherwise
+     */
+    public static Class resolveNestedType(Class type, String name) {
+        if (name == null)
+            return null;
+        for (Class c : type.getClasses()) {
+            if (name.equals(c.getSimpleName()))
+                return c;
+        }
+        return null;
     }
 
     /**

@@ -218,6 +218,17 @@ public class ForEachTest extends JexlTestCase {
     }
 
     @Test
+    public void testForEachNestedTyped() throws Exception {
+        JexlScript e = JEXL.createScript("for(Map.Entry item : list.entrySet()) item.value");
+        JexlContext jc = new MapContext();
+        Map<?, ?> map = System.getProperties();
+        String lastProperty = (String) new ArrayList<Object>(map.values()).get(System.getProperties().size() - 1);
+        jc.set("list", map);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not last evaluated expression", lastProperty, o);
+    }
+
+    @Test
     public void testForEachTypedFinal() throws Exception {
         JexlScript e = JEXL.createScript("for(final String item : list) item");
         JexlContext jc = new MapContext();

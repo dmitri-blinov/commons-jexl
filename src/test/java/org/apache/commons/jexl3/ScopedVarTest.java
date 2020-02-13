@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -55,6 +57,17 @@ public class ScopedVarTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertTrue("Result is not true", o instanceof String);
         Assert.assertEquals("Result is not as expected", "abc", o);
+    }
+
+    @Test
+    public void testNestedType() throws Exception {
+        JexlContext jc = new MapContext();
+
+        JexlScript e = jexl.createScript("Map.Entry x = [3:4]");
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not true", o instanceof Map.Entry);
+        Assert.assertEquals("Result is not as expected", 3, ((Map.Entry) o).getKey());
+        Assert.assertEquals("Result is not as expected", 4, ((Map.Entry) o).getValue());
     }
 
     @Test

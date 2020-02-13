@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -77,6 +79,17 @@ public class FunctionTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         Object result = s.execute(jc);
         Assert.assertEquals(42L, result);
+    }
+
+    @Test
+    public void testNestedTypedFunction() throws Exception {
+        JexlEngine jexl = createEngine();
+        JexlScript s = jexl.createScript("Map.Entry x() {return [2:42]}; x()");
+        JexlContext jc = new MapContext();
+        Object result = s.execute(jc);
+        Assert.assertTrue(result instanceof Map.Entry);
+        Assert.assertEquals(42, ((Map.Entry) result).getValue());
+        Assert.assertEquals(2, ((Map.Entry) result).getKey());
     }
 
     @Test
