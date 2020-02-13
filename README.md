@@ -191,28 +191,30 @@ Enhancements
 
 + Variadic functions can be defined by using `(a...)` syntax after the last function argument
 
-+ Function closures implement all basic java-8 `@FunctionalInterface` interfaces, 
-  so that it is possible to pass a function closure as an argument to java method that accepts such interfaces
++ Function closures implement all basic Java 8 `@FunctionalInterface` interfaces, 
+  so that it is possible to pass a function closure as an argument to a java method that accepts such interfaces
 
 + Function can be declared as `static` to prevent variable capturing
 
-+ Function parameters can use `var` keyword for parameter definition
++ Function parameters can use `var` keyword for parameter definition `function(var x) {}`
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
 
-+ Function can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
-
 + Function parameters can be declared as `final`
 
-+ Function parameters can be declared as non-null `function(var &x)`
++ Function parameters can be declared as non-null `function(var &x) {}`
 
-+ Function parameters can have default values `function(var x = 0)` 
++ Function parameters can have default values `function(var x = 0) {}` 
 
-+ Return statement expression can be omitted, implying `null` as a result
++ Functions can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
+
++ Return statement expression can be omitted, implying `null` as a result 
+
++ Return statement should not use value expression for void functions
 
 + Local variables can be declared strongly typed by using java class or primitive types `int i = 0`
 
-+ Local variables can be declared final `final var i = 0`
++ Local variables can be declared as final `final var i = 0`
 
 + Local variables can be declared as non-null `var &i = 0`
 
@@ -230,7 +232,9 @@ Enhancements
 
 + Operator `new` supports initialized map creation syntax `new LinkedHashMap {'abc' : 1, 'def' : 2}`
 
-+ Foreach statement may also define additional `counter` variable `for (var counter,x : list)` along with the current loop value variable
++ Foreach statement may also define additional `counter` variable `for (var counter,x : list) {}` along with the current loop value variable
+
++ Foreach statement support strongly types variable `for (String x : list) {}` 
 
 + Immutable list `#[1,2,3]` literal constructs can be used 
 
