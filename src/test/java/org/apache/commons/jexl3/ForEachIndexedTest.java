@@ -175,4 +175,13 @@ public class ForEachIndexedTest extends JexlTestCase {
         Assert.assertEquals("Result is not last evaluated expression", 3, o);
     }
 
+    @Test
+    public void testForEachVarFinal() throws Exception {
+        JexlScript e = JEXL.createScript("for(final var i, item : list) item");
+        JexlContext jc = new MapContext();
+        jc.set("list", new Object[]{"Hello", "World"});
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not last evaluated expression", "World", o);
+    }
+
 }
