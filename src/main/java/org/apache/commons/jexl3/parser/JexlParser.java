@@ -822,6 +822,21 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Resolves a type that is subtype by its name.
+     * @param type the supertype
+     * @param name the name of the type
+     * @return the Class that is subtype of the specified type, or null otherwise
+     */
+    public static Class resolveType(Class type, String name) {
+        Class result = resolveType(name);
+        if (result != null && type.isAssignableFrom(type)) {
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Gets a class by its name.
      * @param name the name of the class
      * @return the Class
@@ -855,26 +870,6 @@ public abstract class JexlParser extends StringParser {
         return (result == null || result.isPrimitive() || result.isInterface() || result.isMemberClass() ||
                 result.isAnnotation() || result.isEnum() || result.isArray() ||
                 Modifier.isAbstract(result.getModifiers())) ? null : result;
-    }
-
-    /**
-     * Resolves a throwable type by its name.
-     * @param name the name of the type
-     * @return the Class
-     */
-    protected static Class resolveThrowableType(String name) {
-        Class result = resolveType(name);
-        return result != null && Throwable.class.isAssignableFrom(result) ? result : null;
-    }
-
-    /**
-     * Resolves a closeable type by its name.
-     * @param name the name of the type
-     * @return the Class
-     */
-    protected static Class resolveCloseableType(String name) {
-        Class result = resolveType(name);
-        return result != null && AutoCloseable.class.isAssignableFrom(result) ? result : null;
     }
 
     /**
