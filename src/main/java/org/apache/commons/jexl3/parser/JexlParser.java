@@ -750,7 +750,10 @@ public abstract class JexlParser extends StringParser {
         throw xparse != null ? xparse : new JexlException.Parsing(xinfo, msg);
     }
 
-    protected static String[] implicitPackages = {"java.lang.","java.util.stream.","java.util.","java.io.","java.net."};
+    /**
+     * Implicitly imported java packages for resolving simple class names from
+     */
+    protected static String[] implicitPackages = {"java.lang.","java.util.function","java.util.regex","java.util.stream.","java.util.","java.io.","java.net."};
 
     /**
      * Checks whether the class has simple name 
