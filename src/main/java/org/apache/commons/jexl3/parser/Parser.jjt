@@ -1342,6 +1342,8 @@ void UnaryExpressionNotPlusMinus() #void : {}
     LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus() #CastNode(2))
     |
     PostfixExpression()
+    |
+    LOOKAHEAD( <SWITCH> ) SwitchExpression()
 }
 
 void PostfixExpression() #void : {}
@@ -2183,8 +2185,6 @@ void PrimaryExpression() #void : {}
     LOOKAHEAD( <HBRACKET> ) ImmutableArrayLiteral()
     |
     LOOKAHEAD( <NEW> ) Constructor()
-    |
-    LOOKAHEAD( <SWITCH> ) SwitchExpression()
     |
     LOOKAHEAD( FunctionCallLookahead() ) FunctionCall()
     |
