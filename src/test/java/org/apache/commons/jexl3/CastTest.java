@@ -224,4 +224,13 @@ public class CastTest extends JexlTestCase {
         Assert.assertEquals("Result is not true", "123", o);
     }
 
+    @Test
+    public void testPrecedence() throws Exception {
+        JexlEngine jexl = new JexlBuilder().arithmetic(new JexlArithmetic(false)).create();
+        JexlContext jc = new MapContext();
+        JexlScript e = jexl.createScript("var Integer = 7; ((Integer) + 7)");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 14, o);
+    }
+
 }

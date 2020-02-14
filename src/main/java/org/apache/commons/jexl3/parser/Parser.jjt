@@ -1326,6 +1326,11 @@ void UnaryExpression() #void : {}
     |
     <tilda> UnaryExpression() #BitwiseComplNode(1)
     |
+    UnaryExpressionNotPlusMinus()
+}
+
+void UnaryExpressionNotPlusMinus() #void : {}
+{
     (<not>|<NOT>) UnaryExpression() #NotNode(1)
     |
     <EMPTY> UnaryExpression() #EmptyFunction(1)
@@ -1334,7 +1339,7 @@ void UnaryExpression() #void : {}
     |
     <ELLIPSIS> EnumerationExpression()
     |
-    LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpression()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpression() #CastNode(2))
+    LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus() #CastNode(2))
     |
     PostfixExpression()
 }
