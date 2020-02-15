@@ -50,6 +50,8 @@ import java.util.Set;
 
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.jexl3.parser.ASTNumberLiteral;
+import org.apache.commons.jexl3.parser.ASTStringLiteral;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -161,7 +163,7 @@ public class Engine extends JexlEngine {
     /**
      * Collect all or only dot references.
      */
-    protected final boolean collectAll;
+    protected final int collectMode;
     /**
      * A cached version of the options.
      */
@@ -188,7 +190,7 @@ public class Engine extends JexlEngine {
         this.cancellable = option(conf.cancellable(), !silent && strict);
         options.setCancellable(cancellable);
         this.debug = option(conf.debug(), true);
-        this.collectAll = option(conf.collectAll(), true);
+        this.collectMode = conf.collectMode();
         this.stackOverflow = conf.stackOverflow() > 0? conf.stackOverflow() : Integer.MAX_VALUE;
         // core properties:
         JexlUberspect uber = conf.uberspect() == null ? getUberspect(conf.logger(), conf.strategy()) : conf.uberspect();
@@ -613,7 +615,7 @@ public class Engine extends JexlEngine {
      * @return a collector instance
      */
     protected VarCollector varCollector() {
-        return new VarCollector(this.collectAll);
+        return new VarCollector(this.collectMode);
     }
 
     /**
@@ -633,16 +635,18 @@ public class Engine extends JexlEngine {
          */
         private JexlNode root = null;
         /**
-         * Whether constant array-access is considered equivalent to dot-access.
+         * Whether constant array-access is considered equivalent to dot-access;
+         * if so, > 1 means collect any constant (set,map,...) instead of just 
+         * strings and numbers.
          */
-        private boolean semantic = true;
+        private int mode = 1;
 
         /**
          * Constructor.
          * @param constaa whether constant array-access is considered equivalent to dot-access
          */
-        protected VarCollector(boolean constaa) {
-            semantic = constaa;
+        protected VarCollector(int constaa) {
+            mode = constaa;
         }
 
         /**
@@ -715,15 +719,20 @@ public class Engine extends JexlEngine {
             if (collector.isCollecting()) {
                 collector.add(((ASTIdentifierAccess) node).getName());
             }
-        } else if (node instanceof ASTArrayAccess && collector.semantic) {
+        } else if (node instanceof ASTArrayAccess && collector.mode > 0) {
             int num = node.jjtGetNumChildren();
             // collect only if array access is const and follows an identifier
             boolean collecting = collector.isCollecting();
             for (int i = 0; i < num; ++i) {
                 JexlNode child = node.jjtGetChild(i);
                 if (collecting && child.isConstant()) {
-                    String image = child.toString();
-                    collector.add(image);
+                    // collect all constants or only string and number literals
+                    boolean collect = collector.mode > 1
+                            || (child instanceof ASTStringLiteral || child instanceof ASTNumberLiteral);
+                    if (collect) {
+                        String image = child.toString();
+                        collector.add(image);
+                    }
                 } else {
                     collecting = false;
                     collector.collect(null);
