@@ -753,7 +753,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Implicitly imported java packages for resolving simple class names from
      */
-    protected static String[] implicitPackages = {"java.lang.","java.util.function","java.util.regex","java.util.stream.","java.util.","java.io.","java.net."};
+    protected static String[] implicitPackages = {"java.lang","java.util.function","java.util.regex","java.util.stream","java.util","java.io","java.net"};
 
     /**
      * Checks whether the class has simple name 
@@ -766,7 +766,6 @@ public abstract class JexlParser extends StringParser {
         String p = pack != null ? pack.getName() : null;
         if (p == null || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger"))
             return true;
-        p = p + ".";
         for (String packageName : implicitPackages) {
             if (p.equals(packageName))
                 return true;
@@ -862,7 +861,7 @@ public abstract class JexlParser extends StringParser {
     protected static Class forName(String name) {
         if (name.indexOf(".") == -1) {
             for (String prefix : implicitPackages) {
-                String className = prefix + name;
+                String className = prefix + "." + name;
                 try {
                     return Class.forName(className);
                 } catch (ClassNotFoundException ex) {
