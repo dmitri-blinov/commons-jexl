@@ -268,7 +268,7 @@ public class FeatureController extends ScriptVisitor {
     }
 
     @Override
-    protected Object visit(ASTMultipleInitialization node, Object data) {
+    protected Object visit(ASTMultipleVarStatement node, Object data) {
         return controlSideEffect(node, data);
     }
 

@@ -170,13 +170,16 @@
                         In non-lexical mode the variable scope is either the entire script scope or the function definition block;
                         Local variables take precedence in resolution over contextual variables.
                         The values assigned to the strongly typed variables are implicitly cast to the defined type in non-strict arithmetic mode.
-                        Primitive type variables are non-null, so it is impossible to declare a primitive type variable without initialization.
-                        When scripts are created with named parameters, those parameters behave as local variables.
+                        Primitive type variables are initialized with default values if are declared without explicit initialization.
+                        When a script is created with named parameters, those parameters behave as local variables.
                         <p>Variables can be declared as final using <code>final var x = 42</code>,
                            it is required to declare a final variable with initialization.
                         </p>
                         <p>Variables can be declared as non-null using a <code>&amp;</code> declarator before the variable name <code>var &amp;x = 42</code>,
-                           it is required to declare a non-null variable with initialization.
+                           it is required to declare a non-null variable with initialization that assigns a non-null value to a variable.
+                        </p>
+                        <p>To declare more than one variable of the specified type, a comma-separated list can be used <code>var x = 40, y = 2</code> e.g.
+                           <code>int x = 40, y = 2</code> is equivalent to <code>int x = 40; int y = 2</code>.
                         </p>
                         <p>Variable names are <strong>case-sensitive</strong>, e.g. <code>var1</code> and <code>Var1</code> are different variables.
                         </p>

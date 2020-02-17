@@ -116,7 +116,7 @@ import org.apache.commons.jexl3.parser.ASTModNode;
 import org.apache.commons.jexl3.parser.ASTMulNode;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
-import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
 import org.apache.commons.jexl3.parser.ASTMultiVar;
 import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
@@ -185,6 +185,7 @@ import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
 import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
 import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
 import org.apache.commons.jexl3.parser.ASTVar;
+import org.apache.commons.jexl3.parser.ASTVarStatement;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
 import org.apache.commons.jexl3.parser.JexlNode;
@@ -2966,7 +2967,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTMultipleInitialization node, Object data) {
+    protected Object visit(ASTMultipleVarStatement node, Object data) {
         cancelCheck(node);
         // Vector of identifiers to assign values to
         JexlNode identifiers = node.jjtGetChild(0);
@@ -3057,19 +3058,48 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(ASTVarStatement node, Object data) {
+        cancelCheck(node);
+        int num = node.jjtGetNumChildren();
+        Object value = null;
+        for (int i = 0; i < num; i++) {
+            value = node.jjtGetChild(i).jjtAccept(this, data);
+        }
+        return value;
+    }
+
+    @Override
     protected Object visit(ASTInitialization node, Object data) {
         cancelCheck(node);
-        JexlNode left = node.jjtGetChild(0);
+        ASTVar left = (ASTVar) node.jjtGetChild(0);
+        Object right = null;
+        // First evaluate the right part
         if (node.jjtGetNumChildren() == 2) {
-           // First evaluate the right part
-           Object right = node.jjtGetChild(1).jjtAccept(this, data);
-           // Then declare variable
-           left.jjtAccept(this, data);
-           // Initialize variable
-           return executeAssign(node, left, right, null, data);
+            right = node.jjtGetChild(1).jjtAccept(this, data);
+        } else if (left.getType() == Boolean.TYPE) {
+            right = Boolean.FALSE;
+        } else if (left.getType() == Character.TYPE) {
+            right = (char) 0;
+        } else if (left.getType() == Byte.TYPE) {
+            right = (byte) 0;
+        } else if (left.getType() == Short.TYPE) {
+            right = (short) 0;
+        } else if (left.getType() == Integer.TYPE) {
+            right = 0;
+        } else if (left.getType() == Long.TYPE) {
+            right = 0L;
+        } else if (left.getType() == Float.TYPE) {
+            right = 0.0f;
+        } else if (left.getType() == Double.TYPE) {
+            right = 0.0d;
+        }
+        // Then declare variable
+        Object result = left.jjtAccept(this, data);
+        // Initialize variable
+        if (node.jjtGetNumChildren() == 2 || right != null) {
+            return executeAssign(node, left, right, null, data);
         } else {
-           // Just declare variable
-           return left.jjtAccept(this, data);
+            return result;
         }
     }
 

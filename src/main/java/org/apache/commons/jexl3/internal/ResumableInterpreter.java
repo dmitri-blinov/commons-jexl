@@ -37,11 +37,10 @@ import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
-import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTIfStatement;
 import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
-import org.apache.commons.jexl3.parser.ASTMultipleInitialization;
+import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
 import org.apache.commons.jexl3.parser.ASTRemove;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
 import org.apache.commons.jexl3.parser.ASTSwitchStatement;
@@ -52,6 +51,7 @@ import org.apache.commons.jexl3.parser.ASTThrowStatement;
 import org.apache.commons.jexl3.parser.ASTTryStatement;
 import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
 import org.apache.commons.jexl3.parser.ASTVar;
+import org.apache.commons.jexl3.parser.ASTVarStatement;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
 import org.apache.commons.jexl3.parser.JexlNode;
@@ -906,13 +906,13 @@ public class ResumableInterpreter extends Interpreter {
     }
 
     @Override
-    protected Object visit(ASTMultipleInitialization node, Object data) {
+    protected Object visit(ASTMultipleVarStatement node, Object data) {
         suspended = false;
         return super.visit(node, data);
     }
 
     @Override
-    protected Object visit(ASTInitialization node, Object data) {
+    protected Object visit(ASTVarStatement node, Object data) {
         suspended = false;
         return super.visit(node, data);
     }
