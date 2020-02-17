@@ -200,7 +200,7 @@ Enhancements
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
 
-+ Function parameters can be declared as `final`
++ Function parameters can be declared as final `function(final var x) {}`
 
 + Function parameters can be declared as non-null `function(var &x) {}`
 
@@ -215,6 +215,8 @@ Enhancements
 + Local variables can be declared strongly typed by using java class or primitive types `int i = 0`
 
 + Local variables can be declared as final `final var i = 0`
+
++ Multiple local variables of the same type can be declared `int i = 0, j = 1`
 
 + Local variables can be declared as non-null `var &i = 0`
 
