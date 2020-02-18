@@ -120,7 +120,7 @@ public final class Scope {
             parms = parameters.length;
             namedVariables = new LinkedHashMap<String, Integer>();
             for (int p = 0; p < parms; ++p) {
-                namedVariables.put(parameters[p], p);
+                addSymbol(parameters[p]);
             }
         } else {
             parms = 0;
@@ -146,31 +146,10 @@ public final class Scope {
         if (parms != scope.parms) {
             return false;
         }
-        if (varArgs != scope.varArgs) {
-            return false;
-        }
         if (namedVariables == null && scope.namedVariables != null) {
             return false;
         }
         if (namedVariables != null && !namedVariables.equals(scope.namedVariables)) {
-            return false;
-        }
-        if (variableTypes == null && scope.variableTypes != null) {
-            return false;
-        }
-        if (variableTypes != null && !variableTypes.equals(scope.variableTypes)) {
-            return false;
-        }
-        if (finalVariables == null && scope.finalVariables != null) {
-            return false;
-        }
-        if (finalVariables != null && !finalVariables.equals(scope.finalVariables)) {
-            return false;
-        }
-        if (requiredVariables == null && scope.requiredVariables != null) {
-            return false;
-        }
-        if (requiredVariables != null && !requiredVariables.equals(scope.requiredVariables)) {
             return false;
         }
         return true;
