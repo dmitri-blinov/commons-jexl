@@ -118,7 +118,6 @@ public final class Scope {
     public Scope(Scope scope, String... parameters) {
         if (parameters != null) {
             parms = parameters.length;
-            namedVariables = new LinkedHashMap<String, Integer>();
             for (int p = 0; p < parms; ++p) {
                 addSymbol(parameters[p]);
             }
@@ -452,6 +451,8 @@ public final class Scope {
                 }
             }
             return new Frame(this, arguments, 0).assign(args);
+        } else if (returnType != null) {
+            return new Frame(this);
         } else {
             return null;
         }

@@ -43,6 +43,14 @@ public final class Frame {
     }
 
     /**
+     * Creates a new empty frame.
+     * @param s the scope
+     */
+    public Frame(Scope s) {
+        this(s, null, 0);
+    }
+
+    /**
      * Creates a new frame.
      * @param f the parent frame
      */
