@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A soft referenced cache.
@@ -47,11 +45,7 @@ public class SoftCache<K, V> {
     /**
      * The soft reference to the cache map.
      */
-    private SoftReference<Map<K, V>> ref = null;
-    /**
-     * The cache r/w lock.
-     */
-    private final ReadWriteLock lock;
+    private volatile SoftReference<Map<K, V>> ref = null;
 
     /**
      * Creates a new instance of a soft cache.
@@ -60,7 +54,6 @@ public class SoftCache<K, V> {
      */
     SoftCache(int theSize) {
         size = theSize;
-        lock = new ReentrantReadWriteLock();
     }
 
     /**
@@ -75,13 +68,8 @@ public class SoftCache<K, V> {
     /**
      * Clears the cache.
      */
-    public void clear() {
-        lock.writeLock().lock();
-        try {
-            ref = null;
-        } finally {
-            lock.writeLock().unlock();
-        }
+    public synchronized void clear() {
+        ref = null;
     }
 
     /**
@@ -90,14 +78,9 @@ public class SoftCache<K, V> {
      * @param key the cache entry key
      * @return the cache entry value
      */
-    public V get(K key) {
-        lock.readLock().lock();
-        try {
-            final Map<K, V> map = ref != null ? ref.get() : null;
-            return map != null ? map.get(key) : null;
-        } finally {
-            lock.readLock().unlock();
-        }
+    public synchronized V get(K key) {
+        final Map<K, V> map = ref != null ? ref.get() : null;
+        return map != null ? map.get(key) : null;
     }
 
     /**
@@ -106,18 +89,13 @@ public class SoftCache<K, V> {
      * @param key the cache entry key
      * @param script the cache entry value
      */
-    public void put(K key, V script) {
-        lock.writeLock().lock();
-        try {
-            Map<K, V> map = ref != null ? ref.get() : null;
-            if (map == null) {
-                map = createCache(size);
-                ref = new SoftReference<Map<K, V>>(map);
-            }
-            map.put(key, script);
-        } finally {
-            lock.writeLock().unlock();
+    public synchronized void put(K key, V script) {
+        Map<K, V> map = ref != null ? ref.get() : null;
+        if (map == null) {
+            map = createCache(size);
+            ref = new SoftReference<Map<K, V>>(map);
         }
+        map.put(key, script);
     }
 
     /**
@@ -127,22 +105,17 @@ public class SoftCache<K, V> {
      *
      * @return the cache entry list
      */
-    public List<Map.Entry<K, V>> entries() {
-        lock.readLock().lock();
-        try {
-            Map<K, V> map = ref != null ? ref.get() : null;
-            if (map == null) {
-                return Collections.emptyList();
-            }
-            final Set<Map.Entry<K, V>> set = map.entrySet();
-            final List<Map.Entry<K, V>> entries = new ArrayList<Map.Entry<K, V>>(set.size());
-            for (Map.Entry<K, V> e : set) {
-                entries.add(new AbstractMap.SimpleEntry<K, V>(e));
-            }
-            return entries;
-        } finally {
-            lock.readLock().unlock();
+    public synchronized List<Map.Entry<K, V>> entries() {
+        Map<K, V> map = ref != null ? ref.get() : null;
+        if (map == null) {
+            return Collections.emptyList();
         }
+        final Set<Map.Entry<K, V>> set = map.entrySet();
+        final List<Map.Entry<K, V>> entries = new ArrayList<Map.Entry<K, V>>(set.size());
+        for (Map.Entry<K, V> e : set) {
+            entries.add(new AbstractMap.SimpleEntry<K, V>(e));
+        }
+        return entries;
     }
 
     /**
