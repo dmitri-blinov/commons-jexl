@@ -145,13 +145,11 @@ public final class Scope {
         if (parms != scope.parms) {
             return false;
         }
-        if (namedVariables == null && scope.namedVariables != null) {
-            return false;
+        if (namedVariables == null) {
+            return scope.namedVariables == null;
+        } else {
+            return namedVariables.equals(scope.namedVariables);
         }
-        if (namedVariables != null && !namedVariables.equals(scope.namedVariables)) {
-            return false;
-        }
-        return true;
     }
 
     /**

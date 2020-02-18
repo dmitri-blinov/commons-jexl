@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.AbstractMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -136,7 +137,7 @@ public class SoftCache<K, V> {
             final Set<Map.Entry<K, V>> set = map.entrySet();
             final List<Map.Entry<K, V>> entries = new ArrayList<Map.Entry<K, V>>(set.size());
             for (Map.Entry<K, V> e : set) {
-                entries.add(new SoftCacheEntry<K, V>(e));
+                entries.add(new AbstractMap.SimpleEntry<K, V>(e));
             }
             return entries;
         } finally {
@@ -166,46 +167,3 @@ public class SoftCache<K, V> {
         };
     }
 }
-
-/**
- * A soft cache entry.
- *
- * @param <K> key type
- * @param <V> value type
- */
-class SoftCacheEntry<K, V> implements Map.Entry<K, V> {
-    /**
-     * The entry key.
-     */
-    private final K key;
-    /**
-     * The entry value.
-     */
-    private final V value;
-
-    /**
-     * Creates an entry clone.
-     *
-     * @param e the entry to clone
-     */
-    SoftCacheEntry(Map.Entry<K, V> e) {
-        key = e.getKey();
-        value = e.getValue();
-    }
-
-    @Override
-    public K getKey() {
-        return key;
-    }
-
-    @Override
-    public V getValue() {
-        return value;
-    }
-
-    @Override
-    public V setValue(V v) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-}
-
