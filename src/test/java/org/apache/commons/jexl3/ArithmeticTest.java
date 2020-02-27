@@ -127,16 +127,6 @@ public class ArithmeticTest extends JexlTestCase {
         asserter.assertExpression("right * left", new BigInteger("12"));
         asserter.assertExpression("right / left", new BigInteger("3"));
         asserter.assertExpression("right % left", new BigInteger("0"));
-    } 
-    
-    @Test
-    public void testOverflows() throws Exception {
-        asserter.assertExpression("1 + 2147483647", Long.valueOf("2147483648"));
-        asserter.assertExpression("-2147483648 - 1", Long.valueOf("-2147483649"));
-        asserter.assertExpression("1 + 9223372036854775807", new BigInteger("9223372036854775808"));
-        asserter.assertExpression("-1 + (-9223372036854775808)", new BigInteger("-9223372036854775809"));
-        asserter.assertExpression("-9223372036854775808 - 1", new BigInteger("-9223372036854775809"));
-        asserter.assertExpression("-1 - 9223372036854775808", new BigInteger("-9223372036854775809"));
     }
 
     @Test
@@ -1176,7 +1166,7 @@ public class ArithmeticTest extends JexlTestCase {
         public XmlArithmetic(boolean astrict) {
             super(astrict);
         }
-        
+
         public XmlArithmetic(boolean astrict, MathContext bigdContext, int bigdScale) {
             super(astrict, bigdContext, bigdScale);
         }
@@ -1205,12 +1195,12 @@ public class ArithmeticTest extends JexlTestCase {
         JexlScript e1 = jexl.createScript("empty(x)", "x");
         JexlScript s0 = jexl.createScript("x.size()", "x");
         JexlScript s1 = jexl.createScript("size(x)", "x");
-        
+
         empty = (Boolean) e1.execute(null, (Object) null);
         Assert.assertTrue(empty);
         size = (Integer) s1.execute(null, (Object) null);
         Assert.assertEquals(0, size);
-            
+
         try {
             Object xx = e0.execute(null, (Object) null);
             Assert.assertNull(xx);
@@ -1229,7 +1219,7 @@ public class ArithmeticTest extends JexlTestCase {
         Assert.assertNull(x0);
         Object x1 = s0.execute(ctxt, (Object) null);
         Assert.assertNull(x1);
-        
+
         xml = getDocument("<node info='123'/>");
         x = xml.getLastChild();
         empty = (Boolean) e0.execute(null, x);
