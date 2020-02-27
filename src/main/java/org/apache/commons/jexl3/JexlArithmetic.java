@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.AbstractMap;
 import java.util.Iterator;
@@ -713,6 +714,26 @@ public class JexlArithmetic {
     }
 
     /**
+     * Checks if value class is a number that can be represented exactly in an int.
+     *
+     * @param value  argument
+     * @return true if argument can be represented by an integer
+     */
+    private static Number asIntegerNumber(Object value) {
+        return value instanceof Integer || value instanceof Short || value instanceof Byte ? (Number) value : null;
+    }
+
+    /**
+     * Checks if value class is a number that can be represented exactly in a long.
+     *
+     * @param value  argument
+     * @return true if argument can be represented by a long
+     */
+    private static Number asLongNumber(Object value) {
+        return value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte ? (Number) value : null;
+    }
+
+    /**
      * Add two values together.
      * <p>
      * If any numeric add fails on coercion to the appropriate type,
@@ -764,7 +785,7 @@ public class JexlArithmetic {
                     double r = toDouble(right);
                     return l + r;
                 }
-                // otherwise treat as integers
+                // otherwise treat as (big) integers
                 BigInteger l = toBigInteger(left);
                 BigInteger r = toBigInteger(right);
                 BigInteger result = l.add(r);
@@ -931,6 +952,22 @@ public class JexlArithmetic {
      */
     public Object selfMod(Object left, Object right) {
         return mod(left, right);
+    }
+
+    /**
+     * Checks if the product of the arguments overflows a {@code long}.
+     * <p>see java8 Math.multiplyExact
+     * @param x the first value
+     * @param y the second value
+     * @param r the product
+     * @return true if product fits a long, false if it overflows
+     */
+    private static boolean isMultiplyExact(long x, long y, long r) {
+        long ax = Math.abs(x);
+        long ay = Math.abs(y);
+        return !(((ax | ay) >>> 31 != 0) &&
+                 (((y != 0) && (r / y != x)) ||
+                   (x == Long.MIN_VALUE && y == -1)));
     }
 
     /**
