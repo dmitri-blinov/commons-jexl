@@ -691,7 +691,10 @@ public class JexlArithmetic {
      * @param object  argument
      */
     protected boolean isIntegerPrecisionNumber(Object value) {
-        return value instanceof Integer || value instanceof Short || value instanceof Byte;
+        if (value == null)
+            return false;
+        Class c = value.getClass();
+        return c == Integer.class || c == Short.class || c == Byte.class;
     }
 
     /**
@@ -700,7 +703,10 @@ public class JexlArithmetic {
      * @param object  argument
      */
     protected boolean isLongPrecisionNumber(Object value) {
-        return value instanceof Long || isIntegerPrecisionNumber(value);
+        if (value == null)
+            return false;
+        Class c = value.getClass();
+        return c == Long.class || c == Integer.class || c == Short.class || c == Byte.class;
     }
 
     protected BigInteger extendedLong(long x, byte msb) {
@@ -762,7 +768,7 @@ public class JexlArithmetic {
                         if ((l & r & ~result) < 0) {
                             return extendedLong(result, (byte) -1);
                         } else if ((~l & ~r & result) < 0) {
-                            return extendedLong(result, (byte) -0);
+                            return extendedLong(result, (byte) 0);
                         } else {
                             return result;
                         }
