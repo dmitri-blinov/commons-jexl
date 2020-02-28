@@ -470,7 +470,7 @@ public class JexlArithmetic {
      * @return true if it is, false otherwise.
      */
     protected boolean isFloatingPointNumber(Object val) {
-        if (val instanceof Float || val instanceof Double) {
+        if (isFloatingPoint(val)) {
             return true;
         }
         if (val instanceof CharSequence) {
@@ -489,7 +489,7 @@ public class JexlArithmetic {
      * @return true if it is a Float or a Double.
      */
     protected boolean isFloatingPoint(final Object o) {
-        return o instanceof Float || o instanceof Double;
+        return o instanceof Double || o instanceof Float;
     }
 
     /**
@@ -499,11 +499,14 @@ public class JexlArithmetic {
      * @return true if Integer, Long, Byte, Short or Character.
      */
     protected boolean isNumberable(final Object o) {
-        return o instanceof Integer
-                || o instanceof Long
-                || o instanceof Byte
-                || o instanceof Short
-                || o instanceof Character;
+        if (o == null)
+            return false;
+        Class c = o.getClass();
+        return c == Integer.class
+                || c == Long.class
+                || c == Byte.class
+                || c == Short.class
+                || c == Character.class;
     }
 
     /**
@@ -1113,7 +1116,7 @@ public class JexlArithmetic {
         } else if (val instanceof Integer) {
             return -((Integer) val);
         } else if (val instanceof Double) {
-            return - ((Double) val);
+            return -((Double) val);
         } else if (val instanceof Long) {
             return -((Long) val);
         } else if (val instanceof BigDecimal) {
@@ -1457,9 +1460,23 @@ public class JexlArithmetic {
      * @return the boolean or null if there is no arithmetic solution
      */
     public Boolean isEmpty(Object object, Boolean def) {
-        if (object instanceof Number) {
-            double d = ((Number) object).doubleValue();
+        if (object instanceof Double) {
+            double d = ((Number) object).doubleValue();     
             return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof Float) {
+            float f = ((Number) object).floatValue();
+            return Float.isNaN(f) || f == 0.f ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof BigDecimal) {
+            return object == BigDecimal.ZERO ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof BigInteger) {
+            return object == BigInteger.ZERO ? Boolean.TRUE : Boolean.FALSE;
+        }
+        if (object instanceof Number) {
+            long l = ((Number) object).longValue();
+            return l == 0L ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof CharSequence) {
             return ((CharSequence) object).length() == 0 ? Boolean.TRUE : Boolean.FALSE;
