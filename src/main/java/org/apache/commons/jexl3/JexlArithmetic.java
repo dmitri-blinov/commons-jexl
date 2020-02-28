@@ -1469,10 +1469,10 @@ public class JexlArithmetic {
             return Float.isNaN(f) || f == 0.f ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof BigDecimal) {
-            return object == BigDecimal.ZERO ? Boolean.TRUE : Boolean.FALSE;
+            return BigDecimal.ZERO.equals(object) ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof BigInteger) {
-            return object == BigInteger.ZERO ? Boolean.TRUE : Boolean.FALSE;
+            return BigInteger.ZERO.equals(object) ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof Number) {
             long l = ((Number) object).longValue();
