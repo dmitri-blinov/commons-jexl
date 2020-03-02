@@ -28,7 +28,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.AbstractMap;
 import java.util.Iterator;
@@ -712,6 +711,12 @@ public class JexlArithmetic {
         return c == Long.class || c == Integer.class || c == Short.class || c == Byte.class;
     }
 
+    /**
+     * Creates BigInteger from long by extending its byte representation with specified byte.
+     *
+     * @param x  value to be extended
+     * @param msb  byte to extend value with
+     */
     protected BigInteger extendedLong(long x, byte msb) {
         byte[] bi = new byte[9];
         bi[0] = msb;
@@ -723,13 +728,19 @@ public class JexlArithmetic {
     }
 
     /**
-     * Checks if value class is a number that can be represented exactly in an int.
-     *
-     * @param value  argument
-     * @return true if argument can be represented by an integer
+     * Given a long, attempt to narrow it to an int.
+     * <p>Narrowing will only occur if no operand is a Long.
+     * @param lhs  the left hand side operand that lead to the long result
+     * @param rhs  the right hand side operand that lead to the long result
+     * @param r the long to narrow
+     * @return an Integer if narrowing is possible, the original Long otherwise
      */
-    private static Number asIntegerNumber(Object value) {
-        return value instanceof Integer || value instanceof Short || value instanceof Byte ? (Number) value : null;
+    protected Number narrowLong(Object lhs, Object rhs, long r) {
+        if (!(lhs instanceof Long || rhs instanceof Long) && (int) r == r) {
+            return (int) r;
+        } else {
+            return r;
+        }
     }
 
     /**
@@ -738,8 +749,13 @@ public class JexlArithmetic {
      * @param value  argument
      * @return true if argument can be represented by a long
      */
-    private static Number asLongNumber(Object value) {
-        return value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte ? (Number) value : null;
+    protected Number asLongNumber(Object value) {
+        return value instanceof Long
+                || value instanceof Integer
+                || value instanceof Short
+                || value instanceof Byte
+                        ? (Number) value
+                        : null;
     }
 
     /**
@@ -849,8 +865,9 @@ public class JexlArithmetic {
                 throw new ArithmeticException("/");
             }
             long result = l / r;
-            if (!(left instanceof Long || right instanceof Long)
-                    && result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE) {
+            if (left instanceof Long || right instanceof Long) {
+                return result;
+            } else if (result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE) {
                 return (int) result;
             } else {
                 return result;
@@ -916,8 +933,9 @@ public class JexlArithmetic {
                 throw new ArithmeticException("%");
             }
             long result = l % r;
-            if (!(left instanceof Long || right instanceof Long)
-                    && result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE) {
+            if (left instanceof Long || right instanceof Long) {
+                return result;
+            } else if (result >= Integer.MIN_VALUE && result <= Integer.MAX_VALUE) {
                 return (int) result;
             } else {
                 return result;
@@ -971,12 +989,13 @@ public class JexlArithmetic {
      * @param r the product
      * @return true if product fits a long, false if it overflows
      */
+    @SuppressWarnings("MagicNumber")
     private static boolean isMultiplyExact(long x, long y, long r) {
         long ax = Math.abs(x);
         long ay = Math.abs(y);
-        return !(((ax | ay) >>> 31 != 0) &&
-                 (((y != 0) && (r / y != x)) ||
-                   (x == Long.MIN_VALUE && y == -1)));
+        return !(((ax | ay) >>> (Integer.SIZE - 1) != 0)
+                  && (((y != 0) && (r / y != x))
+                      || (x == Long.MIN_VALUE && y == -1)));
     }
 
     /**
@@ -1461,7 +1480,7 @@ public class JexlArithmetic {
      */
     public Boolean isEmpty(Object object, Boolean def) {
         if (object instanceof Double) {
-            double d = ((Number) object).doubleValue();     
+            double d = ((Number) object).doubleValue();
             return Double.isNaN(d) || d == 0.d ? Boolean.TRUE : Boolean.FALSE;
         }
         if (object instanceof Float) {
