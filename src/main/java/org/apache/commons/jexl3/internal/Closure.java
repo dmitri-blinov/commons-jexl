@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
@@ -211,7 +212,8 @@ public class Closure extends Script {
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
         if (context == null)
             context = this.context;
-        return jexl.createInterpreter(context, frame, options(context), caller != null ? caller.current : null);
+        JexlOptions opts = jexl.options(script, context);
+        return jexl.createInterpreter(context, frame, opts, caller != null ? caller.current : null);
     }
 
     /**

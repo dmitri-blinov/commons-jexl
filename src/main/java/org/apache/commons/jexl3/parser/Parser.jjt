@@ -1102,7 +1102,7 @@ Object PragmaValue() #void :
     |
     v=<STRING_LITERAL> { return Parser.buildString(v.image, true); }
     |
-    v=<QUALIFIED_IDENTIFIER> { return v.image; }
+    v=<IDENTIFIER> { return v.image; }
     |
     v=<TRUE> { return true; }
     |
