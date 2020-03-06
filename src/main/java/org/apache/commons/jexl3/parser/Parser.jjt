@@ -1094,6 +1094,7 @@ void Pragma() #void :
 Object PragmaValue() #void :
 {
     Token v;
+    StringBuilder sb;
 }
 {
     v=<INTEGER_LITERAL> { return NumberParser.parseInteger(v.image); }
@@ -1102,7 +1103,7 @@ Object PragmaValue() #void :
     |
     v=<STRING_LITERAL> { return Parser.buildString(v.image, true); }
     |
-    v=<IDENTIFIER> { return v.image; }
+    v=<IDENTIFIER> { sb = new StringBuilder(v.image); } ( LOOKAHEAD(<DOT>) <DOT> v=<DOT_IDENTIFIER> { sb.append(".").append(v.image); } )* { return sb.toString(); }
     |
     v=<TRUE> { return true; }
     |
