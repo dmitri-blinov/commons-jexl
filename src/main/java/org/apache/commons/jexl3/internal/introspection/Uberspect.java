@@ -63,7 +63,7 @@ public class Uberspect implements JexlUberspect {
     /** The soft reference to the introspector currently in use. */
     private volatile Reference<Introspector> ref;
     /** The class loader reference; used to recreate the introspector when necessary. */
-    private volatile Reference<ClassLoader> loader;
+    private volatile ClassLoader loader;
     /**
      * The map from arithmetic classes to overloaded operator sets.
      * <p>
@@ -92,7 +92,7 @@ public class Uberspect implements JexlUberspect {
         strategy = sty == null? JexlUberspect.JEXL_STRATEGY : sty;
         permissions  = perms;
         ref = new SoftReference<Introspector>(null);
-        loader = new SoftReference<ClassLoader>(getClass().getClassLoader());
+        loader = getClass().getClassLoader();
         operatorMap = new ConcurrentHashMap<Class<? extends JexlArithmetic>, Set<JexlOperator>>();
         version = new AtomicInteger(0);
     }
@@ -111,9 +111,8 @@ public class Uberspect implements JexlUberspect {
             synchronized (this) {
                 intro = ref.get();
                 if (intro == null) {
-                    intro = new Introspector(logger, loader.get(), permissions);
+                    intro = new Introspector(logger, loader, permissions);
                     ref = new SoftReference<Introspector>(intro);
-                    loader = new SoftReference<ClassLoader>(intro.getLoader());
                     version.incrementAndGet();
                 }
             }
@@ -132,7 +131,7 @@ public class Uberspect implements JexlUberspect {
                 intro = new Introspector(logger, nloader, permissions);
                 ref = new SoftReference<Introspector>(intro);
             }
-            loader = new SoftReference<ClassLoader>(intro.getLoader());
+            loader = nloader;
             operatorMap.clear();
             version.incrementAndGet();
         }
@@ -140,7 +139,7 @@ public class Uberspect implements JexlUberspect {
 
     @Override
     public ClassLoader getClassLoader() {
-        return loader.get();
+        return loader;
     }
 
     @Override
