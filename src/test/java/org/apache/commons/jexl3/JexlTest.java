@@ -681,7 +681,7 @@ public class JexlTest extends JexlTestCase {
             assertExpression(new MapContext(), "empty()", null);
             Assert.fail("Bad expression didn't throw ParseException");
         } catch (JexlException pe) {
-            // expected behaviour
+            // expected behavior
         }
     }
 
