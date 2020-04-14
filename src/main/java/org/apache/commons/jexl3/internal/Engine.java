@@ -37,23 +37,24 @@ import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
+import org.apache.commons.jexl3.parser.ASTNumberLiteral;
+import org.apache.commons.jexl3.parser.ASTStringLiteral;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.Parser;
 
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.jexl3.parser.ASTNumberLiteral;
-import org.apache.commons.jexl3.parser.ASTStringLiteral;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A JexlEngine implementation.
@@ -360,18 +361,17 @@ public class Engine extends JexlEngine {
      * @return the options
      */
     protected JexlOptions options(ASTJexlScript script, JexlContext context) {
-        final JexlOptions opts = options(context);
+        final JexlOptions opts = options(context); 
+        if (opts != options) {
+            // when feature lexical, try hard to run lexical
+            if (scriptFeatures.isLexical()) {
+                opts.setLexical(true);
+            }
+            if (scriptFeatures.isLexicalShade()) {
+                opts.setLexicalShade(true);
+            }
+        }
         if (script != null) {
-            // when parsing lexical, try hard to run lexical
-           JexlFeatures features = script.getFeatures();
-           if (features != null) {
-               if (features.isLexical()) {
-                   opts.setLexical(true);
-               }
-               if (features.isLexicalShade()) {
-                   opts.setLexicalShade(true);
-               }
-           }
            // process script pragmas if any
            processPragmas(script, context, opts);
         }

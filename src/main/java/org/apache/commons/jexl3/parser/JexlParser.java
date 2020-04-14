@@ -736,7 +736,7 @@ public abstract class JexlParser extends StringParser {
         }
         if (tok != null) {
             xinfo = info.at(tok.beginLine, tok.beginColumn);
-            msg = readSourceLine(source, tok.beginLine);
+            msg = tok.image;
             if (xclazz != null) {
                 try {
                     Constructor<T> ctor = xclazz.getConstructor(JexlInfo.class, String.class);
