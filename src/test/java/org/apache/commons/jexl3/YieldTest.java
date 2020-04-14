@@ -67,8 +67,7 @@ public class YieldTest extends JexlTestCase {
             JexlScript e = JEXL.createScript("if (true) { yield 42; }");
             Assert.fail("yield is out of expression!");
         } catch (JexlException.Parsing xparse) {
-            String str = xparse.detailedMessage();
-            Assert.assertTrue(str.contains("yield"));
+            // OK
         }
     }
 
