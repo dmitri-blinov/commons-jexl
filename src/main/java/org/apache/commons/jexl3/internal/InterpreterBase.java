@@ -302,7 +302,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         }
         return context.has(name);
     }
-    
+
     /**
      * Gets a value of a defined local variable or from the context.
      * @param frame the local frame
@@ -332,7 +332,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 if (type != null)
                     return type;
             } else {
-                return isSafe() ? null : unsolvableVariable(identifier, name, true); // undefined
+                return unsolvableVariable(identifier, name, true); // undefined
             }
         }
         return value;
