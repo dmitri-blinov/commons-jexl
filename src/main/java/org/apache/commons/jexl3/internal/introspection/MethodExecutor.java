@@ -116,9 +116,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
         if (objectClass == obj.getClass() && key.equals(new MethodKey(name, args))) {
             try {
                 return invoke(obj, args);
-            } catch (IllegalAccessException xill) {
-                return TRY_FAILED;// fail
-            } catch (IllegalArgumentException xarg) {
+            } catch (IllegalAccessException | IllegalArgumentException xill) {
                 return TRY_FAILED;// fail
             } catch (InvocationTargetException xinvoke) {
                 throw JexlException.tryFailed(xinvoke); // throw

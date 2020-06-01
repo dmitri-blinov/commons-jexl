@@ -24,6 +24,7 @@ import org.apache.commons.jexl3.internal.introspection.IndexedType;
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -221,7 +222,7 @@ public class JexlArithmetic {
         if (ctor != null) {
             try {
                 return ctor.newInstance(astrict, bigdContext, bigdScale);
-            } catch (Exception xany) {
+            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | InvocationTargetException xany) {
                 // it was worth the try
             }
         }

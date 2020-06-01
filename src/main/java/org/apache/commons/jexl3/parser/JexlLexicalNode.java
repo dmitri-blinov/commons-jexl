@@ -56,12 +56,12 @@ public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit 
 
     @Override
     public boolean hasSymbol(int symbol) {
-        return locals == null? false : locals.hasSymbol(symbol);
+        return locals != null && locals.hasSymbol(symbol);
     }
 
     @Override
     public boolean isSymbolFinal(int symbol) {
-        return locals == null? false : locals.isVariableFinal(symbol);
+        return locals != null && locals.isVariableFinal(symbol);
     }
 
     @Override

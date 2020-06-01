@@ -73,7 +73,7 @@ abstract class AbstractExecutor {
     static Object[] makeArgs(Object... args) {
         return args;
     }
-    
+
     /**
      * Gets the class of an object or Object if null.
      * @param instance the instance

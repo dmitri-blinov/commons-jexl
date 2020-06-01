@@ -82,7 +82,7 @@
                         </ul>
                         <p>
                             <strong>N.B.</strong> the following keywords are reserved, and cannot be used as an identifier or the property name when using the dot operator:
-                            <code>or and eq ne lt gt le ge in div mod not this null true false instanceof new var final do while break continue remove yield static class 
+                            <code>or and eq ne lt gt le ge in div mod not this null true false instanceof new var final do while break continue remove yield static class
                             function return try catch finally throw assert synchronized switch case default byte short int long char boolean float double void</code>
                             For example, the following is invalid:
                             <code>my.new.dotted.var1 // invalid ('new' is keyword)</code>
@@ -122,7 +122,7 @@
                         <p>Pragma keys can be identifiers or antish names, pragma values can be literals (boolean, integer,
                             real, string, null, NaN) and antish names</p>
                         <p>Although pragmas are statements, they are <em>not</em> evaluated at runtime; they are constants
-                            associated to the script after parsing. It is expected that user code accesses the pragma map from 
+                            associated to the script after parsing. It is expected that user code accesses the pragma map from
                             scripts to alter some functions behavior.</p>
                     </td>
                 </tr>
@@ -209,8 +209,8 @@
                 <tr>
                     <td>Null assignment</td>
                     <td>
-                        Assigns the value to a variable, context variable or property (<code>my.var ?= 'a value'</code>) if a 
-                        variable or a property is null, e.g. 
+                        Assigns the value to a variable, context variable or property (<code>my.var ?= 'a value'</code>) if a
+                        variable or a property is null, e.g.
                         <code>city ?= foo</code> and <code>if (city == null) city = foo</code> are equivalent.
                         Both <em>beans</em> and <em>ant-ish</em> variables assignment are supported.
                     </td>
@@ -218,8 +218,8 @@
                 <tr>
                     <td>Equality assignment</td>
                     <td>
-                        Assigns the value to a variable, context variable or property (<code>my.var := 'a value'</code>) if a 
-                        variable or a property is not equal to assigned value, e.g. 
+                        Assigns the value to a variable, context variable or property (<code>my.var := 'a value'</code>) if a
+                        variable or a property is not equal to assigned value, e.g.
                         <code>city := foo</code> and <code>if (city != foo) city = foo</code> are equivalent.
                         Both <em>beans</em> and <em>ant-ish</em> variables assignment are supported.
                     </td>
@@ -263,15 +263,15 @@
                         The actual values passed to the function during invocation will be implicitly cast to the specified parameter types.
                         Parameters can also have default values, in that case the usage of <code>var</code> keyword is mandatory in parameter declaration list:
                         <code>var fun = function(var x = 40, var y = 2) { x + y }</code>.
-                        If the actual values passed to the function during invocation are not specified for a parameter with default value, 
-                        the default value will be used instead of null, for example the result of the evaluation of 
+                        If the actual values passed to the function during invocation are not specified for a parameter with default value,
+                        the default value will be used instead of null, for example the result of the evaluation of
                         <code>fun() </code>will lead to <code>40 + 2 = 42</code>
                         <p>The following function definition syntax is also supported
                         <code>var fun = (x, y) -> { x + y }</code>
                         If the function body is a simple expression then the following syntax without curly braces can also be used
                         <code>var fun = (x, y) => x + y</code></p>
                         <p>A function can accept variable number of arguments, in that case the following syntax can be used
-                        <code>var fun = (x, y...) -> {x + y[0] + y[1]}</code>. The last parameter of a function accepting the variable 
+                        <code>var fun = (x, y...) -> {x + y[0] + y[1]}</code>. The last parameter of a function accepting the variable
                         number of arguments can not have a default value.
                         If a function has only one untyped non-final argument and does not accept variable number of arguments
                         then the parentheses around that argument may be omitted
@@ -282,9 +282,9 @@
                         <code>var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7)</code>
                         The function closure captures 't' when defined; the result of the evaluation will
                         lead to <code>15 + 7 + 20 = 42</code>.
-                        To prevent a function from capturing enclosing variables the function should be declared as <strong>static</strong>, e.g. 
+                        To prevent a function from capturing enclosing variables the function should be declared as <strong>static</strong>, e.g.
                         <code>var t = 54; var s = static function(x, y) {x + y + t}; this.t = 20; s(15, 7)</code>
-                        The static function does not capture 't' when defined, but refers to the context variable instead; 
+                        The static function does not capture 't' when defined, but refers to the context variable instead;
                         the result of the evaluation will lead to <code>15 + 7 + 20 = 42</code>.
                         </p>
                     </td>
@@ -296,7 +296,7 @@
                         <code>function fun(x,y) { x + y}</code> and <code>final var fun = function(x, y) { x + y }</code> are equivalent.
                         Function can have strongly typed return value by specifying a simple class name or one of java primitive types
                         <code>boolean char byte short int long float double void</code> instead of <code>function</code> keyword:
-                        <code>int fun(int x, int y) { x + y }</code>. 
+                        <code>int fun(int x, int y) { x + y }</code>.
                         The actual value returned by the function during invocation will be implicitly cast to the specified return type.
                         Void function returns null value. The returned value can not be specified for the <code>return</code> statement
                         for functions typed as void.
@@ -359,9 +359,9 @@
                         <p>Properties can also be quoted as in <code>foo {'b a r' : 10}</code> and can be dynamic
                         back-quoted interpolation strings as in <code>cal {`${dd.year}-${dd.month}-${dd.day}` : '1990-01-01'}</code>.</p>
                         <p>Nested properties can also be assigned as in <code>foo {bar {quux: 10}}</code>.</p>
-                        <p>The null assignment operator <code>foo {bar ?: 10}</code> can be specified, 
+                        <p>The null assignment operator <code>foo {bar ?: 10}</code> can be specified,
                         which assigns a value to the property only if property is null.</p>
-                        <p>The equality assignment operator <code>foo {bar =: 10}</code> can be specified, 
+                        <p>The equality assignment operator <code>foo {bar =: 10}</code> can be specified,
                         which assigns a value to the property only if property is not equal to assigned value.</p>
                     </td>
                 </tr>
@@ -377,7 +377,7 @@
                     <td>
                         Iterator can also be specified in a form of generator function, e.g.
                         <code>...{for (var i : 1..10) yield i}</code>.
-                        <p><strong>NOTE:</strong> The <code>yield</code> statement is not allowed inside 
+                        <p><strong>NOTE:</strong> The <code>yield</code> statement is not allowed inside
                         <code>synchronized</code> and <code>try</code> statements</p>
                     </td>
                 </tr>
@@ -527,15 +527,23 @@
                         Can start and end with either <code>'</code> or <code>"</code> delimiters, e.g.
                         <code>"Hello world"</code> and
                         <code>'Hello world'</code> are equivalent.
-                        <p>The escape character is <code>\</code> (backslash); it only escapes the string delimiter 
-                        and a unicode sequence starting with 'u' followed by 4 hexadecimals, e.g. <code>\u0021</code></p>
+                        <p>The escape character is <code>\</code> (backslash).
+                        Unicode characters can be used in string literals;
+                            <lu>Unicode escape sequences consist of:
+                                <li> a backslash '\' </li>
+                                <li>a 'u' </li>
+                                <li>4 hexadecimal digits ([0-9],[A-H],[a-h]).</li>
+                            </lu>
+                            Such sequences represent the UTF-16 encoding of a Unicode character,
+                            for example, <code>'a'</code> is equivalent to <code>'\u0061'</code>.
+                        </p>
                     </td>
                 </tr>
                 <tr>
                     <td>Multiline format literals</td>
                     <td>
                         Start and end with <code>`</code> delimiter - back-quote -, e.g. <code>`Hello world`</code>
-                        <p>The escape character is <code>\</code> (backslash); it only escapes the string delimiter.</p>
+                        <p>The escape character is <code>\</code> (backslash); Unicode escape sequences can also be used.</p>
                         These format literals can span multiple lines and allow Unified JEXL expressions (JSTL like expressions)
                         to be interpolated. If a variable <code>user</code> valued <code>JEXL</code>is present in the environment - whether
                         as a local or global variable -, the format <code>`Hello ${user}`</code> will evaluate as <code>Hello JEXL</code>.
@@ -666,9 +674,9 @@
                         <code>{ "one" : 1, "two" : 2, "three" : 3, "more": "many more" }</code>
                         <p>This syntax creates a <code>HashMap&lt;Object,Object&gt;</code>.</p>
                         <p>Ordered map can be created by specifying <code>...</code> at the end of the list, e.g.
-                        <code>{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code> creates a 
+                        <code>{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code> creates a
                         <code>LinkedHashMap&lt;Object,Object&gt;</code>.</p>
-                        <p>Empty map literal can be specified as <code>{:}</code>, ordered empty map literal 
+                        <p>Empty map literal can be specified as <code>{:}</code>, ordered empty map literal
                         can be specified as <code>{:...}</code>.</p>
                         <p>Map comprehentions syntax can also be used to construct maps based on other maps,
                              e.g.<code>{1:1, 2:2, 3:3, *:...{4:4, 5:5, 6:6}}</code></p>
@@ -681,7 +689,7 @@
                         with <code>}</code>, e.g.
                         <code>#{ "one" : 1, "two" : 2, "three" : 3, "more": "many more" }</code>
                         <p>Ordered immutable map can be created by specifying <code>...</code> at the end of the list, e.g.
-                        <code>#{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code></p> 
+                        <code>#{ "one" : 1, "two" : 2, "three" : 3, "more": "many more",...}</code></p>
                         <p>Both syntax create an immutable <code>Map&lt;Object,Object&gt;</code>.</p>
                         <p>Empty immutable map literal can be specified as <code>#{:}</code></p>
                         <p>Map comprehentions can also be used like in conventional Map literal syntax</p>
@@ -910,7 +918,7 @@
                     <td>
                         The set <code>?()</code> operator can be used for comparison of single argument against the set of values.
                         A set of values is specified by <code>?(</code> followed by one or more expressions separated by <code>,</code> and ending
-                        with <code>)</code>. The result is true if comparison of argument against <strong>any</strong>  
+                        with <code>)</code>. The result is true if comparison of argument against <strong>any</strong>
                         value from the set is true, e.g.
                         <code>val1 == ?(a,b)</code> and
                         <code>val1 == a or val1 == b</code> are equivalent.
@@ -923,7 +931,7 @@
                     <td>
                         The set <code>??()</code> operator can be used for comparison of single argument against the set of values.
                         A set of values is specified by <code>??(</code> followed by one or more expressions separated by <code>,</code> and ending
-                        with <code>)</code>. The result is true if comparison of argument against <strong>all</strong>  
+                        with <code>)</code>. The result is true if comparison of argument against <strong>all</strong>
                         values from the set is true, e.g.
                         <code>val1 == ??(a,b)</code> and
                         <code>val1 == a and val1 == b</code> are equivalent.
@@ -946,7 +954,7 @@
                             <li>Equality uses the java <code>equals</code> method</li>
                         </ol>
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -959,7 +967,7 @@
                         <code>val1 != val2</code> and
                         <code>val1 ne val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -967,7 +975,7 @@
                 <tr>
                     <td>In or Match<code>=~</code></td>
                     <td>
-                        The syntactically Perl inspired <code>=~</code> operator as well as the abbreviation <code>in</code> can be used to check 
+                        The syntactically Perl inspired <code>=~</code> operator as well as the abbreviation <code>in</code> can be used to check
                         that a <code>string</code> matches a regular expression (expressed either a Java String or a java.util.regex.Pattern).
                         For example
                         <code>"abcdef" =~ "abc.*</code> returns <code>true</code>.
@@ -977,7 +985,7 @@
                         to behave as right-hand side operands of this operator.
                         <code> "a" =~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -985,7 +993,7 @@
                 <tr>
                     <td>Not-In or Not-Match<code>!~</code></td>
                     <td>
-                        The syntactically Perl inspired <code>!~</code> operator as well as the abbreviation <code>!in</code> can be used to check 
+                        The syntactically Perl inspired <code>!~</code> operator as well as the abbreviation <code>!in</code> can be used to check
                         that a <code>string</code> does not match a regular expression (expressed either a Java String or a java.util.regex.Pattern).
                         For example
                         <code>"abcdef" !~ "abc.*</code> returns <code>false</code>.
@@ -995,7 +1003,7 @@
                         to behave as right-hand side operands of this operator.
                         <code> "a" !~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1034,7 +1042,7 @@
                         <code>val1 &lt; val2</code> and
                         <code>val1 lt val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1047,7 +1055,7 @@
                         <code>val1 &lt;= val2</code> and
                         <code>val1 le val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1060,7 +1068,7 @@
                         <code>val1 &gt; val2</code> and
                         <code>val1 gt val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1073,7 +1081,7 @@
                         <code>val1 &gt;= val2</code> and
                         <code>val1 ge val2</code> are equivalent.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1086,7 +1094,7 @@
                         Note that through duck-typing, user classes exposing a public 'startsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1097,7 +1105,7 @@
                         This is the negation of the 'starts with' operator.
                         <code>a !^ "abc"</code> is equivalent to <code>!(a =^ "abc")</code>
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1109,7 +1117,7 @@
                         Note that through duck-typing, user classes exposing an 'endsWith' method will allow their instances
                         to behave as left-hand side operands of this operator.
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1120,7 +1128,7 @@
                         This is the negation of the 'ends with' operator.
                         <code>a !$ "abc"</code> is equivalent to <code>!(a =$ "abc")</code>
                         <p>
-                            This operator also supports comparison of single argument against the set of values by using 
+                            This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
                         </p>
                     </td>
@@ -1447,13 +1455,13 @@
                         In case of only one defined dimension <code>a.[@foo]</code>, the projection operator creates an iterator
                         that yields a single value on each iteration. In case of more than one defined dimension <code>a.{@foo,@bar,@quux}</code>,
                         the projection operator creates an iterator that yields an array of the corresponding values.
-                        The projection expression can be either an attribute reference in the form of <code>@attr</code> or 
-                        a defined function. The function in its basic form defines the projection rule takes one argument, 
-                        which accepts the current element of the iterable object. In extended form the projecting function can take two arguments 
-                        <code>(index,value) -> {index &lt; 10}</code> with the first argument <code>index</code> being the zero based index of the 
+                        The projection expression can be either an attribute reference in the form of <code>@attr</code> or
+                        a defined function. The function in its basic form defines the projection rule takes one argument,
+                        which accepts the current element of the iterable object. In extended form the projecting function can take two arguments
+                        <code>(index,value) -> {index &lt; 10}</code> with the first argument <code>index</code> being the zero based index of the
                         current element of the iterable object, and the second <code>value</code> is the current element itself.
-                        <p>A Projection expression can also be specified as a simple expression, in that case 
-                        the currently projected object should be addressed with current object literal <code>@</code> e.g. 
+                        <p>A Projection expression can also be specified as a simple expression, in that case
+                        the currently projected object should be addressed with current object literal <code>@</code> e.g.
                         <code>a.{@.length()}</code> is equivalent to <code>a.{x -> {x.length()}}</code></p>
                     </td>
                     <td>Key-value projection</td>
@@ -1470,8 +1478,8 @@
                         In extended form the filtering function can take two arguments <code>(index,value) -> {index &lt; 10}</code>
                         with the first argument <code>index</code> being the zero based index of the next element of the iterable
                         object, and the second <code>value</code> is the next element itself.
-                        <p>A selection expression can also be specified as a simple conditional expression, in that case 
-                        the currently checked object should be addressed with current object literal <code>@</code> e.g. 
+                        <p>A selection expression can also be specified as a simple conditional expression, in that case
+                        the currently checked object should be addressed with current object literal <code>@</code> e.g.
                         <code>a.[@.length() > 10]</code> is equivalent to <code>a.[x -> {x.length() > 10}]</code></p>
                     </td>
                 </tr>
@@ -1497,10 +1505,10 @@
                         <code>result -> {result + 1}</code>, or take no arguments at all<code>() -> {nextid()}</code>.
                         In extended form the function can take three arguments <code>(result,index,value) -> {result + value}</code>
                         with additional argument <code>index</code> being the zero based index of the current element of the iterable
-                        object. 
+                        object.
                         </p>
-                        <p>Pipe function can also be specified as a simple expression, in that case 
-                        the currently processed object should be addressed with current object literal <code>@</code> e.g. 
+                        <p>Pipe function can also be specified as a simple expression, in that case
+                        the currently processed object should be addressed with current object literal <code>@</code> e.g.
                         <code>a.(@+1)</code> is equivalent to <code>a.(x -> {x+1})</code></p>
                     </td>
                 </tr>
@@ -1587,7 +1595,7 @@
                         <code>for (Integer item : list) {
                             x = x + item;
                             }</code>
-                        Where <code>item</code> is a local variable of Integer class. 
+                        Where <code>item</code> is a local variable of Integer class.
                         The actual values of iterable object will be implicitly cast to the specified type.</p>
                         <p>The labeled syntax is also supported:
                         <code>foo : for (var item : list) {
@@ -1674,7 +1682,7 @@
                 <tr>
                     <td>yield</td>
                     <td>
-                        Allows to break current evaluation operator (switch expression/block evaluation) execution and returns the value of the specified expression 
+                        Allows to break current evaluation operator (switch expression/block evaluation) execution and returns the value of the specified expression
                         as the operator value, e.g.
                         <code>yield 42</code>
                     </td>

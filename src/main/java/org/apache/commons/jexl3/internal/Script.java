@@ -30,6 +30,7 @@ import org.apache.commons.jexl3.parser.ASTJexlScript;
 import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -183,7 +184,7 @@ public class Script implements JexlScript, JexlExpression {
         if (this.jexl != other.jexl) {
             return false;
         }
-        if ((this.source == null) ? (other.source != null) : !this.source.equals(other.source)) {
+        if (!Objects.equals(this.source, other.source)) {
             return false;
         }
         return true;

@@ -35,9 +35,11 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.introspection.JexlUberspect.PropertyResolver;
 import org.apache.commons.jexl3.parser.ASTArrayAccess;
 import org.apache.commons.jexl3.parser.ASTArrayAccessSafe;
+import org.apache.commons.jexl3.parser.ASTAssignment;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
+import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTVar;
@@ -331,7 +333,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 Class type = JexlParser.resolveType(name);
                 if (type != null)
                     return type;
-            } else {
+            } else if (!((identifier.jjtGetParent() instanceof ASTAssignment || identifier.jjtGetParent() instanceof ASTInitialization) && isSafe())) {
                 return unsolvableVariable(identifier, name, true); // undefined
             }
         }

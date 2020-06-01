@@ -22,11 +22,11 @@ The Apache Commons JEXL Pro library is an experimental fork of the The Apache Co
 Idea of the fork
 ----------------
 While JEXL in its latest version (3.2-SNAPSHOT) is already a mature Java object manipulation language which supports many great features,
-I feel that something more can be done to fill the gap between what functionality Java objects expose to the environment and 
-how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some 
+I feel that something more can be done to fill the gap between what functionality Java objects expose to the environment and
+how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some
 enhancements and changes to the capabilities of the scripting language. In result, compatibility with Java language is greatly improved,
 as the majority of modern Java syntax is now supported. Such compatibility gives the script writers the opportunity to start using
-the language faster, for example, the following Java code snippet is perfectly valid 
+the language faster, for example, the following Java code snippet is perfectly valid
 construct in JEXL Pro and gives the same results as in Java:
 
 ```
@@ -42,7 +42,7 @@ String bytesToHex(byte[] bytes, int offset, int count) {
 }
 ```
 
-On the other hand, some new language features and more syntactic sugar are aimed at productivity and will allow for more compact and 
+On the other hand, some new language features and more syntactic sugar are aimed at productivity and will allow for more compact and
 less error-prone code to be written, for example, instead of writing
 
 ```
@@ -56,38 +56,38 @@ var x = [...{items.[@.color == 'red'].{@price}}]
 
 There are also some under-the-hood performance and memory usage improvements.
 
-Development Roadmap 
+Development Roadmap
 ----------------------
 The fork is feature complete and stable in both design and implementation, though minor enhancements are likely to come.
-I have no intention of promoting this fork as an alternative to the main library, and I would be happy to have all 
-the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones 
+I have no intention of promoting this fork as an alternative to the main library, and I would be happy to have all
+the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones
 the JEXL community would benefit from remains at the descretion of the Apache JEXL team.
 
-Language Compatibility 
+Language Compatibility
 ----------------------
 The library tends to maintain as much syntax compatibility with the original syntax as possible, but there are
-some changes that may break your existing scripts. The main reason for this comes from the introduction of the new 
-reserved words to support new syntax constructs, so your variables may no longer be named by one of those keywords 
-that are introduced. There are also some minor tweaks to the original syntax in order to streamline language structure and 
-align some language constructs with other popular scripting languages, to minimize the learning curve and syntactic diversity. 
+some changes that may break your existing scripts. The main reason for this comes from the introduction of the new
+reserved words to support new syntax constructs, so your variables may no longer be named by one of those keywords
+that are introduced. There are also some minor tweaks to the original syntax in order to streamline language structure and
+align some language constructs with other popular scripting languages, to minimize the learning curve and syntactic diversity.
 These changes are all reflected in the documentation, but the breef summary is given below.
 
 Incompatible changes
 --------------------
-+ Java 8 is the new minimum supported version 
++ Java 8 is the new minimum supported version
 
 + New reserved words are introduced. Those are:
   `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
   `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `void` `class` `yield` `_`.
   You may not longer use them as the names of the variables.
 
-+ Pragmas can only be defined at the beginning of the script. The reason for this is that the pragmas are not executable constructs, 
++ Pragmas can only be defined at the beginning of the script. The reason for this is that the pragmas are not executable constructs,
   so it is pointless and misleading to have them being incorporated in flow-control structures somewhere in the middle.
 
 + Literal `null` can not have any properies, so it is forbidden to use it in expressions like `null.prop`.
   If, for some reason, you still want to do this, use parentheses like `(null).prop`.
 
-+ Precedence of the `range` operator (`..`) is changed to be higher than that of relational operators, 
++ Precedence of the `range` operator (`..`) is changed to be higher than that of relational operators,
   but lower than that of arithmetic operators.
 
 + Precedence of the `match` operator (`=~`) and `not-match` operator (`!~`) is changed to be that of other equality operators.
@@ -95,14 +95,14 @@ Incompatible changes
 + Passing to a function more arguments than is specified in the function declaration now results in error
 
 + Captured variables are final by default. The reason for this is that captured variables are in fact copies of the original variables,
-  so assigning a new value to a captured variable does not affect the original variable in outer scope. 
+  so assigning a new value to a captured variable does not affect the original variable in outer scope.
   Such behaviour is misleading and thus restricted.
 
 + Left-hand assignment expression can not use safe access operator `?.`
 
 + Arrays do not expose wrapper methods `.contains()`, `.get()`, `.set()` etc
 
-+ Class literals `Integer.class` may cover variable access if the variable name can be resolved as a class name 
++ Class literals `Integer.class` may cover variable access if the variable name can be resolved as a class name
 
 New features
 ------------
@@ -122,9 +122,9 @@ New features
 
 + Java-like `this` literal is introduced to allow easier access to the current evaluation context
 
-+ Java-like bitwise shift `<<`,`>>`,`>>>` operators are introduced 
++ Java-like bitwise shift `<<`,`>>`,`>>>` operators are introduced
 
-+ Java-like shift self-assignment `<<=`,`>>=`,`>>>=` operators are introduced 
++ Java-like shift self-assignment `<<=`,`>>=`,`>>>=` operators are introduced
 
 + Java-like increment/decrement `++` and `--`  operators are introduced. Prefix and postfix forms are supported
 
@@ -180,7 +180,7 @@ New features
 
 Enhancements
 ------------
-+ Java-like labelled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used. 
++ Java-like labelled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used.
   The defined labels can be further specified for inner `break`, `continue` and `remove` flow-control statements
 
 + Multidimensional arrays can be accessed by using new syntax `arr[x,y]` as well as by using older syntax `arr[x][y]`
@@ -191,7 +191,7 @@ Enhancements
 
 + Variadic functions can be defined by using `(a...)` syntax after the last function argument
 
-+ Function closures implement all basic Java 8 `@FunctionalInterface` interfaces, 
++ Function closures implement all basic Java 8 `@FunctionalInterface` interfaces,
   so that it is possible to pass a function closure as an argument to a java method that accepts such interfaces
 
 + Function can be declared as `static` to prevent variable capturing
@@ -204,11 +204,11 @@ Enhancements
 
 + Function parameters can be declared as non-null `function(var &x) {}`
 
-+ Function parameters can have default values `function(var x = 0) {}` 
++ Function parameters can have default values `function(var x = 0) {}`
 
 + Functions can be declared strongly typed or void by using java class or primitive types `int a(int a, int b) {a+b}`
 
-+ Return statement expression can be omitted, implying `null` as a result 
++ Return statement expression can be omitted, implying `null` as a result
 
 + Return statement should not use value expression for void functions
 
@@ -222,7 +222,7 @@ Enhancements
 
 + Last part of the ternary expression `x?y:z` (along with the separating `:`) can be omitted, implying `null` as a result
 
-+ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases 
++ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases
 
 + Operator `new` supports Java-like object creation syntax `new String()`
 
@@ -236,9 +236,9 @@ Enhancements
 
 + Foreach statement may also define additional `counter` variable `for (var counter,x : list) {}` along with the current loop value variable
 
-+ Foreach statement support strongly types variable `for (String x : list) {}` 
++ Foreach statement support strongly types variable `for (String x : list) {}`
 
-+ Immutable list `#[1,2,3]` literal constructs can be used 
++ Immutable list `#[1,2,3]` literal constructs can be used
 
 + Immutable set `#{1,2,3}` literal constructs can be used
 
@@ -254,13 +254,13 @@ Enhancements
 
 + Map comprehensions `{*:...a}` can be used in map literals
 
-+ Function argument comprehensions `func(...a)` can be used 
++ Function argument comprehensions `func(...a)` can be used
 
-+ Java-like binary format `0b...` support for natural literals 
++ Java-like binary format `0b...` support for natural literals
 
 + Java-like support for underscores in numeric literals
 
-+ Groovy-like lambda composition operators `<<`, `>>` may be used 
++ Groovy-like lambda composition operators `<<`, `>>` may be used
 
 + Corresponding unicode characters may be used for the operators like `!=`, `>=` etc
 
