@@ -1670,7 +1670,7 @@ public class Interpreter extends InterpreterBase {
             for (int i = 1; i < num; i++) {
                 JexlNode cb = node.jjtGetChild(i);
                 if (cb instanceof ASTCatchBlock) {
-                    JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
+                    JexlNode catchVariable = cb.jjtGetNumChildren() > 1 ? (JexlNode) cb.jjtGetChild(0) : null;
                     if (catchVariable instanceof ASTMultiVar) {
                         List<Class> types = ((ASTMultiVar) catchVariable).getTypes();
                         for (Class type : types) {
@@ -1774,7 +1774,7 @@ public class Interpreter extends InterpreterBase {
             for (int i = 2; i < num; i++) {
                 JexlNode cb = node.jjtGetChild(i);
                 if (cb instanceof ASTCatchBlock) {
-                    JexlNode catchVariable = (JexlNode) cb.jjtGetChild(0);
+                    JexlNode catchVariable = cb.jjtGetNumChildren() > 1 ? (JexlNode) cb.jjtGetChild(0) : null;
                     if (catchVariable instanceof ASTMultiVar) {
                         List<Class> types = ((ASTMultiVar) catchVariable).getTypes();
                         for (Class type : types) {
@@ -1822,27 +1822,33 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(ASTCatchBlock node, Object data) {
-        ASTIdentifier catchVariable = (ASTIdentifier) node.jjtGetChild(0);
-        final int symbol = catchVariable.getSymbol();
-        final boolean lexical = options.isLexical() && symbol >= 0;
-        if (lexical) {
-            // create lexical frame
-            LexicalFrame locals = new LexicalFrame(frame, block);
-            if (!defineVariable((ASTVar) catchVariable, locals)) {
-                return redefinedVariable(node, catchVariable.getName());
+        int num = node.jjtGetNumChildren();
+        ASTIdentifier catchVariable = num > 1 ? (ASTIdentifier) node.jjtGetChild(0) : null;
+        if (catchVariable != null) {
+            final int symbol = catchVariable.getSymbol();
+            final boolean lexical = options.isLexical() && symbol >= 0;
+            if (lexical) {
+                // create lexical frame
+                LexicalFrame locals = new LexicalFrame(frame, block);
+                if (!defineVariable((ASTVar) catchVariable, locals)) {
+                    return redefinedVariable(node, catchVariable.getName());
+                }
+                block = locals;
             }
-            block = locals;
-        }
-        try {
-            // Set catch variable
-            executeAssign(node, catchVariable, data, null, null);
+            try {
+                // Set catch variable
+                executeAssign(node, catchVariable, data, null, null);
 
-            // execute catch block
-            node.jjtGetChild(1).jjtAccept(this, null);
-        } finally {
-            // restore lexical frame
-            if (lexical)
-                block = block.pop();
+                // execute catch block
+                node.jjtGetChild(1).jjtAccept(this, null);
+            } finally {
+                // restore lexical frame
+                if (lexical)
+                    block = block.pop();
+            }
+        } else {
+            // just execute catch block
+            node.jjtGetChild(0).jjtAccept(this, null);
         }
         return null;
     }

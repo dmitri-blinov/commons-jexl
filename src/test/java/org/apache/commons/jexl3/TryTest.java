@@ -181,4 +181,12 @@ public class TryTest extends JexlTestCase {
         Assert.assertEquals(42, o);
     }
 
+    @Test
+    public void testBlindCatch() throws Exception {
+        JexlScript e = JEXL.createScript("try {42/0} catch {return 42}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertEquals(42, o);
+    }
+
 }

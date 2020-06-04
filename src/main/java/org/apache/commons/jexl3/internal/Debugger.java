@@ -988,10 +988,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTCatchBlock node, Object data) {
-        builder.append(" catch (");
-        accept(node.jjtGetChild(0), data);
-        builder.append(") ");
-        accept(node.jjtGetChild(1), data);
+        int num = node.jjtGetNumChildren();
+        builder.append(" catch ");
+        if (num > 1) {
+            builder.append("(");
+            accept(node.jjtGetChild(0), data);
+            builder.append(") ");
+        }
+        accept(node.jjtGetChild(num - 1), data);
         return data;
     }
 

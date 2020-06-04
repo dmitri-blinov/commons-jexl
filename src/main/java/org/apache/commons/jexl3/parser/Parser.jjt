@@ -721,7 +721,7 @@ void CatchBlock() :
     pushUnit(jjtThis);
 }
 {
-    <CATCH> <LPAREN> CatchVar() <RPAREN> Block()
+    <CATCH> [ <LPAREN> CatchVar() <RPAREN> ] Block()
 {
     popUnit(jjtThis);
 }

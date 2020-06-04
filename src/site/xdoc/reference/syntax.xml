@@ -1703,6 +1703,13 @@
                               ...
                             } </code>
                         Where <code>e</code> is a local variable.</p>
+                        <p>The following blind catch syntax is also supported:
+                        <code>try {
+                              return 42/0;
+                            } catch {
+                              ...
+                            } </code>
+                        </p>
                         <p>The following multiblock syntax is also supported:
                         <code>try {
                               return 42/0;
