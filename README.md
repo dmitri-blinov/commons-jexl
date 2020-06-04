@@ -74,8 +74,6 @@ These changes are all reflected in the documentation, but the breef summary is g
 
 Incompatible changes
 --------------------
-+ Java 8 is the new minimum supported version
-
 + New reserved words are introduced. Those are:
   `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
   `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `void` `class` `yield` `_`.
