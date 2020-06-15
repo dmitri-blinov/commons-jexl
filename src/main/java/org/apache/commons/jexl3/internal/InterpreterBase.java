@@ -74,7 +74,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     protected final AtomicBoolean cancelled;
     /** Empty parameters for method matching. */
     protected static final Object[] EMPTY_PARAMS = new Object[0];
-    /** The context to store/retrieve variables. */
+    /** The namespace resolver. */
     protected final JexlContext.NamespaceResolver ns;
     /** The operators evaluation delegate. */
     protected final Operators operators;
@@ -113,7 +113,8 @@ public abstract class InterpreterBase extends ParserVisitor {
             acancel = ((JexlContext.CancellationHandle) context).getCancellation();
         }
         this.cancelled = acancel != null? acancel : new AtomicBoolean(false);
-        this.functions = jexl.functions;
+        Map<String,Object> ons = options.getNamespaces();
+        this.functions = ons.isEmpty()? jexl.functions : ons;
         this.functors = null;
         this.operators = new Operators(this);
     }
@@ -333,7 +334,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 Class type = JexlParser.resolveType(name);
                 if (type != null)
                     return type;
-            } else if (!((identifier.jjtGetParent() instanceof ASTAssignment || identifier.jjtGetParent() instanceof ASTInitialization) && isSafe())) {
+            } else if (!(isSafe() && (symbol >= 0 || identifier.jjtGetParent() instanceof ASTAssignment || identifier.jjtGetParent() instanceof ASTInitialization))) {
                 return unsolvableVariable(identifier, name, true); // undefined
             }
         }

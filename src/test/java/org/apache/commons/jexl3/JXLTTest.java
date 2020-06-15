@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3;
 
+import java.io.File;
 import org.apache.commons.jexl3.internal.Debugger;
 import org.apache.commons.jexl3.internal.TemplateDebugger;
 import org.apache.commons.logging.Log;
@@ -46,30 +47,30 @@ public class JXLTTest extends JexlTestCase {
     private static final Log LOGGER = LogFactory.getLog(JxltEngine.class);
     private final MapContext vars = new MapContext();
     private JexlEvalContext context = null;
+    private final JexlBuilder BUILDER;
     private final JexlEngine ENGINE;
     private final JxltEngine JXLT;
     
-    public JXLTTest(JexlEngine jexl) {
+    public JXLTTest(JexlBuilder builder) {
         super("JXLTTest");
-        ENGINE = jexl;
+        BUILDER = builder;
+        ENGINE = BUILDER.create();
         JXLT = ENGINE.createJxltEngine();
     }
    
 
    @Parameterized.Parameters
-   public static List<JexlEngine> engines() {
+   public static List<JexlBuilder> engines() {
        JexlFeatures f = new JexlFeatures();
        f.lexical(true).lexicalShade(true);
-      return Arrays.<JexlEngine>asList(new JexlEngine[] {
+      return Arrays.<JexlBuilder>asList(new JexlBuilder[] {
          new JexlBuilder().silent(false)
             .lexical(true).lexicalShade(true)
-            .cache(128).strict(true).create(),
-          
+            .cache(128).strict(true),
          new JexlBuilder().features(f).silent(false)
-            .cache(128).strict(true).create(),
-         
+            .cache(128).strict(true),
          new JexlBuilder().silent(false)
-            .cache(128).strict(true).create(),
+            .cache(128).strict(true),
       });
    }
     
@@ -1088,4 +1089,83 @@ public class JXLTTest extends JexlTestCase {
             Assert.assertFalse(xvar.isUndefined());
         }
     }
+    
+    @Test
+    public void testTemplateOutOfScope() throws Exception {
+        JexlOptions opts = new JexlOptions();
+        opts.setCancellable(false);
+        opts.setStrict(false);
+        opts.setLexical(false);
+        opts.setLexicalShade(false);
+        opts.setSharedInstance(true);
+        JexlContext ctxt = new PragmaticContext(opts);
+        String src = "$$if (false) { var tab = 42; }\n"
+                + "${tab}";
+        JxltEngine.Template tmplt;
+        JexlFeatures features = BUILDER.features();
+        try {
+            tmplt = JXLT.createTemplate("$$", new StringReader(src));
+        } catch (JexlException xparse) {
+            if (features != null && features.isLexicalShade()) {
+                return;
+            }
+            throw xparse;
+        }
+        Writer strw = new StringWriter();
+        opts.setSafe(true);
+        try {
+            tmplt.evaluate(ctxt, strw);
+            Assert.assertTrue(strw.toString().isEmpty());
+        } catch (JexlException.Variable xvar) {
+            Assert.fail("safe should prevent local shade");
+        }
+        opts.setStrict(true);
+        opts.setSafe(false);
+        try {
+            tmplt.evaluate(ctxt, strw);
+            Assert.fail("tab var is undefined");
+        } catch (JexlException.Variable xvar) {
+            Assert.assertTrue("tab".equals(xvar.getVariable()));
+            Assert.assertTrue(xvar.isUndefined());
+        } catch (JexlException xany) {
+            Assert.assertTrue(xany.getMessage().contains("tab"));
+        }
+    }
+    
+    @Test
+    public void testCommentedTemplate0() throws Exception {
+        JexlContext ctxt = new MapContext();
+        JexlEngine jexl = new JexlBuilder().create();
+        JxltEngine jxlt = jexl.createJxltEngine();
+        JxltEngine.Template tmplt;
+        String src = "$$/*\n"
+                + "Hello\n"
+                + "$$*/";
+        tmplt = jxlt.createTemplate(src);
+        Assert.assertNotNull(tmplt);
+        Writer strw = new StringWriter();
+        tmplt.evaluate(ctxt, strw);
+        Assert.assertTrue(strw.toString().isEmpty());
+    }
+
+    @Test
+    public void testCommentedTemplate1() throws Exception {
+        JexlContext ctxt = new MapContext();
+        JexlEngine jexl = new JexlBuilder().create();
+        JxltEngine jxlt = jexl.createJxltEngine();
+        JxltEngine.Template tmplt;
+        String src = "$$/*\n"
+                + "one\n"
+                + "$$*/\n"
+                + "42\n"
+                + "$$/*\n"
+                + "three\n"
+                + "$$*/\n";
+        tmplt = jxlt.createTemplate(src);
+        Assert.assertNotNull(tmplt);
+        Writer strw = new StringWriter();
+        tmplt.evaluate(ctxt, strw);
+        Assert.assertEquals("42\n", strw.toString());
+    }
+
 }
