@@ -57,17 +57,18 @@ public final class Frame {
     protected Frame(Frame f, Object... values) {
         scope = f.scope;
         stack = f.stack != null ? f.stack.clone() : null;
-        curried = f.curried;
         if (stack != null) {
             int nparm = scope.getArgCount();
             int ncopy = 0;
             if (values != null && values.length > 0) {
-                ncopy = Math.min(nparm - curried, Math.min(nparm, values.length));
-                System.arraycopy(values, 0, stack, curried, ncopy);
+                ncopy = Math.min(nparm - f.curried, Math.min(nparm, values.length));
+                System.arraycopy(values, 0, stack, f.curried, ncopy);
             }
+            curried = f.curried + ncopy;
             // unbound parameters are defined as null
-            Arrays.fill(stack, curried + ncopy, nparm, null);
-            curried += ncopy;
+            Arrays.fill(stack, curried, nparm, null);
+        } else {
+            curried = f.curried;
         }
     }
 
