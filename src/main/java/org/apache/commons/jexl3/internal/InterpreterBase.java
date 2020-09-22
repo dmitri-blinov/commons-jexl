@@ -237,6 +237,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                         throw new JexlException(node, "unable to instantiate namespace " + prefix, xtry.getCause());
                     }
                 }
+                // find a ctor with that context class
                 if (functor == null) {
                     JexlMethod ctor = uberspect.getConstructor(namespace, context);
                     if (ctor != null) {
@@ -249,13 +250,36 @@ public abstract class InterpreterBase extends ParserVisitor {
                             throw new JexlException(node, "unable to instantiate namespace " + prefix, xinst);
                         }
                     }
+                    // try again; find a ctor with no arg
+                    if (functor == null) {
+                        ctor = uberspect.getConstructor(namespace);
+                        if (ctor != null) {
+                            try {
+                                functor = ctor.invoke(namespace);
+                            } catch (Exception xinst) {
+                                throw new JexlException(node, "unable to instantiate namespace " + prefix, xinst);
+                            }
+                        }
+                        // try again; use a class, namespace of static methods
+                        if (functor == null) {
+                            // try to find a class with that name
+                            if (namespace instanceof String) {
+                                try {
+                                    namespace = uberspect.getClassLoader().loadClass((String) namespace);
+                                } catch (ClassNotFoundException xignore) {
+                                    // not a class
+                                    namespace = null;
+                                }
+                            } // we know its a class
+                        }
+                    }
                 }
             }
             // got a functor, store it and return it
             if (functor != null) {
                 synchronized (this) {
                     if (functors == null) {
-                        functors = new HashMap<String, Object>();
+                        functors = new HashMap<>();
                     }
                     functors.put(prefix, functor);
                 }

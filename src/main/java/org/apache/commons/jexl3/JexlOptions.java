@@ -401,7 +401,7 @@ public final class JexlOptions {
         namespaces = src.namespaces;
         return this;
     }
-    
+
     /**
      * Gets the optional map of namespaces.
      * @return the map of namespaces, may be empty, not null
@@ -417,7 +417,7 @@ public final class JexlOptions {
     public void setNamespaces(Map<String, Object> ns) {
         this.namespaces = ns == null? Collections.emptyMap() : ns;
     }
-    
+
     /**
      * Creates a copy of this instance.
      * @return a copy
