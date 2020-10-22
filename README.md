@@ -158,6 +158,8 @@ New features
 
 + New Map.Entry `[a : b]` literal is introduced
 
++ New StringBuilder `"abcd"...` literal is introduced
+
 + New block evaluation `({})` operator is introduced
 
 + New iterator `...arr` operator is introduced
