@@ -151,6 +151,7 @@ import org.apache.commons.jexl3.parser.ASTSizeFunction;
 import org.apache.commons.jexl3.parser.ASTStartCountNode;
 import org.apache.commons.jexl3.parser.ASTStopCountNode;
 import org.apache.commons.jexl3.parser.ASTStringLiteral;
+import org.apache.commons.jexl3.parser.ASTStringBuilderLiteral;
 import org.apache.commons.jexl3.parser.ASTSubNode;
 import org.apache.commons.jexl3.parser.ASTSwitchCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpression;
@@ -1758,6 +1759,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTStringLiteral node, Object data) {
         String img = node.getLiteral().replace("'", "\\'");
         return check(node, "'" + img + "'", data);
+    }
+
+    @Override
+    protected Object visit(ASTStringBuilderLiteral node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        builder.append("...");
+        return data;
     }
 
     @Override

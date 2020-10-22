@@ -562,9 +562,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>StringBuilder literals</td>
+                    <td>
+                        Starts with either *String* literal or *Multiline format literal* and ends with <code>...</code> delimiter, e.g.
+                        <code>"Hello world"...</code> and
+                        <code>'Hello world'...</code> are equivalent.
+                    </td>
+                </tr>
+                <tr>
                     <td>Regular expression (regex) literals</td>
                     <td>
-                        Start with <code>~/</code> and ends with <code>/</code> delimiters, e.g.
+                        Starts with <code>~/</code> and ends with <code>/</code> delimiters, e.g.
                         <code>~/ABC.*/</code>
                         <p>The escape character is <code>\</code> (backslash); it only escapes the string delimiter <code>\</code> (slash)</p>
                     </td>

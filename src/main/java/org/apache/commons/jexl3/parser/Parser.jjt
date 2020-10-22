@@ -1644,6 +1644,11 @@ void RegexLiteral() :
     t=<REGEX_LITERAL> { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
+void StringBuilderLiteral() : {}
+{
+    (JxltLiteral() | StringLiteral()) <ELLIPSIS> 
+}
+
 void ClassLiteral() :
 {
     Token t;
@@ -2202,6 +2207,8 @@ void PrimaryExpression() #void : {}
     This()
     |
     Current()
+    |
+    LOOKAHEAD( StringBuilderLiteral() ) StringBuilderLiteral()
     |
     Literal()
     |

@@ -164,6 +164,7 @@ import org.apache.commons.jexl3.parser.ASTSizeFunction;
 import org.apache.commons.jexl3.parser.ASTStartCountNode;
 import org.apache.commons.jexl3.parser.ASTStopCountNode;
 import org.apache.commons.jexl3.parser.ASTStringLiteral;
+import org.apache.commons.jexl3.parser.ASTStringBuilderLiteral;
 import org.apache.commons.jexl3.parser.ASTSubNode;
 import org.apache.commons.jexl3.parser.ASTSwitchCaseLabel;
 import org.apache.commons.jexl3.parser.ASTSwitchExpression;
@@ -2232,6 +2233,12 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTRegexLiteral node, Object data) {
         return node.getLiteral();
+    }
+
+    @Override
+    protected Object visit(ASTStringBuilderLiteral node, Object data) {
+        Object o = node.jjtGetChild(0).jjtAccept(this, data);
+        return new StringBuilder(arithmetic.toString(o));
     }
 
     @Override
