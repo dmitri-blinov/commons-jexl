@@ -554,7 +554,7 @@
                 <tr>
                     <td>Multiline format literals</td>
                     <td>
-                        Start and end with <code>`</code> delimiter - back-quote -, e.g. <code>`Hello world`</code>
+                        Starts and ends with <code>`</code> delimiter - back-quote -, e.g. <code>`Hello world`</code>
                         <p>The escape character is <code>\</code> (backslash); Unicode escape sequences can also be used.</p>
                         These format literals can span multiple lines and allow Unified JEXL expressions (JSTL like expressions)
                         to be interpolated. If a variable <code>user</code> valued <code>JEXL</code>is present in the environment - whether
@@ -562,9 +562,20 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Text block literals</td>
+                    <td>
+                        Starts and ends with <code>"""</code> delimiter, e.g. 
+                        <code>"""
+                        Hello world
+                        """</code>
+                        <p>The escape character is <code>\</code> (backslash); Unicode escape sequences can also be used.</p>
+                        Text block literals can span multiple lines and follow the semantics of java text blocks.
+                    </td>
+                </tr>
+                <tr>
                     <td>StringBuilder literals</td>
                     <td>
-                        Starts with either *String* literal or *Multiline format literal* and ends with <code>...</code> delimiter, e.g.
+                        Starts with either *String* literal, Text block literal or *Multiline format literal* and ends with <code>...</code> delimiter, e.g.
                         <code>"Hello world"...</code> and
                         <code>'Hello world'...</code> are equivalent.
                     </td>

@@ -160,6 +160,7 @@ import org.apache.commons.jexl3.parser.ASTSwitchStatementCase;
 import org.apache.commons.jexl3.parser.ASTSwitchStatementDefault;
 import org.apache.commons.jexl3.parser.ASTSynchronizedStatement;
 import org.apache.commons.jexl3.parser.ASTTernaryNode;
+import org.apache.commons.jexl3.parser.ASTTextBlockLiteral;
 import org.apache.commons.jexl3.parser.ASTThisNode;
 import org.apache.commons.jexl3.parser.ASTThrowStatement;
 import org.apache.commons.jexl3.parser.ASTTryStatement;
@@ -695,6 +696,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(ASTRegexLiteral node, Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTTextBlockLiteral node, Object data) {
         return visitNode(node, data);
     }
 

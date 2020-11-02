@@ -162,6 +162,7 @@ import org.apache.commons.jexl3.parser.ASTSwitchStatementCase;
 import org.apache.commons.jexl3.parser.ASTSwitchStatementDefault;
 import org.apache.commons.jexl3.parser.ASTSynchronizedStatement;
 import org.apache.commons.jexl3.parser.ASTTernaryNode;
+import org.apache.commons.jexl3.parser.ASTTextBlockLiteral;
 import org.apache.commons.jexl3.parser.ASTThisNode;
 import org.apache.commons.jexl3.parser.ASTThrowStatement;
 import org.apache.commons.jexl3.parser.ASTTryStatement;
@@ -1759,6 +1760,12 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTStringLiteral node, Object data) {
         String img = node.getLiteral().replace("'", "\\'");
         return check(node, "'" + img + "'", data);
+    }
+
+    @Override
+    protected Object visit(ASTTextBlockLiteral node, Object data) {
+        String img = node.getLiteral();
+        return check(node, "\"\"\"\n" + img + "\"\"\"", data);
     }
 
     @Override

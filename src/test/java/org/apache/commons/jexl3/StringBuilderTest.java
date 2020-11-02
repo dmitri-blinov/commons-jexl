@@ -52,4 +52,14 @@ public class StringBuilderTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 4, ((StringBuilder) o).length());
     }
 
+    @Test
+    public void testTextBlockStringBuilder() throws Exception {
+        JexlExpression e = JEXL.createExpression("\"\"\"\nabcd\"\"\"...");
+        JexlContext jc = new MapContext();
+
+        Object o = e.evaluate(jc);
+        Assert.assertTrue(o instanceof StringBuilder);
+        Assert.assertEquals("Result is not as expected", 4, ((StringBuilder) o).length());
+    }
+
 }

@@ -16,6 +16,11 @@
  */
 package org.apache.commons.jexl3.parser;
 
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.io.IOException;
+
 /**
  * Common constant strings utilities.
  * <p>
@@ -60,6 +65,50 @@ public class StringParser {
      */
     public static String buildRegex(CharSequence str) {
         return buildString(str.subSequence(1, str.length()), true);
+    }
+
+    /**
+     * Builds a string from a text block, handles escaping through '\' syntax.
+     * @param str the block to build from
+     * @return the built string
+     */
+    public static String buildBlock(CharSequence str) {
+        StringBuilder strb = new StringBuilder(str.length());
+        try (BufferedReader in = new BufferedReader(new StringReader(str.toString()))) {
+            String line = in.readLine();
+            ArrayList<String> lines = new ArrayList<String>();
+            // Calculate indent
+            int indent = -1;
+            while ((line = in.readLine()) != null) {
+                int i = 0;
+                while (i < line.length() && Character.isWhitespace(line.charAt(i)))
+                    i++;
+                // Skip whitespace lines
+                if (i < line.length() && (indent == -1 || indent > i))
+                    indent = i;
+                // Strip end delimiter
+                if (line.endsWith("\"\"\"")) {
+                    line = line.substring(0, line.length() - 3);
+                }
+                // Trim trailing whilespaces
+                int end = line.length();
+                while (end > 0 && Character.isWhitespace(line.charAt(end - 1)))
+                    end--;
+                lines.add(line.substring(0, end));
+            }
+            if (indent == -1)
+                indent = 0;
+            // Assemble text block
+            for (String s : lines) {
+                if (strb.length() > 0)
+                    strb.append("\n");
+                readString(strb, s.length() >= indent ? s.substring(indent) : s, 0, (char) 0);
+            }
+
+        } catch (IOException ex) {
+            return null;
+        }
+        return strb.toString();
     }
 
     /**

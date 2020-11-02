@@ -362,11 +362,11 @@ TOKEN_MGR_DECLS : {
 {
   < STRING_LITERAL:
     "\"" (~["\"","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "\""
-  |
+    |
     "\u201C" (~["\u201C","\u201D","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "\u201D"
-  |
+    |
     "\u2018" (~["\u2018","\u2019","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "\u2019"
-  |
+    |
     "'" (~["'","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "'"
   > { popDot(); } /* Revert state to default if was DOT_ID. */
 }
@@ -382,6 +382,13 @@ TOKEN_MGR_DECLS : {
 {
   < REGEX_LITERAL:
     "~" "/" (~["/","\n","\r","\u2028","\u2029"] | "\\" "/" )* "/"
+  > { popDot(); } /* Revert state to default if was DOT_ID. */
+}
+
+<*> TOKEN :
+{
+  < BLOCK_LITERAL:
+    "\"\"\"" ([" ","\t"])* ("\n" | "\r" | "\r\n") ("\\" "\"" | ~[])* "\"\"\""
   > { popDot(); } /* Revert state to default if was DOT_ID. */
 }
 
@@ -1575,6 +1582,8 @@ void Literal() #void : {}
     |
     JxltLiteral()
     |
+    TextBlockLiteral()
+    |
     StringLiteral()
     |
     RegexLiteral()
@@ -1644,9 +1653,17 @@ void RegexLiteral() :
     t=<REGEX_LITERAL> { jjtThis.setLiteral(Parser.buildRegex(t.image)); }
 }
 
+void TextBlockLiteral() :
+{
+    Token t;
+}
+{
+    t=<BLOCK_LITERAL> { jjtThis.setLiteral(Parser.buildBlock(t.image));  }
+}
+
 void StringBuilderLiteral() : {}
 {
-    (JxltLiteral() | StringLiteral()) <ELLIPSIS> 
+    (JxltLiteral() | TextBlockLiteral() | StringLiteral()) <ELLIPSIS> 
 }
 
 void ClassLiteral() :
