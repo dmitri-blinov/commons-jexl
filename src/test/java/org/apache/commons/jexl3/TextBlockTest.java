@@ -114,4 +114,13 @@ public class TextBlockTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", "three\"\"\"", o);
     }
 
+    @Test
+    public void testTextBlockLines() throws Exception {
+        JexlExpression e = JEXL.createExpression("\"\"\"\nabc\\\ndef\"\"\"");
+        JexlContext jc = new MapContext();
+
+        Object o = e.evaluate(jc);
+        Assert.assertEquals("Result is not as expected", "abcdef", o);
+    }
+
 }

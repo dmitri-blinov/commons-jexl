@@ -99,10 +99,12 @@ public class StringParser {
             if (indent == -1)
                 indent = 0;
             // Assemble text block
+            String linesep = "\n";
             for (String s : lines) {
                 if (strb.length() > 0)
-                    strb.append("\n");
+                    strb.append(linesep);
                 readString(strb, s.length() >= indent ? s.substring(indent) : s, 0, (char) 0);
+                linesep = s.endsWith("\\") ? "" : "\n";
             }
 
         } catch (IOException ex) {
