@@ -1658,7 +1658,7 @@ void TextBlockLiteral() :
     Token t;
 }
 {
-    t=<BLOCK_LITERAL> { jjtThis.setLiteral(Parser.buildBlock(t.image));  }
+    t=<BLOCK_LITERAL> { jjtThis.setImage(t.image); jjtThis.setLiteral(Parser.buildBlock(t.image)); }
 }
 
 void StringBuilderLiteral() : {}

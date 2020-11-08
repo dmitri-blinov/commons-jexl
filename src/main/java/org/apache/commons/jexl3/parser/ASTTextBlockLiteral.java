@@ -20,6 +20,7 @@ public final class ASTTextBlockLiteral extends JexlNode implements JexlNode.Cons
 
     /** The actual literal value; the inherited 'value' member may host a cached getter. */
     private String literal;
+    private String image;
 
     ASTTextBlockLiteral(int id) {
         super(id);
@@ -31,7 +32,7 @@ public final class ASTTextBlockLiteral extends JexlNode implements JexlNode.Cons
 
     @Override
     public String toString() {
-        return this.literal;
+        return this.image;
     }
 
     /**
@@ -50,6 +51,10 @@ public final class ASTTextBlockLiteral extends JexlNode implements JexlNode.Cons
 
     void setLiteral(String literal) {
         this.literal = literal;
+    }
+
+    void setImage(String image) {
+        this.image = image;
     }
 
     @Override

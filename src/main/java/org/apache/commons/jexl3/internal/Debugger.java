@@ -1764,8 +1764,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTTextBlockLiteral node, Object data) {
-        String img = node.getLiteral();
-        return check(node, "\"\"\"\n" + img + "\"\"\"", data);
+        String img = node.toString();
+        return check(node, img, data);
     }
 
     @Override

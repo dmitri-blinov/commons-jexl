@@ -54,7 +54,7 @@ public class StringParser {
         char sep = eatsep ? str.charAt(0) : 0;
         int end = str.length() - (eatsep ? 1 : 0);
         int begin = (eatsep ? 1 : 0);
-        read(strb, str, begin, end, sep);
+        read(strb, str, begin, end, sep, false);
         return strb.toString();
     }
 
@@ -103,7 +103,7 @@ public class StringParser {
             for (String s : lines) {
                 if (strb.length() > 0)
                     strb.append(linesep);
-                readString(strb, s.length() >= indent ? s.substring(indent) : s, 0, (char) 0);
+                readBlockString(strb, s.length() >= indent ? s.substring(indent) : s);
                 linesep = s.endsWith("\\") ? "" : "\n";
             }
 
@@ -111,6 +111,17 @@ public class StringParser {
             return null;
         }
         return strb.toString();
+    }
+
+    /**
+     * Read the text block string,
+     * handles escaping through '\' syntax.
+     * @param strb the destination buffer to copy characters into
+     * @param str the origin
+     * @return the offset in origin
+     */
+    public static int readBlockString(StringBuilder strb, CharSequence str) {
+        return read(strb, str, 0, str.length(), (char) 0, true);
     }
 
     /**
@@ -123,7 +134,7 @@ public class StringParser {
      * @return the offset in origin
      */
     public static int readString(StringBuilder strb, CharSequence str, int index, char sep) {
-        return read(strb, str, index, str.length(), sep);
+        return read(strb, str, index, str.length(), sep, false);
     }
     /** The length of an escaped unicode sequence. */
     private static final int UCHAR_LEN = 4;
@@ -138,7 +149,7 @@ public class StringParser {
      * @param sep the separator, single or double quote, marking end of string
      * @return the last character offset handled in origin
      */
-    private static int read(StringBuilder strb, CharSequence str, int begin, int end, char sep) {
+    private static int read(StringBuilder strb, CharSequence str, int begin, int end, char sep, boolean space) {
         boolean escape = false;
         int index = begin;
         for (; index < end; ++index) {
@@ -150,9 +161,20 @@ public class StringParser {
                     // if c is not an escapable character, re-emmit the backslash before it
                     boolean notSeparator = sep == 0 ? c != '\'' && c != '"' : c != sep;
                     if (notSeparator && c != '\\') {
-                        strb.append('\\');
+                        switch (c) {
+                            // http://es5.github.io/x7.html#x7.8.4
+                            case 'b': strb.append('\b'); break; // backspace \u0008
+                            case 't': strb.append('\t'); break; // horizontal tab \u0009
+                            case 'n': strb.append('\n'); break; // line feed \u000A
+                            // We don't support vertical tab. If needed, the unicode (\u000B) should be used instead
+                            case 'f': strb.append('\f'); break; // form feed \u000C
+                            case 'r': strb.append('\r'); break; // carriage return \u000D
+                            case 's': if (space) strb.append(' '); else strb.append('\\').append(c); break;
+                            default: strb.append('\\').append(c);
+                        }
+                    } else {
+                        strb.append(c);
                     }
-                    strb.append(c);
                 }
                 escape = false;
                 continue;
