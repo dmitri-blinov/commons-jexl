@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +77,11 @@ final class ClassMap {
      * </p>
      * Uses ConcurrentMap since 3.0, marginally faster than 2.1 under contention.
      */
-    private final ConcurrentMap<MethodKey, Method> byKey = new ConcurrentHashMap<MethodKey, Method>();
+    private final ConcurrentMap<MethodKey, Method> byKey = new ConcurrentHashMap<>();
     /**
      * Keep track of all methods with the same name; this is not modified after creation.
      */
-    private final Map<String, Method[]> byName = new HashMap<String, Method[]>();
+    private final Map<String, Method[]> byName = new HashMap<>();
     /**
      * Cache of fields.
      */
@@ -109,7 +110,7 @@ final class ClassMap {
         // eagerly cache public fields
         Field[] fields = aClass.getFields();
         if (fields.length > 0) {
-            fieldCache = new HashMap<String, Field>();
+            fieldCache = new HashMap<>();
             for (Field field : fields) {
                 if (permissions.allow(field)) {
                     fieldCache.put(field.getName(), field);
@@ -119,9 +120,9 @@ final class ClassMap {
             fieldCache = Collections.emptyMap();
         }
         // Property getters
-        propertyGetters = new ConcurrentHashMap<String, Method> ();
+        propertyGetters = new ConcurrentHashMap<> ();
         // Property setters
-        propertySetters = new ConcurrentHashMap<String, Map<Class, Method>> ();
+        propertySetters = new ConcurrentHashMap<> ();
     }
 
     /**
@@ -370,10 +371,10 @@ final class ClassMap {
         }
         // now that we've got all methods keyed in, lets organize them by name
         if (!cache.byKey.isEmpty()) {
-            List<Method> lm = new ArrayList<Method>(cache.byKey.size());
+            List<Method> lm = new ArrayList<>(cache.byKey.size());
             lm.addAll(cache.byKey.values());
             // sort all methods by name
-            lm.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+            lm.sort(Comparator.comparing(Method::getName));
             // put all lists of methods with same name in byName cache
             int start = 0;
             while (start < lm.size()) {
