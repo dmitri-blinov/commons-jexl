@@ -39,7 +39,7 @@ public interface JexlUberspect {
      * These are used through 'strategies' to solve properties; a strategy orders a list of resolver types,
      * and each resolver type is tried in sequence; the first resolver that discovers a non null {s,g}etter
      * stops the search.
-     * 
+     *
      * @see JexlResolver
      * @see JexlUberspect#getPropertyGet
      * @see JexlUberspect#getPropertySet
@@ -49,7 +49,7 @@ public interface JexlUberspect {
 
         /**
          * Gets a property getter.
-         * 
+         *
          * @param uber       the uberspect
          * @param obj        the object
          * @param identifier the property identifier
@@ -59,7 +59,7 @@ public interface JexlUberspect {
 
         /**
          * Gets a property setter.
-         * 
+         *
          * @param uber       the uberspect
          * @param obj        the object
          * @param identifier the property identifier
@@ -74,7 +74,7 @@ public interface JexlUberspect {
      * <p>
      * Each resolver discovers how to set/get a property with different techniques; seeking
      * method names or field names, etc.
-     * 
+     *
      * @since 3.0
      */
     enum JexlResolver implements PropertyResolver {
@@ -98,19 +98,19 @@ public interface JexlUberspect {
 
         @Override
         public final JexlPropertyGet getPropertyGet(JexlUberspect uber, Object obj, Object identifier) {
-            return uber.getPropertyGet(Collections.<PropertyResolver>singletonList(this), obj, identifier);
+            return uber.getPropertyGet(Collections.singletonList(this), obj, identifier);
         }
 
         @Override
         public final JexlPropertySet getPropertySet(JexlUberspect uber, Object obj, Object identifier, Object arg) {
-            return uber.getPropertySet(Collections.<PropertyResolver>singletonList(this), obj, identifier, arg);
+            return uber.getPropertySet(Collections.singletonList(this), obj, identifier, arg);
         }
     }
 
     /**
      * A resolver types list tailored for POJOs, favors '.' over '[]'.
      */
-    List<PropertyResolver> POJO = Collections.<PropertyResolver>unmodifiableList(Arrays.asList(
+    List<PropertyResolver> POJO = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.PROPERTY,
             JexlResolver.MAP,
             JexlResolver.LIST,
@@ -122,7 +122,7 @@ public interface JexlUberspect {
     /**
      * A resolver types list tailored for Maps, favors '[]' over '.'.
      */
-    List<PropertyResolver> MAP = Collections.<PropertyResolver>unmodifiableList(Arrays.asList(
+    List<PropertyResolver> MAP = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.MAP,
             JexlResolver.LIST,
             JexlResolver.DUCK,
@@ -133,19 +133,19 @@ public interface JexlUberspect {
 
     /**
      * Determines property resolution strategy.
-     * 
+     *
      * <p>To use a strategy instance, you have to set it at engine creation using
      * {@link org.apache.commons.jexl3.JexlBuilder#strategy(JexlUberspect.ResolverStrategy)}
      * as in:</p>
-     * 
+     *
      * <code>JexlEngine jexl = new JexlBuilder().strategy(MY_STRATEGY).create();</code>
-     * 
+     *
      * @since 3.0
      */
     interface ResolverStrategy {
         /**
          * Applies this strategy to a list of resolver types.
-         * 
+         *
          * @param operator the property access operator, may be null
          * @param obj      the instance we seek to obtain a property setter/getter from, can not be null
          * @return the ordered list of resolvers types, must not be null
@@ -174,7 +174,7 @@ public interface JexlUberspect {
 
     /**
      * The map strategy.
-     * 
+     *
      * <p>If the operator is '[]' or if the object is a map, use the MAP list of resolvers.
      * Otherwise, use the POJO list of resolvers.</p>
      */
@@ -193,7 +193,7 @@ public interface JexlUberspect {
 
     /**
      * Applies this uberspect property resolver strategy.
-     * 
+     *
      * @param op the operator
      * @param obj the object
      * @return the applied strategy resolver list
@@ -202,13 +202,13 @@ public interface JexlUberspect {
 
     /**
      * Sets the class loader to use.
-     * 
+     *
      * <p>This increments the version.</p>
-     * 
+     *
      * @param loader the class loader
      */
     void setClassLoader(ClassLoader loader);
-    
+
     /**
      * Gets the current class loader.
      * @return the class loader
@@ -217,14 +217,14 @@ public interface JexlUberspect {
 
     /**
      * Gets this uberspect version.
-     * 
+     *
      * @return the class loader modification count
      */
     int getVersion();
 
     /**
      * Returns a class constructor.
-     * 
+     *
      * @param ctorHandle a class or class name
      * @param args       constructor arguments
      * @return a {@link JexlMethod}
@@ -243,7 +243,7 @@ public interface JexlUberspect {
 
     /**
      * Returns a JexlMethod.
-     * 
+     *
      * @param obj    the object
      * @param method the method name
      * @param args   method arguments
@@ -263,9 +263,9 @@ public interface JexlUberspect {
 
     /**
      * Property getter.
-     * 
+     *
      * <p>returns a JelPropertySet apropos to an expression like <code>bar.woogie</code>.</p>
-     * 
+     *
      * @param obj        the object to get the property from
      * @param identifier property name
      * @return a {@link JexlPropertyGet} or null
@@ -290,7 +290,7 @@ public interface JexlUberspect {
      * Property setter.
      * <p>
      * Seeks a JelPropertySet apropos to an expression like  <code>foo.bar = "geir"</code>.</p>
-     * 
+     *
      * @param obj        the object to get the property from.
      * @param identifier property name
      * @param arg        value to set
@@ -315,7 +315,7 @@ public interface JexlUberspect {
 
     /**
      * Gets an iterator from an object.
-     * 
+     *
      * @param obj to get the iterator from
      * @return an iterator over obj or null
      */
@@ -332,7 +332,7 @@ public interface JexlUberspect {
 
     /**
      * Gets an arithmetic operator resolver for a given arithmetic instance.
-     * 
+     *
      * @param arithmetic the arithmetic instance
      * @return the arithmetic uberspect or null if no operator method were overridden
      * @since 3.0
