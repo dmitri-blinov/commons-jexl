@@ -139,7 +139,7 @@ public final class NumberParser {
      * Originally from OGNL.
      * @param s the real as string
      */
-    void setReal(final String s) {
+    void setReal(String s) {
         Number result;
         Class<? extends Number> rclass;
         if ("#NaN".equals(s) || "NaN".equals(s)) {
