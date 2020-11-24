@@ -24,51 +24,58 @@ import java.util.Deque;
  * <p>The symbol identifiers are determined by the functional scope.
  */
 public class LexicalFrame extends LexicalScope {
-    /** The stack of values in the lexical frame. */
+    /**
+     * The stack of values in the lexical frame.
+     */
     private Deque<Object> stack = null;
+
     /**
      * Lexical frame ctor.
+     *
      * @param scriptf the script frame
-     * @param outerf the previous lexical frame
+     * @param outerf  the previous lexical frame
      */
-    public LexicalFrame(Frame scriptf, LexicalFrame outerf) {
+    public LexicalFrame(final Frame scriptf, final LexicalFrame outerf) {
         super(scriptf, outerf);
     }
 
     /**
      * Copy ctor.
+     *
      * @param src the frame to copy
      */
-    public LexicalFrame(LexicalFrame src) {
+    public LexicalFrame(final LexicalFrame src) {
         super(src.symbols, src.moreSymbols, src.frame, src.previous);
         stack = src.stack != null? new ArrayDeque<Object>(src.stack) : null;
     }
 
     /**
      * Define the arguments.
+     *
      * @return this frame
      */
     public LexicalFrame defineArgs() {
         if (frame != null) {
-            int argc = frame.getScope().getArgCount();
-            for(int a  = 0; a < argc; ++a) {
+            final int argc = frame.getScope().getArgCount();
+            for (int a = 0; a < argc; ++a) {
                 super.addSymbol(a);
             }
         }
         return this;
     }
 
-   /**
-    * Defines a symbol.
-    * @param symbol the symbol to define
-    * @param capture whether this redefines a captured symbol
-    * @return true if symbol is defined, false otherwise
-    */
-   public boolean defineSymbol(int symbol, boolean capture) {
-        boolean declared = addSymbol(symbol);
+    /**
+     * Defines a symbol.
+     *
+     * @param symbol  the symbol to define
+     * @param capture whether this redefines a captured symbol
+     * @return true if symbol is defined, false otherwise
+     */
+    public boolean defineSymbol(final int symbol, final boolean capture) {
+        final boolean declared = addSymbol(symbol);
         if (declared && capture) {
             if (stack == null) {
-                stack = new ArrayDeque<Object>() ;
+                stack = new ArrayDeque<>();
             }
             stack.push(symbol);
             Object value = frame.get(symbol);
@@ -82,33 +89,22 @@ public class LexicalFrame extends LexicalScope {
 
     /**
      * Pops back values and lexical frame.
+     *
      * @return the previous frame
      */
     public LexicalFrame pop() {
-        long clean = symbols;
-        // undefine symbols getting out of scope
-        while (clean != 0L) {
-            int s = Long.numberOfTrailingZeros(clean);
-            clean &= ~(1L << s);
-            frame.set(s, Scope.UNDEFINED);
-        }
-        symbols = 0L;
-        if (moreSymbols != null) {
-            for (int s = moreSymbols.nextSetBit(0); s != -1; s = moreSymbols.nextSetBit(s + 1)) {
-                frame.set(s, Scope.UNDEFINED);
-            }
-            moreSymbols.clear();
-        }
+        // undefine all symbols
+        clearSymbols(s ->   frame.set(s, Scope.UNDEFINED) );
         // restore values of captured symbols that were overwritten
         if (stack != null) {
-            while(!stack.isEmpty()) {
+            while (!stack.isEmpty()) {
                 Object value = stack.pop();
                 if (value == Scope.UNDECLARED) {
                     value = Scope.UNDEFINED;
-                } else if (value == this) {// || value == Scope.UNDEFINED) {
+                } else if (value == this) {
                     value = null;
                 }
-                int symbol = (Integer) stack.pop();
+                final int symbol = (Integer) stack.pop();
                 frame.set(symbol, value);
             }
         }

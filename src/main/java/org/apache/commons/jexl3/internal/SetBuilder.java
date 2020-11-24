@@ -33,12 +33,12 @@ public class SetBuilder implements JexlArithmetic.SetBuilder {
      * @param size the initial set size
      * @param ordered whether the set should be ordered
      */
-    public SetBuilder(int size, boolean ordered) {
+    public SetBuilder(final int size, final boolean ordered) {
         set = ordered ? new LinkedHashSet<Object>(size) : new HashSet<Object>(size);
     }
 
     @Override
-    public void add(Object value) {
+    public void add(final Object value) {
         set.add(value);
     }
 

@@ -36,7 +36,7 @@ public final class Frame {
      * @param r the stack frame
      * @param c the number of curried parameters
      */
-    public Frame(Scope s, Object[] r, int c) {
+    public Frame(final Scope s, final Object[] r, final int c) {
         scope = s;
         stack = r;
         curried = c;
@@ -102,7 +102,7 @@ public final class Frame {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
@@ -118,7 +118,7 @@ public final class Frame {
      * @param s the offset in this frame
      * @return the stacked value
      */
-    Object get(int s) {
+    Object get(final int s) {
         return stack[s];
     }
 
@@ -127,7 +127,7 @@ public final class Frame {
      * @param s the offset in this frame
      * @return true if this symbol has been assigned a value, false otherwise
      */
-    boolean has(int s) {
+    boolean has(final int s) {
         return s >= 0 && s < stack.length && stack[s] != Scope.UNDECLARED;
     }
 
@@ -136,7 +136,7 @@ public final class Frame {
      * @param r the offset in this frame
      * @param value the value to set in this frame
      */
-    void set(int r, Object value) {
+    void set(final int r, final Object value) {
         stack[r] = value;
     }
     /**
@@ -144,7 +144,7 @@ public final class Frame {
      * @param values the values
      * @return this frame
      */
-     public Frame assign(Object... values) {
+     public Frame assign(final Object... values) {
          if (stack != null) {
              return new Frame(this, values);
          }

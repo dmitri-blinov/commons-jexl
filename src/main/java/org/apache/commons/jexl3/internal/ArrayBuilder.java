@@ -50,8 +50,8 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
      * @param parm a class
      * @return the primitive type or null it the argument is not unboxable
      */
-    protected static Class<?> unboxingClass(Class<?> parm) {
-        Class<?> prim = BOXING_CLASSES.get(parm);
+    protected static Class<?> unboxingClass(final Class<?> parm) {
+        final Class<?> prim = BOXING_CLASSES.get(parm);
         return prim == null ? parm : prim;
     }
 
@@ -70,12 +70,12 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
      * Creates a new builder.
      * @param size the initial array size
      */
-    public ArrayBuilder(int size) {
+    public ArrayBuilder(final int size) {
         untyped = new ArrayList<Object> (size);
     }
 
     @Override
-    public void add(Object value) {
+    public void add(final Object value) {
         // for all children after first...
         if (!Object.class.equals(commonClass)) {
             if (value == null) {
@@ -108,7 +108,7 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
     }
 
     @Override
-    public Object create(boolean extended) {
+    public Object create(final boolean extended) {
         if (extended) {
             return untyped;
         }

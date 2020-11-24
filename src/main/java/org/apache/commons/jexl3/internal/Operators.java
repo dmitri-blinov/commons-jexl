@@ -40,7 +40,7 @@ public class Operators {
      * Constructor.
      * @param owner the owning interpreter
      */
-    protected Operators(InterpreterBase owner) {
+    protected Operators(final InterpreterBase owner) {
         final JexlArithmetic arithmetic = owner.arithmetic;
         final JexlUberspect uberspect = owner.uberspect;
         this.interpreter = owner;
@@ -52,9 +52,9 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private static boolean returnsBoolean(JexlMethod vm) {
+    private static boolean returnsBoolean(final JexlMethod vm) {
         if (vm !=null) {
-            Class<?> rc = vm.getReturnType();
+            final Class<?> rc = vm.getReturnType();
             return Boolean.TYPE.equals(rc) || Boolean.class.equals(rc);
         }
         return false;
@@ -65,9 +65,9 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private boolean returnsInteger(JexlMethod vm) {
+    private boolean returnsInteger(final JexlMethod vm) {
         if (vm !=null) {
-            Class<?> rc = vm.getReturnType();
+            final Class<?> rc = vm.getReturnType();
             return Integer.TYPE.equals(rc) || Integer.class.equals(rc);
         }
         return false;
@@ -78,9 +78,9 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private boolean isArithmetic(JexlMethod vm) {
+    private boolean isArithmetic(final JexlMethod vm) {
         if (vm instanceof MethodExecutor) {
-            Method method = ((MethodExecutor) vm).getMethod();
+            final Method method = ((MethodExecutor) vm).getMethod();
             return JexlArithmetic.class.equals(method.getDeclaringClass());
         }
         return false;
@@ -95,7 +95,7 @@ public class Operators {
      * @param arg1     the first argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
-    protected Object tryOverload(JexlNode node, JexlOperator operator, Object arg1) {
+    protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1) {
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1);
         }
@@ -112,7 +112,7 @@ public class Operators {
      * @param arg2     the second argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
-    protected Object tryOverload(JexlNode node, JexlOperator operator, Object arg1, Object arg2) {
+    protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2) {
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2);
         }
@@ -130,7 +130,7 @@ public class Operators {
      * @param arg3     the third argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
-    protected Object tryOverload(JexlNode node, JexlOperator operator, Object arg1, Object arg2, Object arg3) {
+    protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2, final Object arg3) {
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2, arg3);
         }
@@ -146,7 +146,7 @@ public class Operators {
      * @param args     the arguments
      * @return the result of the operator evaluation or TRY_FAILED
      */
-    protected Object callOverload(JexlNode node, JexlOperator operator, Object... args) {
+    protected Object callOverload(final JexlNode node, final JexlOperator operator, final Object... args) {
         final JexlArithmetic arithmetic = interpreter.arithmetic;
         final boolean cache = interpreter.cache && node != null;
         try {
@@ -188,7 +188,7 @@ public class Operators {
      *         JexlEngine.TRY_FAILED if no operation was performed,
      *         the value to use as the side effect argument otherwise
      */
-    protected Object tryAssignOverload(JexlNode node, JexlOperator operator, Object arg1, Object arg2) {
+    protected Object tryAssignOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2) {
         if (operator.getArity() != 2) {
             return JexlEngine.TRY_FAILED;
         }
@@ -199,7 +199,7 @@ public class Operators {
         }
 
         // call base operator
-        JexlOperator base = operator.getBaseOperator();
+        final JexlOperator base = operator.getBaseOperator();
         if (operators != null && base != null && operators.overloads(base)) {
             result = callAssignOverload(node, operator, arg1, arg2);
             if (result != JexlEngine.TRY_FAILED) {
@@ -237,7 +237,7 @@ public class Operators {
                     // unexpected, new operator added?
                     throw new UnsupportedOperationException(operator.getOperatorSymbol());
             }
-        } catch (Exception xany) {
+        } catch (final Exception xany) {
             interpreter.operatorError(node, base, xany);
         }
         return JexlEngine.TRY_FAILED;
@@ -327,22 +327,22 @@ public class Operators {
      * @param right    the right operand
      * @return true if left starts with right, false otherwise
      */
-    protected boolean startsWith(JexlNode node, String operator, Object left, Object right) {
+    protected boolean startsWith(final JexlNode node, final String operator, final Object left, final Object right) {
         try {
             final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
-            Object result = tryOverload(node, JexlOperator.STARTSWITH, left, right);
+            final Object result = tryOverload(node, JexlOperator.STARTSWITH, left, right);
             if (result != JexlEngine.TRY_FAILED) {
                 return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            Boolean matched = arithmetic.startsWith(left, right);
+            final Boolean matched = arithmetic.startsWith(left, right);
             if (matched != null) {
                 return matched;
             }
             // try a startsWith method (duck type)
             try {
-                Object[] argv = {right};
+                final Object[] argv = {right};
                 final JexlUberspect uberspect = interpreter.uberspect;
                 JexlMethod vm = uberspect.getMethod(left, "startsWith", argv);
                 if (returnsBoolean(vm)) {
@@ -353,12 +353,12 @@ public class Operators {
                         return (Boolean) vm.invoke(left, argv);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new JexlException(node, operator + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, operator + " error", xrt);
         }
     }
@@ -371,22 +371,22 @@ public class Operators {
      * @param right    the right operand
      * @return true if left ends with right, false otherwise
      */
-    protected boolean endsWith(JexlNode node, String operator, Object left, Object right) {
+    protected boolean endsWith(final JexlNode node, final String operator, final Object left, final Object right) {
         try {
             final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
-            Object result = tryOverload(node, JexlOperator.ENDSWITH, left, right);
+            final Object result = tryOverload(node, JexlOperator.ENDSWITH, left, right);
             if (result != JexlEngine.TRY_FAILED) {
                 return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            Boolean matched = arithmetic.endsWith(left, right);
+            final Boolean matched = arithmetic.endsWith(left, right);
             if (matched != null) {
                 return matched;
             }
             // try a endsWith method (duck type)
             try {
-                Object[] argv = {right};
+                final Object[] argv = {right};
                 final JexlUberspect uberspect = interpreter.uberspect;
                 JexlMethod vm = uberspect.getMethod(left, "endsWith", argv);
                 if (returnsBoolean(vm)) {
@@ -397,12 +397,12 @@ public class Operators {
                         return (Boolean) vm.invoke(left, argv);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new JexlException(node, operator + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, operator + " error", xrt);
         }
     }
@@ -419,22 +419,22 @@ public class Operators {
      * @param left  the right operand
      * @return true if left matches right, false otherwise
      */
-    protected boolean contains(JexlNode node, String op, Object left, Object right) {
+    protected boolean contains(final JexlNode node, final String op, final Object left, final Object right) {
         try {
             final JexlArithmetic arithmetic = interpreter.arithmetic;
             // try operator overload
-            Object result = tryOverload(node, JexlOperator.CONTAINS, left, right);
+            final Object result = tryOverload(node, JexlOperator.CONTAINS, left, right);
             if (result != JexlEngine.TRY_FAILED) {
                 return arithmetic.toBoolean(result);
             }
             // use arithmetic / pattern matching ?
-            Boolean matched = arithmetic.contains(left, right);
+            final Boolean matched = arithmetic.contains(left, right);
             if (matched != null) {
                 return matched;
             }
             // try a contains method (duck type set)
             try {
-                Object[] argv = {right};
+                final Object[] argv = {right};
                 final JexlUberspect uberspect = interpreter.uberspect;
                 JexlMethod vm = uberspect.getMethod(left, "contains", argv);
                 if (returnsBoolean(vm)) {
@@ -445,12 +445,12 @@ public class Operators {
                         return (Boolean) vm.invoke(left, argv);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new JexlException(node, op + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, op + " error", xrt);
         }
     }
@@ -464,7 +464,7 @@ public class Operators {
      * @param object the object to check the emptyness of
      * @return the evaluation result
      */
-    protected Object empty(JexlNode node, Object object) {
+    protected Object empty(final JexlNode node, final Object object) {
         if (object == null) {
             return true;
         }
@@ -479,11 +479,11 @@ public class Operators {
             // check if there is an isEmpty method on the object that returns a
             // boolean and if so, just use it
             final JexlUberspect uberspect = interpreter.uberspect;
-            JexlMethod vm = uberspect.getMethod(object, "isEmpty", Interpreter.EMPTY_PARAMS);
+            final JexlMethod vm = uberspect.getMethod(object, "isEmpty", Interpreter.EMPTY_PARAMS);
             if (returnsBoolean(vm)) {
                 try {
                     result = vm.invoke(object, Interpreter.EMPTY_PARAMS);
-                } catch (Exception xany) {
+                } catch (final Exception xany) {
                     interpreter.operatorError(node, JexlOperator.EMPTY, xany);
                 }
             }
@@ -500,7 +500,7 @@ public class Operators {
      * @param object the object to get the size of
      * @return the evaluation result
      */
-    protected Object size(JexlNode node, Object object) {
+    protected Object size(final JexlNode node, final Object object) {
         if (object == null) {
             return 0;
         }
@@ -514,11 +514,11 @@ public class Operators {
             // check if there is a size method on the object that returns an
             // integer and if so, just use it
             final JexlUberspect uberspect = interpreter.uberspect;
-            JexlMethod vm = uberspect.getMethod(object, "size", Interpreter.EMPTY_PARAMS);
+            final JexlMethod vm = uberspect.getMethod(object, "size", Interpreter.EMPTY_PARAMS);
             if (returnsInteger(vm)) {
                 try {
                     result = vm.invoke(object, Interpreter.EMPTY_PARAMS);
-                } catch (Exception xany) {
+                } catch (final Exception xany) {
                     interpreter.operatorError(node, JexlOperator.SIZE, xany);
                 }
             }

@@ -14,50 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.jexl3.internal.introspection;
 
+package org.apache.commons.jexl3.internal.introspection;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.jexl3.JexlException;
-
 /**
- * Specialized executor to get a property from an object.
- * <p>Duck as in duck-typing for an interface like:
- * <code>
- * interface Get {
- *      Object get(Object key);
- * }
- * </code>
- * </p>
+ * Specialized executor to get a boolean property from an object.
  * @since 2.0
  */
-public final class DuckGetExecutor extends AbstractExecutor.Get {
-    /** The property, may be null. */
-    private final Object property;
-    /** The arguments list */
-    private final Object[] args;
+public final class BooleanGetExecutor extends AbstractExecutor.Get {
+    /** The property. */
+    private final String property;
 
     /**
-     * Attempts to discover a DuckGetExecutor.
+     * Discovers a BooleanGetExecutor.
+     * <p>The method to be found should be named "is{P,p}property and return a boolean.</p>
+     *
      * @param is the introspector
      * @param clazz the class to find the get method from
-     * @param identifier the key to use as an argument to the get method
+     * @param property the the property name
      * @return the executor if found, null otherwise
      */
-    public static DuckGetExecutor discover(final Introspector is, final Class<?> clazz, final Object identifier) {
-        final java.lang.reflect.Method method = is.getMethod(clazz, "get", makeArgs(identifier));
-        return method == null? null : new DuckGetExecutor(clazz, method, identifier);
+    public static BooleanGetExecutor discover(final Introspector is, final Class<?> clazz, final String property) {
+        if (property != null && !property.isEmpty()) {
+            final java.lang.reflect.Method m = PropertyGetExecutor.discoverGet(is, "is", clazz, property);
+            if (m != null && (m.getReturnType() == Boolean.TYPE || m.getReturnType() == Boolean.class)) {
+                return new BooleanGetExecutor(clazz, m, property);
+            }
+        }
+        return null;
     }
 
     /**
-     * Creates an instance.
-     * @param clazz he class the get method applies to
+     * Creates an instance by attempting discovery of the get method.
+     * @param clazz the class to introspect
      * @param method the method held by this executor
-     * @param identifier the property to get
+     * @param key the property to get
      */
-    private DuckGetExecutor(final Class<?> clazz, final java.lang.reflect.Method method, final Object identifier) {
+    private BooleanGetExecutor(final Class<?> clazz, final java.lang.reflect.Method method, final String key) {
         super(clazz, method);
-        property = identifier;
-        args = new Object[] {property};
+        property = key;
     }
 
     @Override
@@ -67,19 +63,18 @@ public final class DuckGetExecutor extends AbstractExecutor.Get {
 
     @Override
     public Object invoke(final Object obj) throws IllegalAccessException, InvocationTargetException {
-        return method.invoke(obj, args);
+        return method == null ? null : method.invoke(obj, (Object[]) null);
     }
 
     @Override
     public Object tryInvoke(final Object obj, final Object key) {
-        if (obj != null
-            && objectClass == obj.getClass()
+        if (obj != null && method !=  null
             // ensure method name matches the property name
-            && ((property == null && key == null)
-                 || (property != null && property.equals(key)))) {
+            && property.equals(key)
+            && objectClass.equals(obj.getClass())) {
             try {
-                return method.invoke(obj, args);
-            } catch (IllegalAccessException | IllegalArgumentException xill) {
+                return method.invoke(obj, (Object[]) null);
+            } catch (final IllegalAccessException xill) {
                 return TRY_FAILED;// fail
             } catch (final InvocationTargetException xinvoke) {
                 throw JexlException.tryFailed(xinvoke); // throw

@@ -25,15 +25,15 @@ public class ASTVar extends ASTIdentifier {
     private Class type;
     protected boolean isRequired;
 
-    public ASTVar(int id) {
+    public ASTVar(final int id) {
         super(id);
     }
 
-    public ASTVar(Parser p, int id) {
+    public ASTVar(final Parser p, final int id) {
         super(p, id);
     }
 
-    void setType(Class c) {
+    void setType(final Class c) {
         type = c;
     }
 
@@ -54,7 +54,7 @@ public class ASTVar extends ASTIdentifier {
     }
     
     @Override
-    public Object jjtAccept(ParserVisitor visitor, Object data) {
+    public Object jjtAccept(final ParserVisitor visitor, final Object data) {
         return visitor.visit(this, data);
     }
 }

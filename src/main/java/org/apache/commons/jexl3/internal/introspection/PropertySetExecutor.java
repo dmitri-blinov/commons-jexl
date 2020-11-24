@@ -40,7 +40,7 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
      * @param value      the value to assign to the property
      * @return the executor if found, null otherwise
      */
-    public static PropertySetExecutor discover(Introspector is, Class<?> clazz, String property, Object value) {
+    public static PropertySetExecutor discover(final Introspector is, final Class<?> clazz, final String property, final Object value) {
         if (property == null || property.isEmpty()) {
             return null;
         }
@@ -58,7 +58,7 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
      * @param key    the key to use as 1st argument to the set method
      * @param value    the value
      */
-    protected PropertySetExecutor(Class<?> clazz, java.lang.reflect.Method method, String key, Object value) {
+    protected PropertySetExecutor(final Class<?> clazz, final java.lang.reflect.Method method, final String key, final Object value) {
         super(clazz, method);
         property = key;
         valueClass = classOf(value);
@@ -70,22 +70,23 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
     }
 
     @Override
-    public Object invoke(Object o, Object arg) throws IllegalAccessException, InvocationTargetException {
+    public Object invoke(final Object o, final Object arg) throws IllegalAccessException, InvocationTargetException {
+        Object param = arg;
         // handle the empty array case
-        if (isEmptyArray(arg)) {
+        if (isEmptyArray(param)) {
             // if array is empty but its component type is different from the method first parameter component type,
             // replace argument with a new empty array instance (of the method first parameter component type)
-            Class<?> componentType = method.getParameterTypes()[0].getComponentType();
+            final Class<?> componentType = method.getParameterTypes()[0].getComponentType();
             if (componentType != null && !componentType.equals(arg.getClass().getComponentType())) {
-                arg = Array.newInstance(componentType, 0);
+                param = Array.newInstance(componentType, 0);
             }
         }
-        method.invoke(o, arg);
-        return arg;
+        method.invoke(o, param);
+        return param;
     }
 
     @Override
-    public Object tryInvoke(Object o, Object identifier, Object value) {
+    public Object tryInvoke(final Object o, final Object identifier, final Object value) {
         if (o != null
             // object class should be same as executor's method declaring class
             && objectClass == o.getClass()
@@ -97,7 +98,7 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
                 return invoke(o, value);
             } catch (IllegalAccessException | IllegalArgumentException xill) {
                 return TRY_FAILED;// fail
-            } catch (InvocationTargetException xinvoke) {
+            } catch (final InvocationTargetException xinvoke) {
                 throw JexlException.tryFailed(xinvoke); // throw
             }
         }
@@ -109,7 +110,7 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
      * @param arg the argument
      * @return true if <code>arg</code> is an empty array
      */
-    private static boolean isEmptyArray(Object arg) {
+    private static boolean isEmptyArray(final Object arg) {
         return (arg != null && arg.getClass().isArray() && Array.getLength(arg) == 0);
     }
 }
