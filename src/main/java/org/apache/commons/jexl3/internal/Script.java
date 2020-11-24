@@ -70,7 +70,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param expr   the expression source.
      * @param ref    the parsed expression.
      */
-    protected Script(Engine engine, String expr, ASTJexlScript ref) {
+    protected Script(final Engine engine, final String expr, final ASTJexlScript ref) {
         jexl = engine;
         source = expr;
         script = ref;
@@ -86,7 +86,7 @@ public class Script implements JexlScript, JexlExpression {
      * </p>
      */
     protected void checkCacheVersion() {
-        int uberVersion = jexl.getUberspect().getVersion();
+        final int uberVersion = jexl.getUberspect().getVersion();
         if (version != uberVersion) {
             // version 0 of the uberSpect is an illusion due to order of construction; no need to clear cache
             if (version > 0) {
@@ -101,7 +101,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param args the arguments to bind to parameters
      * @return the frame (may be null)
      */
-    protected Frame createFrame(Object[] args) {
+    protected Frame createFrame(final Object[] args) {
         return script.createFrame(args);
     }
 
@@ -111,8 +111,8 @@ public class Script implements JexlScript, JexlExpression {
      * @param frame the calling frame
      * @return  the interpreter
      */
-    protected Interpreter createInterpreter(JexlContext context, Frame frame) {
-        JexlOptions opts = jexl.options(script, context);
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame) {
+        final JexlOptions opts = jexl.options(script, context);
         return jexl.createInterpreter(context, frame, opts);
     }
 
@@ -144,8 +144,8 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     @Override
-    public String getParsedText(int indent) {
-        Debugger debug = new Debugger();
+    public String getParsedText(final int indent) {
+        final Debugger debug = new Debugger();
         debug.setIndentation(indent);
         debug.debug(script, false);
         return debug.toString();
@@ -155,7 +155,7 @@ public class Script implements JexlScript, JexlExpression {
     public String toString() {
         CharSequence src = source;
         if (src == null) {
-            Debugger debug = new Debugger();
+            final Debugger debug = new Debugger();
             debug.debug(script, false);
             src = debug.toString();
         }
@@ -173,7 +173,7 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
@@ -191,35 +191,35 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     @Override
-    public Object evaluate(JexlContext context) {
+    public Object evaluate(final JexlContext context) {
         return execute(context, null);
     }
 
     @Override
-    public Object execute(JexlContext context) {
+    public Object execute(final JexlContext context) {
         return execute(context, null);
     }
 
     @Override
-    public Object execute(JexlContext context, Object... args) {
+    public Object execute(final JexlContext context, final Object... args) {
         checkCacheVersion();
-        Interpreter interpreter = createInterpreter(context, args);
+        final Interpreter interpreter = createInterpreter(context, args);
         return interpreter.interpret(script);
     }
 
-    protected boolean isArray(Object o) {
+    protected boolean isArray(final Object o) {
         return o != null ? (o.getClass().isArray()) : false;
     }
 
-    protected boolean isArrayOf(Object o, Class type) {
+    protected boolean isArrayOf(final Object o, final Class type) {
         return o != null ? (o.getClass().isArray() && o.getClass().getComponentType() == type) : false;
     }
 
-    protected Object castArray(Object arr, Class type) {
+    protected Object castArray(final Object arr, final Class type) {
         return castArray(arr, type, 0);
     }
 
-    protected Object castArray(Object arr, Class type, int from) {
+    protected Object castArray(final Object arr, final Class type, final int from) {
         JexlArithmetic arithmetic = jexl.getArithmetic();
         // Process via untyped array to cover primitive type arrays
         int len = Array.getLength(arr);
@@ -245,7 +245,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param args the passed arguments list
      * @return the script parameter list
      */
-    protected Object[] scriptArgs(Object[] args) {
+    protected Object[] scriptArgs(final Object[] args) {
         return scriptArgs(0, args);
     }
 
@@ -255,7 +255,7 @@ public class Script implements JexlScript, JexlExpression {
      * @param args the passed arguments list
      * @return the script parameter list
      */
-    protected Object[] scriptArgs(int curried, Object[] args) {
+    protected Object[] scriptArgs(final int curried, final Object[] args) {
 
         String[] params = getParameters();
         boolean varArgs = isVarArgs();
@@ -391,8 +391,8 @@ public class Script implements JexlScript, JexlExpression {
     }
 
     @Override
-    public JexlScript curry(Object... args) {
-        String[] parms = getUnboundParameters();
+    public JexlScript curry(final Object... args) {
+        final String[] parms = getUnboundParameters();
         if (parms == null || parms.length == 0 || args == null || args.length == 0)
             return this;
         return Closure.create(this, args);
@@ -470,7 +470,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return the callable
      */
     @Override
-    public Callable callable(JexlContext context) {
+    public Callable callable(final JexlContext context) {
         return callable(context, (Object[]) null);
     }
 
@@ -483,7 +483,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return the callable
      */
     @Override
-    public Callable callable(JexlContext context, Object... args) {
+    public Callable callable(final JexlContext context, final Object... args) {
         return new CallableScript(createInterpreter(context, args));
     }
 
@@ -500,7 +500,7 @@ public class Script implements JexlScript, JexlExpression {
          * The base constructor.
          * @param intrprtr the interpreter to use
          */
-        protected CallableScript(Interpreter intrprtr) {
+        protected CallableScript(final Interpreter intrprtr) {
             this.interpreter = intrprtr;
             this.result = intrprtr;
         }

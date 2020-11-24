@@ -38,11 +38,11 @@ public final class PropertyGetExecutor extends AbstractExecutor.Get {
      * @param property the property name to find
      * @return the executor if found, null otherwise
      */
-    public static PropertyGetExecutor discover(Introspector is, Class<?> clazz, String property) {
+    public static PropertyGetExecutor discover(final Introspector is, final Class<?> clazz, final String property) {
         if (property == null || property.isEmpty()) {
             return null;
         }
-        java.lang.reflect.Method m = is.getPropertyGet(clazz, property);
+        final java.lang.reflect.Method m = is.getPropertyGet(clazz, property);
         return m == null ? null : new PropertyGetExecutor(clazz, m, property);
     }
 
@@ -52,7 +52,7 @@ public final class PropertyGetExecutor extends AbstractExecutor.Get {
      * @param method the method held by this executor
      * @param identifier the property to get
      */
-    private PropertyGetExecutor(Class<?> clazz, java.lang.reflect.Method method, String identifier) {
+    private PropertyGetExecutor(final Class<?> clazz, final java.lang.reflect.Method method, final String identifier) {
         super(clazz, method);
         property = identifier;
     }
@@ -63,18 +63,18 @@ public final class PropertyGetExecutor extends AbstractExecutor.Get {
     }
 
     @Override
-    public Object invoke(Object o) throws IllegalAccessException, InvocationTargetException {
+    public Object invoke(final Object o) throws IllegalAccessException, InvocationTargetException {
         return method == null ? null : method.invoke(o, (Object[]) null);
     }
 
     @Override
-    public Object tryInvoke(Object o, Object identifier) {
+    public Object tryInvoke(final Object o, final Object identifier) {
         if (o != null && objectClass == o.getClass() && property.equals(castString(identifier))) {
             try {
                 return method.invoke(o, (Object[]) null);
             } catch (IllegalAccessException | IllegalArgumentException xill) {
                 return TRY_FAILED;// fail
-            } catch (InvocationTargetException xinvoke) {
+            } catch (final InvocationTargetException xinvoke) {
                 throw JexlException.tryFailed(xinvoke); // throw
             }
         }

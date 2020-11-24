@@ -115,7 +115,7 @@ public final class Scope {
      * @param scope the parent scope if any
      * @param parameters the list of parameters
      */
-    public Scope(Scope scope, String... parameters) {
+    public Scope(final Scope scope, final String... parameters) {
         if (parameters != null) {
             parms = parameters.length;
             for (int p = 0; p < parms; ++p) {
@@ -134,14 +134,14 @@ public final class Scope {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (!(o instanceof Scope)) {
             return false;
         }
-        Scope scope = (Scope) o;
+        final Scope scope = (Scope) o;
         if (parms != scope.parms) {
             return false;
         }
@@ -172,7 +172,7 @@ public final class Scope {
      * @param name the symbol name
      * @return the symbol index
      */
-    public Integer getSymbol(String name) {
+    public Integer getSymbol(final String name) {
         return getSymbol(name, true);
     }
 
@@ -182,7 +182,7 @@ public final class Scope {
      * @param capture whether solving by capturing a parent symbol is allowed
      * @return the symbol index
      */
-    public Integer getSymbol(String name, boolean capture) {
+    public Integer getSymbol(final String name, final boolean capture) {
         Integer register = namedVariables != null ? namedVariables.get(name) : null;
         if (register == null && capture && parent != null && !isStatic) {
             Integer pr = parent.getSymbol(name, true);
@@ -203,7 +203,7 @@ public final class Scope {
      * @param symbol the symbol number
      * @return true if captured, false otherwise
      */
-    public boolean isCapturedSymbol(int symbol) {
+    public boolean isCapturedSymbol(final int symbol) {
         return capturedVariables != null && capturedVariables.containsKey(symbol);
     }
 
@@ -212,7 +212,7 @@ public final class Scope {
      * @param symbol the symbol index
      * @param register the parent frame register
      */
-    protected void setVariableCaptured(int symbol, int register) {
+    protected void setVariableCaptured(final int symbol, final int register) {
         if (capturedVariables == null) {
             capturedVariables = new LinkedHashMap<Integer, Integer>();
         }
@@ -313,7 +313,7 @@ public final class Scope {
      * @param name the parameter name
      * @return the register index storing this variable
      */
-    public int declareParameter(String name) {
+    public int declareParameter(final String name) {
         return declareParameter(name, null, false, false, null);
     }
 
@@ -329,7 +329,7 @@ public final class Scope {
      * @param value the default parameter value
      * @return the register index storing this variable
      */
-    public int declareParameter(String name, Class type, boolean isFinal, boolean isRequired, Object value) {
+    public int declareParameter(final String name, final Class type, final boolean isFinal, final boolean isRequired, final Object value) {
         if (vars > 0) {
             throw new IllegalStateException("cant declare parameters after variables");
         }
@@ -368,7 +368,7 @@ public final class Scope {
     /**
      * Declares return type
      */
-    public void declareReturnType(Class type) {
+    public void declareReturnType(final Class type) {
         returnType = type;
     }
 
@@ -380,7 +380,7 @@ public final class Scope {
      * @param name the variable name
      * @return the register index storing this variable
      */
-    public int declareVariable(String name) {
+    public int declareVariable(final String name) {
         return declareVariable(name, null, false, false);
     }
 
@@ -395,7 +395,7 @@ public final class Scope {
      * @param isRequired if the declared variable is non-null
      * @return the register index storing this variable
      */
-    public int declareVariable(String name, Class type, boolean isFinal, boolean isRequired) {
+    public int declareVariable(final String name, final Class type, final boolean isFinal, final boolean isRequired) {
         Integer register = getSymbol(name, false);
         if (register == null) {
             register = addSymbol(name);
@@ -409,7 +409,7 @@ public final class Scope {
             }
             // check if local is redefining captured
             if (parent != null) {
-                Integer pr = parent.getSymbol(name, true);
+                final Integer pr = parent.getSymbol(name, true);
                 if (pr != null) {
                     setVariableCaptured(register, pr);
                 }
@@ -436,15 +436,15 @@ public final class Scope {
      * @param args the arguments
      * @return the arguments array
      */
-    public Frame createFrame(Frame frame, Object...args) {
+    public Frame createFrame(final Frame frame, final Object...args) {
         if (namedVariables != null) {
-            Object[] arguments = new Object[namedVariables.size()];
+            final Object[] arguments = new Object[namedVariables.size()];
             Arrays.fill(arguments, UNDECLARED);
             if (frame != null && capturedVariables != null && parent != null) {
-                for (Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
-                    Integer target = capture.getKey();
-                    Integer source = capture.getValue();
-                    Object arg = frame.get(source);
+                for (final Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
+                    final Integer target = capture.getKey();
+                    final Integer source = capture.getValue();
+                    final Object arg = frame.get(source);
                     arguments[target] = arg;
                 }
             }
@@ -461,10 +461,10 @@ public final class Scope {
      * @param symbol the symbol index
      * @return the target symbol index or null if the symbol is not captured
      */
-    public Integer getCaptured(int symbol) {
+    public Integer getCaptured(final int symbol) {
         if (capturedVariables != null) {
-            for (Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
-                Integer source = capture.getValue();
+            for (final Map.Entry<Integer, Integer> capture : capturedVariables.entrySet()) {
+                final Integer source = capture.getValue();
                 if (source == symbol) {
                     return capture.getKey();
                 }
@@ -526,13 +526,13 @@ public final class Scope {
      * @param bound number of known bound parameters (curry)
      * @return the parameter names
      */
-    protected String[] getParameters(int bound) {
-        int unbound = parms - bound;
+    protected String[] getParameters(final int bound) {
+        final int unbound = parms - bound;
         if (namedVariables != null && unbound > 0) {
-            String[] pa = new String[unbound];
+            final String[] pa = new String[unbound];
             int p = 0;
-            for (Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
-                int argn = entry.getValue();
+            for (final Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
+                final int argn = entry.getValue();
                 if (argn >= bound && argn < parms) {
                     pa[p++] = entry.getKey();
                 }
@@ -549,7 +549,7 @@ public final class Scope {
      */
     public String[] getLocalVariables() {
         if (namedVariables != null && vars > 0) {
-            List<String> locals = new ArrayList<String>(vars);
+            final List<String> locals = new ArrayList<String>(vars);
             for (Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
                 int symnum = entry.getValue();
                 if (symnum >= parms && !isCapturedSymbol(symnum)) {

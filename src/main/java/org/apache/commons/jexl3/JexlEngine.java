@@ -100,7 +100,7 @@ public abstract class JexlEngine {
      *
      * @param tls the thread local context to set
      */
-    public static void setThreadContext(JexlContext.ThreadLocal tls) {
+    public static void setThreadContext(final JexlContext.ThreadLocal tls) {
         CONTEXT.set(tls);
     }
 
@@ -187,17 +187,17 @@ public abstract class JexlEngine {
         private EmptyContext() {}
 
         @Override
-        public Object get(String name) {
+        public Object get(final String name) {
             return null;
         }
 
         @Override
-        public boolean has(String name) {
+        public boolean has(final String name) {
             return false;
         }
 
         @Override
-        public void set(String name, Object value) {
+        public void set(final String name, final Object value) {
             throw new UnsupportedOperationException("Not supported in void context.");
         }
     };
@@ -217,7 +217,7 @@ public abstract class JexlEngine {
         private EmptyNamespaceResolver() {}
 
         @Override
-        public Object resolveNamespace(String name) {
+        public Object resolveNamespace(final String name) {
             return null;
         }
     };
@@ -306,7 +306,7 @@ public abstract class JexlEngine {
      * @param noScript  whether the JxltEngine only allows Jexl expressions or scripts
      * @return a JEXL Template engine
      */
-    public JxltEngine createJxltEngine(boolean noScript) {
+    public JxltEngine createJxltEngine(final boolean noScript) {
         return createJxltEngine(noScript, JXLT_CACHE_SIZE, '$', '#');
     }
 
@@ -345,7 +345,7 @@ public abstract class JexlEngine {
      * @return An {@link JexlExpression} which can be evaluated using a {@link JexlContext}
      * @throws JexlException if there is a problem parsing the script
      */
-    public final JexlExpression createExpression(String expression) {
+    public final JexlExpression createExpression(final String expression) {
         return createExpression(null, expression);
     }
     /**
@@ -373,7 +373,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed using a {@link JexlContext}
      * @throws JexlException if there is a problem parsing the script
      */
-    public final JexlScript createScript(JexlInfo info, String source, String... names) {
+    public final JexlScript createScript(final JexlInfo info, final String source, final String... names) {
         return createScript(null, info, source, names);
     }
 
@@ -385,7 +385,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed using a {@link JexlContext}
      * @throws JexlException if there is a problem parsing the script.
      */
-    public final JexlScript createScript(String scriptText) {
+    public final JexlScript createScript(final String scriptText) {
         return createScript(null, null, scriptText, (String[]) null);
     }
 
@@ -399,7 +399,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed using a {@link JexlContext}
      * @throws JexlException if there is a problem parsing the script
      */
-    public final JexlScript createScript(String source, String... names) {
+    public final JexlScript createScript(final String source, final String... names) {
         return createScript(null, null, source, names);
     }
 
@@ -411,7 +411,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(File scriptFile) {
+    public final JexlScript createScript(final File scriptFile) {
         return createScript(null, null, readSource(scriptFile), (String[]) null);
     }
 
@@ -425,7 +425,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(File scriptFile, String... names) {
+    public final JexlScript createScript(final File scriptFile, final String... names) {
         return createScript(null, null, readSource(scriptFile), names);
     }
 
@@ -440,7 +440,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(JexlInfo info, File scriptFile, String... names) {
+    public final JexlScript createScript(final JexlInfo info, final File scriptFile, final String... names) {
         return createScript(null, info, readSource(scriptFile), names);
     }
 
@@ -452,7 +452,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(URL scriptUrl) {
+    public final JexlScript createScript(final URL scriptUrl) {
         return createScript(null, readSource(scriptUrl), (String[]) null);
     }
 
@@ -466,7 +466,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(URL scriptUrl, String... names) {
+    public final JexlScript createScript(final URL scriptUrl, final String... names) {
         return createScript(null, null, readSource(scriptUrl), names);
     }
 
@@ -481,7 +481,7 @@ public abstract class JexlEngine {
      * @return A {@link JexlScript} which can be executed with a {@link JexlContext}.
      * @throws JexlException if there is a problem reading or parsing the script.
      */
-    public final JexlScript createScript(JexlInfo info, URL scriptUrl, String... names) {
+    public final JexlScript createScript(final JexlInfo info, final URL scriptUrl, final String... names) {
         return createScript(null, info, readSource(scriptUrl), names);
     }
 
@@ -583,7 +583,7 @@ public abstract class JexlEngine {
      * @param c  column number
      * @return a JexlInfo instance
      */
-    public JexlInfo createInfo(String fn, int l, int c) {
+    public JexlInfo createInfo(final String fn, final int l, final int c) {
         return new JexlInfo(fn, l, c);
     }
 
@@ -605,8 +605,8 @@ public abstract class JexlEngine {
      * @return the contents of the reader as a String.
      * @throws IOException on any error reading the reader.
      */
-    protected static String toString(BufferedReader reader) throws IOException {
-        StringBuilder buffer = new StringBuilder();
+    protected static String toString(final BufferedReader reader) throws IOException {
+        final StringBuilder buffer = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
             buffer.append(line).append('\n');
@@ -627,7 +627,7 @@ public abstract class JexlEngine {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
                 getCharset()))) {
             return toString(reader);
-        } catch (IOException xio) {
+        } catch (final IOException xio) {
             throw new JexlException(createInfo(file.toString(), 1, 1), "could not read source File", xio);
         }
     }
@@ -644,7 +644,7 @@ public abstract class JexlEngine {
         }
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), getCharset()))) {
             return toString(reader);
-        } catch (IOException xio) {
+        } catch (final IOException xio) {
             throw new JexlException(createInfo(url.toString(), 1, 1), "could not read source URL", xio);
         }
     }

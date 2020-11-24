@@ -52,7 +52,7 @@ public class SoftCache<K, V> {
      *
      * @param theSize the cache size
      */
-    SoftCache(int theSize) {
+    SoftCache(final int theSize) {
         size = theSize;
     }
 
@@ -78,7 +78,7 @@ public class SoftCache<K, V> {
      * @param key the cache entry key
      * @return the cache entry value
      */
-    public synchronized V get(K key) {
+    public synchronized V get(final K key) {
         final Map<K, V> map = ref != null ? ref.get() : null;
         return map != null ? map.get(key) : null;
     }
@@ -89,7 +89,7 @@ public class SoftCache<K, V> {
      * @param key the cache entry key
      * @param script the cache entry value
      */
-    public synchronized void put(K key, V script) {
+    public synchronized void put(final K key, final V script) {
         Map<K, V> map = ref != null ? ref.get() : null;
         if (map == null) {
             map = createCache(size);
@@ -134,7 +134,7 @@ public class SoftCache<K, V> {
             private static final long serialVersionUID = 1L;
 
             @Override
-            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
                 return super.size() > cacheSize;
             }
         };

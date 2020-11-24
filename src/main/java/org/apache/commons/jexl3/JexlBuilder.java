@@ -115,7 +115,7 @@ public class JexlBuilder {
      * @param u the uberspect
      * @return this builder
      */
-    public JexlBuilder uberspect(JexlUberspect u) {
+    public JexlBuilder uberspect(final JexlUberspect u) {
         this.uberspect = u;
         return this;
     }
@@ -132,7 +132,7 @@ public class JexlBuilder {
      * @param rs the strategy
      * @return this builder
      */
-    public JexlBuilder strategy(JexlUberspect.ResolverStrategy rs) {
+    public JexlBuilder strategy(final JexlUberspect.ResolverStrategy rs) {
         this.strategy = rs;
         return this;
     }
@@ -153,7 +153,7 @@ public class JexlBuilder {
      * @param a the arithmetic
      * @return this builder
      */
-    public JexlBuilder arithmetic(JexlArithmetic a) {
+    public JexlBuilder arithmetic(final JexlArithmetic a) {
         this.arithmetic = a;
         options.setStrictArithmetic(a.isStrict());
         options.setMathContext(a.getMathContext());
@@ -172,7 +172,7 @@ public class JexlBuilder {
      * @param box the sandbox
      * @return this builder
      */
-    public JexlBuilder sandbox(JexlSandbox box) {
+    public JexlBuilder sandbox(final JexlSandbox box) {
         this.sandbox = box;
         return this;
     }
@@ -191,7 +191,7 @@ public class JexlBuilder {
      * @param f the features
      * @return this builder
      */
-    public JexlBuilder features(JexlFeatures f) {
+    public JexlBuilder features(final JexlFeatures f) {
         this.features = f;
         if (features != null) {
             if (features.isLexical()) {
@@ -215,7 +215,7 @@ public class JexlBuilder {
      * @param log the logger
      * @return this builder
      */
-    public JexlBuilder logger(Log log) {
+    public JexlBuilder logger(final Log log) {
         this.logger = log;
         return this;
     }
@@ -231,7 +231,7 @@ public class JexlBuilder {
      * @param l the class loader
      * @return this builder
      */
-    public JexlBuilder loader(ClassLoader l) {
+    public JexlBuilder loader(final ClassLoader l) {
         this.loader = l;
         return this;
     }
@@ -249,7 +249,7 @@ public class JexlBuilder {
      * @deprecated since 3.1 use {@link #charset(Charset)} instead
      */
     @Deprecated
-    public JexlBuilder loader(Charset arg) {
+    public JexlBuilder loader(final Charset arg) {
         return charset(arg);
     }
 
@@ -260,7 +260,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.1
      */
-    public JexlBuilder charset(Charset arg) {
+    public JexlBuilder charset(final Charset arg) {
         this.charset = arg;
         return this;
     }
@@ -276,7 +276,7 @@ public class JexlBuilder {
      * @param flag true means antish resolution is enabled, false disables it
      * @return this builder
      */
-    public JexlBuilder antish(boolean flag) {
+    public JexlBuilder antish(final boolean flag) {
         options.setAntish(flag);
         return this;
     }
@@ -293,7 +293,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.2
      */
-    public JexlBuilder lexical(boolean flag) {
+    public JexlBuilder lexical(final boolean flag) {
         options.setLexical(flag);
         return this;
     }
@@ -310,7 +310,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.2
      */
-    public JexlBuilder lexicalShade(boolean flag) {
+    public JexlBuilder lexicalShade(final boolean flag) {
         options.setLexicalShade(flag);
         return this;
     }
@@ -326,7 +326,7 @@ public class JexlBuilder {
      * @param flag true means no JexlException will occur, false allows them
      * @return this builder
      */
-    public JexlBuilder silent(boolean flag) {
+    public JexlBuilder silent(final boolean flag) {
         options.setSilent(flag);
         return this;
     }
@@ -343,7 +343,7 @@ public class JexlBuilder {
      * @param flag true means strict error reporting, false allows them to be evaluated as null
      * @return this builder
      */
-    public JexlBuilder strict(boolean flag) {
+    public JexlBuilder strict(final boolean flag) {
         options.setStrict(flag);
         return this;
     }
@@ -379,7 +379,7 @@ public class JexlBuilder {
      * @param flag true means safe navigation, false throws exception when dereferencing null
      * @return this builder
      */
-    public JexlBuilder safe(boolean flag) {
+    public JexlBuilder safe(final boolean flag) {
         options.setSafe(flag);
         return this;
     }
@@ -395,7 +395,7 @@ public class JexlBuilder {
      * @param flag true implies debug is on, false implies debug is off.
      * @return this builder
      */
-    public JexlBuilder debug(boolean flag) {
+    public JexlBuilder debug(final boolean flag) {
         this.debug = flag;
         return this;
     }
@@ -413,7 +413,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.1
      */
-    public JexlBuilder cancellable(boolean flag) {
+    public JexlBuilder cancellable(final boolean flag) {
         this.cancellable = flag;
         options.setCancellable(flag);
         return this;
@@ -434,7 +434,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.2
      */
-    public JexlBuilder collectAll(boolean flag) {
+    public JexlBuilder collectAll(final boolean flag) {
         return collectMode(flag? 1 : 0);
     }
     
@@ -445,7 +445,7 @@ public class JexlBuilder {
      * @return this builder
      * @since 3.2
      */
-    public JexlBuilder collectMode(int mode) {
+    public JexlBuilder collectMode(final int mode) {
         this.collectMode = mode;
         return this;
     }  
@@ -491,7 +491,7 @@ public class JexlBuilder {
      * @param ns the map of namespaces
      * @return this builder
      */
-    public JexlBuilder namespaces(Map<String, Object> ns) {
+    public JexlBuilder namespaces(final Map<String, Object> ns) {
         options.setNamespaces(ns);
         return this;
     }
@@ -511,7 +511,7 @@ public class JexlBuilder {
      * @param size if not strictly positive, no cache is used.
      * @return this builder
      */
-    public JexlBuilder cache(int size) {
+    public JexlBuilder cache(final int size) {
         this.cache = size;
         return this;
     }
@@ -533,7 +533,7 @@ public class JexlBuilder {
      * @param length if not strictly positive, the value is silently replaced by the default value (64).
      * @return this builder
      */
-    public JexlBuilder cacheThreshold(int length) {
+    public JexlBuilder cacheThreshold(final int length) {
         this.cacheThreshold = length > 0? length : CACHE_THRESHOLD;
         return this;
     }
@@ -550,7 +550,7 @@ public class JexlBuilder {
      * @param size if not strictly positive, limit is reached when java StackOverflow is thrown.
      * @return this builder
      */
-    public JexlBuilder stackOverflow(int size) {
+    public JexlBuilder stackOverflow(final int size) {
         this.stackOverflow = size;
         return this;
     }

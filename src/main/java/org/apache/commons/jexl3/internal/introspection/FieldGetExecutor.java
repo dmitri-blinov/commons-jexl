@@ -40,11 +40,11 @@ public final class FieldGetExecutor extends AbstractExecutor.Get {
      * @param identifier the key to use as an argument to the get method
      * @return the executor if found, null otherwise
      */
-    public static JexlPropertyGet discover(Introspector is, Class<?> clazz, String identifier) {
+    public static JexlPropertyGet discover(final Introspector is, final Class<?> clazz, final String identifier) {
         if (identifier == null || identifier.isEmpty()) {
             return null;
         }
-        Field field = is.getField(clazz, identifier);
+        final Field field = is.getField(clazz, identifier);
         if (field != null) {
             return new FieldGetExecutor(field);
         }
@@ -54,18 +54,18 @@ public final class FieldGetExecutor extends AbstractExecutor.Get {
      * Creates a new instance of FieldPropertyGet.
      * @param theField the class public field
      */
-    private FieldGetExecutor(Field theField) {
+    private FieldGetExecutor(final Field theField) {
         super(theField.getDeclaringClass(), FIELD_GET);
         field = theField;
     }
 
     @Override
-    public Object invoke(Object obj) throws Exception {
+    public Object invoke(final Object obj) throws Exception {
         return field.get(obj);
     }
 
     @Override
-    public Object tryInvoke(Object obj, Object key) {
+    public Object tryInvoke(final Object obj, final Object key) {
         if (objectClass == obj.getClass() && field.getName().equals(castString(key))) {
             try {
                 return field.get(obj);

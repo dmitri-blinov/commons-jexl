@@ -53,7 +53,7 @@ final class ClassMap {
     public static Method cacheMiss() {
         try {
             return ClassMap.class.getMethod("cacheMiss");
-        } catch (Exception xio) {
+        } catch (final Exception xio) {
             // this really cant make an error...
             return null;
         }
@@ -107,12 +107,12 @@ final class ClassMap {
      * @param log         the logger.
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    ClassMap(Class<?> aClass, Permissions permissions, Log log) {
+    ClassMap(final Class<?> aClass, final Permissions permissions, final Log log) {
         this.aClass = aClass;
         // eagerly cache methods
         create(this, permissions, aClass, log);
         // eagerly cache public fields
-        Field[] fields = aClass.getFields();
+        final Field[] fields = aClass.getFields();
         if (fields.length > 0) {
             fieldCache = new HashMap<>();
             for (Field field : fields) {
@@ -164,7 +164,7 @@ final class ClassMap {
      * @return the array of methods (null or non-empty)
      */
     Method[] getMethods(final String methodName) {
-        Method[] lm = byName.get(methodName);
+        final Method[] lm = byName.get(methodName);
         if (lm != null && lm.length > 0) {
             return lm.clone();
         } else {
@@ -361,7 +361,7 @@ final class ClassMap {
      * @param classToReflect the class to cache
      * @param log            the Log
      */
-    private static void create(ClassMap cache, Permissions permissions, Class<?> classToReflect, Log log) {
+    private static void create(final ClassMap cache, final Permissions permissions, Class<?> classToReflect, final Log log) {
         //
         // Build a list of all elements in the class hierarchy. This one is bottom-first (i.e. we start
         // with the actual declaring class and its interfaces and then move up (superclass etc.) until we
@@ -374,31 +374,31 @@ final class ClassMap {
             if (Modifier.isPublic(classToReflect.getModifiers())) {
                 populateWithClass(cache, permissions, classToReflect, log);
             }
-            Class<?>[] interfaces = classToReflect.getInterfaces();
-            for (Class<?> anInterface : interfaces) {
+            final Class<?>[] interfaces = classToReflect.getInterfaces();
+            for (final Class<?> anInterface : interfaces) {
                 populateWithInterface(cache, permissions, anInterface, log);
             }
         }
         // now that we've got all methods keyed in, lets organize them by name
         if (!cache.byKey.isEmpty()) {
-            List<Method> lm = new ArrayList<>(cache.byKey.size());
+            final List<Method> lm = new ArrayList<>(cache.byKey.size());
             lm.addAll(cache.byKey.values());
             // sort all methods by name
             lm.sort(Comparator.comparing(Method::getName));
             // put all lists of methods with same name in byName cache
             int start = 0;
             while (start < lm.size()) {
-                String name = lm.get(start).getName();
+                final String name = lm.get(start).getName();
                 int end = start + 1;
                 while (end < lm.size()) {
-                    String walk = lm.get(end).getName();
+                    final String walk = lm.get(end).getName();
                     if (walk.equals(name)) {
                         end += 1;
                     } else {
                         break;
                     }
                 }
-                Method[] lmn = lm.subList(start, end).toArray(new Method[end - start]);
+                final Method[] lmn = lm.subList(start, end).toArray(new Method[end - start]);
                 cache.byName.put(name, lmn);
                 start = end;
             }
@@ -413,11 +413,11 @@ final class ClassMap {
      * @param iface       the interface to populate the cache from
      * @param log         the Log
      */
-    private static void populateWithInterface(ClassMap cache, Permissions permissions, Class<?> iface, Log log) {
+    private static void populateWithInterface(final ClassMap cache, final Permissions permissions, final Class<?> iface, final Log log) {
         if (Modifier.isPublic(iface.getModifiers())) {
             populateWithClass(cache, permissions, iface, log);
-            Class<?>[] supers = iface.getInterfaces();
-            for (Class<?> aSuper : supers) {
+            final Class<?>[] supers = iface.getInterfaces();
+            for (final Class<?> aSuper : supers) {
                 populateWithInterface(cache, permissions, aSuper, log);
             }
         }
@@ -431,19 +431,19 @@ final class ClassMap {
      * @param clazz       the class to populate the cache from
      * @param log         the Log
      */
-    private static void populateWithClass(ClassMap cache, Permissions permissions, Class<?> clazz, Log log) {
+    private static void populateWithClass(final ClassMap cache, final Permissions permissions, final Class<?> clazz, final Log log) {
         try {
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method mi : methods) {
+            final Method[] methods = clazz.getDeclaredMethods();
+            for (final Method mi : methods) {
                 // add method to byKey cache; do not override
-                MethodKey key = new MethodKey(mi);
-                Method pmi = cache.byKey.putIfAbsent(key, permissions.allow(mi) ? mi : CACHE_MISS);
+                final MethodKey key = new MethodKey(mi);
+                final Method pmi = cache.byKey.putIfAbsent(key, permissions.allow(mi) ? mi : CACHE_MISS);
                 if (pmi != null && pmi != CACHE_MISS && log.isDebugEnabled() && !key.equals(new MethodKey(pmi))) {
                     // foo(int) and foo(Integer) have the same signature for JEXL
                     log.debug("Method " + pmi + " is already registered, key: " + key.debugString());
                 }
             }
-        } catch (SecurityException se) {
+        } catch (final SecurityException se) {
             // Everybody feels better with...
             if (log.isDebugEnabled()) {
                 log.debug("While accessing methods of " + clazz + ": ", se);

@@ -43,7 +43,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
      * @param args the method arguments
      * @return a filled up parameter (may contain a null method)
      */
-    public static MethodExecutor discover(Introspector is, Object obj, String method, Object[] args) {
+    public static MethodExecutor discover(final Introspector is, final Object obj, final String method, final Object[] args) {
         final Class<?> clazz = obj.getClass();
         final MethodKey key = new MethodKey(method, args);
         java.lang.reflect.Method m = is.getMethod(clazz, key);
@@ -87,13 +87,13 @@ public final class MethodExecutor extends AbstractExecutor.Method {
      * @param m the method
      * @param k the MethodKey
      */
-    private MethodExecutor(Class<?> c, java.lang.reflect.Method m, MethodKey k) {
+    private MethodExecutor(final Class<?> c, final java.lang.reflect.Method m, final MethodKey k) {
         super(c, m, k);
         int vastart = -1;
         Class<?> vaclass = null;
         if (MethodKey.isVarArgs(method)) {
             // if the last parameter is an array, the method is considered as vararg
-            Class<?>[] formal = method.getParameterTypes();
+            final Class<?>[] formal = method.getParameterTypes();
             vastart = formal.length - 1;
             vaclass = formal[vastart].getComponentType();
         }
@@ -102,7 +102,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
     }
 
     @Override
-    public Object invoke(Object o, Object... args) throws IllegalAccessException, InvocationTargetException {
+    public Object invoke(final Object o, Object... args) throws IllegalAccessException, InvocationTargetException {
         if (vaClass != null && args != null) {
             args = handleVarArg(args);
         }
@@ -110,7 +110,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
     }
 
     @Override
-    public Object tryInvoke(String name, Object obj, Object... args) {
+    public Object tryInvoke(final String name, final Object obj, final Object... args) {
         // let's assume that invocation will fly if the declaring class is the
         // same and arguments have the same type
         if (objectClass == obj.getClass() && key.equals(new MethodKey(name, args))) {
@@ -118,7 +118,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
                 return invoke(obj, args);
             } catch (IllegalAccessException | IllegalArgumentException xill) {
                 return TRY_FAILED;// fail
-            } catch (InvocationTargetException xinvoke) {
+            } catch (final InvocationTargetException xinvoke) {
                 throw JexlException.tryFailed(xinvoke); // throw
             }
         }
@@ -144,10 +144,10 @@ public final class MethodExecutor extends AbstractExecutor.Method {
             // and that arg is not the sole argument and not an array of the expected type,
             // make the last arg an array of the expected type
             if (actual[vastart] != null) {
-                Class<?> aclazz = actual[vastart].getClass();
+                final Class<?> aclazz = actual[vastart].getClass();
                 if (!aclazz.isArray() || !vaclass.isAssignableFrom(aclazz.getComponentType())) {
                     // create a 1-length array to hold and replace the last argument
-                    Object lastActual = Array.newInstance(vaclass, 1);
+                    final Object lastActual = Array.newInstance(vaclass, 1);
                     Array.set(lastActual, 0, actual[vastart]);
                     actual[vastart] = lastActual;
                 }
@@ -156,10 +156,10 @@ public final class MethodExecutor extends AbstractExecutor.Method {
         } else {
             // if no or multiple values are being passed into the vararg,
             // put them in an array of the expected type
-            Object varargs = Array.newInstance(vaclass, varargc);
+            final Object varargs = Array.newInstance(vaclass, varargc);
             System.arraycopy(actual, vastart, varargs, 0, varargc);
             // put all arguments into a new actual array of the appropriate size
-            Object[] newActual = new Object[vastart + 1];
+            final Object[] newActual = new Object[vastart + 1];
             System.arraycopy(actual, 0, newActual, 0, vastart);
             newActual[vastart] = varargs;
             // replace the old actual array

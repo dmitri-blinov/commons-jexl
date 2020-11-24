@@ -61,9 +61,9 @@ public class TemplateDebugger extends Debugger {
      * @param je the expression
      * @return true if the expression was a {@link TemplateExpression} instance, false otherwise
      */
-    public boolean debug(JxltEngine.Expression je) {
+    public boolean debug(final JxltEngine.Expression je) {
         if (je instanceof TemplateExpression) {
-            TemplateEngine.TemplateExpression te = (TemplateEngine.TemplateExpression) je;
+            final TemplateEngine.TemplateExpression te = (TemplateEngine.TemplateExpression) je;
             return visit(te, this) != null;
         } else {
             return false;
@@ -75,9 +75,9 @@ public class TemplateDebugger extends Debugger {
      * @param jt the template
      * @return true if the template was a {@link TemplateScript} instance, false otherwise
      */
-    public boolean debug(JxltEngine.Template jt) {
+    public boolean debug(final JxltEngine.Template jt) {
         if (jt instanceof TemplateScript) {
-            TemplateScript ts = (TemplateScript) jt;
+            final TemplateScript ts = (TemplateScript) jt;
             // ensure expr is not null for templates
             this.exprs = ts.getExpressions() == null? new TemplateExpression[0] : ts.getExpressions();
             this.script = ts.getScript();
@@ -86,9 +86,9 @@ public class TemplateDebugger extends Debugger {
             indentLevel = 0;
             builder.setLength(0);
             cause = script;
-            int num = script.jjtGetNumChildren();
+            final int num = script.jjtGetNumChildren();
             for (int i = 0; i < num; ++i) {
-                JexlNode child = script.jjtGetChild(i);
+                final JexlNode child = script.jjtGetChild(i);
                 acceptStatement(child, null);
             }
             // the last line
@@ -104,7 +104,7 @@ public class TemplateDebugger extends Debugger {
 
 
     @Override
-    protected Object visit(ASTBlock node, Object data) {
+    protected Object visit(final ASTBlock node, final Object data) {
         // if not really a template, must use super impl
         if (exprs == null) {
             return super.visit(node, data);
@@ -117,9 +117,9 @@ public class TemplateDebugger extends Debugger {
         } else {
             builder.append(' ');
         }
-        int num = node.jjtGetNumChildren();
+        final int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
-            JexlNode child = node.jjtGetChild(i);
+            final JexlNode child = node.jjtGetChild(i);
             acceptStatement(child, data);
         }
         // before we close this block node, $$ might be needed
@@ -138,12 +138,12 @@ public class TemplateDebugger extends Debugger {
     }
 
     @Override
-    protected Object acceptStatement(JexlNode child, Object data) {
+    protected Object acceptStatement(final JexlNode child, final Object data) {
         // if not really a template, must use super impl
         if (exprs == null) {
             return super.acceptStatement(child, data);
         }
-        TemplateExpression te = getPrintStatement(child);
+        final TemplateExpression te = getPrintStatement(child);
         if (te != null) {
             // if statement is a jexl:print(...), may need to prepend '\n'
             newJxltLine();
@@ -167,15 +167,15 @@ public class TemplateDebugger extends Debugger {
         }
 
         if (exprs != null && child instanceof ASTFunctionNode) {
-            ASTFunctionNode node = (ASTFunctionNode) child;
-            ASTIdentifier ns = (ASTIdentifier) node.jjtGetChild(0);
-            JexlNode args = node.jjtGetChild(1);
+            final ASTFunctionNode node = (ASTFunctionNode) child;
+            final ASTIdentifier ns = (ASTIdentifier) node.jjtGetChild(0);
+            final JexlNode args = node.jjtGetChild(1);
             if ("jexl".equals(ns.getNamespace())
                 && "print".equals(ns.getName())
                 && args.jjtGetNumChildren() == 1
                 && args.jjtGetChild(0) instanceof ASTNumberLiteral) {
-                ASTNumberLiteral exprn = (ASTNumberLiteral) args.jjtGetChild(0);
-                int n = exprn.getLiteral().intValue();
+                final ASTNumberLiteral exprn = (ASTNumberLiteral) args.jjtGetChild(0);
+                final int n = exprn.getLiteral().intValue();
                 if (n >= 0 && n < exprs.length) {
                     return exprs[n];
                 }
@@ -188,12 +188,12 @@ public class TemplateDebugger extends Debugger {
      * Insert $$ and \n when needed.
      */
     private void newJexlLine() {
-        int length = builder.length();
+        final int length = builder.length();
         if (length == 0) {
             builder.append("$$ ");
         } else {
             for (int i = length - 1; i >= 0; --i) {
-                char c = builder.charAt(i);
+                final char c = builder.charAt(i);
                 switch (c) {
                     case '\n':
                         builder.append("$$ ");
@@ -214,9 +214,9 @@ public class TemplateDebugger extends Debugger {
      * Insert \n when needed.
      */
     private void newJxltLine() {
-        int length = builder.length();
+        final int length = builder.length();
         for (int i = length - 1; i >= 0; --i) {
-            char c = builder.charAt(i);
+            final char c = builder.charAt(i);
             switch (c) {
                 case '\n':
                 case ';':
@@ -235,7 +235,7 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(TemplateExpression expr, Object data) {
+    private Object visit(final TemplateExpression expr, final Object data) {
         Object r;
         switch (expr.getType()) {
             case CONSTANT:
@@ -265,7 +265,7 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(ConstantExpression expr, Object data) {
+    private Object visit(final ConstantExpression expr, final Object data) {
         expr.asString(builder);
         return data;
     }
@@ -276,7 +276,7 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(ImmediateExpression expr, Object data) {
+    private Object visit(final ImmediateExpression expr, final Object data) {
         builder.append(expr.isImmediate() ? '$' : '#');
         builder.append('{');
         super.accept(expr.node, data);
@@ -290,7 +290,7 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(DeferredExpression expr, Object data) {
+    private Object visit(final DeferredExpression expr, final Object data) {
         builder.append(expr.isImmediate() ? '$' : '#');
         builder.append('{');
         super.accept(expr.node, data);
@@ -304,7 +304,7 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(NestedExpression expr, Object data) {
+    private Object visit(final NestedExpression expr, final Object data) {
         super.accept(expr.node, data);
         return data;
     }
@@ -314,8 +314,8 @@ public class TemplateDebugger extends Debugger {
      * @param data the visitor argument
      * @return the visitor argument
      */
-    private Object visit(CompositeExpression expr, Object data) {
-        for (TemplateExpression ce : expr.exprs) {
+    private Object visit(final CompositeExpression expr, final Object data) {
+        for (final TemplateExpression ce : expr.exprs) {
             visit(ce, data);
         }
         return data;

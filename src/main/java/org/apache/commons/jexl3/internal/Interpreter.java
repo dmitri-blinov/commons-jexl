@@ -235,7 +235,7 @@ public class Interpreter extends InterpreterBase {
      * @param opts     the evaluation options, flags modifying evaluation behavior
      * @param eFrame   the evaluation frame, arguments and local variables
      */
-    protected Interpreter(Engine engine, JexlOptions opts, JexlContext aContext, Frame eFrame) {
+    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame) {
         this(engine, opts, aContext, eFrame, null);
     }
 
@@ -247,7 +247,7 @@ public class Interpreter extends InterpreterBase {
      * @param eFrame   the evaluation frame, arguments and local variables
      * @param current  the current evaluation object
      */
-    protected Interpreter(Engine engine, JexlOptions opts, JexlContext aContext, Frame eFrame, Object current) {
+    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame, final Object current) {
         super(engine, opts, aContext);
         this.frame = eFrame;
         this.current = current;
@@ -258,7 +258,7 @@ public class Interpreter extends InterpreterBase {
      * @param ii  the interpreter to copy
      * @param jexla the arithmetic instance to use (or null)
      */
-    protected Interpreter(Interpreter ii, JexlArithmetic jexla) {
+    protected Interpreter(final Interpreter ii, final JexlArithmetic jexla) {
         super(ii, jexla);
         frame = ii.frame;
         block = ii.block != null? new LexicalFrame(ii.block) : null;
@@ -269,8 +269,8 @@ public class Interpreter extends InterpreterBase {
      * @param inter the interpreter or null
      * @return the previous thread local interpreter
      */
-    protected Interpreter putThreadInterpreter(Interpreter inter) {
-        Interpreter pinter = INTER.get();
+    protected Interpreter putThreadInterpreter(final Interpreter inter) {
+        final Interpreter pinter = INTER.get();
         INTER.set(inter);
         return pinter;
     }
@@ -284,7 +284,7 @@ public class Interpreter extends InterpreterBase {
      * @return the result of the interpretation.
      * @throws JexlException if any error occurs during interpretation.
      */
-    public Object interpret(JexlNode node) {
+    public Object interpret(final JexlNode node) {
         JexlContext.ThreadLocal tcontext = null;
         JexlEngine tjexl = null;
         Interpreter tinter = null;
@@ -326,20 +326,20 @@ public class Interpreter extends InterpreterBase {
             }
             return result;
         } catch (StackOverflowError xstack) {
-            JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
+            final JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
             if (!isSilent()) {
                 throw xjexl.clean();
             }
             if (logger.isWarnEnabled()) {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());
             }
-        } catch (JexlException.Cancel xcancel) {
+        } catch (final JexlException.Cancel xcancel) {
             // cancelled |= Thread.interrupted();
             cancelled.weakCompareAndSet(false, Thread.interrupted());
             if (isCancellable()) {
                 throw xcancel.clean();
             }
-        } catch (JexlException xjexl) {
+        } catch (final JexlException xjexl) {
             if (!isSilent()) {
                 throw xjexl.clean();
             }
@@ -349,7 +349,7 @@ public class Interpreter extends InterpreterBase {
         } finally {
             synchronized(this) {
                 if (functors != null) {
-                    for (Object functor : functors.values()) {
+                    for (final Object functor : functors.values()) {
                         closeIfSupported(functor);
                     }
                     functors.clear();
@@ -375,7 +375,7 @@ public class Interpreter extends InterpreterBase {
      * @param attribute the attribute of the object, e.g. an index (1, 0, 2) or key for a map
      * @return the attribute value
      */
-    public Object getAttribute(Object object, Object attribute) {
+    public Object getAttribute(final Object object, final Object attribute) {
         return getAttribute(object, attribute, null);
     }
 
@@ -386,81 +386,81 @@ public class Interpreter extends InterpreterBase {
      * @param attribute the attribute of the object, e.g. an index (1, 0, 2) or key for a map
      * @param value     the value to assign to the object's attribute
      */
-    public void setAttribute(Object object, Object attribute, Object value) {
+    public void setAttribute(final Object object, final Object attribute, final Object value) {
         setAttribute(object, attribute, value, null, JexlOperator.PROPERTY_SET);
     }
 
     @Override
-    protected Object visit(ASTAddNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTAddNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.ADD, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.ADD, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.add(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, "+ error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTSubNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSubNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.SUBTRACT, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.SUBTRACT, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.subtract(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, "- error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTMulNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTMulNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.MULTIPLY, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.MULTIPLY, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.multiply(left, right);
-        } catch (ArithmeticException xrt) {
-            JexlNode xnode = findNullOperand(xrt, node, left, right);
+        } catch (final ArithmeticException xrt) {
+            final JexlNode xnode = findNullOperand(xrt, node, left, right);
             throw new JexlException(xnode, "* error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTDivNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTDivNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.DIVIDE, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.DIVIDE, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.divide(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            JexlNode xnode = findNullOperand(xrt, node, left, right);
+            final JexlNode xnode = findNullOperand(xrt, node, left, right);
             throw new JexlException(xnode, "/ error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTModNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTModNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.MOD, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.MOD, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.mod(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            JexlNode xnode = findNullOperand(xrt, node, left, right);
+            final JexlNode xnode = findNullOperand(xrt, node, left, right);
             throw new JexlException(xnode, "% error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTShiftLeftNode node, Object data) {
+    protected Object visit(final ASTShiftLeftNode node, final Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
@@ -473,7 +473,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTShiftRightNode node, Object data) {
+    protected Object visit(final ASTShiftRightNode node, final Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
@@ -486,7 +486,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTShiftRightUnsignedNode node, Object data) {
+    protected Object visit(final ASTShiftRightUnsignedNode node, final Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
@@ -499,52 +499,52 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTBitwiseAndNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTBitwiseAndNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.AND, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.AND, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.and(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, "& error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTBitwiseOrNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTBitwiseOrNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.OR, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.OR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.or(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, "| error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTBitwiseXorNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTBitwiseXorNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.XOR, left, right);
+            final Object result = operators.tryOverload(node, JexlOperator.XOR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.xor(left, right);
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node, "^ error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTISNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTISNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return left == right;
     }
 
     @Override
-    protected Object visit(ASTNINode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTNINode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return left != right;
     }
 
@@ -588,7 +588,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTEQNode node, Object data) {
+    protected Object visit(final ASTEQNode node, final Object data) {
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
@@ -616,8 +616,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNENode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNENode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -626,7 +626,7 @@ public class Interpreter extends InterpreterBase {
                     return result != JexlEngine.TRY_FAILED
                            ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
                            : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
-                } catch (ArithmeticException xrt) {
+                } catch (final ArithmeticException xrt) {
                     throw new JexlException(node, "!= error", xrt);
                 }
             });
@@ -637,7 +637,7 @@ public class Interpreter extends InterpreterBase {
                 return result != JexlEngine.TRY_FAILED
                        ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
                        : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
-            } catch (ArithmeticException xrt) {
+            } catch (final ArithmeticException xrt) {
                 JexlNode xnode = findNullOperand(xrt, node, left, right);
                 throw new JexlException(xnode, "!= error", xrt);
             }
@@ -645,8 +645,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTGENode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTGENode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -673,8 +673,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTGTNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTGTNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -701,8 +701,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTLENode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTLENode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -729,8 +729,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTLTNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTLTNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -757,8 +757,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSWNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTSWNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -771,8 +771,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNSWNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNSWNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -785,8 +785,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTEWNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTEWNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -799,8 +799,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNEWNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNEWNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -813,8 +813,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTERNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTERNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -827,8 +827,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNRNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNRNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
@@ -841,8 +841,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTIOFNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTIOFNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         if (left != null) {
             Class k = left.getClass();
             ASTTypeLiteral right = (ASTTypeLiteral) node.jjtGetChild(1);
@@ -861,8 +861,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNIOFNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNIOFNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         if (left != null) {
             Class k = left.getClass();
             ASTTypeLiteral right = (ASTTypeLiteral) node.jjtGetChild(1);
@@ -881,28 +881,28 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTRangeNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTRangeNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
             return arithmetic.createRange(left, right);
-        } catch (ArithmeticException xrt) {
-            JexlNode xnode = findNullOperand(xrt, node, left, right);
+        } catch (final ArithmeticException xrt) {
+            final JexlNode xnode = findNullOperand(xrt, node, left, right);
             throw new JexlException(xnode, ".. error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTUnaryMinusNode node, Object data) {
+    protected Object visit(final ASTUnaryMinusNode node, final Object data) {
         // use cached value if literal
-        Object value = node.jjtGetValue();
+        final Object value = node.jjtGetValue();
         if (value != null && !(value instanceof JexlMethod)) {
             return value;
         }
-        JexlNode valNode = node.jjtGetChild(0);
-        Object val = valNode.jjtAccept(this, data);
+        final JexlNode valNode = node.jjtGetChild(0);
+        final Object val = valNode.jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.NEGATE, val);
+            final Object result = operators.tryOverload(node, JexlOperator.NEGATE, val);
             if (result != JexlEngine.TRY_FAILED) {
                 return result;
             }
@@ -918,40 +918,40 @@ public class Interpreter extends InterpreterBase {
                 }
             }
             return number;
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(valNode, "- error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTUnaryPlusNode node, Object data) {
+    protected Object visit(final ASTUnaryPlusNode node, final Object data) {
         // use cached value if literal
-        Object value = node.jjtGetValue();
+        final Object value = node.jjtGetValue();
         if (value != null && !(value instanceof JexlMethod)) {
             return value;
         }
-        JexlNode valNode = node.jjtGetChild(0);
-        Object val = valNode.jjtAccept(this, data);
+        final JexlNode valNode = node.jjtGetChild(0);
+        final Object val = valNode.jjtAccept(this, data);
         try {
-            Object result = operators.tryOverload(node, JexlOperator.POSITIVIZE, val);
+            final Object result = operators.tryOverload(node, JexlOperator.POSITIVIZE, val);
             if (result != JexlEngine.TRY_FAILED) {
                 return result;
             }
-            Object number = arithmetic.positivize(val);
+            final Object number = arithmetic.positivize(val);
             if (valNode instanceof ASTNumberLiteral
                 && number instanceof Number
                 && arithmetic.isPositivizeStable()) {
                 node.jjtSetValue(number);
             }
             return number;
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(valNode, "- error", xrt);
         }
     }
 
     @Override
-    protected Object visit(ASTIndirectNode node, Object data) {
-        Object val = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTIndirectNode node, final Object data) {
+        final Object val = node.jjtGetChild(0).jjtAccept(this, data);
         if (val == null) {
             if (isStrictEngine()) {
                 throw new JexlException(node, "Null dereference", null);
@@ -964,7 +964,6 @@ public class Interpreter extends InterpreterBase {
 
         return operators.indirect(node, val);
     }
-
 
     /**
      * Declares pointer dereference operator
@@ -1092,7 +1091,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTPointerNode node, Object data) {
+    protected Object visit(final ASTPointerNode node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         if (left instanceof ASTIdentifier) {
             ASTIdentifier var = (ASTIdentifier) left;
@@ -1179,8 +1178,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTBitwiseComplNode node, Object data) {
-        Object arg = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTBitwiseComplNode node, final Object data) {
+        final Object arg = node.jjtGetChild(0).jjtAccept(this, data);
         try {
             Object result = operators.tryOverload(node, JexlOperator.COMPLEMENT, arg);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.complement(arg);
@@ -1190,8 +1189,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNotNode node, Object data) {
-        Object val = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTNotNode node, final Object data) {
+        final Object val = node.jjtGetChild(0).jjtAccept(this, data);
         try {
             Object result = operators.tryOverload(node, JexlOperator.NOT, val);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.not(val);
@@ -1201,7 +1200,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTCastNode node, Object data) {
+    protected Object visit(final ASTCastNode node, final Object data) {
         // Type
         ASTTypeLiteral type = (ASTTypeLiteral) node.jjtGetChild(0);
         Class c = type.getType();
@@ -1215,7 +1214,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTEnumerationReference node, Object data) {
+    protected Object visit(final ASTEnumerationReference node, final Object data) {
         cancelCheck(node);
         final int numChildren = node.jjtGetNumChildren();
         // pass first piece of data in and loop through children
@@ -1231,7 +1230,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTEnumerationNode node, Object data) {
+    protected Object visit(final ASTEnumerationNode node, final Object data) {
         JexlNode valNode = node.jjtGetChild(0);
         if (valNode instanceof ASTSimpleLambda) {
             ASTJexlLambda generator = (ASTJexlLambda) valNode;
@@ -1312,7 +1311,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTExpressionStatement node, Object data) {
+    protected Object visit(final ASTExpressionStatement node, final Object data) {
         cancelCheck(node);
         // Try unknown identifier as a method
         JexlNode child = node.jjtGetChild(0);
@@ -1342,7 +1341,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTFunctionStatement node, Object data) {
+    protected Object visit(final ASTFunctionStatement node, final Object data) {
         cancelCheck(node);
         // Declare variable
         JexlNode left = node.jjtGetChild(0);
@@ -1353,7 +1352,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTIfStatement node, Object data) {
+    protected Object visit(final ASTIfStatement node, final Object data) {
         cancelCheck(node);
         try {
             Object condition = node.jjtGetChild(0).jjtAccept(this, null);
@@ -1385,7 +1384,7 @@ public class Interpreter extends InterpreterBase {
      * @param data the usual data
      * @return the result of the last expression evaluation
      */
-    private Object visitBlock(ASTBlock node, Object data) {
+    private Object visitBlock(final ASTBlock node, final Object data) {
         Object result = null;
         final int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
@@ -1405,8 +1404,8 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTBlock node, Object data) {
-        int cnt = node.getSymbolCount();
+    protected Object visit(final ASTBlock node, final Object data) {
+        final int cnt = node.getSymbolCount();
         if (!options.isLexical() || cnt <= 0) {
             return visitBlock(node, data);
         }
@@ -1420,7 +1419,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTReturnStatement node, Object data) {
+    protected Object visit(final ASTReturnStatement node, final Object data) {
         cancelCheck(node);
         final int numChildren = node.jjtGetNumChildren();
         Object val = numChildren > 0 ? node.jjtGetChild(0).jjtAccept(this, data) : null;
@@ -1428,32 +1427,32 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTYieldStatement node, Object data) {
+    protected Object visit(final ASTYieldStatement node, final Object data) {
         cancelCheck(node);
         Object val = node.jjtGetChild(0).jjtAccept(this, data);
         throw new JexlException.Yield(node, null, val);
     }
 
     @Override
-    protected Object visit(ASTContinue node, Object data) {
+    protected Object visit(final ASTContinue node, final Object data) {
         cancelCheck(node);
         throw new JexlException.Continue(node, node.getLabel());
     }
 
     @Override
-    protected Object visit(ASTRemove node, Object data) {
+    protected Object visit(final ASTRemove node, final Object data) {
         cancelCheck(node);
         throw new JexlException.Remove(node, node.getLabel());
     }
 
     @Override
-    protected Object visit(ASTBreak node, Object data) {
+    protected Object visit(final ASTBreak node, final Object data) {
         cancelCheck(node);
         throw new JexlException.Break(node, node.getLabel());
     }
 
     @Override
-    protected Object visit(ASTForStatement node, Object data) {
+    protected Object visit(final ASTForStatement node, final Object data) {
         cancelCheck(node);
         final boolean lexical = options.isLexical();
         if (lexical) {
@@ -1500,7 +1499,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTForInitializationNode node, Object data) {
+    protected Object visit(final ASTForInitializationNode node, final Object data) {
         Object result = null;
         final int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
@@ -1511,7 +1510,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTForTerminationNode node, Object data) {
+    protected Object visit(final ASTForTerminationNode node, final Object data) {
         if (node.jjtGetNumChildren() > 0) {
             return arithmetic.toBoolean(node.jjtGetChild(0).jjtAccept(this, data));
         } else {
@@ -1520,7 +1519,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTForIncrementNode node, Object data) {
+    protected Object visit(final ASTForIncrementNode node, final Object data) {
         Object result = null;
         final int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
@@ -1531,7 +1530,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTForeachStatement node, Object data) {
+    protected Object visit(final ASTForeachStatement node, final Object data) {
         cancelCheck(node);
         Object result = null;
         /* first objectNode is the loop variable */
@@ -1558,7 +1557,7 @@ public class Interpreter extends InterpreterBase {
 
         try {
             /* second objectNode is the variable to iterate */
-            Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
+            final Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
             Iterator<?> itemsIterator = null;
             // make sure there is a value to iterate on
             if (iterableValue != null) {
@@ -1576,12 +1575,12 @@ public class Interpreter extends InterpreterBase {
                 int i = -1;
                 try {
                     /* third objectNode is the statement to execute */
-                    JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
+                    final JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
                     while (itemsIterator.hasNext()) {
                         cancelCheck(node);
                         i += 1;
                         // set loopVariable to value of iterator
-                        Object value = itemsIterator.next();
+                        final Object value = itemsIterator.next();
                         if (loopValueVariable != null) {
                             if (value instanceof Map.Entry<?,?>) {
                                 Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
@@ -1598,20 +1597,20 @@ public class Interpreter extends InterpreterBase {
                             try {
                                 // execute statement
                                 result = statement.jjtAccept(this, data);
-                            } catch (JexlException.Break stmtBreak) {
+                            } catch (final JexlException.Break stmtBreak) {
                                 String target = stmtBreak.getLabel();
                                 if (target == null || target.equals(node.getLabel())) {
                                     break;
                                 } else {
                                     throw stmtBreak;
                                 }
-                            } catch (JexlException.Continue stmtContinue) {
+                            } catch (final JexlException.Continue stmtContinue) {
                                 String target = stmtContinue.getLabel();
                                 if (target != null && !target.equals(node.getLabel())) {
                                     throw stmtContinue;
                                 }
                                 // continue
-                            } catch (JexlException.Remove stmtRemove) {
+                            } catch (final JexlException.Remove stmtRemove) {
                                 String target = stmtRemove.getLabel();
                                 if (target != null && !target.equals(node.getLabel())) {
                                     throw stmtRemove;
@@ -1892,25 +1891,25 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTWhileStatement node, Object data) {
+    protected Object visit(final ASTWhileStatement node, final Object data) {
         cancelCheck(node);
         Object result = null;
         /* first objectNode is the condition */
-        Node condition = node.jjtGetChild(0);
+        final Node condition = node.jjtGetChild(0);
         while (arithmetic.toBoolean(condition.jjtAccept(this, data))) {
             cancelCheck(node);
             if (node.jjtGetNumChildren() > 1) {
                 try {
                     // execute statement
                     result = node.jjtGetChild(1).jjtAccept(this, data);
-                } catch (JexlException.Break stmtBreak) {
+                } catch (final JexlException.Break stmtBreak) {
                     String target = stmtBreak.getLabel();
                     if (target == null || target.equals(node.getLabel())) {
                         break;
                     } else {
                         throw stmtBreak;
                     }
-                } catch (JexlException.Continue stmtContinue) {
+                } catch (final JexlException.Continue stmtContinue) {
                     String target = stmtContinue.getLabel();
                     if (target != null && !target.equals(node.getLabel())) {
                         throw stmtContinue;
@@ -1923,24 +1922,24 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTDoWhileStatement node, Object data) {
+    protected Object visit(final ASTDoWhileStatement node, final Object data) {
         Object result = null;
         /* last objectNode is the expression */
-        Node expressionNode = node.jjtGetChild(node.jjtGetNumChildren() - 1);
+        final Node expressionNode = node.jjtGetChild(node.jjtGetNumChildren() - 1);
         do {
             cancelCheck(node);
             // execute statement
             if (node.jjtGetNumChildren() > 1) {
                 try {
                     result = node.jjtGetChild(0).jjtAccept(this, data);
-                } catch (JexlException.Break stmtBreak) {
+                } catch (final JexlException.Break stmtBreak) {
                     String target = stmtBreak.getLabel();
                     if (target == null || target.equals(node.getLabel())) {
                         break;
                     } else {
                         throw stmtBreak;
                     }
-                } catch (JexlException.Continue stmtContinue) {
+                } catch (final JexlException.Continue stmtContinue) {
                     String target = stmtContinue.getLabel();
                     if (target != null && !target.equals(node.getLabel())) {
                         throw stmtContinue;
@@ -1955,7 +1954,7 @@ public class Interpreter extends InterpreterBase {
 
 
     @Override
-    protected Object visit(ASTSynchronizedStatement node, Object data) {
+    protected Object visit(final ASTSynchronizedStatement node, final Object data) {
         cancelCheck(node);
         Object result = null;
         /* first objectNode is the synchronization expression */
@@ -1966,7 +1965,7 @@ public class Interpreter extends InterpreterBase {
                 if (node.jjtGetNumChildren() > 1)
                     result = node.jjtGetChild(1).jjtAccept(this, data);
             }
-        } catch (JexlException.Break stmtBreak) {
+        } catch (final JexlException.Break stmtBreak) {
             String target = stmtBreak.getLabel();
             if (target == null || !target.equals(node.getLabel())) {
                 throw stmtBreak;
@@ -1977,7 +1976,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchStatement node, Object data) {
+    protected Object visit(final ASTSwitchStatement node, final Object data) {
         cancelCheck(node);
         final boolean lexical = options.isLexical();
         if (lexical) {
@@ -2051,7 +2050,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchStatementCase node, Object data) {
+    protected Object visit(final ASTSwitchStatementCase node, final Object data) {
         Object result = null;
         final int childCount = node.jjtGetNumChildren();
         for (int i = 1; i < childCount; i++) {
@@ -2062,7 +2061,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchStatementDefault node, Object data) {
+    protected Object visit(final ASTSwitchStatementDefault node, final Object data) {
         Object result = null;
         final int childCount = node.jjtGetNumChildren();
         for (int i = 0; i < childCount; i++) {
@@ -2073,7 +2072,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchExpression node, Object data) {
+    protected Object visit(final ASTSwitchExpression node, final Object data) {
         /* first objectNode is the switch expression */
         Object left = node.jjtGetChild(0).jjtAccept(this, data);
         try {
@@ -2117,7 +2116,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchExpressionCase node, Object data) {
+    protected Object visit(final ASTSwitchExpressionCase node, final Object data) {
         Object result = null;
         int childCount = node.jjtGetNumChildren();
         if (childCount > 1)
@@ -2126,12 +2125,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSwitchCaseLabel node, Object data) {
+    protected Object visit(final ASTSwitchCaseLabel node, final Object data) {
         return null;
     }
 
     @Override
-    protected Object visit(ASTSwitchExpressionDefault node, Object data) {
+    protected Object visit(final ASTSwitchExpressionDefault node, final Object data) {
         Object result = null;
         int childCount = node.jjtGetNumChildren();
         if (childCount > 0)
@@ -2140,83 +2139,83 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTAndNode node, Object data) {
+    protected Object visit(final ASTAndNode node, final Object data) {
         /*
          * The pattern for exception mgmt is to let the child*.jjtAccept out of the try/catch loop so that if one fails,
          * the ex will traverse up to the interpreter. In cases where this is not convenient/possible, JexlException
          * must be caught explicitly and rethrown.
          */
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         try {
-            boolean leftValue = arithmetic.toBoolean(left);
+            final boolean leftValue = arithmetic.toBoolean(left);
             if (!leftValue) {
                 return Boolean.FALSE;
             }
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node.jjtGetChild(0), "boolean coercion error", xrt);
         }
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            boolean rightValue = arithmetic.toBoolean(right);
+            final boolean rightValue = arithmetic.toBoolean(right);
             if (!rightValue) {
                 return Boolean.FALSE;
             }
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node.jjtGetChild(1), "boolean coercion error", xrt);
         }
         return Boolean.TRUE;
     }
 
     @Override
-    protected Object visit(ASTOrNode node, Object data) {
-        Object left = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTOrNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         try {
-            boolean leftValue = arithmetic.toBoolean(left);
+            final boolean leftValue = arithmetic.toBoolean(left);
             if (leftValue) {
                 return Boolean.TRUE;
             }
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node.jjtGetChild(0), "boolean coercion error", xrt);
         }
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
-            boolean rightValue = arithmetic.toBoolean(right);
+            final boolean rightValue = arithmetic.toBoolean(right);
             if (rightValue) {
                 return Boolean.TRUE;
             }
-        } catch (ArithmeticException xrt) {
+        } catch (final ArithmeticException xrt) {
             throw new JexlException(node.jjtGetChild(1), "boolean coercion error", xrt);
         }
         return Boolean.FALSE;
     }
 
     @Override
-    protected Object visit(ASTUnderscoreLiteral node, Object data) {
+    protected Object visit(final ASTUnderscoreLiteral node, final Object data) {
         return null;
     }
 
     @Override
-    protected Object visit(ASTNullLiteral node, Object data) {
+    protected Object visit(final ASTNullLiteral node, final Object data) {
         return node.getLiteral();
     }
 
     @Override
-    protected Object visit(ASTThisNode node, Object data) {
+    protected Object visit(final ASTThisNode node, final Object data) {
         return context;
     }
 
     @Override
-    protected Object visit(ASTCurrentNode node, Object data) {
+    protected Object visit(final ASTCurrentNode node, final Object data) {
         return current;
     }
 
     @Override
-    protected Object visit(ASTBooleanLiteral node, Object data) {
+    protected Object visit(final ASTBooleanLiteral node, final Object data) {
         return node.getLiteral();
     }
 
     @Override
-    protected Object visit(ASTNumberLiteral node, Object data) {
+    protected Object visit(final ASTNumberLiteral node, final Object data) {
         if (data != null && node.isInteger()) {
             return getAttribute(data, node.getLiteral(), node);
         }
@@ -2224,7 +2223,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTStringLiteral node, Object data) {
+    protected Object visit(final ASTStringLiteral node, final Object data) {
         if (data != null) {
             return getAttribute(data, node.getLiteral(), node);
         }
@@ -2232,33 +2231,33 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTRegexLiteral node, Object data) {
+    protected Object visit(final ASTRegexLiteral node, final Object data) {
         return node.getLiteral();
     }
 
     @Override
-    protected Object visit(ASTTextBlockLiteral node, Object data) {
+    protected Object visit(final ASTTextBlockLiteral node, final Object data) {
         return node.getLiteral();
     }
 
     @Override
-    protected Object visit(ASTStringBuilderLiteral node, Object data) {
-        Object o = node.jjtGetChild(0).jjtAccept(this, data);
+    protected Object visit(final ASTStringBuilderLiteral node, final Object data) {
+        final Object o = node.jjtGetChild(0).jjtAccept(this, data);
         return new StringBuilder(arithmetic.toString(o));
     }
 
     @Override
-    protected Object visit(ASTClassLiteral node, Object data) {
+    protected Object visit(final ASTClassLiteral node, final Object data) {
         return node.getLiteral();
     }
 
     @Override
-    protected Object visit(ASTTypeLiteral node, Object data) {
+    protected Object visit(final ASTTypeLiteral node, final Object data) {
         return node.getType();
     }
 
     @Override
-    protected Object visit(ASTArrayLiteral node, Object data) {
+    protected Object visit(final ASTArrayLiteral node, final Object data) {
         int childCount = node.jjtGetNumChildren();
         JexlArithmetic.ArrayBuilder ab = arithmetic.arrayBuilder(childCount);
         boolean extended = node.isExtended();
@@ -2301,12 +2300,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSetOperand node, Object data) {
+    protected Object visit(final ASTSetOperand node, final Object data) {
         return null;
     }
 
     @Override
-    protected Object visit(ASTSetLiteral node, Object data) {
+    protected Object visit(final ASTSetLiteral node, final Object data) {
         boolean immutable = node.isImmutable();
         final boolean cacheable = cache && immutable && node.isConstant();
         Object cached = cacheable ? node.jjtGetValue() : null;
@@ -2346,7 +2345,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTMapLiteral node, Object data) {
+    protected Object visit(final ASTMapLiteral node, final Object data) {
         boolean immutable = node.isImmutable();
         final boolean cacheable = cache && immutable && node.isConstant();
         Object cached = cacheable ? node.jjtGetValue() : null;
@@ -2395,22 +2394,22 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTMapEntry node, Object data) {
-        Object key = node.jjtGetChild(0).jjtAccept(this, data);
-        Object value = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTMapEntry node, final Object data) {
+        final Object key = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
         return new Object[]{key, value};
     }
 
     @Override
-    protected Object visit(ASTMapEntryLiteral node, Object data) {
-        Object key = node.jjtGetChild(0).jjtAccept(this, data);
-        Object value = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTMapEntryLiteral node, final Object data) {
+        final Object key = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
 
         return arithmetic.createMapEntry(key, value);
     }
 
     @Override
-    protected Object visit(ASTMapEnumerationNode node, Object data) {
+    protected Object visit(final ASTMapEnumerationNode node, final Object data) {
         JexlNode valNode = node.jjtGetChild(0);
         Object iterableValue = valNode.jjtAccept(this, data);
 
@@ -2426,7 +2425,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyAssignment node, Object data) {
+    protected Object visit(final ASTInlinePropertyAssignment node, final Object data) {
         Object prev = current;
         current = data;
         try {
@@ -2529,50 +2528,49 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyArrayEntry node, Object data) {
-
-        Object key = node.jjtGetChild(0).jjtAccept(this, data);
-        Object value = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTInlinePropertyArrayEntry node, final Object data) {
+        final Object key = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
 
         return new Object[] {key, value};
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyEntry node, Object data) {
+    protected Object visit(final ASTInlinePropertyEntry node, final Object data) {
         JexlNode name = node.jjtGetChild(0);
 
-        Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, data);
-        Object value = node.jjtGetChild(1).jjtAccept(this, data);
+        final Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, data);
+        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
 
         return new Object[] {key, value};
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyNullEntry node, Object data) {
+    protected Object visit(final ASTInlinePropertyNullEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyNEEntry node, Object data) {
+    protected Object visit(final ASTInlinePropertyNEEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyArrayNullEntry node, Object data) {
+    protected Object visit(final ASTInlinePropertyArrayNullEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
     @Override
-    protected Object visit(ASTInlinePropertyArrayNEEntry node, Object data) {
+    protected Object visit(final ASTInlinePropertyArrayNEEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
     @Override
-    protected Object visit(ASTTernaryNode node, Object data) {
+    protected Object visit(final ASTTernaryNode node, final Object data) {
         Object condition;
         try {
             condition = node.jjtGetChild(0).jjtAccept(this, data);
-        } catch(JexlException xany) {
+        } catch(final JexlException xany) {
             if (!(xany.getCause() instanceof JexlArithmetic.NullOperand)) {
                 throw xany;
             }
@@ -2606,11 +2604,11 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNullpNode node, Object data) {
+    protected Object visit(final ASTNullpNode node, final Object data) {
         Object lhs;
         try {
             lhs = node.jjtGetChild(0).jjtAccept(this, data);
-        } catch(JexlException xany) {
+        } catch(final JexlException xany) {
             if (!(xany.getCause() instanceof JexlArithmetic.NullOperand)) {
                 throw xany;
             }
@@ -2621,21 +2619,21 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSizeFunction node, Object data) {
+    protected Object visit(final ASTSizeFunction node, final Object data) {
         try {
-            Object val = node.jjtGetChild(0).jjtAccept(this, data);
+            final Object val = node.jjtGetChild(0).jjtAccept(this, data);
             return operators.size(node, val);
-        } catch(JexlException xany) {
+        } catch(final JexlException xany) {
             return 0;
         }
     }
 
     @Override
-    protected Object visit(ASTEmptyFunction node, Object data) {
+    protected Object visit(final ASTEmptyFunction node, final Object data) {
         try {
-            Object value = node.jjtGetChild(0).jjtAccept(this, data);
+            final Object value = node.jjtGetChild(0).jjtAccept(this, data);
             return operators.empty(node, value);
-        } catch(JexlException xany) {
+        } catch(final JexlException xany) {
             return true;
         }
     }
@@ -2646,7 +2644,7 @@ public class Interpreter extends InterpreterBase {
      * @param data the usual data
      * @return the return value
      */
-    protected Object visitLexicalNode(JexlNode node, Object data) {
+    protected Object visitLexicalNode(final JexlNode node, final Object data) {
         block = new LexicalFrame(frame, null);
         try {
             return node.jjtAccept(this, data);
@@ -2661,11 +2659,11 @@ public class Interpreter extends InterpreterBase {
      * @param data the usual data
      * @return the closure return value
      */
-    protected Object runClosure(Closure closure, Object data) {
-        ASTJexlScript script = closure.getScript();
+    protected Object runClosure(final Closure closure, final Object data) {
+        final ASTJexlScript script = closure.getScript();
         block = new LexicalFrame(frame, block).defineArgs();
         try {
-            JexlNode body = script.jjtGetChild(script.jjtGetNumChildren() - 1);
+            final JexlNode body = script.jjtGetChild(script.jjtGetNumChildren() - 1);
             return interpret(body);
         } finally {
             block = block.pop();
@@ -2673,7 +2671,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTJexlScript script, Object data) {
+    protected Object visit(final ASTJexlScript script, final Object data) {
         if (script instanceof ASTJexlLambda && !((ASTJexlLambda) script).isTopLevel()) {
             return Closure.create(this, (ASTJexlLambda) script);
         } else {
@@ -2682,7 +2680,7 @@ public class Interpreter extends InterpreterBase {
                 final int numChildren = script.jjtGetNumChildren();
                 Object result = null;
                 for (int i = 0; i < numChildren; i++) {
-                    JexlNode child = script.jjtGetChild(i);
+                    final JexlNode child = script.jjtGetChild(i);
                     result = child.jjtAccept(this, data);
                     cancelCheck(child);
                 }
@@ -2694,17 +2692,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTEnclosedExpression node, Object data) {
+    protected Object visit(final ASTEnclosedExpression node, final Object data) {
         try {
             return node.jjtGetChild(0).jjtAccept(this, data);
-        } catch (JexlException.Yield stmtYield) {
+        } catch (final JexlException.Yield stmtYield) {
             return stmtYield.getValue();
         }
     }
 
     @Override
-    protected Object visit(ASTVar node, Object data) {
-        int symbol = node.getSymbol();
+    protected Object visit(final ASTVar node, final Object data) {
+        final int symbol = node.getSymbol();
         if (options.isLexical() && !defineVariable(node, block)) {
             return redefinedVariable(node, node.getName());
         }
@@ -2725,17 +2723,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTExtVar node, Object data) {
+    protected Object visit(final ASTExtVar node, final Object data) {
         return visit((ASTVar) node, data);
     }
 
     @Override
-    protected Object visit(ASTMultiVar node, Object data) {
+    protected Object visit(final ASTMultiVar node, final Object data) {
         return visit((ASTVar) node, data);
     }
 
     @Override
-    protected Object visit(ASTIdentifier identifier, Object data) {
+    protected Object visit(final ASTIdentifier identifier, final Object data) {
         cancelCheck(identifier);
         return data != null
                 ? getAttribute(data, identifier.getName(), identifier)
@@ -2743,17 +2741,17 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTArrayAccess node, Object data) {
+    protected Object visit(final ASTArrayAccess node, final Object data) {
         // first objectNode is the identifier
         Object object = data;
         // can have multiple nodes - either an expression, integer literal or reference
-        int numChildren = node.jjtGetNumChildren();
+        final int numChildren = node.jjtGetNumChildren();
         for (int i = 0; i < numChildren; i++) {
-            JexlNode nindex = node.jjtGetChild(i);
+            final JexlNode nindex = node.jjtGetChild(i);
             if (object == null) {
                 return unsolvableProperty(nindex, stringifyProperty(nindex), false, null);
             }
-            Object index = nindex.jjtAccept(this, null);
+            final Object index = nindex.jjtAccept(this, null);
             cancelCheck(node);
             object = getAttribute(object, index, nindex);
         }
@@ -2784,7 +2782,7 @@ public class Interpreter extends InterpreterBase {
      * @param node the identifier access node
      * @return the evaluated identifier
      */
-    private Object evalIdentifier(ASTIdentifierAccess node) {
+    private Object evalIdentifier(final ASTIdentifierAccess node) {
         if (node instanceof ASTIdentifierAccessJxlt) {
             final ASTIdentifierAccessJxlt accessJxlt = (ASTIdentifierAccessJxlt) node;
             final String src = node.getName();
@@ -2792,18 +2790,18 @@ public class Interpreter extends InterpreterBase {
             TemplateEngine.TemplateExpression expr = (TemplateEngine.TemplateExpression) accessJxlt.getExpression();
             try {
                 if (expr == null) {
-                    TemplateEngine jxlt = jexl.jxlt();
+                    final TemplateEngine jxlt = jexl.jxlt();
                     expr = jxlt.parseExpression(node.jexlInfo(), src, frame != null ? frame.getScope() : null);
                     accessJxlt.setExpression(expr);
                 }
                 if (expr != null) {
-                    Object name = expr.evaluate(frame, context);
+                    final Object name = expr.evaluate(frame, context);
                     if (name != null) {
-                        Integer id = ASTIdentifierAccess.parseIdentifier(name.toString());
+                        final Integer id = ASTIdentifierAccess.parseIdentifier(name.toString());
                         return id != null ? id : name;
                     }
                 }
-            } catch (JxltEngine.Exception xjxlt) {
+            } catch (final JxltEngine.Exception xjxlt) {
                 cause = xjxlt;
             }
             return node.isSafe() ? null : unsolvableProperty(node, src, true, cause);
@@ -2813,16 +2811,16 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTIdentifierAccess node, Object data) {
+    protected Object visit(final ASTIdentifierAccess node, final Object data) {
         if (data == null) {
             return null;
         }
-        Object id = evalIdentifier(node);
+        final Object id = evalIdentifier(node);
         return getAttribute(data, id, node);
     }
 
     @Override
-    protected Object visit(ASTAttributeReference node, Object data) {
+    protected Object visit(final ASTAttributeReference node, final Object data) {
         if (data == null) {
             return null;
         }
@@ -2831,7 +2829,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(final ASTReference node, Object data) {
+    protected Object visit(final ASTReference node, final Object data) {
         cancelCheck(node);
         final int numChildren = node.jjtGetNumChildren();
         final JexlNode parent = node.jjtGetParent();
@@ -2850,9 +2848,9 @@ public class Interpreter extends InterpreterBase {
                 if (object == null) {
                     // we may be performing a method call on an antish var
                     if (ant != null) {
-                        JexlNode child = objectNode.jjtGetChild(0);
+                        final JexlNode child = objectNode.jjtGetChild(0);
                         if (child instanceof ASTIdentifierAccess) {
-                            int alen = ant.length();
+                            final int alen = ant.length();
                             ant.append('.');
                             ant.append(((ASTIdentifierAccess) child).getName());
                             object = context.get(ant.toString());
@@ -2900,9 +2898,9 @@ public class Interpreter extends InterpreterBase {
                 // create first from first node
                 if (ant == null) {
                     // if we still have a null object, check for an antish variable
-                    JexlNode first = node.jjtGetChild(0);
+                    final JexlNode first = node.jjtGetChild(0);
                     if (first instanceof ASTIdentifier) {
-                        ASTIdentifier afirst = (ASTIdentifier) first;
+                        final ASTIdentifier afirst = (ASTIdentifier) first;
                         ant = new StringBuilder(afirst.getName());
                         // skip the else...*
                     } else {
@@ -2917,9 +2915,9 @@ public class Interpreter extends InterpreterBase {
                 }
                 // catch up to current node
                 for (; v <= c; ++v) {
-                    JexlNode child = node.jjtGetChild(v);
+                    final JexlNode child = node.jjtGetChild(v);
                     if (child instanceof ASTIdentifierAccess) {
-                        ASTIdentifierAccess achild = (ASTIdentifierAccess) child;
+                        final ASTIdentifierAccess achild = (ASTIdentifierAccess) child;
                         if (achild.isSafe() || achild.isExpression()) {
                             break main;
                         }
@@ -2946,8 +2944,8 @@ public class Interpreter extends InterpreterBase {
                     return null;
                 }
                 if (ant != null) {
-                    String aname = ant.toString();
-                    boolean defined = isVariableDefined(frame, block, aname);
+                    final String aname = ant.toString();
+                    final boolean defined = isVariableDefined(frame, block, aname);
                     return unsolvableVariable(node, aname, !defined);
                 }
                 return unsolvableProperty(node,
@@ -2957,8 +2955,8 @@ public class Interpreter extends InterpreterBase {
                 if (node.isSafeLhs(isSafe())) {
                     return null;
                 }
-                String aname = ant != null ? ant.toString() : "?";
-                boolean defined = isVariableDefined(frame, block, aname);
+                final String aname = ant != null ? ant.toString() : "?";
+                final boolean defined = isVariableDefined(frame, block, aname);
                 if (defined && !arithmetic.isStrict()) {
                     return null;
                 }
@@ -2971,12 +2969,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTMultipleIdentifier node, Object data) {
+    protected Object visit(final ASTMultipleIdentifier node, final Object data) {
         return null;
     }
 
     @Override
-    protected Object visit(ASTMultipleAssignment node, Object data) {
+    protected Object visit(final ASTMultipleAssignment node, final Object data) {
         cancelCheck(node);
         // Vector of identifiers to assign values to
         JexlNode identifiers = node.jjtGetChild(0);
@@ -2986,7 +2984,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTMultipleVarStatement node, Object data) {
+    protected Object visit(final ASTMultipleVarStatement node, final Object data) {
         cancelCheck(node);
         // Vector of identifiers to assign values to
         JexlNode identifiers = node.jjtGetChild(0);
@@ -3009,7 +3007,7 @@ public class Interpreter extends InterpreterBase {
      * @param data        the data
      * @return the left hand side
      */
-    protected Object executeMultipleAssign(JexlNode node, JexlNode identifiers, Object value, Object data) { // CSOFF: MethodLength
+    protected Object executeMultipleAssign(final JexlNode node, final JexlNode identifiers, final Object value, final Object data) { // CSOFF: MethodLength
         Object result = null;
         final int num = identifiers.jjtGetNumChildren();
         // Use separate logic for maps and non-iterable objects for destructuring
@@ -3077,9 +3075,9 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTVarStatement node, Object data) {
+    protected Object visit(final ASTVarStatement node, final Object data) {
         cancelCheck(node);
-        int num = node.jjtGetNumChildren();
+        final int num = node.jjtGetNumChildren();
         Object value = null;
         for (int i = 0; i < num; i++) {
             value = node.jjtGetChild(i).jjtAccept(this, data);
@@ -3088,7 +3086,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTInitialization node, Object data) {
+    protected Object visit(final ASTInitialization node, final Object data) {
         cancelCheck(node);
         ASTVar left = (ASTVar) node.jjtGetChild(0);
         Object right = null;
@@ -3123,14 +3121,14 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTAssignment node, Object data) {
+    protected Object visit(final ASTAssignment node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, null, data);
     }
 
     @Override
-    protected Object visit(ASTNullAssignment node, Object data) {
+    protected Object visit(final ASTNullAssignment node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object value = left.jjtAccept(this, data);
         if (value != null) {
@@ -3141,7 +3139,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTNEAssignment node, Object data) {
+    protected Object visit(final ASTNEAssignment node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object value = left.jjtAccept(this, data);
         Object right = node.jjtGetChild(1).jjtAccept(this, data);
@@ -3156,96 +3154,96 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTSetAddNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetAddNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_ADD, data);
     }
 
     @Override
-    protected Object visit(ASTSetSubNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetSubNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_SUBTRACT, data);
     }
 
     @Override
-    protected Object visit(ASTSetMultNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetMultNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_MULTIPLY, data);
     }
 
     @Override
-    protected Object visit(ASTSetDivNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetDivNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_DIVIDE, data);
     }
 
     @Override
-    protected Object visit(ASTSetModNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetModNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_MOD, data);
     }
 
     @Override
-    protected Object visit(ASTSetAndNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetAndNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_AND, data);
     }
 
     @Override
-    protected Object visit(ASTSetOrNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetOrNode node, Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_OR, data);
     }
 
     @Override
-    protected Object visit(ASTSetXorNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetXorNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_XOR, data);
     }
 
     @Override
-    protected Object visit(ASTSetShlNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetShlNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_SHL, data);
     }
 
     @Override
-    protected Object visit(ASTSetSarNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetSarNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_SAR, data);
     }
 
     @Override
-    protected Object visit(ASTSetShrNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object right = node.jjtGetChild(1).jjtAccept(this, data);
+    protected Object visit(final ASTSetShrNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_SHR, data);
     }
 
     @Override
-    protected Object visit(ASTIncrementNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
+    protected Object visit(final ASTIncrementNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
         return executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
     }
 
     @Override
-    protected Object visit(ASTDecrementNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
+    protected Object visit(final ASTDecrementNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
         return executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
     }
 
     @Override
-    protected Object visit(ASTIncrementPostfixNode node, Object data) {
+    protected Object visit(final ASTIncrementPostfixNode node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object value = left.jjtAccept(this, data);
         executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
@@ -3253,9 +3251,9 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTDecrementPostfixNode node, Object data) {
-        JexlNode left = node.jjtGetChild(0);
-        Object value = left.jjtAccept(this, data);
+    protected Object visit(final ASTDecrementPostfixNode node, final Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object value = left.jjtAccept(this, data);
         executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
         return value;
     }
@@ -3269,11 +3267,12 @@ public class Interpreter extends InterpreterBase {
      * @param data     the data
      * @return the left hand side
      */
-    protected Object executeAssign(JexlNode node, JexlNode left, Object right, JexlOperator assignop, Object data) { // CSOFF: MethodLength
+    protected Object executeAssign(final JexlNode node, final JexlNode left, final Object right, final JexlOperator assignop, final Object data) { // CSOFF: MethodLength
         cancelCheck(node);
         // left contains the reference to assign to
         ASTIdentifier var = null;
         Object object = null;
+        Object value = right;
         int symbol = -1;
         // check var decl with assign is ok
         if (left instanceof ASTIdentifier) {
@@ -3298,10 +3297,10 @@ public class Interpreter extends InterpreterBase {
                         throw new JexlException(node, "can not assign a value to the final variable: " + var.getName());
                     }
                     if (assignop != null) {
-                        Object self = getVariable(frame, block, var);
-                        right = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                            operators.tryAssignOverload(node, assignop, self, right);
-                        if (right == JexlOperator.ASSIGN) {
+                        final Object self = getVariable(frame, block, var);
+                        value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
+                            operators.tryAssignOverload(node, assignop, self, value);
+                        if (value == JexlOperator.ASSIGN) {
                             return self;
                         }
                     }
@@ -3309,23 +3308,23 @@ public class Interpreter extends InterpreterBase {
                     Class type = block.typeof(symbol);
                     if (type != null) {
                         if (arithmetic.isStrict()) {
-                            right = arithmetic.implicitCast(type, right);
+                            value = arithmetic.implicitCast(type, value);
                         } else {
-                            right = arithmetic.cast(type, right);
+                            value = arithmetic.cast(type, value);
                         }
-                        if (type.isPrimitive() && right == null)
+                        if (type.isPrimitive() && value == null)
                             throw new JexlException(node, "not null value required for: " + var.getName());
                     }
                     boolean isRequired = block.isVariableRequired(symbol);
-                    if (isRequired && right == null)
+                    if (isRequired && value == null)
                         throw new JexlException(node, "not null value required for: " + var.getName());
 
-                    frame.set(symbol, right);
+                    frame.set(symbol, value);
                     // make the closure accessible to itself, ie capture the currently set variable after frame creation
-                    if (right instanceof Closure) {
-                          ((Closure) right).setCaptured(symbol, right);
+                    if (value instanceof Closure) {
+                          ((Closure) value).setCaptured(symbol, value);
                     }
-                    return right; // 1
+                    return value; // 1
                 }
                 object = getVariable(frame, block, var);
                 // top level is a symbol, can not be an antish var
@@ -3334,15 +3333,15 @@ public class Interpreter extends InterpreterBase {
                 // check we are not assigning direct global
                 if (last < 0) {
                     if (assignop != null) {
-                        Object self = context.get(var.getName());
-                        right = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                            operators.tryAssignOverload(node, assignop, self, right);
-                        if (right == JexlOperator.ASSIGN) {
+                        final Object self = context.get(var.getName());
+                        value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
+                            operators.tryAssignOverload(node, assignop, self, value);
+                        if (value == JexlOperator.ASSIGN) {
                             return self;
                         }
                     }
-                    setContextVariable(node, var.getName(), right);
-                    return right; // 2
+                    setContextVariable(node, var.getName(), value);
+                    return value; // 2
                 }
                 object = context.get(var.getName());
                 // top level accesses object, can not be an antish var
@@ -3401,8 +3400,8 @@ public class Interpreter extends InterpreterBase {
             } else if (antish) {
                 // initialize if first time
                 if (ant == null) {
-                    JexlNode first = left.jjtGetChild(0);
-                    ASTIdentifier firstId = first instanceof ASTIdentifier
+                    final JexlNode first = left.jjtGetChild(0);
+                    final ASTIdentifier firstId = first instanceof ASTIdentifier
                             ? (ASTIdentifier) first
                             : null;
                     if (firstId != null && firstId.getSymbol() < 0) {
@@ -3415,8 +3414,8 @@ public class Interpreter extends InterpreterBase {
                 }
                 // catch up to current child
                 for (; v <= c; ++v) {
-                    JexlNode child = left.jjtGetChild(v);
-                    ASTIdentifierAccess aid = child instanceof ASTIdentifierAccess
+                    final JexlNode child = left.jjtGetChild(v);
+                    final ASTIdentifierAccess aid = child instanceof ASTIdentifierAccess
                             ? (ASTIdentifierAccess) child
                             : null;
                     // remain antish only if unsafe navigation
@@ -3437,7 +3436,7 @@ public class Interpreter extends InterpreterBase {
         // 2: last objectNode will perform assignement in all cases
         Object property = null;
         JexlNode propertyNode = left.jjtGetChild(last);
-        ASTIdentifierAccess propertyId = propertyNode instanceof ASTIdentifierAccess
+        final ASTIdentifierAccess propertyId = propertyNode instanceof ASTIdentifierAccess
                 ? (ASTIdentifierAccess) propertyNode
                 : null;
         if (propertyId != null) {
@@ -3448,24 +3447,24 @@ public class Interpreter extends InterpreterBase {
                 }
                 ant.append(propertyId.getName());
                 if (assignop != null) {
-                    Object self = context.get(ant.toString());
-                    right = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                        operators.tryAssignOverload(node, assignop, self, right);
-                    if (right == JexlOperator.ASSIGN) {
+                    final Object self = context.get(ant.toString());
+                    value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
+                        operators.tryAssignOverload(node, assignop, self, value);
+                    if (value == JexlOperator.ASSIGN) {
                         return self;
                     }
                 }
-                setContextVariable(propertyNode, ant.toString(), right);
-                return right; // 3
+                setContextVariable(propertyNode, ant.toString(), value);
+                return value; // 3
             }
             // property of an object ?
             property = evalIdentifier(propertyId);
         } else if (propertyNode instanceof ASTArrayAccess) {
             // can have multiple nodes - either an expression, integer literal or reference
-            int numChildren = propertyNode.jjtGetNumChildren() - 1;
+            final int numChildren = propertyNode.jjtGetNumChildren() - 1;
             for (int i = 0; i < numChildren; i++) {
-                JexlNode nindex = propertyNode.jjtGetChild(i);
-                Object index = nindex.jjtAccept(this, null);
+                final JexlNode nindex = propertyNode.jjtGetChild(i);
+                final Object index = nindex.jjtAccept(this, null);
                 object = getAttribute(object, index, nindex);
             }
             propertyNode = propertyNode.jjtGetChild(numChildren);
@@ -3482,9 +3481,9 @@ public class Interpreter extends InterpreterBase {
         // 3: one before last, assign
         if (assignop != null) {
             Object self = getAttribute(object, property, propertyNode);
-            right = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                operators.tryAssignOverload(node, assignop, self, right);
-            if (right == JexlOperator.ASSIGN) {
+            value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
+                operators.tryAssignOverload(node, assignop, self, value);
+            if (value == JexlOperator.ASSIGN) {
                 return self;
             }
         }
@@ -3492,8 +3491,8 @@ public class Interpreter extends InterpreterBase {
         final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
                                       ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
 
-        setAttribute(object, property, right, propertyNode, operator);
-        return right; // 4
+        setAttribute(object, property, value, propertyNode, operator);
+        return value; // 4
     }
 
     @Override
@@ -3567,9 +3566,9 @@ public class Interpreter extends InterpreterBase {
             }
             String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr);
-        } catch (JexlException xthru) {
+        } catch (final JexlException xthru) {
             throw xthru;
-        } catch (Exception xany) {
+        } catch (final Exception xany) {
             String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
@@ -3586,7 +3585,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(final ASTMethodNode node, Object data) {
+    protected Object visit(final ASTMethodNode node, final Object data) {
         return visit(node, null, data);
     }
 
@@ -3597,7 +3596,7 @@ public class Interpreter extends InterpreterBase {
      * @param data the context
      * @return the method call result
      */
-    private Object visit(final ASTMethodNode node, Object object, Object data) {
+    private Object visit(final ASTMethodNode node, Object object, final Object data) {
         // left contains the reference to the method
         final JexlNode methodNode = node.jjtGetChild(0);
         Object method;
@@ -3627,7 +3626,7 @@ public class Interpreter extends InterpreterBase {
                         ? null
                         : unsolvableMethod(methodNode, "<?>.<null>(...)");
             }
-            ASTArguments argNode = (ASTArguments) node.jjtGetChild(a);
+            final ASTArguments argNode = (ASTArguments) node.jjtGetChild(a);
             result = call(node, object, result, argNode);
             object = result;
         }
@@ -3635,11 +3634,11 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTFunctionNode node, Object data) {
-        ASTIdentifier functionNode = (ASTIdentifier) node.jjtGetChild(0);
-        String nsid = functionNode.getNamespace();
-        Object namespace = (nsid != null)? resolveNamespace(nsid, node) : context;
-        ASTArguments argNode = (ASTArguments) node.jjtGetChild(1);
+    protected Object visit(final ASTFunctionNode node, final Object data) {
+        final ASTIdentifier functionNode = (ASTIdentifier) node.jjtGetChild(0);
+        final String nsid = functionNode.getNamespace();
+        final Object namespace = (nsid != null)? resolveNamespace(nsid, node) : context;
+        final ASTArguments argNode = (ASTArguments) node.jjtGetChild(1);
         return call(node, namespace, functionNode, argNode);
     }
 
@@ -3660,7 +3659,7 @@ public class Interpreter extends InterpreterBase {
      * @param argNode the node carrying the arguments
      * @return the result of the method invocation
      */
-    protected Object call(final JexlNode node, Object target, Object functor, final ASTArguments argNode) {
+    protected Object call(final JexlNode node, final Object target, Object functor, final ASTArguments argNode) {
         cancelCheck(node);
         // evaluate the arguments
         final Object[] argv = visit(argNode, null);
@@ -3671,7 +3670,7 @@ public class Interpreter extends InterpreterBase {
         boolean isavar = false;
         if (functor instanceof ASTIdentifier) {
             // function call, target is context or namespace (if there was one)
-            ASTIdentifier methodIdentifier = (ASTIdentifier) functor;
+            final ASTIdentifier methodIdentifier = (ASTIdentifier) functor;
             symbol = methodIdentifier.getSymbol();
             methodName = methodIdentifier.getName();
             functor = null;
@@ -3706,10 +3705,10 @@ public class Interpreter extends InterpreterBase {
         }
 
         // solving the call site
-        CallDispatcher call = new CallDispatcher(node, cacheable);
+        final CallDispatcher call = new CallDispatcher(node, cacheable);
         try {
             // do we have a  cached version method/function name ?
-            Object eval = call.tryEval(target, methodName, argv);
+            final Object eval = call.tryEval(target, methodName, argv);
             if (JexlEngine.TRY_FAILED != eval) {
                 return eval;
             }
@@ -3726,7 +3725,7 @@ public class Interpreter extends InterpreterBase {
                     }
                     if (target == context) {
                         // solve 'null' namespace
-                        Object namespace = resolveNamespace(null, node);
+                        final Object namespace = resolveNamespace(null, node);
                         if (namespace != null
                             && namespace != context
                             && call.isTargetMethod(namespace, methodName, argv)) {
@@ -3741,7 +3740,7 @@ public class Interpreter extends InterpreterBase {
                     } else {
                         // try prepending target to arguments and look for
                         // applicable method in context...
-                        Object[] pargv = functionArguments(target, narrow, argv);
+                        final Object[] pargv = functionArguments(target, narrow, argv);
                         if (call.isContextMethod(methodName, pargv)) {
                             return call.eval(methodName);
                         }
@@ -3798,7 +3797,7 @@ public class Interpreter extends InterpreterBase {
                     }
                     // try prepending functor to arguments and look for
                     // context or arithmetic function called 'call'
-                    Object[] pargv = functionArguments(functor, narrow, argv);
+                    final Object[] pargv = functionArguments(functor, narrow, argv);
                     if (call.isContextMethod(mCALL, pargv)) {
                         return call.eval(mCALL);
                     }
@@ -3819,17 +3818,17 @@ public class Interpreter extends InterpreterBase {
             return node.isSafeLhs(isSafe())
                     ? null
                     : unsolvableMethod(node, methodName, argv);
-        } catch (JexlException.TryFailed xany) {
+        } catch (final JexlException.TryFailed xany) {
             throw invocationException(node, methodName, xany.getCause());
-        } catch (JexlException xthru) {
+        } catch (final JexlException xthru) {
             throw xthru;
-        } catch (Exception xany) {
+        } catch (final Exception xany) {
             throw invocationException(node, methodName, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTConstructorNode node, Object data) {
+    protected Object visit(final ASTConstructorNode node, final Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -3896,16 +3895,16 @@ public class Interpreter extends InterpreterBase {
             }
             String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr, argv);
-        } catch (JexlException xthru) {
+        } catch (final JexlException xthru) {
             throw xthru;
-        } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+        } catch (final Exception xany) {
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTQualifiedConstructorNode node, Object data) {
+    protected Object visit(final ASTQualifiedConstructorNode node, final Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -3967,16 +3966,16 @@ public class Interpreter extends InterpreterBase {
             }
             String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr, argv);
-        } catch (JexlException.Method xmethod) {
+        } catch (final JexlException.Method xmethod) {
             throw xmethod;
-        } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+        } catch (final Exception xany) {
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTArrayConstructorNode node, Object data) {
+    protected Object visit(final ASTArrayConstructorNode node, Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -3990,19 +3989,19 @@ public class Interpreter extends InterpreterBase {
         }
         try {
             return Array.newInstance(target, argv);
-        } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+        } catch (final Exception xany) {
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTArrayOpenDimension node, Object data) {
+    protected Object visit(final ASTArrayOpenDimension node, final Object data) {
         return 0;
     }
 
     @Override
-    protected Object visit(ASTInitializedArrayConstructorNode node, Object data) {
+    protected Object visit(final ASTInitializedArrayConstructorNode node, final Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -4067,14 +4066,14 @@ public class Interpreter extends InterpreterBase {
                 }
                 return result;
             }
-        } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+        } catch (final Exception xany) {
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTInitializedCollectionConstructorNode node, Object data) {
+    protected Object visit(final ASTInitializedCollectionConstructorNode node, final Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -4110,13 +4109,13 @@ public class Interpreter extends InterpreterBase {
             String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTInitializedMapConstructorNode node, Object data) {
+    protected Object visit(final ASTInitializedMapConstructorNode node, final Object data) {
         if (isCancelled()) {
             throw new JexlException.Cancel(node);
         }
@@ -4156,19 +4155,19 @@ public class Interpreter extends InterpreterBase {
                 }
                 return result;
             }
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr, EMPTY_PARAMS);
-        } catch (Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+        } catch (final Exception xany) {
+            final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
     }
 
     @Override
-    protected Object visit(ASTJxltLiteral node, Object data) {
+    protected Object visit(final ASTJxltLiteral node, final Object data) {
         TemplateEngine.TemplateExpression tp = (TemplateEngine.TemplateExpression) node.jjtGetValue();
         if (tp == null) {
-            TemplateEngine jxlt = jexl.jxlt();
+            final TemplateEngine jxlt = jexl.jxlt();
             JexlInfo info = node.jexlInfo();
             if (this.block != null) {
                 info = new JexlNode.Info(node, info);
@@ -4183,12 +4182,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(ASTAnnotation node, Object data) {
+    protected Object visit(final ASTAnnotation node, final Object data) {
         throw new UnsupportedOperationException(ASTAnnotation.class.getName() + ": Not supported.");
     }
 
     @Override
-    protected Object visit(ASTAnnotatedStatement node, Object data) {
+    protected Object visit(final ASTAnnotatedStatement node, final Object data) {
         return processAnnotation(node, 0, data);
     }
 
@@ -4255,7 +4254,7 @@ public class Interpreter extends InterpreterBase {
         // are we evaluating the block ?
         final int last = stmt.jjtGetNumChildren() - 1;
         if (index == last) {
-            JexlNode cblock = stmt.jjtGetChild(last);
+            final JexlNode cblock = stmt.jjtGetChild(last);
             // if the context has changed, might need a new arithmetic
             final JexlArithmetic jexla = arithmetic.options(context);
             if (jexla != arithmetic) {
@@ -4281,7 +4280,7 @@ public class Interpreter extends InterpreterBase {
         final ASTAnnotation anode = (ASTAnnotation) stmt.jjtGetChild(index);
         final String aname = anode.getName();
         // evaluate the arguments
-        Object[] argv = anode.jjtGetNumChildren() > 0
+        final Object[] argv = anode.jjtGetNumChildren() > 0
                         ? visit((ASTArguments) anode.jjtGetChild(0), null) : null;
         // wrap the future, will recurse through annotation processor
         Object result;
@@ -4291,9 +4290,9 @@ public class Interpreter extends InterpreterBase {
             if (!jstmt.isProcessed()) {
                 return annotationError(anode, aname, null);
             }
-        } catch (JexlException xany) {
+        } catch (final JexlException xany) {
             throw xany;
-        } catch (Exception xany) {
+        } catch (final Exception xany) {
             return annotationError(anode, aname, xany);
         }
         // the caller may return a return, break or continue
@@ -4311,7 +4310,7 @@ public class Interpreter extends InterpreterBase {
      * @return the result of statement.call()
      * @throws Exception if anything goes wrong
      */
-    protected Object processAnnotation(String annotation, Object[] args, Callable<Object> stmt) throws Exception {
+    protected Object processAnnotation(final String annotation, final Object[] args, final Callable<Object> stmt) throws Exception {
                 return context instanceof JexlContext.AnnotationProcessor
                 ? ((JexlContext.AnnotationProcessor) context).processAnnotation(annotation, args, stmt)
                 : stmt.call();

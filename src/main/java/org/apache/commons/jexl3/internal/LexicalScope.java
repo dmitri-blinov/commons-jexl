@@ -69,11 +69,17 @@ public class LexicalScope {
             return new VariableModifier(this.type, this.isFinal, this.isRequired);
         }
     }
-    /** Number of bits in a long. */
+    /**
+     * Number of bits in a long.
+     */
     protected static final int LONGBITS = 64;
-    /** The mask of symbols in the frame. */
+    /**
+     * The mask of symbols in the frame.
+     */
     protected long symbols = 0L;
-    /** Symbols after 64. */
+    /**
+     * Symbols after 64.
+     */
     protected BitSet moreSymbols = null;
     /** Previous block. */
     protected final LexicalScope previous;
@@ -93,7 +99,7 @@ public class LexicalScope {
      * Default ctor.
      * @param scope the previous scope
      */
-    public LexicalScope(LexicalScope scope) {
+    public LexicalScope(final LexicalScope scope) {
         this(null, scope);
     }
 
@@ -102,7 +108,7 @@ public class LexicalScope {
      * @param frame the frame
      * @param scope the previous scope
      */
-    public LexicalScope(Frame frame, LexicalScope scope) {
+    public LexicalScope(final Frame frame, final LexicalScope scope) {
         if (frame != null) {
             this.frame = frame;
         } else {
@@ -113,17 +119,19 @@ public class LexicalScope {
 
     /**
      * Frame copy ctor base.
-     * @param s the symbols mask
+     *
+     * @param s  the symbols mask
      * @param ms the more symbols bitset
      */
-    protected LexicalScope(long s, BitSet ms, Frame frame, LexicalScope pscope) {
+    protected LexicalScope(final long s, final BitSet ms, final Frame frame, final LexicalScope pscope) {
         this(frame, pscope);
         symbols = s;
-        moreSymbols = ms != null? (BitSet) ms.clone() : null;
+        moreSymbols = ms != null ? (BitSet) ms.clone() : null;
     }
 
     /**
      * Ensure more symbpls can be stored.
+     *
      * @return the set of more symbols
      */
     protected final BitSet moreSymbols() {
@@ -135,10 +143,11 @@ public class LexicalScope {
 
     /**
      * Checks whether a symbol has already been declared.
+     *
      * @param symbol the symbol
      * @return true if declared, false otherwise
      */
-    public boolean hasSymbol(int symbol) {
+    public boolean hasSymbol(final int symbol) {
         if (symbol < LONGBITS) {
             return (symbols & (1L << symbol)) != 0L;
         } else {
@@ -218,18 +227,19 @@ public class LexicalScope {
 
     /**
      * Adds a symbol in this scope.
+     *
      * @param symbol the symbol
      * @return true if registered, false if symbol was already registered
      */
-    public final boolean addSymbol(int symbol) {
+    public boolean addSymbol(final int symbol) {
         if (symbol < LONGBITS) {
             if ((symbols & (1L << symbol)) != 0L) {
                 return false;
             }
             symbols |= (1L << symbol);
         } else {
-            int s = symbol - LONGBITS;
-            BitSet ms = moreSymbols();
+            final int s = symbol - LONGBITS;
+            final BitSet ms = moreSymbols();
             if (ms.get(s)) {
                 return false;
             }
@@ -238,10 +248,36 @@ public class LexicalScope {
         return true;
     }
     /**
+     * Clear all symbols.
+     *
+     * @param cleanSymbol a (optional, may be null) functor to call for each cleaned symbol
+     */
+    public final void clearSymbols(final java.util.function.IntConsumer cleanSymbol) {
+        // undefine symbols getting out of scope
+        if (cleanSymbol != null) {
+            long clean = symbols;
+            while (clean != 0L) {
+                final int s = Long.numberOfTrailingZeros(clean);
+                clean &= ~(1L << s);
+                cleanSymbol.accept(s);
+            }
+        }
+        symbols = 0L;
+        if (moreSymbols != null) {
+            if (cleanSymbol != null) {
+                for (int s = moreSymbols.nextSetBit(0); s != -1; s = moreSymbols.nextSetBit(s + 1)) {
+                    cleanSymbol.accept(s + LONGBITS);
+                }
+            }
+            moreSymbols.clear();
+        }
+    }
+
+    /**
      * @return the number of symbols defined in this scope.
      */
     public int getSymbolCount() {
-        return Long.bitCount(symbols) + (moreSymbols == null? 0 : moreSymbols.cardinality());
+        return Long.bitCount(symbols) + (moreSymbols == null ? 0 : moreSymbols.cardinality());
     }
 
     public String toString() {
