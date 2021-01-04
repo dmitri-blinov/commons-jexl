@@ -40,7 +40,10 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
      * @param value      the value to assign to the property
      * @return the executor if found, null otherwise
      */
-    public static PropertySetExecutor discover(final Introspector is, final Class<?> clazz, final String property, final Object value) {
+    public static PropertySetExecutor discover(final Introspector is,
+                                               final Class<?> clazz,
+                                               final String property,
+                                               final Object value) {
         if (property == null || property.isEmpty()) {
             return null;
         }
@@ -58,7 +61,10 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
      * @param key    the key to use as 1st argument to the set method
      * @param value    the value
      */
-    protected PropertySetExecutor(final Class<?> clazz, final java.lang.reflect.Method method, final String key, final Object value) {
+    protected PropertySetExecutor(final Class<?> clazz,
+                                  final java.lang.reflect.Method method,
+                                  final String key,
+                                  final Object value) {
         super(clazz, method);
         property = key;
         valueClass = classOf(value);
