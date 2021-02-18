@@ -97,6 +97,15 @@ public class InlinePropertyTest extends JexlTestCase {
     }
 
     @Test
+    public void inlinePropertyEmpty() throws Exception {
+        JexlScript e = JEXL.createScript("addr {}; addr.PostalCode");
+        JexlContext jc = new MapContext();
+        jc.set("addr", new Address());
+        Object o = e.execute(jc);
+        Assert.assertNull("Result is not as expected", o);
+    }
+
+    @Test
     public void inlinePropertySimple() throws Exception {
         JexlScript e = JEXL.createScript("addr { PostalCode : '123456'}; addr.PostalCode");
         JexlContext jc = new MapContext();

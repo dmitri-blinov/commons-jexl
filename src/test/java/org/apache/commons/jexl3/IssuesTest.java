@@ -299,7 +299,7 @@ public class IssuesTest extends JexlTestCase {
             "a=3 b=4",
             "while(a) while(a)",
             "1 2",
-            "if (true) 2; 3 {}",
+            // "if (true) 2; 3 {}", allowed since inline property assignment introduction
             "while (x) 1 if (y) 2 3"
         };
         for (final String fexpr : fexprs) {

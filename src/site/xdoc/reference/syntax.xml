@@ -362,7 +362,7 @@
                 <tr>
                     <td>Inline assignment operator</td>
                     <td>
-                        <p>Allows to set a property of an object, a value of the collection or an array
+                        <p>Allows to set a property of an object, a value of a collection or of an array
                         by using curly brackets, e.g.
                         <code>foo {bar : 10}</code> will set the <code>bar</code> property
                         of the <code>foo</code> Object to the <code>10</code>.

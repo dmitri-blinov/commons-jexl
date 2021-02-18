@@ -1464,9 +1464,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(ASTInlinePropertyAssignment node, Object data) {
         int num = node.jjtGetNumChildren();
         builder.append("{ ");
-        accept(node.jjtGetChild(0), data);
-        for (int i = 1; i < num; ++i) {
-            builder.append(",");
+        for (int i = 0; i < num; ++i) {
+            if (i > 0)
+                builder.append(",");
             accept(node.jjtGetChild(i), data);
         }
         builder.append(" }");

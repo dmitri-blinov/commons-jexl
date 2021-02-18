@@ -2286,7 +2286,7 @@ void MethodReference() : {}
 
 void InlinePropertyAssignment() : {}
 {
-    <LCURLY> (InlinePropertyBlock() ( <COMMA> InlinePropertyBlock() )* ) <RCURLY>
+    <LCURLY> [ InlinePropertyBlock() ( <COMMA> InlinePropertyBlock() )* ] <RCURLY>
 }
 
 void InlineMemberAccess() #void : {}
