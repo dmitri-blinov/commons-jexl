@@ -1070,9 +1070,9 @@ public class JexlArithmetic {
             long r = ((Number) right).longValue();
             long result = l - r;
             if (left instanceof Long || right instanceof Long) {
-                if ((l & r & ~result) > 0) {
+                if ((l & ~r & ~result) < 0) {
                     return extendedLong(result, (byte) 0);
-                } else if ((~l & ~r & result) > 0) {
+                } else if ((~l & r & result) < 0) {
                     return extendedLong(result, (byte) -1);
                 } else {
                     return result;

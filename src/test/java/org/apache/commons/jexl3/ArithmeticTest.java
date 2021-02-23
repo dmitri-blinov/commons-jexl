@@ -143,6 +143,11 @@ public class ArithmeticTest extends JexlTestCase {
         asserter.assertExpression(maxl.toString() + " * " + maxl.toString() , maxl.multiply(maxl));
     }
 
+    @Test
+    public void testOverflowsBugs() throws Exception {
+        asserter.assertExpression("60L -1", Long.valueOf("59"));
+    }
+
     /**
      * test some simple mathematical calculations
      */
