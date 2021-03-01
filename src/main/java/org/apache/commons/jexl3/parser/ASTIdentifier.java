@@ -97,7 +97,7 @@ public class ASTIdentifier extends JexlNode {
     public boolean isShaded() {
         return isSet(SHADED, flags);
     }
-    
+
     public void setCaptured(final boolean f) {
         flags = set(CAPTURED, flags, f);
     }

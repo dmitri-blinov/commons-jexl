@@ -157,6 +157,5 @@ public final class ConstructorMethod implements JexlMethod {
     public final boolean isStatic() {
         return true;
     }
-
-    
+   
 }

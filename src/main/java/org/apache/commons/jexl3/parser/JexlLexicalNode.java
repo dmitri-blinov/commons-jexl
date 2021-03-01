@@ -24,6 +24,7 @@ import org.apache.commons.jexl3.internal.LexicalScope;
  */
 public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit {
     private LexicalScope locals = null;
+
     public JexlLexicalNode(final int id) {
         super(id);
     }
