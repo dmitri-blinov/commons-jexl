@@ -366,7 +366,7 @@ public class Engine extends JexlEngine {
      * @return the options
      */
     protected JexlOptions options(final ASTJexlScript script, final JexlContext context) {
-        final JexlOptions opts = options(context); 
+        final JexlOptions opts = options(context);
         if (opts != options) {
             // when feature lexical, try hard to run lexical
             if (scriptFeatures.isLexical()) {
@@ -382,7 +382,7 @@ public class Engine extends JexlEngine {
         }
         return opts;
     }
-    
+
     /**
      * Processes a script pragmas.
      * <p>Only called from options(...)
@@ -431,7 +431,7 @@ public class Engine extends JexlEngine {
             }
         }
     }
-    
+
     /**
      * Sets options from this engine options.
      * @param opts the options to set
@@ -490,7 +490,7 @@ public class Engine extends JexlEngine {
         return new ResumableInterpreter(this, opts, context, frame);
     }
 
-    
+
     @Override
     public Script createExpression(final JexlInfo info, final String expression) {
         return createScript(expressionFeatures, info, expression, null);
@@ -717,7 +717,7 @@ public class Engine extends JexlEngine {
         private JexlNode root = null;
         /**
          * Whether constant array-access is considered equivalent to dot-access;
-         * if so, > 1 means collect any constant (set,map,...) instead of just 
+         * if so, > 1 means collect any constant (set,map,...) instead of just
          * strings and numbers.
          */
         private int mode = 1;

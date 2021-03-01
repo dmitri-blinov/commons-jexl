@@ -437,10 +437,10 @@ public class JexlBuilder {
     public JexlBuilder collectAll(final boolean flag) {
         return collectMode(flag? 1 : 0);
     }
-    
+
     /**
      * Experimental collector mode setter.
-     * 
+     *
      * @param mode 0 or 1 as equivalents to false and true, other values are experimental
      * @return this builder
      * @since 3.2
@@ -448,18 +448,18 @@ public class JexlBuilder {
     public JexlBuilder collectMode(final int mode) {
         this.collectMode = mode;
         return this;
-    }  
-    
-    /** 
-     * @return true if variable collection follows strict syntactic rule 
+    }
+
+    /**
+     * @return true if variable collection follows strict syntactic rule
      * @since 3.2
      */
     public boolean collectAll() {
         return this.collectMode != 0;
     }
 
-    /** 
-     * @return 0 if variable collection follows strict syntactic rule 
+    /**
+     * @return 0 if variable collection follows strict syntactic rule
      * @since 3.2
      */
     public int collectMode() {

@@ -60,7 +60,7 @@ public class ScriptTest extends JexlTestCase {
         final JexlScript s = JEXL.createScript(code);
         Assert.assertNotNull(s);
     }
-    
+
     /**
      * Test creating a script from a string.
      */
@@ -86,11 +86,11 @@ public class ScriptTest extends JexlTestCase {
         Assert.assertNotNull("No result", result);
         Assert.assertEquals("Wrong result", new Integer(7), result);
     }
-  
+
     @Test
     public void testArgScriptFromFile() throws Exception {
         final File testScript = new File(TEST_ADD);
-        final JexlScript s = JEXL.createScript(testScript,new String[]{"x","y"});
+        final JexlScript s = JEXL.createScript(testScript,"x", "y");
         final JexlContext jc = new MapContext();
         jc.set("out", System.out);
         final Object result = s.execute(jc, 13, 29);
@@ -112,7 +112,7 @@ public class ScriptTest extends JexlTestCase {
     @Test
     public void testArgScriptFromURL() throws Exception {
         final URL testUrl = new File(TEST_ADD).toURI().toURL();
-        final JexlScript s = JEXL.createScript(testUrl,new String[]{"x","y"});
+        final JexlScript s = JEXL.createScript(testUrl,"x", "y");
         final JexlContext jc = new MapContext();
         jc.set("out", System.out);
         final Object result = s.execute(jc, 13, 29);
