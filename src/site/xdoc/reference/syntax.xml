@@ -367,7 +367,8 @@
                         <code>foo {bar : 10}</code> will set the <code>bar</code> property
                         of the <code>foo</code> Object to the <code>10</code>.
                         <code>arr1 {[0] : 10}</code> will set the first element of the
-                        of the <code>arr1</code> array to the <code>10</code>.</p>
+                        of the <code>arr1</code> array to the <code>10</code>.
+                        The result of the inline assignmen operator is the same object which properties are being set, not a new object</p>
                         <p>Properties can also be quoted as in <code>foo {'b a r' : 10}</code> and can be dynamic
                         back-quoted interpolation strings as in <code>cal {`${dd.year}-${dd.month}-${dd.day}` : '1990-01-01'}</code>.</p>
                         <p>Nested properties can also be assigned as in <code>foo {bar {quux: 10}}</code>.</p>
@@ -375,6 +376,9 @@
                         which assigns a value to the property only if property is null.</p>
                         <p>The equality assignment operator <code>foo {bar =: 10}</code> can be specified,
                         which assigns a value to the property only if property is not equal to assigned value.</p>
+                        <p>The conventional assignment, null assignment and equality assignment operators 
+                        <code>foo {bar = 10, quux ?= 20, baz := 30}</code> can be specified as a matter of coding style preferences,,
+                        which are syntactically equivalent to previously described ones.</p>
                     </td>
                 </tr>
                 <tr>

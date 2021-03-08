@@ -2298,17 +2298,17 @@ void InlineMemberAccess() #void : {}
 
 void InlinePropertyBlock() #void : {}
 {
-    LOOKAHEAD(InlinePropertyName() <COLON>) InlinePropertyEntry()
+    LOOKAHEAD(InlinePropertyName() ( <COLON> | <assign> ) ) InlinePropertyEntry()
     |
-    LOOKAHEAD(InlinePropertyName() <ELVIS>) InlinePropertyNullEntry()
+    LOOKAHEAD(InlinePropertyName() ( <ELVIS> | <null_assign> ) ) InlinePropertyNullEntry()
     |
-    LOOKAHEAD(InlinePropertyName() <EN_ASSIGN>) InlinePropertyNEEntry()
+    LOOKAHEAD(InlinePropertyName() ( <EN_ASSIGN> | <ne_assign> ) ) InlinePropertyNEEntry()
     |
-    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <COLON>) InlinePropertyArrayEntry()
+    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> ( <COLON> | <assign> ) ) InlinePropertyArrayEntry()
     |
-    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <ELVIS>) InlinePropertyArrayNullEntry()
+    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> ( <ELVIS> | <null_assign> ) ) InlinePropertyArrayNullEntry()
     |
-    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> <EN_ASSIGN>) InlinePropertyArrayNEEntry()
+    LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> ( <EN_ASSIGN> | <ne_assign> ) ) InlinePropertyArrayNEEntry()
     |
     ((LOOKAHEAD(<LBRACKET>) ArrayAccess() | Identifier()) (LOOKAHEAD(2) InlineMemberAccess() )* InlinePropertyAssignment()) #Reference()
 }
@@ -2324,30 +2324,30 @@ void InlinePropertyName() #void : {}
 
 void InlinePropertyEntry() : {}
 {
-    InlinePropertyName() <COLON> Expression()
+    InlinePropertyName() ( <COLON> | <assign> ) Expression()
 }
 
 void InlinePropertyNullEntry() : {}
 {
-    InlinePropertyName() <ELVIS> Expression()
+    InlinePropertyName() ( <ELVIS> | <null_assign> ) Expression()
 }
 
 void InlinePropertyNEEntry() : {}
 {
-    InlinePropertyName() <EN_ASSIGN> Expression()
+    InlinePropertyName() ( <EN_ASSIGN> | <ne_assign> ) Expression()
 }
 
 void InlinePropertyArrayEntry() : {}
 {
-    <LBRACKET> Expression() <RBRACKET> <COLON> Expression()
+    <LBRACKET> Expression() <RBRACKET> ( <COLON> | <assign> ) Expression()
 }
 
 void InlinePropertyArrayNullEntry() : {}
 {
-    <LBRACKET> Expression() <RBRACKET> <ELVIS> Expression()
+    <LBRACKET> Expression() <RBRACKET> ( <ELVIS> | <null_assign> ) Expression()
 }
 
 void InlinePropertyArrayNEEntry() : {}
 {
-    <LBRACKET> Expression() <RBRACKET> <EN_ASSIGN> Expression()
+    <LBRACKET> Expression() <RBRACKET> ( <EN_ASSIGN> | <ne_assign> ) Expression()
 }
