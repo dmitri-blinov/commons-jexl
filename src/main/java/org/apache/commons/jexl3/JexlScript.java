@@ -98,7 +98,7 @@ public interface JexlScript {
      * @return boolean
      * @since 3.2
      */
-    boolean isVarArgs();
+    default boolean isVarArgs() { return false; }
 
     /**
      * Gets this script unbound parameters.

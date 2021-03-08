@@ -47,4 +47,55 @@
         <method>java.lang.ClassLoader getClassLoader()</method>
         <to>java.lang.ClassLoader getClassLoader()</to>
     </difference>
+
+    <!-- 4.0 differences: Internal interfaces are not used as user implementation contracts -->
+
+    <difference>
+        <className>org/apache/commons/jexl3/JexlScript</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>boolean isVarArgs()</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/JexlEngine</className>
+        <differenceType>7013</differenceType> <!-- method added to abstract class that is not meant for the user to implement -->
+        <method>boolean isAssertions()</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/JexlEngine$Options</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>java.lang.Boolean isAssertions()</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/introspection/JexlMethod</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>boolean isStatic()</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/introspection/JexlMethod</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>java.lang.Class[] getParameterTypes()</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/introspection/JexlUberspect</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>org.apache.commons.jexl3.introspection.JexlMethod[] getConstructors(java.lang.Object)</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/introspection/JexlUberspect</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>org.apache.commons.jexl3.introspection.JexlMethod[] getMethods(java.lang.Object, java.lang.String)</method>
+    </difference>
+
+    <difference>
+        <className>org/apache/commons/jexl3/introspection/JexlUberspect</className>
+        <differenceType>7012</differenceType> <!-- method added to interface that is not meant for the user to implement -->
+        <method>java.util.Iterator getIndexedIterator(java.lang.Object)</method>
+    </difference>
+
 </differences>

@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.AbstractMap;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Optional;
@@ -317,6 +316,16 @@ public class JexlArithmetic {
      * Called by the interpreter when evaluating a literal set.
      *
      * @param size the number of elements in the set
+     * @return the set builder
+     */
+    public SetBuilder setBuilder(final int size) {
+        return setBuilder(size, false);
+    }
+
+    /**
+     * Called by the interpreter when evaluating a literal set.
+     *
+     * @param size the number of elements in the set
      * @param ordered whether the set is ordered
      * @return the set builder
      */
@@ -343,6 +352,16 @@ public class JexlArithmetic {
          * @return the map
          */
         Object create();
+    }
+
+    /**
+     * Called by the interpreter when evaluating a literal map.
+     *
+     * @param size the number of elements in the map
+     * @return the map builder
+     */
+    public MapBuilder mapBuilder(final int size) {
+        return mapBuilder(size, false);
     }
 
     /**
