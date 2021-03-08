@@ -505,9 +505,8 @@ public class Issues200Test extends JexlTestCase {
             if (i266 != null) {
                 i266.remove();
                 throw new JexlException.Continue(null, null);
-            } else {
-                throw new NoSuchElementException();
-            }
+            } 
+            throw new NoSuchElementException();
         }
     }
 

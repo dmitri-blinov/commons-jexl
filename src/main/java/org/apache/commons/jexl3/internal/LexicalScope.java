@@ -150,9 +150,8 @@ public class LexicalScope {
     public boolean hasSymbol(final int symbol) {
         if (symbol < LONGBITS) {
             return (symbols & (1L << symbol)) != 0L;
-        } else {
-            return moreSymbols != null && moreSymbols.get(symbol - LONGBITS);
         }
+        return moreSymbols != null && moreSymbols.get(symbol - LONGBITS);
     }
     /**
      * Sets a variable modifiers.
