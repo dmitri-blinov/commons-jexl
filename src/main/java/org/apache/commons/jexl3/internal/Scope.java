@@ -449,11 +449,11 @@ public final class Scope {
                 }
             }
             return new Frame(this, arguments, 0).assign(args);
-        } else if (returnType != null) {
-            return new Frame(this);
-        } else {
-            return null;
         }
+        if (returnType != null) {
+            return new Frame(this);
+        }
+        return null;
     }
 
     /**
@@ -528,19 +528,18 @@ public final class Scope {
      */
     protected String[] getParameters(final int bound) {
         final int unbound = parms - bound;
-        if (namedVariables != null && unbound > 0) {
-            final String[] pa = new String[unbound];
-            int p = 0;
-            for (final Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
-                final int argn = entry.getValue();
-                if (argn >= bound && argn < parms) {
-                    pa[p++] = entry.getKey();
-                }
-            }
-            return pa;
-        } else {
+        if ((namedVariables == null) || (unbound <= 0)) {
             return EMPTY_STRS;
         }
+        final String[] pa = new String[unbound];
+        int p = 0;
+        for (final Map.Entry<String, Integer> entry : namedVariables.entrySet()) {
+            final int argn = entry.getValue();
+            if (argn >= bound && argn < parms) {
+                pa[p++] = entry.getKey();
+            }
+        }
+        return pa;
     }
 
     /**
@@ -557,8 +556,7 @@ public final class Scope {
                 }
             }
             return locals.toArray(new String[locals.size()]);
-        } else {
-            return EMPTY_STRS;
-        }
+        } 
+        return EMPTY_STRS;
     }
 }

@@ -475,9 +475,8 @@ public abstract class JexlParser extends StringParser {
         if (!declareSymbol(symbol, var.getType(), var.isFinal(), var.isRequired())) {
             if (getFeatures().isLexical()) {
                 throw new JexlException(var, name + ": variable is already declared");
-            } else {
-                var.setRedefined(true);
             }
+            var.setRedefined(true);
         }
     }
 
