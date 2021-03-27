@@ -69,6 +69,7 @@ import org.apache.commons.jexl3.parser.ASTEnumerationNode;
 import org.apache.commons.jexl3.parser.ASTEnumerationReference;
 import org.apache.commons.jexl3.parser.ASTExpressionStatement;
 import org.apache.commons.jexl3.parser.ASTExtVar;
+import org.apache.commons.jexl3.parser.ASTFieldAccess;
 import org.apache.commons.jexl3.parser.ASTForStatement;
 import org.apache.commons.jexl3.parser.ASTForInitializationNode;
 import org.apache.commons.jexl3.parser.ASTForTerminationNode;
@@ -2818,6 +2819,15 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTFieldAccess node, final Object data) {
+        if (data == null) {
+            return null;
+        }
+        final Object id = node.getIdentifier();
+        return getField(data, id, node);
+    }
+
+    @Override
     protected Object visit(final ASTAttributeReference node, final Object data) {
         if (data == null) {
             return null;
@@ -2865,6 +2875,12 @@ public class Interpreter extends InterpreterBase {
                     break;
                 }
             } else if (objectNode instanceof ASTArrayAccess) {
+                antish = false;
+                if (object == null) {
+                    ptyNode = objectNode;
+                    break;
+                }
+            } else if (objectNode instanceof ASTFieldAccess) {
                 antish = false;
                 if (object == null) {
                     ptyNode = objectNode;
@@ -3417,7 +3433,7 @@ public class Interpreter extends InterpreterBase {
                             ? (ASTIdentifierAccess) child
                             : null;
                     // remain antish only if unsafe navigation
-                    if (aid != null && !aid.isSafe() && !aid.isExpression()) {
+                    if (aid != null && aid.isGlobalVar()) {
                         ant.append('.');
                         ant.append(aid.getName());
                     } else {
@@ -3434,12 +3450,13 @@ public class Interpreter extends InterpreterBase {
         // 2: last objectNode will perform assignement in all cases
         Object property = null;
         JexlNode propertyNode = left.jjtGetChild(last);
-        final ASTIdentifierAccess propertyId = propertyNode instanceof ASTIdentifierAccess
-                ? (ASTIdentifierAccess) propertyNode
-                : null;
-        if (propertyId != null) {
+        if (propertyNode instanceof ASTFieldAccess) {
+            final ASTIdentifierAccess propertyId = (ASTIdentifierAccess) propertyNode;
+            property = propertyId.getIdentifier();
+        } else if (propertyNode instanceof ASTIdentifierAccess) {
+            final ASTIdentifierAccess propertyId = (ASTIdentifierAccess) propertyNode;
             // deal with creating/assignining antish variable
-            if (antish && ant != null && object == null && !propertyId.isSafe() && !propertyId.isExpression()) {
+            if (antish && ant != null && object == null && propertyId.isGlobalVar()) {
                 if (last > 0) {
                     ant.append('.');
                 }
@@ -3474,11 +3491,15 @@ public class Interpreter extends InterpreterBase {
         // we can not *have* a null object though.
         if (object == null) {
             // no object, we fail
-            return unsolvableProperty(objectNode, "<null>.<?>", true, null);
+            return propertyNode instanceof ASTFieldAccess ?
+                unsolvableField(objectNode, "<null>.<?>", true, null) : 
+                unsolvableProperty(objectNode, "<null>.<?>", true, null);
         }
         // 3: one before last, assign
         if (assignop != null) {
-            Object self = getAttribute(object, property, propertyNode);
+            Object self = propertyNode instanceof ASTFieldAccess ? 
+                getField(object, property, propertyNode) :
+                getAttribute(object, property, propertyNode);
             value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
                 operators.tryAssignOverload(node, assignop, self, value);
             if (value == JexlOperator.ASSIGN) {
@@ -3486,10 +3507,13 @@ public class Interpreter extends InterpreterBase {
             }
         }
 
-        final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
-                                      ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
-
-        setAttribute(object, property, value, propertyNode, operator);
+        if (propertyNode != null && propertyNode instanceof ASTFieldAccess) {
+            setField(object, property, value, propertyNode);
+        } else {
+            final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
+                                          ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
+            setAttribute(object, property, value, propertyNode, operator);
+        }
         return value; // 4
     }
 

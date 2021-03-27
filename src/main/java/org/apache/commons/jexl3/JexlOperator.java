@@ -367,6 +367,20 @@ public enum JexlOperator {
     PROPERTY_SET(".=", "propertySet", 3),
 
     /**
+     * Field get operator as in: x.@y.
+     * <br><strong>Syntax:</strong> <code>x.@y</code>
+     * <br><strong>Method:</strong> <code>Object fieldGet(L x, R y);</code>.
+     */
+    FIELD_GET(".@", "fieldGet", 2),
+
+    /**
+     * Field set operator as in: x.@y = z.
+     * <br><strong>Syntax:</strong> <code>x.@y = z</code>
+     * <br><strong>Method:</strong> <code>void fieldSet(L x, R y, V z);</code>.
+     */
+    FIELD_SET(".@=", "fieldSet", 3),
+
+    /**
      * Array get operator as in: x[y].
      * <br><strong>Syntax:</strong> <code>x.y</code>
      * <br><strong>Method:</strong> <code>Object arrayGet(L x, R y);</code>.

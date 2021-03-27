@@ -115,7 +115,7 @@ public interface JexlUberspect {
     /**
      * A resolver types list tailored for POJOs, favors '.' over '[]'.
      */
-    List<PropertyResolver> POJO = Collections.unmodifiableList(Arrays.asList(
+    final List<PropertyResolver> POJO = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.PROPERTY,
             JexlResolver.MAP,
             JexlResolver.LIST,
@@ -127,13 +127,20 @@ public interface JexlUberspect {
     /**
      * A resolver types list tailored for Maps, favors '[]' over '.'.
      */
-    List<PropertyResolver> MAP = Collections.unmodifiableList(Arrays.asList(
+    final List<PropertyResolver> MAP = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.MAP,
             JexlResolver.LIST,
             JexlResolver.DUCK,
             JexlResolver.PROPERTY,
             JexlResolver.FIELD,
             JexlResolver.CONTAINER
+    ));
+
+    /**
+     * A resolver types list tailored for field access.
+     */
+    final List<PropertyResolver> FIELD = Collections.unmodifiableList(Arrays.asList(
+            JexlResolver.FIELD
     ));
 
     /**

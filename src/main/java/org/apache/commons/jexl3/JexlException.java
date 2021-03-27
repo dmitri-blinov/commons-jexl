@@ -705,6 +705,73 @@ public class JexlException extends RuntimeException {
     }
 
     /**
+     * Thrown when a field is unknown.
+     *
+     * @since 4.0
+     */
+    public static class Field extends JexlException {
+        /**
+         * Undefined variable flag.
+         */
+        private final boolean undefined;
+
+        /**
+         * Creates a new Field exception instance.
+         *
+         * @param node the offending ASTnode
+         * @param fld  the unknown field
+         * @param undef whether the variable is null or undefined
+         * @param cause the exception causing the error
+         */
+        public Field(final JexlNode node, final String fld, final boolean undef, final Throwable cause) {
+            super(node, fld, cause);
+            undefined = undef;
+        }
+
+        /**
+         * Whether the variable causing an error is undefined or evaluated as null.
+         *
+         * @return true if undefined, false otherwise
+         */
+        public boolean isUndefined() {
+            return undefined;
+        }
+
+        /**
+         * @return the field name
+         */
+        public String getField() {
+            return getDetail();
+        }
+
+        @Override
+        protected String detailedMessage() {
+            return (undefined? "undefined" : "null value") + " field '" + getField() + "'";
+        }
+    }
+
+    /**
+     * Generates a message for an unsolvable field error.
+     *
+     * @param node the node where the error occurred
+     * @param fld  the field
+     * @param undef whether the field is null or undefined
+     * @return the error message
+     */
+    public static String fieldError(final JexlNode node, final String fld, final boolean undef) {
+        final StringBuilder msg = errorAt(node);
+        if (undef) {
+            msg.append("unsolvable");
+        } else {
+            msg.append("null value");
+        }
+        msg.append(" field '");
+        msg.append(fld);
+        msg.append('\'');
+        return msg.toString();
+    }
+
+    /**
      * Thrown when a method or ctor is unknown, ambiguous or inaccessible.
      *
      * @since 3.0

@@ -1626,6 +1626,17 @@ public class JexlArithmetic {
     }
 
     /**
+     * Field get operator
+     *
+     * @param object the object to be derefenced
+     * @param key the field key
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object fieldGet(Object object, Object key) throws Exception {
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
      * Array get operator
      *
      * @param object the object to be derefenced
@@ -1655,6 +1666,18 @@ public class JexlArithmetic {
             ((JexlContext) object).set(toString(key), value);
             return null;
         }
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Field set operator
+     *
+     * @param object the object to be derefenced
+     * @param key the field key
+     * @param value the value to assign to property
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     */
+    public Object fieldSet(Object object, Object key, Object value) throws Exception {
         return JexlEngine.TRY_FAILED;
     }
 

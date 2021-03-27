@@ -531,6 +531,24 @@ public abstract class InterpreterBase extends ParserVisitor {
     }
 
     /**
+     * Triggered when a field can not be resolved.
+     * @param node  the node where the error originated from
+     * @param field the field node
+     * @param cause the cause if any
+     * @param undef whether the field is undefined or null
+     * @return throws JexlException if strict and not silent, null otherwise
+     */
+    protected Object unsolvableField(final JexlNode node, final String field, final boolean undef, final Throwable cause) {
+        if (isStrictEngine() && !node.isTernaryProtected()) {
+            throw new JexlException.Field(node, field, undef, cause);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug(JexlException.fieldError(node, field, undef));
+        }
+        return null;
+    }
+
+    /**
      * Checks whether a reference child node holds a local variable reference.
      * @param node  the reference node
      * @param which the child we are checking
@@ -1123,4 +1141,147 @@ public abstract class InterpreterBase extends ParserVisitor {
         final String attrStr = attribute != null ? attribute.toString() : null;
         unsolvableProperty(node, attrStr, true, xcause);
     }
+
+    /**
+     * Gets a field of an object.
+     *
+     * @param object    to retrieve value from
+     * @param field     the field of the object
+     * @param node      the node that evaluated as the object
+     * @return the attribute value
+     */
+    protected Object getField(final Object object, final Object attribute, final JexlNode node) {
+        if (object == null) {
+            throw new JexlException(node, "object is null");
+        }
+        cancelCheck(node);
+        final JexlOperator operator = JexlOperator.FIELD_GET;
+        Object result = operators.tryOverload(node, operator, object, attribute);
+        if (result != JexlEngine.TRY_FAILED) {
+            return result;
+        }
+        Exception xcause = null;
+        try {
+            // attempt to reuse last executor cached in volatile JexlNode.value
+            if (node != null && cache) {
+                final Object cached = node.jjtGetValue();
+                if (cached instanceof JexlPropertyGet) {
+                    final JexlPropertyGet vg = (JexlPropertyGet) cached;
+                    final Object value = vg.tryInvoke(object, attribute);
+                    if (!vg.tryFailed(value)) {
+                        return value;
+                    }
+                }
+            }
+
+            // attempt arithmetic implementation
+            result = arithmetic.fieldGet(object, attribute);
+            if (result != JexlEngine.TRY_FAILED) {
+                return result;
+            }
+
+            // resolve that field
+            final JexlPropertyGet vg = uberspect.getPropertyGet(JexlUberspect.FIELD, object, attribute);
+            if (vg != null) {
+                final Object value = vg.invoke(object);
+                // cache executor in volatile JexlNode.value
+                if (node != null && cache && vg.isCacheable()) {
+                    node.jjtSetValue(vg);
+                }
+                return value;
+            }
+        } catch (final Exception xany) {
+            xcause = xany;
+        }
+        // lets fail
+        if (node == null) {
+            // direct call
+            final String error = "unable to get object field"
+                    + ", class: " + object.getClass().getName()
+                    + ", field: " + attribute;
+            throw new UnsupportedOperationException(error, xcause);
+        }
+        final String attrStr = attribute != null ? attribute.toString() : null;
+        return unsolvableField(node, attrStr, true, xcause);
+    }
+
+    /**
+     * Sets a field of an object.
+     *
+     * @param object    to set the value to
+     * @param field     the field of the object
+     * @param right     the value to assign to the object's field
+     * @param node      the node that evaluated as the object
+     */
+    protected void setField(final Object object, final Object attribute, final Object right, final JexlNode node) {
+        cancelCheck(node);
+        Object value = right;
+        final JexlOperator operator = JexlOperator.FIELD_SET;
+        Object result = operators.tryOverload(node, operator, object, attribute, value);
+        if (result != JexlEngine.TRY_FAILED) {
+            return;
+        }
+        Exception xcause = null;
+        try {
+            // check if we need to typecast value first
+            Class type = object != null ? object.getClass() : null;
+            if (type != null && type.isArray()) {
+                type = arithmetic.getWrapperClass(type.getComponentType());
+                if (!type.isInstance(value)) {
+                    if (arithmetic.isStrict()) {
+                        value = arithmetic.implicitCast(type, value);
+                    } else {
+                        value = arithmetic.cast(type, value);
+                    }
+                }
+            }
+            // attempt to reuse last executor cached in volatile JexlNode.value
+            if (node != null && cache) {
+                final Object cached = node.jjtGetValue();
+                if (cached instanceof JexlPropertySet) {
+                    final JexlPropertySet setter = (JexlPropertySet) cached;
+                    final Object eval = setter.tryInvoke(object, attribute, value);
+                    if (!setter.tryFailed(eval)) {
+                        return;
+                    }
+                }
+            }
+            // attempt arithmetic implementation
+            result = arithmetic.fieldSet(object, attribute, value);
+            if (result != JexlEngine.TRY_FAILED) {
+                return;
+            }
+            JexlPropertySet vs = uberspect.getPropertySet(JexlUberspect.FIELD, object, attribute, value);
+            // if we can't find an exact match, narrow the value argument and try again
+            if (vs == null) {
+                // replace all numbers with the smallest type that will fit
+                final Object[] narrow = {value};
+                if (arithmetic.narrowArguments(narrow)) {
+                    vs = uberspect.getPropertySet(JexlUberspect.FIELD, object, attribute, narrow[0]);
+                }
+            }
+            if (vs != null) {
+                // cache executor in volatile JexlNode.value
+                vs.invoke(object, value);
+                if (node != null && cache && vs.isCacheable()) {
+                    node.jjtSetValue(vs);
+                }
+                return;
+            }
+        } catch (final Exception xany) {
+            xcause = xany;
+        }
+        // lets fail
+        if (node == null) {
+            // direct call
+            final String error = "unable to set object field"
+                    + ", class: " + object.getClass().getName()
+                    + ", field: " + attribute
+                    + ", argument: " + value.getClass().getSimpleName();
+            throw new UnsupportedOperationException(error, xcause);
+        }
+        final String attrStr = attribute != null ? attribute.toString() : null;
+        unsolvableField(node, attrStr, true, xcause);
+    }
+
 }

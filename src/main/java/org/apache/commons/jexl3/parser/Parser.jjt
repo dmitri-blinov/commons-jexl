@@ -185,6 +185,7 @@ TOKEN_MGR_DECLS : {
     | < COMMA : "," > { popQ(); } /* Revert state to default. */
     | < DOT : "." > { pushDot(); } /* Lexical state is now DOT_ID */
     | < QDOT : "?." > { pushDot(); } /* Lexical state is now DOT_ID */
+    | < DOTAT : ".@" > { pushDot(); } /* Lexical state is now DOT_ID */
     | < QLBRACKET : "?[" > { popDot(); } /* Revert state to default */
     | < ELLIPSIS : "..." | "\u2026">
     | < HBRACKET : "#[" >
@@ -2170,6 +2171,16 @@ void IdentifierAccess() #void :
     )
 }
 
+void FieldAccess() #void :
+{
+    Token t;
+}
+{
+    <DOTAT> (
+        t=dotName() { jjtThis.setIdentifier(t.image); } #FieldAccess
+    )
+}
+
 void ArrayAccess() : {}
 {
     <LBRACKET> Expression() ( <COMMA> Expression() )* <RBRACKET>
@@ -2273,6 +2284,8 @@ void MemberAccess() #void : {}
     LOOKAHEAD(<QLBRACKET>) ArrayAccessSafe()
     |
     LOOKAHEAD(<DOTP>) Pipe()
+    |
+    LOOKAHEAD(<DOTAT>) FieldAccess()
     |
     LOOKAHEAD(<DOT> | <QDOT>) IdentifierAccess()
     |
