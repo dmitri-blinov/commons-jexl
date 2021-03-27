@@ -78,6 +78,9 @@ import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedCollectionConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedMapConstructorNode;
+import org.apache.commons.jexl3.parser.ASTInlineFieldEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNEEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNullEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
@@ -1460,6 +1463,30 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTInlinePropertyNEEntry node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        builder.append(" =: ");
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTInlineFieldEntry node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        builder.append(" : ");
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTInlineFieldNullEntry node, Object data) {
+        accept(node.jjtGetChild(0), data);
+        builder.append(" ?: ");
+        accept(node.jjtGetChild(1), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(ASTInlineFieldNEEntry node, Object data) {
         accept(node.jjtGetChild(0), data);
         builder.append(" =: ");
         accept(node.jjtGetChild(1), data);

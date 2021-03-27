@@ -2307,10 +2307,18 @@ void InlineMemberAccess() #void : {}
     LOOKAHEAD(<LBRACKET>) ArrayAccess()
     |
     LOOKAHEAD(<DOT>) IdentifierAccess()
+    |
+    LOOKAHEAD(<DOTAT>) FieldAccess()
 }
 
 void InlinePropertyBlock() #void : {}
 {
+    LOOKAHEAD(InlineFieldName() ( <COLON> | <assign> ) ) InlineFieldEntry()
+    |
+    LOOKAHEAD(InlineFieldName() ( <ELVIS> | <null_assign> ) ) InlineFieldNullEntry()
+    |
+    LOOKAHEAD(InlineFieldName() ( <EN_ASSIGN> | <ne_assign> ) ) InlineFieldNEEntry()
+    |
     LOOKAHEAD(InlinePropertyName() ( <COLON> | <assign> ) ) InlinePropertyEntry()
     |
     LOOKAHEAD(InlinePropertyName() ( <ELVIS> | <null_assign> ) ) InlinePropertyNullEntry()
@@ -2326,6 +2334,11 @@ void InlinePropertyBlock() #void : {}
     ((LOOKAHEAD(<LBRACKET>) ArrayAccess() | Identifier()) (LOOKAHEAD(2) InlineMemberAccess() )* InlinePropertyAssignment()) #Reference()
 }
 
+void InlineFieldName() #void : {}
+{
+    AttributeReference()
+}
+
 void InlinePropertyName() #void : {}
 {
     Identifier()
@@ -2333,6 +2346,21 @@ void InlinePropertyName() #void : {}
     StringLiteral()
     |
     JxltLiteral()
+}
+
+void InlineFieldEntry() : {}
+{
+    InlineFieldName() ( <COLON> | <assign> ) Expression()
+}
+
+void InlineFieldNullEntry() : {}
+{
+    InlineFieldName() ( <ELVIS> | <null_assign> ) Expression()
+}
+
+void InlineFieldNEEntry() : {}
+{
+    InlineFieldName() ( <EN_ASSIGN> | <ne_assign> ) Expression()
 }
 
 void InlinePropertyEntry() : {}

@@ -90,6 +90,9 @@ import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedCollectionConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedMapConstructorNode;
+import org.apache.commons.jexl3.parser.ASTInlineFieldEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNEEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNullEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
@@ -2443,6 +2446,15 @@ public class Interpreter extends InterpreterBase {
 
                    setAttribute(data, name, value, p, JexlOperator.PROPERTY_SET);
 
+                } else if (p instanceof ASTInlineFieldEntry) {
+
+                   Object[] entry = (Object[]) p.jjtAccept(this, null);
+
+                   String name = String.valueOf(entry[0]);
+                   Object value = entry[1];
+
+                   setField(data, name, value, p);
+
                 } else if (p instanceof ASTInlinePropertyArrayEntry) {
 
                    Object[] entry = (Object[]) p.jjtAccept(this, null);
@@ -2467,6 +2479,33 @@ public class Interpreter extends InterpreterBase {
                       setAttribute(data, property, value, p, JexlOperator.PROPERTY_SET);
                    }
 
+                } else if (p instanceof ASTInlineFieldNullEntry) {
+
+                   ASTInlineFieldNullEntry entry = (ASTInlineFieldNullEntry) p;
+
+                   JexlNode name = entry.jjtGetChild(0);
+                   Object key = ((ASTAttributeReference) name).getName();
+                   String property = String.valueOf(key);
+
+                   Object value = getField(data, property, p);
+
+                   if (value == null) {
+                      value = entry.jjtAccept(this, null);
+                      setField(data, property, value, p);
+                   }
+
+                } else if (p instanceof ASTInlinePropertyArrayNullEntry) {
+
+                   ASTInlinePropertyArrayNullEntry entry = (ASTInlinePropertyArrayNullEntry) p;
+
+                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
+                   Object value = getAttribute(data, key, p);
+
+                   if (value == null) {
+                      value = entry.jjtAccept(this, null);
+                      setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
+                   }
+
                 } else if (p instanceof ASTInlinePropertyNEEntry) {
 
                    ASTInlinePropertyNEEntry entry = (ASTInlinePropertyNEEntry) p;
@@ -2486,16 +2525,23 @@ public class Interpreter extends InterpreterBase {
                       setAttribute(data, property, right, p, JexlOperator.PROPERTY_SET);
                    }
 
-                } else if (p instanceof ASTInlinePropertyArrayNullEntry) {
+                } else if (p instanceof ASTInlineFieldNEEntry) {
 
-                   ASTInlinePropertyArrayNullEntry entry = (ASTInlinePropertyArrayNullEntry) p;
+                   ASTInlineFieldNEEntry entry = (ASTInlineFieldNEEntry) p;
 
-                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
-                   Object value = getAttribute(data, key, p);
+                   JexlNode name = entry.jjtGetChild(0);
+                   Object key = ((ASTAttributeReference) name).getName();
+                   String property = String.valueOf(key);
 
-                   if (value == null) {
-                      value = entry.jjtAccept(this, null);
-                      setAttribute(data, key, value, p, JexlOperator.ARRAY_SET);
+                   Object value = getField(data, property, p);
+                   Object right = entry.jjtAccept(this, null);
+
+                   Object result = operators.tryOverload(entry, JexlOperator.EQ, value, right);
+                   boolean equals = (result != JexlEngine.TRY_FAILED)
+                              ? arithmetic.toBoolean(result)
+                              : arithmetic.equals(value, right);
+                   if (!equals) {
+                      setField(data, property, right, p);
                    }
 
                 } else if (p instanceof ASTInlinePropertyArrayNEEntry) {
@@ -2545,12 +2591,32 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTInlineFieldEntry node, final Object data) {
+        JexlNode name = node.jjtGetChild(0);
+
+        final Object key = ((ASTAttributeReference) name).getName();
+        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
+
+        return new Object[] {key, value};
+    }
+
+    @Override
     protected Object visit(final ASTInlinePropertyNullEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 
     @Override
+    protected Object visit(final ASTInlineFieldNullEntry node, final Object data) {
+        return node.jjtGetChild(1).jjtAccept(this, data);
+    }
+
+    @Override
     protected Object visit(final ASTInlinePropertyNEEntry node, final Object data) {
+        return node.jjtGetChild(1).jjtAccept(this, data);
+    }
+
+    @Override
+    protected Object visit(final ASTInlineFieldNEEntry node, final Object data) {
         return node.jjtGetChild(1).jjtAccept(this, data);
     }
 

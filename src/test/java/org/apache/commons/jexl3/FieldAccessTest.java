@@ -135,4 +135,58 @@ public class FieldAccessTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", "hello", x.v);
     }
 
+    @Test
+    public void inlinePropertySimple() throws Exception {
+        JexlScript e = JEXL.createScript("x { @y : '123456'}");
+        JexlContext jc = new MapContext();
+        FieldObject x = new FieldObject();
+        jc.set("x", x);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", x.y);
+    }
+
+    @Test
+    public void inlinePropertyNullSimple() throws Exception {
+        JexlScript e = JEXL.createScript("x { @y ?: '123456'}");
+        JexlContext jc = new MapContext();
+        FieldObject x = new FieldObject();
+        jc.set("x", x);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", x.y);
+    }
+
+    @Test
+    public void inlinePropertyNotNullSimple() throws Exception {
+        JexlScript e = JEXL.createScript("x { @y ?: '123456'}");
+        JexlContext jc = new MapContext();
+        FieldObject x = new FieldObject();
+        x.y = "Hello";
+        jc.set("x", x);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "Hello", x.y);
+    }
+
+    @Test
+    public void inlinePropertyNotEqualsSimple() throws Exception {
+        JexlScript e = JEXL.createScript("x { @y =: '123456'}");
+        JexlContext jc = new MapContext();
+        FieldObject x = new FieldObject();
+        jc.set("x", x);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", x.y);
+    }
+
+
+    @Test
+    public void inlinePropertyEqualsSimple() throws Exception {
+        JexlScript e = JEXL.createScript("x { @y =: '123456'}");
+        JexlContext jc = new MapContext();
+        String value = "123456";
+        FieldObject x = new FieldObject();
+        x.y = value;
+        jc.set("x", x);
+        Object o = e.execute(jc);
+        Assert.assertTrue("Result is not as expected", value == x.y);
+    }
+
 }

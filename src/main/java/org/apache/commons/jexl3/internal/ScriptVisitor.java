@@ -77,6 +77,9 @@ import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedCollectionConstructorNode;
 import org.apache.commons.jexl3.parser.ASTInitializedMapConstructorNode;
+import org.apache.commons.jexl3.parser.ASTInlineFieldEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNEEntry;
+import org.apache.commons.jexl3.parser.ASTInlineFieldNullEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
 import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
@@ -792,6 +795,21 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(final ASTInlinePropertyNEEntry node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTInlineFieldEntry node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTInlineFieldNullEntry node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTInlineFieldNEEntry node, final Object data) {
         return visitNode(node, data);
     }
 

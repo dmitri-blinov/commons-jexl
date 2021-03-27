@@ -266,6 +266,12 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTInlinePropertyNEEntry node, Object data);
 
+    protected abstract Object visit(ASTInlineFieldEntry node, Object data);
+
+    protected abstract Object visit(ASTInlineFieldNullEntry node, Object data);
+
+    protected abstract Object visit(ASTInlineFieldNEEntry node, Object data);
+
     protected abstract Object visit(ASTEmptyFunction node, Object data);
 
     protected abstract Object visit(ASTSizeFunction node, Object data);
