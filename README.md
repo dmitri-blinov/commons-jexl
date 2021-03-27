@@ -142,6 +142,8 @@ New features
 
 + Java-like text block `"""\nabcd"""` literal is introduced
 
++ Groovy-like `.@` field access operator is introduced
+
 + Groovy-like `!instanceof` operator is introduced
 
 + Groovy-like `?=` conditional assignment operator is introduced
