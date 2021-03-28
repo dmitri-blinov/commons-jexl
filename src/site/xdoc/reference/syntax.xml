@@ -454,10 +454,10 @@
                         <p>Stream operators allows to perform transformations of iterable objects into iterators or values.
                         Stream operator can be a projection operator, selection operator or pipe operator</p>
                         <p>Projection operator creates an iterator that yields values specified in the projection.
-                        Projection operator can be either an array projection operator <code>a.{@foo,@bar}</code> or a
-                        key-value projection operator <code>a.{@foo : @bar}</code>.
-                        The projection dimensions can be defined either as the properties of the object, <code>a.{@foo}</code>
-                        or as lambda expressions <code>a.{x - > {x.foo}}</code>.</p>
+                        Projection operator can be either an array projection operator <code>a.{@.foo,@.bar}</code> or a
+                        key-value projection operator <code>a.{@.foo : @.bar}</code>.
+                        The projection dimensions can be defined either as an expression, <code>a.{@.foo}</code>
+                        or as a lambda expression <code>a.{x - > {x.foo}}</code>.</p>
                         <p>Selection operator creates an iterator that yields only the values that satisfy the specified
                         selection condition <code>a.[x - > {x.foo.length() > 10])</code></p>
                         <p>Pipe operator evaluates a scalar value from iterable object <code>a.((result,value) -> {result + value})</code></p>
@@ -1507,12 +1507,12 @@
                 <tr>
                     <td>Array projection</td>
                     <td>
-                        An array projection operator <code>a.{@foo,@bar}</code> can define one or more projection dimensions.
-                        In case of only one defined dimension <code>a.[@foo]</code>, the projection operator creates an iterator
-                        that yields a single value on each iteration. In case of more than one defined dimension <code>a.{@foo,@bar,@quux}</code>,
+                        An array projection operator <code>a.{@.foo,@.bar}</code> can define one or more projection dimensions.
+                        In case of only one defined dimension <code>a.[@.foo]</code>, the projection operator creates an iterator
+                        that yields a single value on each iteration. In case of more than one defined dimension <code>a.{@.foo,@.bar,@.quux}</code>,
                         the projection operator creates an iterator that yields an array of the corresponding values.
-                        The projection expression can be either an attribute reference in the form of <code>@attr</code> or
-                        a defined function. The function in its basic form defines the projection rule takes one argument,
+                        The projection expression can be either a simple expression in the form of <code>@.attr</code> or
+                        a defined function. The function that defines the projection rule in its basic form takes one argument,
                         which accepts the current element of the iterable object. In extended form the projecting function can take two arguments
                         <code>(index,value) -> {index &lt; 10}</code> with the first argument <code>index</code> being the zero based index of the
                         current element of the iterable object, and the second <code>value</code> is the current element itself.
@@ -1522,7 +1522,7 @@
                     </td>
                     <td>Key-value projection</td>
                     <td>
-                        A key-value projection operator <code>a.{@foo:@bar}</code> creates an iterator
+                        A key-value projection operator <code>a.{@.foo:@.bar}</code> creates an iterator
                         that yields <code>Map.Entry</code> object with a key and a value. The projection expression definition
                         is the same as for array projection.
                     </td>

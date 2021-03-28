@@ -1429,17 +1429,7 @@ void MapProjection() #MapProjectionNode : {}
 
 void ProjectionExpression() #void : {}
 {
-    AttributeReference()
-    |
     ExpressionLambda()
-}
-
-void AttributeReference() :
-{
-    Token t;
-}
-{
-    t=<ANNOTATION> { jjtThis.setName(t.image); }
 }
 
 void IteratorExpression() #EnumerationNode : {}
@@ -2332,6 +2322,14 @@ void InlinePropertyBlock() #void : {}
     LOOKAHEAD(<LBRACKET> Expression() <RBRACKET> ( <EN_ASSIGN> | <ne_assign> ) ) InlinePropertyArrayNEEntry()
     |
     ((LOOKAHEAD(<LBRACKET>) ArrayAccess() | Identifier()) (LOOKAHEAD(2) InlineMemberAccess() )* InlinePropertyAssignment()) #Reference()
+}
+
+void AttributeReference() :
+{
+    Token t;
+}
+{
+    t=<ANNOTATION> { jjtThis.setName(t.image); }
 }
 
 void InlineFieldName() #void : {}

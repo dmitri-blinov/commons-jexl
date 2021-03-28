@@ -2898,8 +2898,7 @@ public class Interpreter extends InterpreterBase {
         if (data == null) {
             return null;
         }
-        Object id = node.getName();
-        return getAttribute(data, id, node);
+        return node.getName();
     }
 
     @Override
