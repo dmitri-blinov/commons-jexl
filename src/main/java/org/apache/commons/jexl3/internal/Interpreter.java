@@ -2483,8 +2483,7 @@ public class Interpreter extends InterpreterBase {
 
                    ASTInlineFieldNullEntry entry = (ASTInlineFieldNullEntry) p;
 
-                   JexlNode name = entry.jjtGetChild(0);
-                   Object key = ((ASTAttributeReference) name).getName();
+                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
                    String property = String.valueOf(key);
 
                    Object value = getField(data, property, p);
@@ -2529,8 +2528,7 @@ public class Interpreter extends InterpreterBase {
 
                    ASTInlineFieldNEEntry entry = (ASTInlineFieldNEEntry) p;
 
-                   JexlNode name = entry.jjtGetChild(0);
-                   Object key = ((ASTAttributeReference) name).getName();
+                   Object key = entry.jjtGetChild(0).jjtAccept(this, null);
                    String property = String.valueOf(key);
 
                    Object value = getField(data, property, p);
@@ -2594,7 +2592,7 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTInlineFieldEntry node, final Object data) {
         JexlNode name = node.jjtGetChild(0);
 
-        final Object key = ((ASTAttributeReference) name).getName();
+        final Object key = node.jjtGetChild(0).jjtAccept(this, data); 
         final Object value = node.jjtGetChild(1).jjtAccept(this, data);
 
         return new Object[] {key, value};
@@ -2895,9 +2893,6 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTAttributeReference node, final Object data) {
-        if (data == null) {
-            return null;
-        }
         return node.getName();
     }
 
