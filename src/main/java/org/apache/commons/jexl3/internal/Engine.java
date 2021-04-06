@@ -660,8 +660,8 @@ public class Engine extends JexlEngine {
      * @return the previous thread local context
      */
     protected JexlContext.ThreadLocal putThreadLocal(final JexlContext.ThreadLocal tls) {
-        final JexlContext.ThreadLocal local = CONTEXT.get();
-        CONTEXT.set(tls);
+        final JexlContext.ThreadLocal local = getThreadContext();
+        setThreadContext(tls);
         return local;
     }
 
