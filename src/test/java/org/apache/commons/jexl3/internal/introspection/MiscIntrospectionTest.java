@@ -79,21 +79,6 @@ public class MiscIntrospectionTest {
         }
     }
 
-    @Test
-    public void testArrayListWrapper() {
-        ArrayListWrapper alw ;
-        try {
-            new ArrayListWrapper(1);
-            Assert.fail("non-array wrap?");
-        } catch(IllegalArgumentException xil) {
-            Assert.assertNotNull(xil);
-        }
-        Integer[] ai = new Integer[]{1, 2};
-        alw = new ArrayListWrapper(ai);
-        Assert.assertEquals(1, alw.indexOf(2));
-        Assert.assertEquals(-1, alw.indexOf(null));
-    }
-
     public static class A {
         public int i;
         public A() {}
