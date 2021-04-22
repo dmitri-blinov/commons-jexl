@@ -56,6 +56,7 @@
         <checksyle.version>8.41.1</checksyle.version>
 
         <!-- override of Jacoco properties defined in CP52 -->
+        <commons.jacoco.version>0.8.6</commons.jacoco.version>
         <commons.jacoco.classRatio>0.95</commons.jacoco.classRatio>
         <commons.jacoco.instructionRatio>0.85</commons.jacoco.instructionRatio>
         <commons.jacoco.methodRatio>0.85</commons.jacoco.methodRatio>
@@ -190,6 +191,9 @@
                             <exclude>**/generated-sources/**/*</exclude>
                             <exclude>**/org/apache/commons/jexl3/parser/*.class</exclude>
                             <exclude>**/org/apache/commons/jexl3/**/*Test.class</exclude>
+                            <exclude>**/java/**/*</exclude>
+                            <exclude>**/javax/**/*</exclude>
+                            <exclude>**/com/sun/**/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -295,7 +299,6 @@
                 <artifactId>maven-changes-plugin</artifactId>
                 <version>2.12.1</version>
                 <configuration>
-                    <xmlPath>${basedir}/src/site/xdoc/changes.xml</xmlPath>
                     <issueLinkTemplatePerSystem>
                         <default>%URL%/%ISSUE%</default>
                     </issueLinkTemplatePerSystem>

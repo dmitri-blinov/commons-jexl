@@ -26,6 +26,9 @@
     </properties>
     <body>
         <release version="3.2">
+            <action dev="ggregory" type="update" due-to="Gary Gregory">
+                Bump actions/setup-java from v1.4.3 to v2 #160.
+            </action>
             <action dev="henrib" type="fix" issue="JEXL-344"  due-to="David Costanzo">
                 Don't fill stack trace for JexlExpression#Return (to improve performance)
             </action>
