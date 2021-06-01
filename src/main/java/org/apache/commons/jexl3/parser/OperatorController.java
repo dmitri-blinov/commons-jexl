@@ -188,4 +188,35 @@ class OperatorController extends ScriptVisitor {
     protected Object visit(final ASTNRNode node, final Object data) {
         return true;
     }
+
+    @Override
+    protected Object visit(final ASTShiftLeftNode node, final Object data) {
+        return true;
+    }
+
+    @Override
+    protected Object visit(final ASTShiftRightNode node, final Object data) {
+        return true;
+    }
+
+    @Override
+    protected Object visit(final ASTShiftRightUnsignedNode node, final Object data) {
+        return true;
+    }
+
+    @Override
+    protected Object visit(final ASTSetShlNode node, final Object data) {
+        return true;
+    }
+
+    @Override
+    protected Object visit(final ASTSetSarNode node, final Object data) {
+        return true;
+    }
+
+    @Override
+    protected Object visit(final ASTSetShrNode node, final Object data) {
+        return true;
+    }
+
 }
