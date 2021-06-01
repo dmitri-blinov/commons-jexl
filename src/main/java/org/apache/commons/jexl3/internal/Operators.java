@@ -358,7 +358,7 @@ public class Operators {
                 throw new JexlException(node, operator + " error", e);
             }
             // defaults to equal
-            return arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            return arithmetic.equals(left, right);
         } catch (final ArithmeticException xrt) {
             throw new JexlException(node, operator + " error", xrt);
         }
@@ -403,7 +403,7 @@ public class Operators {
                 throw new JexlException(node, operator + " error", e);
             }
             // defaults to equal
-            return arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+            return arithmetic.equals(left, right);
         } catch (final ArithmeticException xrt) {
             throw new JexlException(node, operator + " error", xrt);
         }
@@ -491,7 +491,7 @@ public class Operators {
                 }
             }
         }
-        return result instanceof Boolean ? (Boolean) result : true;
+        return !(result instanceof Boolean) || (Boolean) result;
     }
 
     /**

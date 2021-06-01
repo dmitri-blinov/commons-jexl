@@ -1175,13 +1175,15 @@ void ConditionalExpression() #void : {}
     ConditionalOrExpression()
     [ LOOKAHEAD(2) (
       <QMARK> TernaryExpression()
-    |
+      |
       <ELVIS> Expression() #ElvisNode(2)
     ) ]
 }
 
 void TernaryExpression() #void : {}
 {
+    LOOKAHEAD(<IDENTIFIER> <COLON>, { isVariable(getToken(1).image) || !isDeclaredNamespace(getToken(1).image) }) Identifier(true) <COLON> Expression() #TernaryNode(3)
+    |
     LOOKAHEAD(Expression() <COLON>) Expression() <COLON> Expression() #TernaryNode(3)
     |
     Expression() #TernaryNode(2)

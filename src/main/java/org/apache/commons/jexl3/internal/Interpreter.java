@@ -30,172 +30,7 @@ import org.apache.commons.jexl3.JxltEngine;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 
-import org.apache.commons.jexl3.parser.ASTAddNode;
-import org.apache.commons.jexl3.parser.ASTAndNode;
-import org.apache.commons.jexl3.parser.ASTAnnotatedStatement;
-import org.apache.commons.jexl3.parser.ASTAnnotation;
-import org.apache.commons.jexl3.parser.ASTArguments;
-import org.apache.commons.jexl3.parser.ASTArrayAccess;
-import org.apache.commons.jexl3.parser.ASTArrayAccessSafe;
-import org.apache.commons.jexl3.parser.ASTArrayConstructorNode;
-import org.apache.commons.jexl3.parser.ASTArrayLiteral;
-import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
-import org.apache.commons.jexl3.parser.ASTAssertStatement;
-import org.apache.commons.jexl3.parser.ASTAssignment;
-import org.apache.commons.jexl3.parser.ASTAttributeReference;
-import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
-import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
-import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
-import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
-import org.apache.commons.jexl3.parser.ASTBlock;
-import org.apache.commons.jexl3.parser.ASTBooleanLiteral;
-import org.apache.commons.jexl3.parser.ASTBreak;
-import org.apache.commons.jexl3.parser.ASTCastNode;
-import org.apache.commons.jexl3.parser.ASTCatchBlock;
-import org.apache.commons.jexl3.parser.ASTClassLiteral;
-import org.apache.commons.jexl3.parser.ASTConstructorNode;
-import org.apache.commons.jexl3.parser.ASTContinue;
-import org.apache.commons.jexl3.parser.ASTCurrentNode;
-import org.apache.commons.jexl3.parser.ASTDecrementNode;
-import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
-import org.apache.commons.jexl3.parser.ASTDivNode;
-import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
-import org.apache.commons.jexl3.parser.ASTEQNode;
-import org.apache.commons.jexl3.parser.ASTERNode;
-import org.apache.commons.jexl3.parser.ASTEWNode;
-import org.apache.commons.jexl3.parser.ASTElvisNode;
-import org.apache.commons.jexl3.parser.ASTEmptyFunction;
-import org.apache.commons.jexl3.parser.ASTEnumerationNode;
-import org.apache.commons.jexl3.parser.ASTEnumerationReference;
-import org.apache.commons.jexl3.parser.ASTExpressionStatement;
-import org.apache.commons.jexl3.parser.ASTExtVar;
-import org.apache.commons.jexl3.parser.ASTFieldAccess;
-import org.apache.commons.jexl3.parser.ASTForStatement;
-import org.apache.commons.jexl3.parser.ASTForInitializationNode;
-import org.apache.commons.jexl3.parser.ASTForTerminationNode;
-import org.apache.commons.jexl3.parser.ASTForIncrementNode;
-import org.apache.commons.jexl3.parser.ASTForeachStatement;
-import org.apache.commons.jexl3.parser.ASTForeachVar;
-import org.apache.commons.jexl3.parser.ASTFunctionNode;
-import org.apache.commons.jexl3.parser.ASTFunctionStatement;
-import org.apache.commons.jexl3.parser.ASTGENode;
-import org.apache.commons.jexl3.parser.ASTGTNode;
-import org.apache.commons.jexl3.parser.ASTIdentifier;
-import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
-import org.apache.commons.jexl3.parser.ASTIdentifierAccessJxlt;
-import org.apache.commons.jexl3.parser.ASTIncrementNode;
-import org.apache.commons.jexl3.parser.ASTIncrementPostfixNode;
-import org.apache.commons.jexl3.parser.ASTIndirectNode;
-import org.apache.commons.jexl3.parser.ASTInitialization;
-import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
-import org.apache.commons.jexl3.parser.ASTInitializedCollectionConstructorNode;
-import org.apache.commons.jexl3.parser.ASTInitializedMapConstructorNode;
-import org.apache.commons.jexl3.parser.ASTInlineFieldEntry;
-import org.apache.commons.jexl3.parser.ASTInlineFieldNEEntry;
-import org.apache.commons.jexl3.parser.ASTInlineFieldNullEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyAssignment;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNullEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyArrayNEEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyNEEntry;
-import org.apache.commons.jexl3.parser.ASTInlinePropertyNullEntry;
-import org.apache.commons.jexl3.parser.ASTInnerConstructorNode;
-import org.apache.commons.jexl3.parser.ASTIfStatement;
-import org.apache.commons.jexl3.parser.ASTIOFNode;
-import org.apache.commons.jexl3.parser.ASTISNode;
-import org.apache.commons.jexl3.parser.ASTJexlLambda;
-import org.apache.commons.jexl3.parser.ASTJexlScript;
-import org.apache.commons.jexl3.parser.ASTJxltLiteral;
-import org.apache.commons.jexl3.parser.ASTLENode;
-import org.apache.commons.jexl3.parser.ASTLTNode;
-import org.apache.commons.jexl3.parser.ASTMapEntry;
-import org.apache.commons.jexl3.parser.ASTMapEntryLiteral;
-import org.apache.commons.jexl3.parser.ASTMapEnumerationNode;
-import org.apache.commons.jexl3.parser.ASTMapLiteral;
-import org.apache.commons.jexl3.parser.ASTMapProjectionNode;
-import org.apache.commons.jexl3.parser.ASTMethodNode;
-import org.apache.commons.jexl3.parser.ASTMethodReference;
-import org.apache.commons.jexl3.parser.ASTModNode;
-import org.apache.commons.jexl3.parser.ASTMulNode;
-import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
-import org.apache.commons.jexl3.parser.ASTMultipleIdentifier;
-import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
-import org.apache.commons.jexl3.parser.ASTMultiVar;
-import org.apache.commons.jexl3.parser.ASTNEAssignment;
-import org.apache.commons.jexl3.parser.ASTNENode;
-import org.apache.commons.jexl3.parser.ASTNEWNode;
-import org.apache.commons.jexl3.parser.ASTNINode;
-import org.apache.commons.jexl3.parser.ASTNIOFNode;
-import org.apache.commons.jexl3.parser.ASTNRNode;
-import org.apache.commons.jexl3.parser.ASTNSWNode;
-import org.apache.commons.jexl3.parser.ASTNotNode;
-import org.apache.commons.jexl3.parser.ASTNullAssignment;
-import org.apache.commons.jexl3.parser.ASTNullLiteral;
-import org.apache.commons.jexl3.parser.ASTNullpNode;
-import org.apache.commons.jexl3.parser.ASTNumberLiteral;
-import org.apache.commons.jexl3.parser.ASTOrNode;
-import org.apache.commons.jexl3.parser.ASTPipeNode;
-import org.apache.commons.jexl3.parser.ASTPointerNode;
-import org.apache.commons.jexl3.parser.ASTProjectionNode;
-import org.apache.commons.jexl3.parser.ASTQualifiedConstructorNode;
-import org.apache.commons.jexl3.parser.ASTRangeNode;
-import org.apache.commons.jexl3.parser.ASTReference;
-import org.apache.commons.jexl3.parser.ASTEnclosedExpression;
-import org.apache.commons.jexl3.parser.ASTRegexLiteral;
-import org.apache.commons.jexl3.parser.ASTRemove;
-import org.apache.commons.jexl3.parser.ASTReturnStatement;
-import org.apache.commons.jexl3.parser.ASTSWNode;
-import org.apache.commons.jexl3.parser.ASTSelectionNode;
-import org.apache.commons.jexl3.parser.ASTSetAddNode;
-import org.apache.commons.jexl3.parser.ASTSetAndNode;
-import org.apache.commons.jexl3.parser.ASTSetDivNode;
-import org.apache.commons.jexl3.parser.ASTSetLiteral;
-import org.apache.commons.jexl3.parser.ASTSetModNode;
-import org.apache.commons.jexl3.parser.ASTSetMultNode;
-import org.apache.commons.jexl3.parser.ASTSetOperand;
-import org.apache.commons.jexl3.parser.ASTSetOrNode;
-import org.apache.commons.jexl3.parser.ASTSetSubNode;
-import org.apache.commons.jexl3.parser.ASTSetShlNode;
-import org.apache.commons.jexl3.parser.ASTSetSarNode;
-import org.apache.commons.jexl3.parser.ASTSetShrNode;
-import org.apache.commons.jexl3.parser.ASTSetXorNode;
-import org.apache.commons.jexl3.parser.ASTShiftLeftNode;
-import org.apache.commons.jexl3.parser.ASTShiftRightNode;
-import org.apache.commons.jexl3.parser.ASTShiftRightUnsignedNode;
-import org.apache.commons.jexl3.parser.ASTSimpleLambda;
-import org.apache.commons.jexl3.parser.ASTSizeFunction;
-import org.apache.commons.jexl3.parser.ASTStartCountNode;
-import org.apache.commons.jexl3.parser.ASTStopCountNode;
-import org.apache.commons.jexl3.parser.ASTStringLiteral;
-import org.apache.commons.jexl3.parser.ASTStringBuilderLiteral;
-import org.apache.commons.jexl3.parser.ASTSubNode;
-import org.apache.commons.jexl3.parser.ASTSwitchCaseLabel;
-import org.apache.commons.jexl3.parser.ASTSwitchExpression;
-import org.apache.commons.jexl3.parser.ASTSwitchExpressionCase;
-import org.apache.commons.jexl3.parser.ASTSwitchExpressionDefault;
-import org.apache.commons.jexl3.parser.ASTSwitchStatement;
-import org.apache.commons.jexl3.parser.ASTSwitchStatementCase;
-import org.apache.commons.jexl3.parser.ASTSwitchStatementDefault;
-import org.apache.commons.jexl3.parser.ASTSynchronizedStatement;
-import org.apache.commons.jexl3.parser.ASTTernaryNode;
-import org.apache.commons.jexl3.parser.ASTTextBlockLiteral;
-import org.apache.commons.jexl3.parser.ASTThisNode;
-import org.apache.commons.jexl3.parser.ASTThrowStatement;
-import org.apache.commons.jexl3.parser.ASTTryStatement;
-import org.apache.commons.jexl3.parser.ASTTryVar;
-import org.apache.commons.jexl3.parser.ASTTryWithResourceStatement;
-import org.apache.commons.jexl3.parser.ASTTryResource;
-import org.apache.commons.jexl3.parser.ASTTypeLiteral;
-import org.apache.commons.jexl3.parser.ASTUnaryMinusNode;
-import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
-import org.apache.commons.jexl3.parser.ASTUnderscoreLiteral;
-import org.apache.commons.jexl3.parser.ASTVar;
-import org.apache.commons.jexl3.parser.ASTVarStatement;
-import org.apache.commons.jexl3.parser.ASTWhileStatement;
-import org.apache.commons.jexl3.parser.ASTYieldStatement;
-import org.apache.commons.jexl3.parser.JexlNode;
-import org.apache.commons.jexl3.parser.Node;
+import org.apache.commons.jexl3.parser.*;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -600,8 +435,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                           : arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                           ? arithmetic.toBoolean(result)
+                           : arithmetic.equals(left, right);
                 } catch (ArithmeticException xrt) {
                     throw new JexlException(node, "== error", xrt);
                 }
@@ -611,8 +446,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                       : arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                       ? arithmetic.toBoolean(result)
+                       : arithmetic.equals(left, right);
             } catch (ArithmeticException xrt) {
                 throw new JexlException(node, "== error", xrt);
             }
@@ -628,8 +463,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
-                           : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
+                           ? !arithmetic.toBoolean(result)
+                           : !arithmetic.equals(left, right);
                 } catch (final ArithmeticException xrt) {
                     throw new JexlException(node, "!= error", xrt);
                 }
@@ -639,8 +474,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.EQ, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.FALSE : Boolean.TRUE
-                       : arithmetic.equals(left, right) ? Boolean.FALSE : Boolean.TRUE;
+                       ? !arithmetic.toBoolean(result)
+                       : !arithmetic.equals(left, right);
             } catch (final ArithmeticException xrt) {
                 JexlNode xnode = findNullOperand(xrt, node, left, right);
                 throw new JexlException(xnode, "!= error", xrt);
@@ -657,8 +492,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                           : arithmetic.greaterThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                           ? arithmetic.toBoolean(result)
+                           : arithmetic.greaterThanOrEqual(left, right);
                 } catch (ArithmeticException xrt) {
                     throw new JexlException(node, ">= error", xrt);
                 }
@@ -668,8 +503,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                       : arithmetic.greaterThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                       ? arithmetic.toBoolean(result) 
+                       : arithmetic.greaterThanOrEqual(left, right);
             } catch (ArithmeticException xrt) {
                 throw new JexlException(node, ">= error", xrt);
             }
@@ -685,8 +520,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                           : arithmetic.greaterThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                           ? arithmetic.toBoolean(result)
+                           : arithmetic.greaterThan(left, right);
                 } catch (ArithmeticException xrt) {
                     throw new JexlException(node, "> error", xrt);
                 }
@@ -696,8 +531,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                       : arithmetic.greaterThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                       ? arithmetic.toBoolean(result)
+                       : arithmetic.greaterThan(left, right);
             } catch (ArithmeticException xrt) {
                 throw new JexlException(node, "> error", xrt);
             }
@@ -713,8 +548,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                           : arithmetic.lessThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                           ? arithmetic.toBoolean(result)
+                           : arithmetic.lessThanOrEqual(left, right);
                 } catch (ArithmeticException xrt) {
                     throw new JexlException(node, "<= error", xrt);
                 }
@@ -724,8 +559,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                       : arithmetic.lessThanOrEqual(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                       ? arithmetic.toBoolean(result)
+                       : arithmetic.lessThanOrEqual(left, right);
             } catch (ArithmeticException xrt) {
                 throw new JexlException(node, "<= error", xrt);
             }
@@ -741,8 +576,8 @@ public class Interpreter extends InterpreterBase {
                 try {
                     Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
                     return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                           : arithmetic.lessThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                           ? arithmetic.toBoolean(result)
+                           : arithmetic.lessThan(left, right);
                 } catch (ArithmeticException xrt) {
                     throw new JexlException(node, "< error", xrt);
                 }
@@ -752,8 +587,8 @@ public class Interpreter extends InterpreterBase {
             try {
                 Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
                 return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) ? Boolean.TRUE : Boolean.FALSE
-                       : arithmetic.lessThan(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                       ? arithmetic.toBoolean(result)
+                       : arithmetic.lessThan(left, right);
             } catch (ArithmeticException xrt) {
                 throw new JexlException(node, "< error", xrt);
             }
@@ -766,11 +601,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.startsWith(node, "^=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+                return operators.startsWith(node, "^=", left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.startsWith(node, "^=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+            return operators.startsWith(node, "^=", left, right);
         }
     }
 
@@ -780,11 +615,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.startsWith(node, "^!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+                return !operators.startsWith(node, "^!", left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.startsWith(node, "^!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+            return !operators.startsWith(node, "^!", left, right);
         }
     }
 
@@ -794,11 +629,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.endsWith(node, "$=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+                return operators.endsWith(node, "$=", left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.endsWith(node, "$=", left, right) ? Boolean.TRUE : Boolean.FALSE;
+            return operators.endsWith(node, "$=", left, right);
         }
     }
 
@@ -808,11 +643,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.endsWith(node, "$!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+                return !operators.endsWith(node, "$!", left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.endsWith(node, "$!", left, right) ? Boolean.FALSE : Boolean.TRUE;
+            return !operators.endsWith(node, "$!", left, right);
         }
     }
 
@@ -822,11 +657,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.contains(node, "=~", right, left) ? Boolean.TRUE : Boolean.FALSE;
+                return operators.contains(node, "=~", right, left);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.contains(node, "=~", right, left) ? Boolean.TRUE : Boolean.FALSE;
+            return operators.contains(node, "=~", right, left);
         }
     }
 
@@ -836,11 +671,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.contains(node, "!~", right, left) ? Boolean.FALSE : Boolean.TRUE;
+                return !operators.contains(node, "!~", right, left);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.contains(node, "!~", right, left) ? Boolean.FALSE : Boolean.TRUE;
+            return !operators.contains(node, "!~", right, left);
         }
     }
 
@@ -3031,12 +2866,11 @@ public class Interpreter extends InterpreterBase {
                 }
                 final String aname = ant != null ? ant.toString() : "?";
                 final boolean defined = isVariableDefined(frame, block, aname);
-                if (defined && !arithmetic.isStrict()) {
+                // defined but null; arg of a strict operator?
+                if (defined && (!arithmetic.isStrict() || !node.jjtGetParent().isStrictOperator())) {
                     return null;
                 }
-                if (!defined || !(node.jjtGetParent() instanceof ASTExpressionStatement)) {
-                    return unsolvableVariable(node, aname, !defined);
-                }
+                return unsolvableVariable(node, aname, !defined);
             }
         }
         return object;

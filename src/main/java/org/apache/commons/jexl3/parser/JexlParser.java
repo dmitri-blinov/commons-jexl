@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.math.BigInteger;
 import java.math.BigDecimal;
+import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import static org.apache.commons.jexl3.parser.ParserConstants.EOF;
 import static org.apache.commons.jexl3.parser.ParserConstants.SEMICOL;
@@ -82,6 +85,10 @@ public abstract class JexlParser extends StringParser {
      * The list of imported classes.
      */
     protected static final Map<String, Class> classes = new WeakHashMap<String, Class> ();
+    /**
+     * The known namespaces.
+     */
+    protected Set<String> namespaces = null;
     /**
      * The current lexical block.
      */
@@ -147,6 +154,7 @@ public abstract class JexlParser extends StringParser {
         pragmas = null;
         branchScope = null;
         branchScopes.clear();
+        namespaces = null;
         blocks.clear();
         block = null;
     }
@@ -309,6 +317,10 @@ public abstract class JexlParser extends StringParser {
             walk = walk.jjtGetParent();
         }
         return false;
+    }
+
+    protected boolean isVariable(String name) {
+        return frame != null && frame.getSymbol(name) != null;
     }
 
     /**
@@ -481,6 +493,11 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * The prefix of a namespace pragma.
+     */
+    protected static final String PRAGMA_JEXLNS = "jexl.namespace.";
+
+    /**
      * Adds a pragma declaration.
      * @param key the pragma key
      * @param value the pragma value
@@ -492,7 +509,32 @@ public abstract class JexlParser extends StringParser {
         if (pragmas == null) {
             pragmas = new TreeMap<String, Object>();
         }
+        // declaring a namespace
+        Predicate<String> ns = getFeatures().namespaceTest();
+        if (ns != null && key.startsWith(PRAGMA_JEXLNS)) {
+            // jexl.namespace.***
+            final String nsname = key.substring(PRAGMA_JEXLNS.length());
+            if (nsname != null && !nsname.isEmpty()) {
+                if (namespaces == null) {
+                    namespaces = new HashSet<>();
+                }
+                namespaces.add(nsname);
+            }
+        }
         pragmas.put(key, value);
+    }
+
+    /**
+     * Checks whether a name identifies a declared namespace.
+     * @param name the name
+     * @return true if the name qualifies a namespace
+     */
+    protected boolean isDeclaredNamespace(String name) {
+        final Set<String> ns = namespaces;
+        if (ns != null && ns.contains(name)) {
+            return true;
+        }
+        return getFeatures().namespaceTest().test(name);
     }
 
     /**
