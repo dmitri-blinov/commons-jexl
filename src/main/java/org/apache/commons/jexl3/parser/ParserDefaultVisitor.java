@@ -14,35 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.jexl3.internal;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.apache.commons.jexl3.JexlArithmetic;
+package org.apache.commons.jexl3.parser;
 
 /**
- * Helper class to create map literals.
+ * This class only exists to prevent JJTree from generating it, since it
+ * expects {@link ParserVisitor} to be an interface, not an abstract class.
  */
-public class MapBuilder implements JexlArithmetic.MapBuilder {
-    /** The map being created. */
-    protected final Map<Object, Object> map;
-
-    /**
-     * Creates a new builder.
-     * @param size the expected map size
-     */
-    public MapBuilder(final int size, final boolean ordered) {
-        map = ordered ? new LinkedHashMap<Object, Object>(size) : new HashMap<Object, Object>(size);
-    }
-
-    @Override
-    public void put(final Object key, final Object value) {
-        map.put(key, value);
-    }
-
-    @Override
-    public Map<Object,Object> create() {
-        return map;
-    }
-}
+class ParserDefaultVisitor { }
