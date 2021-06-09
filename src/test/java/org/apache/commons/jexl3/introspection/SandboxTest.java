@@ -552,11 +552,12 @@ public class SandboxTest extends JexlTestCase {
 
     public static class Arithmetic350 extends JexlArithmetic {
         // cheat and keep the map builder around
-        MapBuilder mb = new org.apache.commons.jexl3.internal.MapBuilder(3);
+        MapBuilder mb = new org.apache.commons.jexl3.internal.MapBuilder(3, false);
         public Arithmetic350(boolean astrict) {
             super(astrict);
         }
-        public MapBuilder mapBuilder(final int size) {
+        @Override
+        public MapBuilder mapBuilder(final int size, final boolean ordered) {
             return mb;
         }
         Map<?,?> getLastMap() {
