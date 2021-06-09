@@ -3764,7 +3764,7 @@ public class Interpreter extends InterpreterBase {
                     functor = context.get(methodName);
                     isavar = functor != null;
                 }
-                // name is a variable, cant be cached
+                // name is a variable, can't be cached
                 cacheable &= !isavar;
             }
         } else if (functor instanceof ASTIdentifierAccess) {

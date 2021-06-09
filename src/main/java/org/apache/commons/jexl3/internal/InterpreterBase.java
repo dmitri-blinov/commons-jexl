@@ -269,7 +269,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                                 // not a class
                                 namespace = null;
                             }
-                        } // we know its a class
+                        } // we know it's a class
                     }
                 }
             }

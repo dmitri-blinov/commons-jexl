@@ -20,6 +20,7 @@ options
 {
    MULTI=true;
    STATIC=false;
+   JAVA_TEMPLATE_TYPE="modern";
    VISITOR=true;
    NODE_SCOPE_HOOK=true;
    NODE_CLASS="JexlNode";
@@ -63,15 +64,15 @@ public final class Parser extends JexlParser
             pragmas = null;
             frame = scope;
             branchScope = new BranchScope();
-            ReInit(new java.io.StringReader(jexlSrc));
+            ReInit(jexlSrc);
             ASTJexlScript script = jexlFeatures.supportsScript()? JexlScript(scope) : JexlExpression(scope);
             script.jjtSetValue(info.detach());
             script.setFeatures(jexlFeatures);
             script.setPragmas(pragmas != null
-                             ? Collections.<String,Object>unmodifiableMap(pragmas)
-                             : Collections.<String,Object>emptyMap());
+                             ? Collections.unmodifiableMap(pragmas)
+                             : Collections.emptyMap());
             return script;
-        } catch (TokenMgrError xtme) {
+        } catch (TokenMgrException xtme) {
             throw new JexlException.Tokenization(info, xtme).clean();
         } catch (ParseException xparse) {
             Token errortok = errorToken(jj_lastpos, jj_scanpos, token.next, token);
@@ -440,7 +441,7 @@ void Annotation() #Annotation :
     t=<ANNOTATION> (LOOKAHEAD(<LPAREN>) Arguments() )? { jjtThis.setName(t.image); }
 }
 
-void AnnotatedStatement() #AnnotatedStatement() : {}
+void AnnotatedStatement() #AnnotatedStatement : {}
 {
     (LOOKAHEAD(<ANNOTATION>) Annotation())+ (LOOKAHEAD({!getFeatures().isLexical()}) GenericStatement() | Statement())
 }
@@ -505,7 +506,7 @@ void StatementBranch() #void : {}
     LOOKAHEAD(1) Block() | LOOKAHEAD({!getFeatures().isLexical()}) GenericStatement() | Statement()
 }
 
-void LabelledStatementLookahead() #void() : {}
+void LabelledStatementLookahead() #void : {}
 {
     <IDENTIFIER> <COLON> ( <LCURLY> | <IF> | <FOR> | <WHILE> | <DO> | <SWITCH> | <SYNCHRONIZED> | <TRY>)
 }
@@ -575,7 +576,7 @@ void AssignmentIdentifier() #void : {}
     Identifier(true)
 }
 
-void FunctionStatementLookahead() #void() : {}
+void FunctionStatementLookahead() #void : {}
 {
     [ <STATIC> ] (<FUNCTION> | FunctionType()) FunctionVar() <LPAREN>
 }
@@ -589,7 +590,7 @@ void FunctionStatement() :
     [ <STATIC> { isStatic = true; } ] (<FUNCTION> | type = FunctionType()) FunctionVar() Function(isStatic, type)
 }
 
-Class FunctionType() #void() :
+Class FunctionType() #void :
 {
     Token t;
     Token te;
@@ -635,7 +636,7 @@ void FunctionVar() #Var :
     t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
 }
 
-void Function(boolean isStatic, Class type) #JexlLambda() :
+void Function(boolean isStatic, Class type) #JexlLambda :
 {
     pushFrame();
     pushUnit(jjtThis);
@@ -1103,23 +1104,29 @@ Object PragmaValue() #void :
 {
     Token v;
     StringBuilder sb;
+    Object result;
 }
 {
-    v=<INTEGER_LITERAL> { return NumberParser.parseInteger(v.image); }
+  (
+    v=<INTEGER_LITERAL> { result = NumberParser.parseInteger(v.image); }
     |
-    v=<FLOAT_LITERAL> { return NumberParser.parseDouble(v.image); }
+    v=<FLOAT_LITERAL> { result = NumberParser.parseDouble(v.image); }
     |
-    v=<STRING_LITERAL> { return Parser.buildString(v.image, true); }
+    v=<STRING_LITERAL> { result = Parser.buildString(v.image, true); }
     |
-    v=<IDENTIFIER> { sb = new StringBuilder(v.image); } ( LOOKAHEAD(<DOT>) <DOT> v=<DOT_IDENTIFIER> { sb.append(".").append(v.image); } )* { return sb.toString(); }
+    v=<IDENTIFIER> { sb = new StringBuilder(v.image); } ( LOOKAHEAD(<DOT>) <DOT> v=<DOT_IDENTIFIER> { sb.append(".").append(v.image); } )* { result = sb.toString(); }
     |
-    v=<TRUE> { return true; }
+    v=<TRUE> { result = true; }
     |
-    v=<FALSE> { return false; }
+    v=<FALSE> { result = false; }
     |
-    v=<NULL> { return null; }
+    v=<NULL> { result = null; }
     |
-    v=<NAN_LITERAL> { return Double.NaN; }
+    v=<NAN_LITERAL> { result = Double.NaN; }
+  )
+  {
+    return result;
+  }
 }
 
 
@@ -1182,8 +1189,6 @@ void ConditionalExpression() #void : {}
 
 void TernaryExpression() #void : {}
 {
-    LOOKAHEAD(<IDENTIFIER> <COLON>, { isVariable(getToken(1).image) || !isDeclaredNamespace(getToken(1).image) }) Identifier(true) <COLON> Expression() #TernaryNode(3)
-    |
     LOOKAHEAD(Expression() <COLON>) Expression() <COLON> Expression() #TernaryNode(3)
     |
     Expression() #TernaryNode(2)
@@ -1507,14 +1512,6 @@ void NamespaceIdentifier()  #NamespaceIdentifier :
     ns=<IDENTIFIER> <COLON> id=<IDENTIFIER> { jjtThis.setNamespace(ns.image, id.image); }
 }
 
-void StringIdentifier() #Identifier :
-{
-    Token t;
-}
-{
-    t=<STRING_LITERAL> { jjtThis.setSymbol(Parser.buildString(t.image, true));  }
-}
-
 void RemoveIdentifier() #Identifier :
 {
     Token t;
@@ -1695,7 +1692,7 @@ void ClassLiteral() :
 }
 }
 
-void TypeCastReference() #TypeLiteral() :
+void TypeCastReference() #TypeLiteral :
 {
     Token t;
     Token te;
@@ -1726,7 +1723,7 @@ void TypeCastReference() #TypeLiteral() :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
-void TypeReference() #TypeLiteral() :
+void TypeReference() #TypeLiteral :
 {
     Token t;
     Class value;
@@ -1748,7 +1745,7 @@ void TypeReference() #TypeLiteral() :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
 }
 
-void NewTypeReference(Class type) #TypeLiteral() :
+void NewTypeReference(Class type) #TypeLiteral :
 {
     Token t;
     Class value;
@@ -1764,7 +1761,7 @@ void ArrayTypeReference() #void : {}
     ObjectType()
 }
 
-void ObjectType() #TypeLiteral() :
+void ObjectType() #TypeLiteral :
 {
     Token t;
     Class value;
@@ -1773,7 +1770,7 @@ void ObjectType() #TypeLiteral() :
     t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
 }
 
-void InnerType() #Identifier() :
+void InnerType() #Identifier :
 {
     Token t;
 }
@@ -1781,7 +1778,7 @@ void InnerType() #Identifier() :
     t=<QUALIFIED_IDENTIFIER> { jjtThis.setSymbol(t.image); }
 }
 
-void PrimitiveType() #TypeLiteral() :
+void PrimitiveType() #TypeLiteral :
 {
     Token t;
 }
@@ -1803,7 +1800,7 @@ void PrimitiveType() #TypeLiteral() :
     t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
 }
 
-void EmptyListLiteral() #ArrayLiteral() : {}
+void EmptyListLiteral() #ArrayLiteral : {}
 {
     <LBRACKET> [ <ELLIPSIS> { jjtThis.setExtended(); } ] <RBRACKET>
 }
@@ -1815,7 +1812,7 @@ void ArrayLiteral() : {}
     <RBRACKET>
 }
 
-void ImmutableArrayLiteral() #ArrayLiteral() :
+void ImmutableArrayLiteral() #ArrayLiteral :
 {
     jjtThis.setImmutable();
 }
@@ -1823,7 +1820,7 @@ void ImmutableArrayLiteral() #ArrayLiteral() :
     <HBRACKET> [ Expression() (<COMMA> Expression() )* ] <RBRACKET>
 }
 
-void EmptyMapLiteral() #MapLiteral() : {}
+void EmptyMapLiteral() #MapLiteral : {}
 {
     <LCURLY> <COLON> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
 }
@@ -1852,7 +1849,7 @@ void MapEntryLiteral() : {}
     <LBRACKET> Expression() <COLON> Expression() <RBRACKET>
 }
 
-void ImmutableEmptyMapLiteral() #MapLiteral() :
+void ImmutableEmptyMapLiteral() #MapLiteral :
 {
     jjtThis.setImmutable();
 }
@@ -1860,7 +1857,7 @@ void ImmutableEmptyMapLiteral() #MapLiteral() :
     <HCURLY> <COLON> <RCURLY>
 }
 
-void ImmutableMapLiteral() #MapLiteral() :
+void ImmutableMapLiteral() #MapLiteral :
 {
     jjtThis.setImmutable();
 }
@@ -1907,7 +1904,9 @@ void Arguments() #Arguments : {}
 
 void FunctionCallLookahead() #void : {}
 {
-    <IDENTIFIER> ( <LPAREN> | <COLON> <IDENTIFIER> <LPAREN>)
+    LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isDeclaredNamespace(getToken(1), getToken(2)) }) <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>
+    |
+    LOOKAHEAD(2) <IDENTIFIER> <LPAREN>
     |
     <REGISTER> <LPAREN>
     |
@@ -1918,9 +1917,9 @@ void FunctionCallLookahead() #void : {}
 
 void FunctionCall() #void : {}
 {
-    LOOKAHEAD(2) Identifier(true) Arguments() #FunctionNode(2)
+    LOOKAHEAD(<IDENTIFIER> <LPAREN>) Identifier(true) Arguments() #FunctionNode(2)
     |
-    LOOKAHEAD(2) NamespaceIdentifier() Arguments() #FunctionNode(2)
+    LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isDeclaredNamespace(getToken(1), getToken(2)) }) NamespaceIdentifier() Arguments() #FunctionNode(2)
     |
     LOOKAHEAD(2) RemoveIdentifier() Arguments() #FunctionNode(2)
     |
@@ -1945,17 +1944,17 @@ void Constructor() #void : {}
     )
 }
 
-void ForNameConstructor() #ConstructorNode() : {}
+void ForNameConstructor() #ConstructorNode : {}
 {
     <LPAREN> Expression() ( <COMMA> Expression() )* <RPAREN>
 }
 
-void QualifiedConstructor() #QualifiedConstructorNode() : {}
+void QualifiedConstructor() #QualifiedConstructorNode : {}
 {
     NewTypeReference(null) Arguments()
 }
 
-void ArrayConstructor() #ArrayConstructorNode() : {}
+void ArrayConstructor() #ArrayConstructorNode : {}
 {
     ArrayTypeReference() (LOOKAHEAD(2) ArrayQualifiedDimension())+ (LOOKAHEAD(2) ArrayOpenDimension())*
 }
@@ -1970,27 +1969,27 @@ void ArrayOpenDimension() : {}
     <LBRACKET> <RBRACKET>
 }
 
-void InitializedArrayConstructor() #InitializedArrayConstructorNode() : {}
+void InitializedArrayConstructor() #InitializedArrayConstructorNode : {}
 {
     ArrayTypeReference() <LBRACKET> <RBRACKET> InitializedCollectionLiteral()
 }
 
-void InitializedCollectionConstructor() #InitializedCollectionConstructorNode() : {}
+void InitializedCollectionConstructor() #InitializedCollectionConstructorNode : {}
 {
     NewTypeReference(Collection.class) InitializedCollectionLiteral()
 }
 
-void InitializedMapConstructor() #InitializedMapConstructorNode() : {}
+void InitializedMapConstructor() #InitializedMapConstructorNode : {}
 {
     NewTypeReference(Map.class) InitializedMapLiteral()
 }
 
-void InitializedCollectionLiteral() #void() : {}
+void InitializedCollectionLiteral() #void : {}
 {
     <LCURLY> [ Expression() ( <COMMA> Expression() )* ] <RCURLY>
 }
 
-void InitializedMapLiteral() #void() : {}
+void InitializedMapLiteral() #void : {}
 {
     <LCURLY> [ MapElement() ( <COMMA> MapElement() )* ] <RCURLY>
 }
@@ -2080,7 +2079,7 @@ void Parameters() #void : {}
     <RPAREN>
 }
 
-void LambdaLookahead() #void() : {}
+void LambdaLookahead() #void : {}
 {
     [ <STATIC> ] 
     (
@@ -2094,7 +2093,7 @@ void LambdaLookahead() #void() : {}
     Parameter() ( <LAMBDA> | <LAMBDAE> )
 }
 
-void Lambda() #JexlLambda() :
+void Lambda() #JexlLambda :
 {
     pushFrame();
     pushUnit(jjtThis);
