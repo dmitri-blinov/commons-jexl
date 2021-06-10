@@ -137,4 +137,34 @@ public class SwitchTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 1, o);
     }
 
+    @Test
+    public void testStringCase() throws Exception {
+        JexlScript e = JEXL.createScript("switch (x) {case 'abs' : return 1; default: return 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", "abs");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+
+        e = JEXL.createScript("switch (x) {case \"\"\"\nabs\"\"\" : return 1; default: return 0}");
+    }
+
+    @Test
+    public void testTextBlockCase() throws Exception {
+        JexlScript e = JEXL.createScript("switch (x) {case \"\"\"\nabs\"\"\" : return 1; default: return 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", "abs");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
+    @Test
+    public void testInterpolatedStringCase() throws Exception {
+        JexlScript e = JEXL.createScript("switch (x) {case `a${y}s` : return 1; default: return 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", "abs");
+        jc.set("y", "b");
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
 }

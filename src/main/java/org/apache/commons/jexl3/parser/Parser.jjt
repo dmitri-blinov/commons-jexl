@@ -1488,6 +1488,10 @@ void SwitchCaseLiteral() #void : {}
 {
     IntegerLiteral()
     |
+    JxltLiteral()
+    |
+    TextBlockLiteral()
+    |
     StringLiteral()
     |
     NullLiteral()
