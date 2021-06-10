@@ -128,4 +128,13 @@ public class SwitchTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 1, o);
     }
 
+    @Test
+    public void testNullCase() throws Exception {
+        JexlScript e = JEXL.createScript("switch (x) {case null : return 1; default: return 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", null);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
 }

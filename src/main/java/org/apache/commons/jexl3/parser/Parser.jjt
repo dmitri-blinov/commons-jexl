@@ -1481,7 +1481,16 @@ void SwitchExpressionCase() : {}
 
 void SwitchCaseLabel() : {}
 {
-    (Literal() | Identifier()) (<COMMA> (Literal() | Identifier()))*
+    (SwitchCaseLiteral() | Identifier()) (<COMMA> (SwitchCaseLiteral() | Identifier()))*
+}
+
+void SwitchCaseLiteral() #void : {}
+{
+    IntegerLiteral()
+    |
+    StringLiteral()
+    |
+    NullLiteral()
 }
 
 void SwitchExpressionDefault() : {}
