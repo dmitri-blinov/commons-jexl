@@ -3895,10 +3895,8 @@ public class Interpreter extends InterpreterBase {
                     break;
                 }
             }
-            // we have either evaluated and returned or no method was found
-            return node.isSafeLhs(isSafe())
-                    ? null
-                    : unsolvableMethod(node, methodName, argv);
+        } catch (JexlException.Method xmethod) {
+            // ignore and handle at end; treat as an inner discover that fails
         } catch (final JexlException.TryFailed xany) {
             throw invocationException(node, methodName, xany.getCause());
         } catch (final JexlException xthru) {
@@ -4151,6 +4149,10 @@ public class Interpreter extends InterpreterBase {
             final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
+        // we have either evaluated and returned or no method was found
+        return node.isSafeLhs(isSafe())
+                ? null
+                : unsolvableMethod(node, methodName, argv);
     }
 
     @Override
