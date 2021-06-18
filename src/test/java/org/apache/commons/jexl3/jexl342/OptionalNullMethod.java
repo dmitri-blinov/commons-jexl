@@ -77,4 +77,15 @@ public class OptionalNullMethod implements JexlMethod {
     public Class<?> getReturnType() {
         return delegate != null ? delegate.getReturnType() : null;
     }
+
+    @Override
+    public final Class<?>[] getParameterTypes() {
+        return delegate != null ? delegate.getParameterTypes() : null;
+    }
+
+    @Override
+    public boolean isStatic() {
+        return false;
+    }
+
 }

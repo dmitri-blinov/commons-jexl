@@ -191,6 +191,11 @@ public class ReferenceUberspect implements JexlUberspect {
     }
 
     @Override
+    public JexlMethod[] getConstructors(Object ctorHandle) {
+        return uberspect.getConstructors(ctorHandle);
+    }
+
+    @Override
     public JexlMethod getMethod(Object ref, String method, Object... args) {
         // is this is a reference of some kind?
         ReferenceHandler handler = discoverHandler(ref);
@@ -212,6 +217,11 @@ public class ReferenceUberspect implements JexlUberspect {
             jexlMethod = new OptionalNullMethod(uberspect, method);
         }
         return new ReferenceMethodExecutor(handler, jexlMethod);
+    }
+
+    @Override
+    public JexlMethod[] getMethods(final Object obj, final String method) {
+        return uberspect.getMethods(obj, method);
     }
 
     @Override
@@ -294,6 +304,11 @@ public class ReferenceUberspect implements JexlUberspect {
             return Collections.emptyIterator();
         }
         return uberspect.getIterator(obj);
+    }
+
+    @Override
+    public Iterator<?> getIndexedIterator(final Object obj) {
+        return getIterator(obj);
     }
 
     @Override

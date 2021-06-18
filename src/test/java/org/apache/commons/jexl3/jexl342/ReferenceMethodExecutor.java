@@ -82,6 +82,17 @@ public class ReferenceMethodExecutor implements JexlMethod {
 
     @Override
     public Class<?> getReturnType() {
-        return method != null?  method.getReturnType() : null;
+        return method != null ? method.getReturnType() : null;
     }
+
+    @Override
+    public final Class<?>[] getParameterTypes() {
+        return method != null ? method.getParameterTypes() : null;
+    }
+
+    @Override
+    public boolean isStatic() {
+        return method != null && method.isStatic();
+    }
+
 }

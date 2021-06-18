@@ -3904,6 +3904,10 @@ public class Interpreter extends InterpreterBase {
         } catch (final Exception xany) {
             throw invocationException(node, methodName, xany);
         }
+        // we have either evaluated and returned or no method was found
+        return node.isSafeLhs(isSafe())
+                ? null
+                : unsolvableMethod(node, methodName, argv);
     }
 
     @Override
@@ -4149,10 +4153,6 @@ public class Interpreter extends InterpreterBase {
             final String tstr = target != null ? target.toString() : "?";
             throw invocationException(node, tstr, xany);
         }
-        // we have either evaluated and returned or no method was found
-        return node.isSafeLhs(isSafe())
-                ? null
-                : unsolvableMethod(node, methodName, argv);
     }
 
     @Override
