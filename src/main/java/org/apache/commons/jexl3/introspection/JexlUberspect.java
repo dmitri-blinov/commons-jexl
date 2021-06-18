@@ -115,7 +115,7 @@ public interface JexlUberspect {
     /**
      * A resolver types list tailored for POJOs, favors '.' over '[]'.
      */
-    final List<PropertyResolver> POJO = Collections.unmodifiableList(Arrays.asList(
+    static final List<PropertyResolver> POJO = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.PROPERTY,
             JexlResolver.MAP,
             JexlResolver.LIST,
@@ -124,10 +124,11 @@ public interface JexlUberspect {
             JexlResolver.CONTAINER
     ));
 
+
     /**
      * A resolver types list tailored for Maps, favors '[]' over '.'.
      */
-    final List<PropertyResolver> MAP = Collections.unmodifiableList(Arrays.asList(
+    static final List<PropertyResolver> MAP = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.MAP,
             JexlResolver.LIST,
             JexlResolver.DUCK,
@@ -139,7 +140,7 @@ public interface JexlUberspect {
     /**
      * A resolver types list tailored for field access.
      */
-    final List<PropertyResolver> FIELD = Collections.unmodifiableList(Arrays.asList(
+    static final List<PropertyResolver> FIELD = Collections.unmodifiableList(Arrays.asList(
             JexlResolver.FIELD
     ));
 
@@ -171,7 +172,7 @@ public interface JexlUberspect {
      * If the operator is '[]' or if the operator is null and the object is a map, use the MAP list of resolvers;
      * Other cases use the POJO list of resolvers.
      */
-    ResolverStrategy JEXL_STRATEGY = (op, obj) -> {
+    static final ResolverStrategy JEXL_STRATEGY = (op, obj) -> {
         if (op == JexlOperator.ARRAY_GET) {
             return MAP;
         }
@@ -190,7 +191,7 @@ public interface JexlUberspect {
      * <p>If the operator is '[]' or if the object is a map, use the MAP list of resolvers.
      * Otherwise, use the POJO list of resolvers.</p>
      */
-    ResolverStrategy MAP_STRATEGY = (op, obj) -> {
+    static final ResolverStrategy MAP_STRATEGY = (op, obj) -> {
         if (op == JexlOperator.ARRAY_GET) {
             return MAP;
         }
