@@ -172,7 +172,7 @@ New features
 
 + New iterator selection `a.[@.color == 'red']` operator is introduced
 
-+ New iterator projection `a.{@qty,@price}` operator is introduced
++ New iterator projection `a.{@.qty,@.price}` operator is introduced
 
 + New pipe `foo.(x -> {x + 1})` operator is introduced
 
