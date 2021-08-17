@@ -51,7 +51,7 @@ var x = [...]; for (var i : items) if (i.color == 'red') x += i.price;
 one can write
 
 ```
-var x = [...{items.[@.color == 'red'].{@price}}]
+var x = [...{items.[@.color == 'red'].{@.price}}]
 ```
 
 There are also some under-the-hood performance and memory usage improvements.
