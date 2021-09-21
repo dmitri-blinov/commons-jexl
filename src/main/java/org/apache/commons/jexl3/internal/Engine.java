@@ -562,9 +562,6 @@ public class Engine extends JexlEngine {
 
     @Override
     public void setProperty(JexlContext context, final Object bean, final String expr, final Object value) {
-        if (context == null) {
-            context = EMPTY_CONTEXT;
-        }
         // synthesize expr using register
         String src = trimSource(expr);
         src = "#0" + (src.charAt(0) == '[' ? "" : ".") + src + "=" + "#1";
@@ -573,7 +570,7 @@ public class Engine extends JexlEngine {
             final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean, value);
-            final Interpreter interpreter = createInterpreter(context, frame, options);
+            final Interpreter interpreter = createInterpreter(context != null? context : EMPTY_CONTEXT, frame, options);
             interpreter.visitLexicalNode(node, null);
         } catch (final JexlException xjexl) {
             if (silent) {

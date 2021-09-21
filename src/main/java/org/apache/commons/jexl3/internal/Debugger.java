@@ -1184,7 +1184,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(final ASTJexlScript node, final Object data) {
+    protected Object visit(final ASTJexlScript node, final Object arg) {
+        Object data = arg;
         // dump pragmas
         Map<String, Object> pragmas = node.getPragmas();
         if (pragmas != null) {
@@ -2202,7 +2203,6 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
         return data;
     }
-
     @Override
     protected Object visit(ASTProjectionNode node, Object data) {
         int num = node.jjtGetNumChildren();
@@ -2251,5 +2251,4 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         builder.append(')');
         return data;
     }
-
 }
