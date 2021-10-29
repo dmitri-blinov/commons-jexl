@@ -715,7 +715,7 @@ ASTTryWithResourceStatement TryWithResourceStatement() :
     branchScope.yieldReturnCount -= 1;
 }
 {
-    <TRY> <LPAREN> TryResource() <RPAREN> Block()
+    <TRY> <LPAREN> TryResource() <RPAREN> ( LOOKAHEAD(InlinePropertyAssignment()) InlinePropertyAssignment() | Block())
     {
       popUnit(jjtThis);
     }

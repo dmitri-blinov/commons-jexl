@@ -1745,7 +1745,8 @@ public class Interpreter extends InterpreterBase {
                 }
                 try (ResourceManager rm = new ResourceManager(r)) {
                     // execute try block
-                    result = node.jjtGetChild(1).jjtAccept(this, data);
+                    JexlNode stmt = node.jjtGetChild(1);
+                    result = stmt instanceof ASTInlinePropertyAssignment ? stmt.jjtAccept(this, r) : stmt.jjtAccept(this, data);
                 }
             } finally {
                 // restore lexical frame

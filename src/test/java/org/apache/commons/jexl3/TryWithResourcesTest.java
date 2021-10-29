@@ -42,9 +42,10 @@ public class TryWithResourcesTest extends JexlTestCase {
     public void testLastValue() throws Exception {
         JexlScript e = JEXL.createScript("try (r) {}");
         JexlContext jc = new MapContext();
-        jc.set("r", new StringReader("foo"));
+        Object r = new StringReader("foo");
+        jc.set("r", r);
         Object o = e.execute(jc);
-        Assert.assertEquals("Result is not last evaluated expression", null, o);
+        Assert.assertEquals("Result is not last evaluated expression", r, o);
     }
 
     @Test
@@ -292,6 +293,41 @@ public class TryWithResourcesTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("try (StringWriter r = new StringWriter()) { r.write('World'); return r.toString()}");
         Object o = e.execute(jc);
         Assert.assertEquals("World", o);
+    }
+
+    public class TestResource implements AutoCloseable {
+        protected int x;
+        protected int y;
+
+        public int getX() {
+           return x;
+        }
+
+        public void setX(int val) {
+           x = val;
+        }
+
+        public int getY() {
+           return y;
+        }
+
+        public void setY(int val) {
+           y = val;
+        }
+
+        public void close() {
+        }
+    }
+
+    @Test
+    public void testInlinePropertyAssignment() throws Exception {
+        JexlContext jc = new MapContext();
+        TestResource r = new TestResource();
+        jc.set("r", r);
+
+        JexlScript e = JEXL.createScript("try (r) {x : 10, y : 20}");
+        Object o = e.execute(jc);
+        Assert.assertEquals(r.getX(), 10);
     }
 
 }

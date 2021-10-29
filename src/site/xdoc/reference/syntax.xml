@@ -1820,6 +1820,12 @@
                               return 42/0;
                             } </code>
                         </p>
+
+                        <p>The syntax with inline property assignment is also supported:
+                        <code>try (e = lock()) {
+                              x : 10, y : 20
+                            } </code>
+                        </p>
                     </td>
                 </tr>
                 <tr>
