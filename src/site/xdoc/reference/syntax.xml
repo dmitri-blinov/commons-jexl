@@ -397,9 +397,6 @@
                         which assigns a value to the target property or field only if it is null.</p>
                         <p>The equality assignment operator <code>foo {bar =: 10}</code> can be specified,
                         which assigns a value to the target property or field only if it is not equal to the assigned value.</p>
-                        <p>The conventional assignment, null assignment and equality assignment operators 
-                        <code>foo {bar = 10, quux ?= 20, baz := 30}</code> can be specified as a matter of coding style preferences,
-                        which are syntactically equivalent to previously described ones.</p>
                     </td>
                 </tr>
                 <tr>

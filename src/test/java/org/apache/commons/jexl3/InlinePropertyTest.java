@@ -261,31 +261,4 @@ public class InlinePropertyTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", "123456", o);
     }
 
-    @Test
-    public void inlinePropertyAssignSimple() throws Exception {
-        JexlScript e = JEXL.createScript("addr { PostalCode = '123456'}; addr.PostalCode");
-        JexlContext jc = new MapContext();
-        jc.set("addr", new Address());
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not as expected", "123456", o);
-    }
-
-    @Test
-    public void inlinePropertyNullAssignSimple() throws Exception {
-        JexlScript e = JEXL.createScript("addr { PostalCode ?= '123456'}; addr.PostalCode");
-        JexlContext jc = new MapContext();
-        jc.set("addr", new Address());
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not as expected", "123456", o);
-    }
-
-    @Test
-    public void inlinePropertyNotEqualsAssignSimple() throws Exception {
-        JexlScript e = JEXL.createScript("addr { PostalCode := '123456'}; addr.PostalCode");
-        JexlContext jc = new MapContext();
-        jc.set("addr", new Address());
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not as expected", "123456", o);
-    }
-
 }
