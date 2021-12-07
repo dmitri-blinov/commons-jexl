@@ -26,6 +26,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.jexl2.internal.SoftCache;
+
 import org.apache.commons.jexl2.introspection.JexlMethod;
 import org.apache.commons.jexl2.introspection.Uberspect;
 import org.apache.commons.jexl2.parser.ASTJexlScript;
@@ -88,7 +91,7 @@ public final class UnifiedJEXL {
     /** The JEXL engine instance. */
     private final JexlEngine jexl;
     /** The expression cache. */
-    private final JexlEngine.SoftCache<String, Expression> cache;
+    private final SoftCache<String, Expression> cache;
     /** The default cache size. */
     private static final int CACHE_SIZE = 256;
     /** The first character for immediate expressions. */
@@ -111,7 +114,7 @@ public final class UnifiedJEXL {
      */
     public UnifiedJEXL(JexlEngine aJexl, int cacheSize) {
         this.jexl = aJexl;
-        this.cache = aJexl.new SoftCache<String, Expression>(cacheSize);
+        this.cache = new SoftCache<String, Expression>(cacheSize);
     }
 
     /**
@@ -214,9 +217,7 @@ public final class UnifiedJEXL {
      * @since 2.1
      */
     public void clearCache() {
-        synchronized (cache) {
-            cache.clear();
-        }
+        cache.clear();
     }
 
     /**
@@ -750,12 +751,10 @@ public final class UnifiedJEXL {
             if (cache == null) {
                 stmt = parseExpression(expression, null);
             } else {
-                synchronized (cache) {
-                    stmt = cache.get(expression);
-                    if (stmt == null) {
-                        stmt = parseExpression(expression, null);
-                        cache.put(expression, stmt);
-                    }
+                stmt = cache.get(expression);
+                if (stmt == null) {
+                    stmt = parseExpression(expression, null);
+                    cache.put(expression, stmt);
                 }
             }
         } catch (JexlException xjexl) {

@@ -34,8 +34,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.apache.commons.jexl2.internal.SoftCache;
 
 import org.apache.commons.jexl2.parser.ParseException;
 import org.apache.commons.jexl2.parser.Parser;
@@ -144,6 +148,11 @@ public class JexlEngine {
      * The Log to which all JexlEngine messages will be logged.
      */
     protected final Log logger;
+    /**
+     * The {@link Parser}; when parsing expressions, this engine synchronizes on the parser.
+     * The atomic parsing flag; true whilst parsing.
+     */
+    protected final AtomicBoolean parsing = new AtomicBoolean(false);
     /**
      * The singleton ExpressionFactory also holds a single instance of
      * {@link Parser}.
@@ -801,104 +810,11 @@ public class JexlEngine {
     }
 
     /**
-     * A soft reference on cache.
-     * <p>The cache is held through a soft reference, allowing it to be GCed under
-     * memory pressure.</p>
-     * @param <K> the cache key entry type
-     * @param <V> the cache key value type
-     */
-    protected class SoftCache<K, V> {
-        /**
-         * The cache size.
-         */
-        private final int size;
-        /**
-         * The soft reference to the cache map.
-         */
-        private SoftReference<Map<K, V>> ref = null;
-
-        /**
-         * Creates a new instance of a soft cache.
-         * @param theSize the cache size
-         */
-        SoftCache(int theSize) {
-            size = theSize;
-        }
-
-        /**
-         * Returns the cache size.
-         * @return the cache size
-         */
-        int size() {
-            return size;
-        }
-
-        /**
-         * Clears the cache.
-         */
-        void clear() {
-            ref = null;
-        }
-
-        /**
-         * Produces the cache entry set.
-         * @return the cache entry set
-         */
-        Set<Entry<K, V>> entrySet() {
-            Map<K, V> map = ref != null ? ref.get() : null;
-            return map != null ? map.entrySet() : Collections.<Entry<K, V>>emptySet();
-        }
-
-        /**
-         * Gets a value from cache.
-         * @param key the cache entry key
-         * @return the cache entry value
-         */
-        V get(K key) {
-            final Map<K, V> map = ref != null ? ref.get() : null;
-            return map != null ? map.get(key) : null;
-        }
-
-        /**
-         * Puts a value in cache.
-         * @param key    the cache entry key
-         * @param script the cache entry value
-         */
-        void put(K key, V script) {
-            Map<K, V> map = ref != null ? ref.get() : null;
-            if (map == null) {
-                map = createCache(size);
-                ref = new SoftReference<Map<K, V>>(map);
-            }
-            map.put(key, script);
-        }
-    }
-
-    /**
-     * Creates a cache.
-     * @param <K>       the key type
-     * @param <V>       the value type
-     * @param cacheSize the cache size, must be &gt; 0
-     * @return a Map usable as a cache bounded to the given size
-     */
-    protected <K, V> Map<K, V> createCache(final int cacheSize) {
-        return new java.util.LinkedHashMap<K, V>(cacheSize, LOAD_FACTOR, true) {
-            /** Serial version UID. */
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-                return size() > cacheSize;
-            }
-        };
-    }
-
-    /**
      * Clears the expression cache.
      * @since 2.1
      */
     public void clearCache() {
-        synchronized (parser) {
+        if (cache != null) {
             cache.clear();
         }
     }
@@ -1246,27 +1162,35 @@ public class JexlEngine {
      * @throws JexlException if any error occured during parsing
      */
     protected ASTJexlScript parse(CharSequence expression, JexlInfo info, Scope frame) {
+
         String expr = cleanExpression(expression);
         ASTJexlScript script = null;
         JexlInfo dbgInfo = null;
-        synchronized (parser) {
-            if (cache != null) {
-                script = cache.get(expr);
-                if (script != null) {
-                    Scope f = script.getScope();
-                    if ((f == null && frame == null) || (f != null && f.equals(frame))) {
-                        return script;
-                    }
+
+        final boolean cached = cache != null;
+
+        if (cached) {
+            script = cache.get(expr);
+            if (script != null) {
+                final Scope f = script.getScope();
+                if ((f == null && frame == null) || (f != null && f.equals(frame))) {
+                    return script;
                 }
             }
+        }
+
+        Reader reader = new StringReader(expr);
+        // use first calling method of JexlEngine as debug info
+        if (info == null) {
+            dbgInfo = debugInfo();
+        } else {
+            dbgInfo = info.debugInfo();
+        }
+
+        // if parser not in use...
+        if (parsing.compareAndSet(false, true)) {
             try {
-                Reader reader = new StringReader(expr);
-                // use first calling method of JexlEngine as debug info
-                if (info == null) {
-                    dbgInfo = debugInfo();
-                } else {
-                    dbgInfo = info.debugInfo();
-                }
+                // lets parse
                 parser.setFrame(frame);
                 script = parser.parse(reader, dbgInfo);
                 // reaccess in case local variables have been declared
@@ -1274,16 +1198,34 @@ public class JexlEngine {
                 if (frame != null) {
                     script.setScope(frame);
                 }
-                if (cache != null) {
-                    cache.put(expr, script);
-                }
             } catch (TokenMgrError xtme) {
                 throw new JexlException.Tokenization(dbgInfo, expression, xtme);
             } catch (ParseException xparse) {
                 throw new JexlException.Parsing(dbgInfo, expression, xparse);
             } finally {
                 parser.setFrame(null);
+                // no longer in use
+                parsing.set(false);
             }
+        } else {
+            // ...otherwise parser was in use, create a new temporary one
+            final Parser lparser = new Parser(new StringReader(";"));
+            try {
+                lparser.setFrame(frame);
+                script = lparser.parse(reader, dbgInfo);
+                // reaccess in case local variables have been declared
+                frame = lparser.getFrame();
+                if (frame != null) {
+                    script.setScope(frame);
+                }
+            } catch (TokenMgrError xtme) {
+                throw new JexlException.Tokenization(dbgInfo, expression, xtme);
+            } catch (ParseException xparse) {
+                throw new JexlException.Parsing(dbgInfo, expression, xparse);
+            }
+        }
+        if (cached) {
+            cache.put(expr, script);
         }
         return script;
     }

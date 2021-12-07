@@ -23,27 +23,16 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Verifies cache & tryExecute
  */
+@SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class CacheTest extends JexlTestCase {
-    public CacheTest(String testName) {
-        super(testName);
-    }
-    private static final JexlEngine jexl = createEngine(false);
-
-    static {
-        jexl.setCache(512);
-        jexl.setSilent(false);
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        // ensure jul logging is only error to avoid warning in silent mode
-        java.util.logging.Logger.getLogger(JexlEngine.class.getName()).setLevel(java.util.logging.Level.SEVERE);
-    }
-
     // LOOPS & THREADS
     private static final int LOOPS = 4096;
     private static final int NTHREADS = 4;
@@ -53,8 +42,39 @@ public class CacheTest extends JexlTestCase {
         3, 3, 3, 4, 4, 4, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 2, 2, 3, 3, 0
     };
 
+    public CacheTest(String testName) {
+        super(testName);
+    }
+
+    private static final JexlEngine jexlCache = createEngine(false);
+    private static final JexlEngine jexlNoCache = createEngine(false);
+    private static JexlEngine jexl = jexlCache;
+
+    static {
+       jexl.setCache(1024);
+       jexl.setSilent(false);
+       jexl.setStrict(true);
+       jexl.setDebug(true);
+    }
+
+    static {
+       jexlNoCache.setCache(0);
+       jexlNoCache.setSilent(false);
+       jexlNoCache.setStrict(true);
+       jexlNoCache.setDebug(true);
+    }
+
+    @Before
     @Override
-    protected void tearDown() throws Exception {
+    public void setUp() throws Exception {
+        // ensure jul logging is only error to avoid warning in silent mode
+        java.util.logging.Logger.getLogger(JexlEngine.class.getName()).setLevel(java.util.logging.Level.SEVERE);
+    }
+
+
+    @After
+    @Override
+    public void tearDown() throws Exception {
         debuggerCheck(jexl);
     }
 
@@ -81,23 +101,23 @@ public class CacheTest extends JexlTestCase {
             return getClass().getSimpleName() + "@s#" + arg0 + ",s#" + arg1;
         }
 
-        public String compute(Integer arg) {
+        public String compute(final Integer arg) {
             return getClass().getSimpleName() + "@i#" + arg;
         }
 
-        public String compute(float arg) {
+        public String compute(final float arg) {
             return getClass().getSimpleName() + "@f#" + arg;
         }
 
-        public String compute(int arg0, int arg1) {
+        public String compute(final int arg0, final int arg1) {
             return getClass().getSimpleName() + "@i#" + arg0 + ",i#" + arg1;
         }
 
-        public String ambiguous(Integer arg0, int arg1) {
+        public String ambiguous(final Integer arg0, final int arg1) {
             return getClass().getSimpleName() + "!i#" + arg0 + ",i#" + arg1;
         }
 
-        public String ambiguous(int arg0, Integer arg1) {
+        public String ambiguous(final int arg0, final Integer arg1) {
             return getClass().getSimpleName() + "!i#" + arg0 + ",i#" + arg1;
         }
 
@@ -118,11 +138,11 @@ public class CacheTest extends JexlTestCase {
             return "CACHED@s#" + arg0 + ",s#" + arg1;
         }
 
-        public static String COMPUTE(int arg) {
+        public static String COMPUTE(final int arg) {
             return "CACHED@i#" + arg;
         }
 
-        public static String COMPUTE(int arg0, int arg1) {
+        public static String COMPUTE(final int arg0, final int arg1) {
             return "CACHED@i#" + arg0 + ",i#" + arg1;
         }
     }
@@ -145,12 +165,12 @@ public class CacheTest extends JexlTestCase {
             value = "Cached0:" + arg;
         }
 
-        public void setFlag(boolean b) {
+        public void setFlag(final boolean b) {
             flag = Boolean.valueOf(b);
         }
 
         public boolean isFlag() {
-            return flag.booleanValue();
+            return flag;
         }
     }
 
@@ -172,16 +192,17 @@ public class CacheTest extends JexlTestCase {
             value = "Cached2:new";
         }
 
-        public Object get(String prop) {
+        public Object get(final String prop) {
             if ("value".equals(prop)) {
                 return value;
-            } else if ("flag".equals(prop)) {
+            }
+            if ("flag".equals(prop)) {
                 return Boolean.valueOf(flag);
             }
             throw new RuntimeException("no such property");
         }
 
-        public void set(String p, Object v) {
+        public void set(final String p, Object v) {
             if (v == null) {
                 v = "na";
             }
@@ -205,12 +226,12 @@ public class CacheTest extends JexlTestCase {
         }
 
         @Override
-        public Object get(Object key) {
+        public Object get(final Object key) {
             return super.get(key.toString());
         }
 
         @Override
-        public Object put(String key, Object arg) {
+        public final Object put(final String key, Object arg) {
             if (arg == null) {
                 arg = "na";
             }
@@ -218,7 +239,7 @@ public class CacheTest extends JexlTestCase {
             return super.put(key, arg);
         }
 
-        public void setflag(boolean b) {
+        public void setflag(final boolean b) {
             flag = b;
         }
 
@@ -246,7 +267,7 @@ public class CacheTest extends JexlTestCase {
             super.set(0, "Cached4:" + arg);
         }
 
-        public void setflag(Boolean b) {
+        public void setflag(final Boolean b) {
             super.set(1, b.toString());
         }
 
@@ -278,25 +299,25 @@ public class CacheTest extends JexlTestCase {
      * @throws Exception if anything goes wrong
      */
     @SuppressWarnings("boxing")
-    void runThreaded(Class<? extends Task> ctask, int loops, boolean cache) throws Exception {
+    void runThreaded(final Class<? extends Task> ctask, int loops, final boolean cache) throws Exception {
         if (loops == 0) {
             loops = MIX.length;
         }
-        if (cache) {
-            jexl.setCache(32);
+        if (!cache) {
+            jexl = jexlNoCache;
         } else {
-            jexl.setCache(0);
+            jexl = jexlCache;
         }
-        java.util.concurrent.ExecutorService execs = java.util.concurrent.Executors.newFixedThreadPool(NTHREADS);
-        List<Callable<Integer>> tasks = new ArrayList<Callable<Integer>>(NTHREADS);
-        for(int t = 0; t < NTHREADS; ++t) {
+        final java.util.concurrent.ExecutorService execs = java.util.concurrent.Executors.newFixedThreadPool(NTHREADS);
+        final List<Callable<Integer>> tasks = new ArrayList<Callable<Integer>>(NTHREADS);
+        for (int t = 0; t < NTHREADS; ++t) {
             tasks.add(jexl.newInstance(ctask, loops));
         }
         // let's not wait for more than a minute
-        List<Future<Integer>> futures = execs.invokeAll(tasks, 60, TimeUnit.SECONDS);
+        final List<Future<Integer>> futures = execs.invokeAll(tasks, 60, TimeUnit.SECONDS);
         // check that all returned loops
-        for(Future<Integer> future : futures) {
-            assertEquals(Integer.valueOf(loops), future.get());
+        for (final Future<Integer> future : futures) {
+            Assert.assertEquals(Integer.valueOf(loops), future.get());
         }
     }
 
@@ -309,15 +330,17 @@ public class CacheTest extends JexlTestCase {
         final Map<String, Object> vars = new HashMap<String, Object>();
         final JexlContext jc = new MapContext(vars);
 
-        Task(int loops) {
+        Task(final int loops) {
             this.loops = loops;
         }
 
+        @Override
         public abstract Integer call() throws Exception;
 
         /**
          * The actual test function; assigns and checks.
-         * <p>The expression will be evaluated against different classes in parallel.
+         * <p>
+         * The expression will be evaluated against different classes in parallel.
          * This verifies that neither the volatile cache in the AST nor the expression cache in the JEXL engine
          * induce errors.</p>
          * <p>
@@ -329,30 +352,30 @@ public class CacheTest extends JexlTestCase {
          * @param value the argument value to control
          * @return the number of loops performed
          */
-        public Integer runAssign(Object value) {
+        public Integer runAssign(final Object value) {
             args.value = new Object[]{value};
             Object result;
 
-            Expression cacheGetValue = jexl.createExpression("cache.value");
-            Expression cacheSetValue = jexl.createExpression("cache.value = value");
+            final Expression cacheGetValue = jexl.createExpression("cache.value");
+            final Expression cacheSetValue = jexl.createExpression("cache.value = value");
             for (int l = 0; l < loops; ++l) {
-                int px = (int) Thread.currentThread().getId();
-                int mix = MIX[(l + px) % MIX.length];
+                final int px = (int) Thread.currentThread().getId();
+                final int mix = MIX[(l + px) % MIX.length];
 
                 vars.put("cache", args.ca[mix]);
                 vars.put("value", args.value[0]);
                 result = cacheSetValue.evaluate(jc);
                 if (args.value[0] == null) {
-                    assertNull(cacheSetValue.toString(), result);
+                    Assert.assertNull(cacheSetValue.toString(), result);
                 } else {
-                    assertEquals(cacheSetValue.toString(), args.value[0], result);
+                    Assert.assertEquals(cacheSetValue.toString(), args.value[0], result);
                 }
 
                 result = cacheGetValue.evaluate(jc);
                 if (args.value[0] == null) {
-                    assertEquals(cacheGetValue.toString(), "Cached" + mix + ":na", result);
+                    Assert.assertEquals(cacheGetValue.toString(), "Cached" + mix + ":na", result);
                 } else {
-                    assertEquals(cacheGetValue.toString(), "Cached" + mix + ":" + args.value[0], result);
+                    Assert.assertEquals(cacheGetValue.toString(), "Cached" + mix + ":" + args.value[0], result);
                 }
 
             }
@@ -365,9 +388,10 @@ public class CacheTest extends JexlTestCase {
      * A task to check assignment.
      */
     public static class AssignTask extends Task {
-        public AssignTask(int loops) {
+        public AssignTask(final int loops) {
             super(loops);
         }
+
         @Override
         public Integer call() throws Exception {
             return runAssign("foo");
@@ -378,9 +402,10 @@ public class CacheTest extends JexlTestCase {
      * A task to check null assignment.
      */
     public static class AssignNullTask extends Task {
-        public AssignNullTask(int loops) {
+        public AssignNullTask(final int loops) {
             super(loops);
         }
+
         @Override
         public Integer call() throws Exception {
             return runAssign(null);
@@ -391,32 +416,33 @@ public class CacheTest extends JexlTestCase {
      * A task to check boolean assignment.
      */
     public static class AssignBooleanTask extends Task {
-        public AssignBooleanTask(int loops) {
+        public AssignBooleanTask(final int loops) {
             super(loops);
         }
+
         @Override
         public Integer call() throws Exception {
             return runAssignBoolean(Boolean.TRUE);
         }
 
         /** The actual test function. */
-        private Integer runAssignBoolean(Boolean value) {
+        private Integer runAssignBoolean(final Boolean value) {
             args.value = new Object[]{value};
-            Expression cacheGetValue = jexl.createExpression("cache.flag");
-            Expression cacheSetValue = jexl.createExpression("cache.flag = value");
+            final Expression cacheGetValue = jexl.createExpression("cache.flag");
+            final Expression cacheSetValue = jexl.createExpression("cache.flag = value");
             Object result;
 
             for (int l = 0; l < loops; ++l) {
-                int px = (int) Thread.currentThread().getId();
-                int mix = MIX[(l + px) % MIX.length];
+                final int px = (int) Thread.currentThread().getId();
+                final int mix = MIX[(l + px) % MIX.length];
 
                 vars.put("cache", args.ca[mix]);
                 vars.put("value", args.value[0]);
                 result = cacheSetValue.evaluate(jc);
-                assertEquals(cacheSetValue.toString(), args.value[0], result);
+                Assert.assertEquals(cacheSetValue.toString(), args.value[0], result);
 
                 result = cacheGetValue.evaluate(jc);
-                assertEquals(cacheGetValue.toString(), args.value[0], result);
+                Assert.assertEquals(cacheGetValue.toString(), args.value[0], result);
 
             }
 
@@ -428,7 +454,7 @@ public class CacheTest extends JexlTestCase {
      * A task to check list assignment.
      */
     public static class AssignListTask extends Task {
-        public AssignListTask(int loops) {
+        public AssignListTask(final int loops) {
             super(loops);
         }
 
@@ -436,67 +462,75 @@ public class CacheTest extends JexlTestCase {
         public Integer call() throws Exception {
             return runAssignList();
         }
+
         /** The actual test function. */
         private Integer runAssignList() {
             args.value = new Object[]{"foo"};
-            java.util.ArrayList<String> c1 = new java.util.ArrayList<String>(2);
+            final java.util.ArrayList<String> c1 = new java.util.ArrayList<String>(2);
             c1.add("foo");
             c1.add("bar");
             args.ca = new Object[]{
-                        new String[]{"one", "two"},
-                        c1
-                    };
+                new String[]{"one", "two"},
+                c1
+            };
 
-            Expression cacheGetValue = jexl.createExpression("cache.0");
-            Expression cacheSetValue = jexl.createExpression("cache[0] = value");
+            final Expression cacheGetValue = jexl.createExpression("cache.0");
+            final Expression cacheSetValue = jexl.createExpression("cache[0] = value");
             Object result;
 
             for (int l = 0; l < loops; ++l) {
-                int px = (int) Thread.currentThread().getId();
-                int mix = MIX[(l + px) % MIX.length] % args.ca.length;
+                final int px = (int) Thread.currentThread().getId();
+                final int mix = MIX[(l + px) % MIX.length] % args.ca.length;
 
                 vars.put("cache", args.ca[mix]);
                 vars.put("value", args.value[0]);
                 result = cacheSetValue.evaluate(jc);
-                assertEquals(cacheSetValue.toString(), args.value[0], result);
+                Assert.assertEquals(cacheSetValue.toString(), args.value[0], result);
 
                 result = cacheGetValue.evaluate(jc);
-                assertEquals(cacheGetValue.toString(), args.value[0], result);
+                Assert.assertEquals(cacheGetValue.toString(), args.value[0], result);
             }
 
             return Integer.valueOf(loops);
         }
     }
 
-
+    @Test
     public void testNullAssignNoCache() throws Exception {
         runThreaded(AssignNullTask.class, LOOPS, false);
     }
 
+    @Test
     public void testNullAssignCache() throws Exception {
         runThreaded(AssignNullTask.class, LOOPS, true);
     }
 
+    @Test
     public void testAssignNoCache() throws Exception {
         runThreaded(AssignTask.class, LOOPS, false);
     }
 
+    @Test
     public void testAssignCache() throws Exception {
         runThreaded(AssignTask.class, LOOPS, true);
     }
 
+    @Test
     public void testAssignBooleanNoCache() throws Exception {
         runThreaded(AssignBooleanTask.class, LOOPS, false);
     }
 
+    @Test
     public void testAssignBooleanCache() throws Exception {
         runThreaded(AssignBooleanTask.class, LOOPS, true);
     }
 
+    @Test
     public void testAssignListNoCache() throws Exception {
         runThreaded(AssignListTask.class, LOOPS, false);
     }
 
+    @Test
     public void testAssignListCache() throws Exception {
         runThreaded(AssignListTask.class, LOOPS, true);
     }
@@ -505,7 +539,7 @@ public class CacheTest extends JexlTestCase {
      * A task to check method calls.
      */
     public static class ComputeTask extends Task {
-        public ComputeTask(int loops) {
+        public ComputeTask(final int loops) {
             super(loops);
         }
 
@@ -514,17 +548,17 @@ public class CacheTest extends JexlTestCase {
             args.ca = new Object[]{args.c0, args.c1, args.c2};
             args.value = new Object[]{new Integer(2), "quux"};
             //jexl.setDebug(true);
-            Expression compute2 = jexl.createExpression("cache.compute(a0, a1)");
-            Expression compute1 = jexl.createExpression("cache.compute(a0)");
-            Expression compute1null = jexl.createExpression("cache.compute(a0)");
-            Expression ambiguous = jexl.createExpression("cache.ambiguous(a0, a1)");
+            final Expression compute2 = jexl.createExpression("cache.compute(a0, a1)");
+            final Expression compute1 = jexl.createExpression("cache.compute(a0)");
+            final Expression compute1null = jexl.createExpression("cache.compute(a0)");
+            final Expression ambiguous = jexl.createExpression("cache.ambiguous(a0, a1)");
             //jexl.setDebug(false);
 
             Object result = null;
             String expected = null;
             for (int l = 0; l < loops; ++l) {
-                int mix = MIX[l % MIX.length] % args.ca.length;
-                Object value = args.value[l % args.value.length];
+                final int mix = MIX[l % MIX.length] % args.ca.length;
+                final Object value = args.value[l % args.value.length];
 
                 vars.put("cache", args.ca[mix]);
                 if (value instanceof String) {
@@ -536,18 +570,18 @@ public class CacheTest extends JexlTestCase {
                     vars.put("a1", Integer.valueOf(9));
                     expected = "Cached" + mix + "@i#7,i#9";
                 } else {
-                    fail("unexpected value type");
+                    Assert.fail("unexpected value type");
                 }
                 result = compute2.evaluate(jc);
-                assertEquals(compute2.toString(), expected, result);
+                Assert.assertEquals(compute2.toString(), expected, result);
 
                 if (value instanceof Integer) {
                     try {
                         vars.put("a0", Short.valueOf((short) 17));
                         vars.put("a1", Short.valueOf((short) 19));
                         result = ambiguous.evaluate(jc);
-                        fail("should have thrown an exception");
-                    } catch (JexlException xany) {
+                        Assert.fail("should have thrown an exception");
+                    } catch (final JexlException xany) {
                         // throws due to ambiguous exception
                     }
                 }
@@ -559,21 +593,21 @@ public class CacheTest extends JexlTestCase {
                     vars.put("a0", Integer.valueOf(5));
                     expected = "Cached" + mix + "@i#5";
                 } else {
-                    fail("unexpected value type");
+                    Assert.fail("unexpected value type");
                 }
                 result = compute1.evaluate(jc);
-                assertEquals(compute1.toString(), expected, result);
+                Assert.assertEquals(compute1.toString(), expected, result);
 
                 try {
                     vars.put("a0", null);
                     result = compute1null.evaluate(jc);
-                    fail("should have thrown an exception");
-                } catch (JexlException xany) {
+                    Assert.fail("should have thrown an exception");
+                } catch (final JexlException xany) {
                     // throws due to ambiguous exception
-                    String sany = xany.getMessage();
-                    String tname = getClass().getName();
+                    final String sany = xany.getMessage();
+                    final String tname = getClass().getName();
                     if (!sany.startsWith(tname)) {
-                        fail("debug mode should carry caller information, "
+                        Assert.fail("debug mode should carry caller information, "
                                 + sany + ", "
                                 + tname);
                     }
@@ -583,51 +617,55 @@ public class CacheTest extends JexlTestCase {
         }
     }
 
+    @Test
     public void testComputeNoCache() throws Exception {
-        try {
-            jexl.setDebug(true);
-            runThreaded(ComputeTask.class, LOOPS, false);
-        } finally {
-            jexl.setDebug(false);
-        }
+        runThreaded(ComputeTask.class, LOOPS, false);
     }
 
+    @Test
     public void testComputeCache() throws Exception {
-        try {
-            jexl.setDebug(true);
-            runThreaded(ComputeTask.class, LOOPS, true);
-        } finally {
-            jexl.setDebug(false);
+        runThreaded(ComputeTask.class, LOOPS, true);
+    }
+
+    public static class JexlContextNS extends MapContext {
+        final Map<String, Object> funcs;
+
+        JexlContextNS(final Map<String, Object> vars, final Map<String, Object> funcs) {
+            super(vars);
+            this.funcs = funcs;
         }
+
+        public Object resolveNamespace(final String name) {
+            return funcs.get(name);
+        }
+
     }
 
     /**
-     * The remaining tests exercise the namespaced functions; not MT.
+     * The remaining tests exercise the namespaced namespaces; not MT.
      * @param x
      * @param loops
      * @param cache
      * @throws Exception
      */
-    void doCOMPUTE(TestCacheArguments x, int loops, boolean cache) throws Exception {
+    void doCOMPUTE(final TestCacheArguments x, int loops, final boolean cache) throws Exception {
         if (loops == 0) {
             loops = MIX.length;
         }
-        if (cache) {
-            jexl.setCache(32);
-        } else {
-            jexl.setCache(0);
+        if (!cache) {
+            jexl.clearCache();
         }
-        Map<String, Object> vars = new HashMap<String, Object>();
-        JexlContext jc = new MapContext(vars);
-        java.util.Map<String, Object> funcs = new java.util.HashMap<String, Object>();
+        final Map<String, Object> vars = new HashMap<String, Object>();
+        final MapContext jc = new MapContext(vars);
+        final java.util.Map<String, Object> funcs = new java.util.HashMap<String, Object>();
         jexl.setFunctions(funcs);
-        Expression compute2 = jexl.createExpression("cached:COMPUTE(a0, a1)");
-        Expression compute1 = jexl.createExpression("cached:COMPUTE(a0)");
+        final Expression compute2 = jexl.createExpression("cached:COMPUTE(a0, a1)");
+        final Expression compute1 = jexl.createExpression("cached:COMPUTE(a0)");
         Object result = null;
         String expected = null;
         for (int l = 0; l < loops; ++l) {
-            int mix = MIX[l % MIX.length] % x.ca.length;
-            Object value = x.value[l % x.value.length];
+            final int mix = MIX[l % MIX.length] % x.ca.length;
+            final Object value = x.value[l % x.value.length];
 
             funcs.put("cached", x.ca[mix]);
             if (value instanceof String) {
@@ -639,10 +677,10 @@ public class CacheTest extends JexlTestCase {
                 vars.put("a1", Integer.valueOf(9));
                 expected = "CACHED@i#7,i#9";
             } else {
-                fail("unexpected value type");
+                Assert.fail("unexpected value type");
             }
             result = compute2.evaluate(jc);
-            assertEquals(compute2.toString(), expected, result);
+            Assert.assertEquals(compute2.toString(), expected, result);
 
             if (value instanceof String) {
                 vars.put("a0", "X0");
@@ -651,27 +689,29 @@ public class CacheTest extends JexlTestCase {
                 vars.put("a0", Integer.valueOf(5));
                 expected = "CACHED@i#5";
             } else {
-                fail("unexpected value type");
+                Assert.fail("unexpected value type");
             }
             result = compute1.evaluate(jc);
-            assertEquals(compute1.toString(), expected, result);
+            Assert.assertEquals(compute1.toString(), expected, result);
         }
     }
 
+    @Test
     public void testCOMPUTENoCache() throws Exception {
-        TestCacheArguments args = new TestCacheArguments();
+        final TestCacheArguments args = new TestCacheArguments();
         args.ca = new Object[]{
-                    Cached.class, Cached1.class, Cached2.class
-                };
+            Cached.class, Cached1.class, Cached2.class
+        };
         args.value = new Object[]{new Integer(2), "quux"};
         doCOMPUTE(args, LOOPS, false);
     }
 
+    @Test
     public void testCOMPUTECache() throws Exception {
-        TestCacheArguments args = new TestCacheArguments();
+        final TestCacheArguments args = new TestCacheArguments();
         args.ca = new Object[]{
-                    Cached.class, Cached1.class, Cached2.class
-                };
+            Cached.class, Cached1.class, Cached2.class
+        };
         args.value = new Object[]{new Integer(2), "quux"};
         doCOMPUTE(args, LOOPS, true);
     }
