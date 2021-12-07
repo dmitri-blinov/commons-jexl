@@ -1054,7 +1054,7 @@
                         as "not in" operator.
                         Note that arrays and user classes which expose a public 'contains' method will allow their instances
                         to behave as right-hand side operands of this operator.
-                        <code> "a" !~ ["a","b","c","d","e",f"]</code> returns <code>true</code>.
+                        <code> "a" !~ ["a","b","c","d","e",f"]</code> returns <code>false</code>.
                         <p>
                             This operator also supports comparison of single argument against the set of values by using
                             <code>any</code> or <code>all</code> operator as right argument.
