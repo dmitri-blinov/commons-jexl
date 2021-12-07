@@ -1103,15 +1103,16 @@ void Pragma() #void :
 
 Object PragmaValue() #void :
 {
+    Token s = null;
     Token v;
     StringBuilder sb;
     Object result;
 }
 {
   (
-    v=<INTEGER_LITERAL> { result = NumberParser.parseInteger(v.image); }
+    LOOKAHEAD(2) (s=<plus>|s=<minus>)? v=<INTEGER_LITERAL> { result = NumberParser.parseInteger(s, v); }
     |
-    v=<FLOAT_LITERAL> { result = NumberParser.parseDouble(v.image); }
+    LOOKAHEAD(2) (s=<plus>|s=<minus>)? v=<FLOAT_LITERAL> { result = NumberParser.parseDouble(s, v); }
     |
     v=<STRING_LITERAL> { result = Parser.buildString(v.image, true); }
     |
@@ -2058,9 +2059,9 @@ void VarParameter() #void :
     [ 
        <assign> 
        (
-           v = <INTEGER_LITERAL> { value = NumberParser.parseInteger(v.image); }
+           v = <INTEGER_LITERAL> { value = NumberParser.parseInteger(null, v); }
            |
-           v = <FLOAT_LITERAL> { value = NumberParser.parseDouble(v.image); }
+           v = <FLOAT_LITERAL> { value = NumberParser.parseDouble(null, v); }
            |
            v = <TRUE> { value = Boolean.TRUE; }
            |
