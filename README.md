@@ -21,7 +21,7 @@ The Apache Commons JEXL Pro library is an experimental fork of the The Apache Co
 
 Idea of the fork
 ----------------
-While JEXL in its latest version (3.2.1-SNAPSHOT) is already a mature Java object manipulation language which supports many great features,
+While JEXL in its latest version (3.3-SNAPSHOT) is already a mature Java object manipulation language which supports many great features,
 I feel that something more can be done to fill the gap between what functionality Java objects expose to the environment and
 how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some
 enhancements and changes to the capabilities of the scripting language. In result, compatibility with Java language is greatly improved,
