@@ -228,6 +228,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
      * Creates a Debugger.
      */
     public Debugger() {
+        // nothing to initialize
     }
 
     /**
@@ -497,7 +498,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
      * @return visitor pattern value
      */
     protected Object infixChildren(final JexlNode node, final String infix, final boolean paren, final Object data) {
-        final int num = node.jjtGetNumChildren(); //child.jjtGetNumChildren() > 1;
+        final int num = node.jjtGetNumChildren();
         if (paren) {
             builder.append('(');
         }
@@ -1044,7 +1045,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
      * (but underscore, at-sign, sharp-sign and dollar).
      */
     protected static final Pattern QUOTED_IDENTIFIER =
-            Pattern.compile("[\\s]|[\\p{Punct}&&[^@#\\$_]]");
+            Pattern.compile("[\\s]|[\\p{Punct}&&[^@#$_]]");
 
     /**
      * Checks whether an identifier should be quoted or not.
@@ -1791,9 +1792,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     @Override
-    protected Object visit(final ASTStringLiteral node, final Object data) {
-        final String img = node.getLiteral().replace("'", "\\'");
-        return check(node, "'" + img + "'", data);
+    protected Object visit(final ASTStringLiteral node, Object data) {
+        String img = StringParser.escapeString(node.getLiteral(), '\'');
+        return this.check(node, img, data);
+    }
+
+    @Override
+    protected Object visit(final ASTJxltLiteral node, Object data) {
+        String img = StringParser.escapeString(node.getLiteral(), '`');
+        return this.check(node, img, data);
     }
 
     @Override
@@ -1811,8 +1818,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTRegexLiteral node, final Object data) {
-        final String img = node.toString().replace("/", "\\/");
-        return check(node, "~/" + img + "/", data);
+        String img = StringParser.escapeString(node.toString(), '/');
+        return check(node, "~" + img, data);
     }
 
     @Override
@@ -2172,12 +2179,6 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(final ASTSetShrNode node, final Object data) {
         return infixChildren(node, " >>>= ", false, data);
-    }
-
-    @Override
-    protected Object visit(final ASTJxltLiteral node, final Object data) {
-        final String img = node.getLiteral().replace("`", "\\`");
-        return check(node, "`" + img + "`", data);
     }
 
     @Override

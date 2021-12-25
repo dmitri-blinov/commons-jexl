@@ -76,19 +76,21 @@ public class PropertySetExecutor extends AbstractExecutor.Set {
     }
 
     @Override
-    public Object invoke(final Object o, final Object arg) throws IllegalAccessException, InvocationTargetException {
-        Object param = arg;
-        // handle the empty array case
-        if (isEmptyArray(param)) {
-            // if array is empty but its component type is different from the method first parameter component type,
-            // replace argument with a new empty array instance (of the method first parameter component type)
-            final Class<?> componentType = method.getParameterTypes()[0].getComponentType();
-            if (componentType != null && !componentType.equals(arg.getClass().getComponentType())) {
-                param = Array.newInstance(componentType, 0);
+    public Object invoke(final Object o, final Object argument) throws IllegalAccessException, InvocationTargetException {
+        Object arg = argument;
+        if (method != null) {
+            // handle the empty array case
+            if (isEmptyArray(arg)) {
+                // if array is empty but its component type is different from the method first parameter component type,
+                // replace argument with a new empty array instance (of the method first parameter component type)
+                final Class<?> componentType = method.getParameterTypes()[0].getComponentType();
+                if (componentType != null && !componentType.equals(arg.getClass().getComponentType())) {
+                    arg = Array.newInstance(componentType, 0);
+                }
             }
+            method.invoke(o, arg);
         }
-        method.invoke(o, param);
-        return param;
+        return arg;
     }
 
     @Override

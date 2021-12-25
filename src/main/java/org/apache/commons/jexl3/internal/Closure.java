@@ -214,7 +214,7 @@ public class Closure extends Script {
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
         if (context == null)
             context = this.context;
-        JexlOptions opts = jexl.options(script, context);
+        JexlOptions opts = jexl.evalOptions(script, context);
         return jexl.createInterpreter(context, frame, opts, caller != null ? caller.current : null);
     }
 

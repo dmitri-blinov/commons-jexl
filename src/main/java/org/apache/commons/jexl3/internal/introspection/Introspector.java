@@ -316,15 +316,12 @@ public final class Introspector {
     /**
      * Sets the class loader used to solve constructors.
      * <p>Also cleans the constructors and methods caches.</p>
-     * @param cloader the class loader; if null, use this instance class loader
+     * @param classLoader the class loader; if null, use this instance class loader
      */
-    public void setLoader(ClassLoader cloader) {
+    public void setLoader(ClassLoader classLoader) {
         final ClassLoader previous = loader;
-        if (cloader == null) {
-            cloader = getClass().getClassLoader();
-        }
-        if (!cloader.equals(loader)) {
-            // clean up constructor and class maps
+        final ClassLoader current = classLoader == null? getClass().getClassLoader() : classLoader;
+        if (!current.equals(loader)) {            // clean up constructor and class maps
             final Iterator<Map.Entry<MethodKey, Constructor<?>>> mentries = constructorsMap.entrySet().iterator();
             while (mentries.hasNext()) {
                 final Map.Entry<MethodKey, Constructor<?>> entry = mentries.next();
@@ -344,7 +341,7 @@ public final class Introspector {
                     centries.remove();
                 }
             }
-            loader = cloader;
+            loader = current;
         }
     }
 
@@ -385,5 +382,4 @@ public final class Introspector {
     public Method lookupSetEmptyArrayProperty(final Class<?> c, final String name) {
         return getMap(c).lookupSetEmptyArrayProperty(name);
     }
-
 }
