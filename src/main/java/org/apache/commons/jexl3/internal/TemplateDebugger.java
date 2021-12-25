@@ -46,6 +46,7 @@ public class TemplateDebugger extends Debugger {
      * Default ctor.
      */
     public TemplateDebugger() {
+        // nothing to initialize
     }
 
     @Override

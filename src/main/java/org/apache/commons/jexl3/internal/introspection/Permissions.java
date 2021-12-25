@@ -21,6 +21,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+//import java.util.Collections;
+//import java.util.Map;
+//import java.util.Set;
+//import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.jexl3.annotations.NoJexl;
 
 /**
@@ -35,6 +40,30 @@ public class Permissions {
      * The default singleton.
      */
     public static final Permissions DEFAULT = new Permissions();
+//
+//    // my.package {
+//    // class0 {...
+//    //    class1 {...}
+//    //    class1(); // constructors
+//    //    method(); // method
+//    //   field;
+//    // } // end class0
+//    // } // end package my.package
+//
+//    public static class NoJexlPackage {
+//        protected Map<String, NoJexlClass> nojexl = new ConcurrentHashMap<>();
+//    }
+//    public static class NoJexlClass {
+//        protected Set<String> methodNames;
+//        protected Set<String> fieldNames;
+//    }
+//    static final NoJexlClass NOJEXL_CLASS = new NoJexlClass();
+//    static final Set<String> NOJEXL_METHODS = Collections.singleton("");
+//    static final Set<String> NOJEXL_FIELDS = Collections.singleton("");
+//
+//    public static final class Shielded extends Permissions {
+//        Map<String, NoJexlPackage> packageShields;
+//    }
 
     /**
      * Checks whether a package explicitly disallows JEXL introspection.
@@ -159,7 +188,7 @@ public class Permissions {
      * @param interf whether interfaces should be checked as well
      * @return true if JEXL is allowed to introspect, false otherwise
      */
-    protected boolean allow(Class<?> clazz, final boolean interf) {
+    protected boolean allow(final Class<?> clazz, final boolean interf) {
         if (clazz == null) {
             return false;
         }
@@ -177,15 +206,15 @@ public class Permissions {
             }
         }
         // lets walk all super classes
-        clazz = clazz.getSuperclass();
+        Class<?> walk = clazz.getSuperclass();
         // walk all superclasses
-        while (clazz != null) {
+        while (walk != null) {
             // is clazz annotated with nojexl ?
-            final NoJexl nojexl = clazz.getAnnotation(NoJexl.class);
+            final NoJexl nojexl = walk.getAnnotation(NoJexl.class);
             if (nojexl != null) {
                 return false;
             }
-            clazz = clazz.getSuperclass();
+            walk = walk.getSuperclass();
         }
         return true;
     }
