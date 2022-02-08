@@ -859,6 +859,12 @@ public class JexlArithmetic {
      * @return ++left.
      */
     public Object increment(Object left) {
+        if (left instanceof BigInteger) 
+            return selfAdd(left, BigInteger.ONE);
+
+        if (left instanceof BigDecimal) 
+            return selfAdd(left, BigDecimal.ONE);
+
         return selfAdd(left, 1);
     }
 
@@ -1136,6 +1142,13 @@ public class JexlArithmetic {
      * @return --left.
      */
     public Object decrement(Object left) {
+
+        if (left instanceof BigInteger) 
+            return selfSubtract(left, BigInteger.ONE);
+
+        if (left instanceof BigDecimal) 
+            return selfSubtract(left, BigDecimal.ONE);
+
         return selfSubtract(left, 1);
     }
 
