@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import org.apache.commons.jexl3.JexlArithmetic;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,7 +26,7 @@ import java.util.NoSuchElementException;
 /**
  * A range of integers.
  */
-public abstract class IntegerRange implements Collection<Integer> {
+public abstract class IntegerRange implements JexlArithmetic.Range, Collection<Integer> {
     /** The lower boundary. */
     protected final int min;
     /** The upper boundary. */
@@ -68,6 +70,23 @@ public abstract class IntegerRange implements Collection<Integer> {
         return max;
     }
 
+    /**
+     * Gets the interval minimum value.
+     * @return the low boundary
+     */
+    @Override
+    public Comparable getFrom() {
+        return min;
+    }
+
+    /**
+     * Gets the interval maximum value.
+     * @return the high boundary
+     */
+    @Override
+    public Comparable getTo() {
+        return max;
+    }
 
     @Override
     public int hashCode() {
@@ -207,6 +226,17 @@ public abstract class IntegerRange implements Collection<Integer> {
         public Iterator<Integer> iterator() {
             return new AscIntegerIterator(min, max);
         }
+
+        /**
+         * Returns indicator whether the range is reversed.
+         *
+         * @return the reverse indicator
+         */
+        @Override
+        public boolean isReverse() {
+            return false;
+        }
+
     }
 
     /**
@@ -226,6 +256,17 @@ public abstract class IntegerRange implements Collection<Integer> {
         public Iterator<Integer> iterator() {
             return new DescIntegerIterator(min, max);
         }
+
+        /**
+         * Returns indicator whether the range is reversed.
+         *
+         * @return the reverse indicator
+         */
+        @Override
+        public boolean isReverse() {
+            return true;
+        }
+
     }
 }
 

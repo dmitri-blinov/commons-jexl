@@ -17,6 +17,8 @@
 package org.apache.commons.jexl3;
 
 import java.util.Collection;
+import java.math.BigInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -184,4 +186,24 @@ public class RangeTest extends JexlTestCase {
         o = e.execute(jc, 90000000011L);
         Assert.assertEquals(Boolean.FALSE, o);
     }
+
+    @Test
+    public void testComparableRange() throws Exception {
+        final JexlExpression e = JEXL.createExpression("(1B..3B)");
+        final JexlContext jc = new MapContext();
+
+        final Object o = e.evaluate(jc);
+        Assert.assertTrue(o instanceof Iterable<?>);
+        Assert.assertFalse((Boolean) JEXL.createScript("empty x", "x").execute(null, o));
+    }
+
+    @Test
+    public void testComparableSum() throws Exception {
+        final JexlScript e = JEXL.createScript("var s = 0; for(var i : (1H..3H)) { s = s + i; }; s");
+        final JexlContext jc = new MapContext();
+
+        final Object o = e.execute(jc);
+        Assert.assertEquals(new BigInteger("6"), o);
+    }
+
 }

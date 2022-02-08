@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import org.apache.commons.jexl3.JexlArithmetic;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
@@ -26,7 +28,7 @@ import java.util.NoSuchElementException;
  * <p>
  * Behaves as a readonly collection of longs.
  */
-public abstract class LongRange implements Collection<Long> {
+public abstract class LongRange implements JexlArithmetic.Range, Collection<Long> {
     /** The lower boundary. */
     protected final long min;
     /** The upper boundary. */
@@ -68,6 +70,24 @@ public abstract class LongRange implements Collection<Long> {
      * @return the high boundary
      */
     public long getMax() {
+        return max;
+    }
+
+    /**
+     * Gets the interval minimum value.
+     * @return the low boundary
+     */
+    @Override
+    public Comparable getFrom() {
+        return min;
+    }
+
+    /**
+     * Gets the interval maximum value.
+     * @return the high boundary
+     */
+    @Override
+    public Comparable getTo() {
         return max;
     }
 
@@ -209,6 +229,16 @@ public abstract class LongRange implements Collection<Long> {
         public Iterator<Long> iterator() {
             return new AscLongIterator(min, max);
         }
+
+        /**
+         * Returns indicator whether the range is reversed.
+         *
+         * @return the reverse indicator
+         */
+        @Override
+        public boolean isReverse() {
+            return false;
+        }
     }
 
     /**
@@ -228,6 +258,17 @@ public abstract class LongRange implements Collection<Long> {
         public Iterator<Long> iterator() {
             return new DescLongIterator(min, max);
         }
+
+        /**
+         * Returns indicator whether the range is reversed.
+         *
+         * @return the reverse indicator
+         */
+        @Override
+        public boolean isReverse() {
+            return true;
+        }
+
     }
 }
 
