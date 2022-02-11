@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -288,8 +287,9 @@ public final class Introspector {
             final String cname = x.getMethod();
             try {
                 Constructor<?>[] constructors = getConstructors(c, cname);
-                if (constructors == null)
+                if (constructors == null) {
                     return null;
+                }
                 Constructor<?> result = x.getMostSpecificConstructor(constructors);
                 return result != null ? result : CTOR_MISS;
             } catch (final MethodKey.AmbiguousException xambiguous) {

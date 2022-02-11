@@ -22,23 +22,19 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.JexlOptions;
-import org.apache.commons.jexl3.JexlScript;
 
-import org.apache.commons.jexl3.parser.ASTAnnotatedStatement;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTExpressionStatement;
-import org.apache.commons.jexl3.parser.ASTExtVar;
 import org.apache.commons.jexl3.parser.ASTForStatement;
 import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIfStatement;
-import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
 import org.apache.commons.jexl3.parser.ASTRemove;
@@ -55,7 +51,6 @@ import org.apache.commons.jexl3.parser.ASTVarStatement;
 import org.apache.commons.jexl3.parser.ASTWhileStatement;
 import org.apache.commons.jexl3.parser.ASTYieldStatement;
 import org.apache.commons.jexl3.parser.JexlNode;
-import org.apache.commons.jexl3.parser.Node;
 
 import java.util.Iterator;
 import java.util.HashMap;
@@ -471,7 +466,9 @@ public class ResumableInterpreter extends Interpreter {
         /* first objectNode is the loop variable */
         ASTForeachVar loopReference = (ASTForeachVar) node.jjtGetChild(0);
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
-        ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? (ASTIdentifier) loopReference.jjtGetChild(1) : null;
+        ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? 
+            (ASTIdentifier) loopReference.jjtGetChild(1) : 
+            null;
         final boolean lexical = options.isLexical();
 
         if (lexical && !suspended) {
@@ -510,11 +507,15 @@ public class ResumableInterpreter extends Interpreter {
                         if (loopValueVariable != null) {
                             // get an iterator for the collection/array etc via the introspector.
                             Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
-                            itemsIterator = forEach instanceof Iterator ? (Iterator<?>) forEach : uberspect.getIndexedIterator(iterableValue);
+                            itemsIterator = forEach instanceof Iterator ? 
+                               (Iterator<?>) forEach : 
+                               uberspect.getIndexedIterator(iterableValue);
                         } else {
                             // get an iterator for the collection/array etc via the introspector.
                             Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, iterableValue);
-                            itemsIterator = forEach instanceof Iterator ? (Iterator<?>) forEach : uberspect.getIterator(iterableValue);
+                            itemsIterator = forEach instanceof Iterator ? 
+                               (Iterator<?>) forEach : 
+                               uberspect.getIterator(iterableValue);
                         }
                     }
                     st = new InterpreterState(i, itemsIterator);
@@ -601,8 +602,9 @@ public class ResumableInterpreter extends Interpreter {
             }
         } finally {
             // restore lexical frame
-            if (lexical && !suspended)
+            if (lexical && !suspended) {
                 block = block.pop();
+            }
         }
         return result;
     }
@@ -751,11 +753,14 @@ public class ResumableInterpreter extends Interpreter {
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                             JexlNode label = labels.jjtGetChild(j);
-                            Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
+                            Object right = label instanceof ASTIdentifier ? 
+                                label.jjtAccept(this, scope) : 
+                                label.jjtAccept(this, data);
                             try {
                                 Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                                if (caseMatched == JexlEngine.TRY_FAILED)
+                                if (caseMatched == JexlEngine.TRY_FAILED) {
                                     caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                }
                                 matched = arithmetic.toBoolean(caseMatched);
                             } catch (ArithmeticException xrt) {
                                 throw new JexlException(node, "== error", xrt);
@@ -813,8 +818,9 @@ public class ResumableInterpreter extends Interpreter {
             }
         } finally {
             // restore lexical frame
-            if (lexical && !suspended)
+            if (lexical && !suspended) {
                 block = block.pop();
+            }
         }
     }
 

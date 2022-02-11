@@ -265,8 +265,9 @@ public class Uberspect implements JexlUberspect {
             if (resolver instanceof JexlResolver) {
                 switch ((JexlResolver) resolver) {
                     case PROPERTY:
-                        if (property == null)
+                        if (property == null) {
                             property = AbstractExecutor.castString(identifier);
+                        }
                         // first try for a getFoo() type of property (also getfoo() )
                         executor = PropertyGetExecutor.discover(is, claz, property);
                         break;
@@ -285,8 +286,9 @@ public class Uberspect implements JexlUberspect {
                         // if that didn't work, look for get(foo)
                         executor = DuckGetExecutor.discover(is, claz, identifier);
                         if (executor == null) {
-                            if (property == null)
+                            if (property == null) {
                                 property = AbstractExecutor.castString(identifier);
+                            }
                             if (property != identifier) {
                                 // look for get("foo") if we did not try yet (just above)
                                 executor = DuckGetExecutor.discover(is, claz, property);
@@ -294,8 +296,9 @@ public class Uberspect implements JexlUberspect {
                         }
                         break;
                     case FIELD:
-                        if (property == null)
+                        if (property == null) {
                             property = AbstractExecutor.castString(identifier);
+                        }
                         if (obj instanceof Class<?>) {
                             // static class fields (enums included)
                             executor = FieldGetExecutor.discover(is, (Class<?>) obj, property);
@@ -305,8 +308,9 @@ public class Uberspect implements JexlUberspect {
                         }
                         break;
                     case CONTAINER:
-                        if (property == null)
+                        if (property == null) {
                             property = AbstractExecutor.castString(identifier);
+                        }
                         // or an indexed property?
                         executor = IndexedType.discover(is, obj, property);
                         break;
@@ -341,8 +345,9 @@ public class Uberspect implements JexlUberspect {
             if (resolver instanceof JexlResolver) {
                 switch ((JexlResolver) resolver) {
                     case PROPERTY:
-                        if (property == null)
+                        if (property == null) {
                             property = AbstractExecutor.castString(identifier);
+                        }
                         // first try for a setFoo() type of property (also setfoo() )
                         executor = PropertySetExecutor.discover(is, claz, property, arg);
                         break;
@@ -362,16 +367,18 @@ public class Uberspect implements JexlUberspect {
                         // if that didn't work, look for set(foo)
                         executor = DuckSetExecutor.discover(is, claz, identifier, arg);
                         if (executor == null) {
-                            if (property == null)
+                            if (property == null) {
                                 property = AbstractExecutor.castString(identifier);
+                            }
                             if (property != identifier) {
                                 executor = DuckSetExecutor.discover(is, claz, property, arg);
                             }
                         }
                         break;
                     case FIELD:
-                        if (property == null)
+                        if (property == null) {
                             property = AbstractExecutor.castString(identifier);
+                        }
                         // a field may be?
                         executor = FieldSetExecutor.discover(is, claz, property, arg);
                         break;

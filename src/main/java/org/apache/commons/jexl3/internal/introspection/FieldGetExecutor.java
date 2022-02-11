@@ -18,7 +18,6 @@
 package org.apache.commons.jexl3.internal.introspection;
 
 import java.lang.reflect.Field;
-import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 
 /**

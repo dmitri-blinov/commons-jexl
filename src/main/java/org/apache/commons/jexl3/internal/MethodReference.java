@@ -19,11 +19,53 @@ package org.apache.commons.jexl3.internal;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 
-import java.lang.reflect.Method;
-
 import java.util.Comparator;
 import java.util.concurrent.Callable;
-import java.util.function.*;
+
+import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
+import java.util.function.Function;
+import java.util.function.DoubleFunction;
+import java.util.function.LongFunction;
+import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
+import java.util.function.LongToDoubleFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.LongUnaryOperator;
+import java.util.function.IntUnaryOperator;
+import java.util.function.IntPredicate;
+import java.util.function.BiConsumer;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjLongConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.LongPredicate;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.DoubleToLongFunction;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.LongBinaryOperator;
+import java.util.function.IntBinaryOperator;
+import java.util.function.ToLongBiFunction;
+import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToIntBiFunction;
+
 
 /**
  * A Method reference implementation.
@@ -55,17 +97,20 @@ public class MethodReference {
         final JexlUberspect uberspect = theCaller.uberspect;
         Class<?> c = target instanceof Class<?> ? (Class<?>) target : target.getClass();
         JexlMethod[] methods = "new".equals(methodName) ? uberspect.getConstructors(c) : uberspect.getMethods(target, methodName);
-        if (methods == null || methods.length == 0)
+        if (methods == null || methods.length == 0) {
             return null;
+        }
         for (int i = 0; i < methods.length; i++) {
             JexlMethod method = methods[i];
-            if (!(target instanceof Class<?>) && method.isStatic())
+            if (!(target instanceof Class<?>) && method.isStatic()) {
                 continue;
+            }
             Class<?>[] parms = method.getParameterTypes();
             Class<?> type = method.getReturnType();
             int argCount = parms.length;
-            if ((target instanceof Class<?>) && !method.isStatic())
+            if ((target instanceof Class<?>) && !method.isStatic()) {
                 argCount++;
+            }
             if (Void.TYPE == type) {
                 switch (argCount) {
                     case 0: 
@@ -102,8 +147,9 @@ public class MethodReference {
     public Object invoke(Object... args) {
         try {
             if (isInstanceMethod) {
-                if (args == null || args.length == 0)
+                if (args == null || args.length == 0) {
                     throw new IllegalArgumentException();
+                }
                 Object[] varg = (args.length) == 1 ? InterpreterBase.EMPTY_PARAMS : new Object[args.length - 1];
                 System.arraycopy(args, 1, varg, 0, args.length - 1);
                 return method.invoke(args[0], varg);

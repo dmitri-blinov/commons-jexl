@@ -101,7 +101,6 @@ import org.apache.commons.jexl3.parser.ASTLTNode;
 import org.apache.commons.jexl3.parser.ASTMapEntry;
 import org.apache.commons.jexl3.parser.ASTMapEntryLiteral;
 import org.apache.commons.jexl3.parser.ASTMapEnumerationNode;
-import org.apache.commons.jexl3.parser.ASTMapLiteral;
 import org.apache.commons.jexl3.parser.ASTMapProjectionNode;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
 import org.apache.commons.jexl3.parser.ASTMethodReference;
@@ -197,7 +196,6 @@ import java.util.regex.Pattern;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
-import org.apache.commons.jexl3.parser.ASTUnaryPlusNode;
 import org.apache.commons.jexl3.parser.StringParser;
 
 /**
@@ -461,8 +459,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 result.append(literal.getName());
             }
         }
-        for (int i = 0; i < array; i++)
+        for (int i = 0; i < array; i++) {
             result.append("[]");
+        }
         return result.toString();
     }
 
@@ -629,8 +628,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         builder.append('[');
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append(']');
@@ -642,8 +642,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         builder.append("?[");
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append(']');
@@ -654,8 +655,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTArrayLiteral node, Object data) {
         int num = node.jjtGetNumChildren();
 
-        if (node.isImmutable())
+        if (node.isImmutable()) {
             builder.append("#");
+        }
 
         builder.append("[ ");
         if (num > 0) {
@@ -666,8 +668,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             }
         }
         if (node.isExtended()) {
-            if (num > 0)
+            if (num > 0) {
                 builder.append(",");
+            }
             builder.append("...");
         }
 
@@ -699,8 +702,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTVarStatement node, final Object data) {
         int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         return data;
@@ -721,13 +725,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         boolean isVarDeclare = node.jjtGetChild(0) instanceof ASTExtVar;
 
-        if (isVarDeclare)
+        if (isVarDeclare) {
             builder.append("var");
+        }
 
         builder.append('(');
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append(")");
@@ -914,8 +920,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTForInitializationNode node, final Object data) {
         int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             JexlNode child = node.jjtGetChild(i);
             accept(child, data);
         }
@@ -924,8 +931,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTForTerminationNode node, final Object data) {
-        if (node.jjtGetNumChildren() > 0)
+        if (node.jjtGetNumChildren() > 0) {
             accept(node.jjtGetChild(0), data);
+        }
         return data;
     }
 
@@ -933,8 +941,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTForIncrementNode node, final Object data) {
         int num = node.jjtGetNumChildren();
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             JexlNode child = node.jjtGetChild(i);
             accept(child, data);
         }
@@ -978,8 +987,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         for (int i = 1; i < num; ++i) {
             JexlNode child = node.jjtGetChild(i);
-            if (!(child instanceof ASTCatchBlock))
+            if (!(child instanceof ASTCatchBlock)) {
                 builder.append(" finally ");
+            }
             accept(child, data);
         }
         return data;
@@ -1014,8 +1024,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(1), data);
         for (int i = 2; i < num; ++i) {
             JexlNode child = node.jjtGetChild(i);
-            if (!(child instanceof ASTCatchBlock))
+            if (!(child instanceof ASTCatchBlock)) {
                 builder.append(" finally ");
+            }
             accept(child, data);
         }
         return data;
@@ -1106,8 +1117,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTFunctionStatement node, final Object data) {
         // Last node is function
         ASTJexlScript script = (ASTJexlScript) node.jjtGetChild(1);
-        if (script.getScope().isStatic())
+        if (script.getScope().isStatic()) {
             builder.append("static ");
+        }
         Class type = script.getScope().getReturnType();
         if (type != null) {
             builder.append(getClassName(type));
@@ -1213,8 +1225,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         } else if (node instanceof ASTJexlLambda) {
             if (node.jjtGetNumChildren() == 1) {
                JexlNode child = node.jjtGetChild(0);
-               if (!(child instanceof ASTBlock))
+               if (!(child instanceof ASTBlock)) {
                    expr = true;
+               }
             }
 
             JexlNode parent = node.jjtGetParent();
@@ -1248,15 +1261,18 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 builder.append("function");
             }
 
-            boolean parens = named || function || params == null || params.length != 1 || node.isVarArgs() || varSyntax || retType != null;
+            boolean parens = named || function || params == null || params.length != 1 
+                             || node.isVarArgs() || varSyntax || retType != null;
 
-            if (parens)
+            if (parens) {
                 builder.append('(');
+            }
 
             if (params != null && params.length > 0) {
                 for (int p = 0; p < params.length; ++p) {
-                    if (p > 0)
+                    if (p > 0) {
                         builder.append(", ");
+                    }
                     String param = params[p];
                     int symbol = scope.getSymbol(param);
                     boolean isFinal = scope.isVariableFinal(symbol);
@@ -1282,12 +1298,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                         builder.append(formatDefaultValue(value));
                     }
                 }
-                if (node.isVarArgs())
+                if (node.isVarArgs()) {
                     builder.append("...");
+                }
             }
 
-            if (parens)
+            if (parens) {
                 builder.append(')');
+            }
 
             if (named) {
                 builder.append(' ');
@@ -1358,8 +1376,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTSetLiteral node, final Object data) {
-        if (node.isImmutable())
+        if (node.isImmutable()) {
             builder.append("#");
+        }
         builder.append("{ ");
         final int num = node.jjtGetNumChildren();
         if (num > 0) {
@@ -1370,8 +1389,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             }
         }
         if (node.isOrdered()) {
-            if (num > 0)
+            if (num > 0) {
                 builder.append(",");
+            }
             builder.append("...");
         }
         builder.append(" }");
@@ -1381,8 +1401,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(final ASTSetOperand node, final Object data) {
         builder.append("?");
-        if (!node.isAny())
+        if (!node.isAny()) {
             builder.append("?");
+        }
         builder.append("(");
         int num = node.jjtGetNumChildren();
         if (num > 0) {
@@ -1398,8 +1419,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTMapLiteral node, final Object data) {
-        if (node.isImmutable())
+        if (node.isImmutable()) {
             builder.append("#");
+        }
         builder.append("{ ");
         final int num = node.jjtGetNumChildren();
         if (num > 0) {
@@ -1412,8 +1434,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             builder.append(':');
         }
         if (node.isOrdered()) {
-            if (num > 0)
+            if (num > 0) {
                 builder.append(",");
+            }
             builder.append("...");
         }
         builder.append(" }");
@@ -1500,8 +1523,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         builder.append("{ ");
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(",");
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append(" }");
@@ -1558,8 +1582,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         builder.append("[]");
         builder.append("{");
         for (int i = 1; i < num; ++i) {
-            if (i > 1)
+            if (i > 1) {
                 builder.append(", ");
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append("}");
@@ -1573,8 +1598,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         builder.append("{");
         for (int i = 1; i < num; ++i) {
-            if (i > 1)
+            if (i > 1) {
                 builder.append(", ");
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append("}");
@@ -1588,8 +1614,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         builder.append("{");
         for (int i = 1; i < num; ++i) {
-            if (i > 1)
+            if (i > 1) {
                 builder.append(", ");
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append("}");
@@ -1753,8 +1780,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTReturnStatement node, final Object data) {
         builder.append("return ");
         int num = node.jjtGetNumChildren();
-        if (num > 0)
+        if (num > 0) {
             accept(node.jjtGetChild(0), data);
+        }
         return data;
     }
 
@@ -1973,8 +2001,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTMultiVar node, final Object data) {
         boolean first = true;
         for (Class type : node.getTypes()) {
-            if (!first)
+            if (!first) {
                 builder.append(" | ");
+            }
             builder.append(getClassName(type)).append(" ");
             first = false;
         }
@@ -2049,8 +2078,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         builder.append("switch (");
         accept(node.jjtGetChild(0), data);
         builder.append(") {");
-        for (int i = 1; i < node.jjtGetNumChildren(); i++)
+        for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             accept(node.jjtGetChild(i), data);
+        }
         builder.append("}");
         return data;
     }
@@ -2061,8 +2091,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         accept(node.jjtGetChild(0), data);
         builder.append(" : ");
         if (node.jjtGetNumChildren() > 1) {
-            for (int i = 1; i < node.jjtGetNumChildren(); i++)
+            for (int i = 1; i < node.jjtGetNumChildren(); i++) {
                 acceptStatement(node.jjtGetChild(i), data);
+            }
         } else {
             builder.append(';');
         }
@@ -2073,8 +2104,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected Object visit(final ASTSwitchStatementDefault node, final Object data) {
         builder.append("default : ");
         if (node.jjtGetNumChildren() > 0) {
-            for (int i = 0; i < node.jjtGetNumChildren(); i++)
+            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
                 acceptStatement(node.jjtGetChild(i), data);
+            }
         } else {
             builder.append(';');
         }
@@ -2086,8 +2118,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         builder.append("switch (");
         accept(node.jjtGetChild(0), data);
         builder.append(") {");
-        for (int i = 1; i < node.jjtGetNumChildren(); i++)
+        for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             accept(node.jjtGetChild(i), data);
+        }
         builder.append("}");
         return data;
     }
@@ -2108,8 +2141,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(final ASTSwitchCaseLabel node, final Object data) {
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         return data;
@@ -2209,8 +2243,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         int num = node.jjtGetNumChildren();
         builder.append(".{");
         for (int i = 0; i < num; ++i) {
-            if (i > 0)
+            if (i > 0) {
                 builder.append(',');
+            }
             accept(node.jjtGetChild(i), data);
         }
         builder.append('}');

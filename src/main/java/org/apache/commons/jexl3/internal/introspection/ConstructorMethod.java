@@ -58,7 +58,6 @@ public final class ConstructorMethod implements JexlMethod {
      * Discovers a class constructor and wrap it as a JexlMethod.
      * @param is the introspector
      * @param ctorHandle a class or class name
-     * @param args constructor arguments
      * @return a {@link JexlMethod}
      */
     public static ConstructorMethod[] discover(final Introspector is, final Object ctorHandle) {

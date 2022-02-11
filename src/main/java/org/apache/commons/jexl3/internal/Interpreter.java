@@ -28,7 +28,6 @@ import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.JxltEngine;
 
 import org.apache.commons.jexl3.introspection.JexlMethod;
-import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 
 import org.apache.commons.jexl3.parser.ASTAddNode;
 import org.apache.commons.jexl3.parser.ASTAndNode;
@@ -250,7 +249,8 @@ public class Interpreter extends InterpreterBase {
      * @param eFrame   the evaluation frame, arguments and local variables
      * @param current  the current evaluation object
      */
-    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame, final Object current) {
+    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame, 
+                          final Object current) {
         super(engine, opts, aContext);
         this.frame = eFrame;
         this.current = current;
@@ -324,8 +324,9 @@ public class Interpreter extends InterpreterBase {
                 } else {
                     result = arithmetic.cast(type, result);
                 }
-                if (type.isPrimitive() && result == null)
+                if (type.isPrimitive() && result == null) {
                     throw new JexlException(node, "not null return value required");
+                }
             }
             return result;
         } catch (StackOverflowError xstack) {
@@ -573,8 +574,9 @@ public class Interpreter extends InterpreterBase {
                         while (it.hasNext()) {
                             Object right = it.next();
                             Boolean ok = p.test(right);
-                            if (ok && any || !ok && !any)
+                            if (ok && any || !ok && !any) {
                                 return ok;
+                            }
                         }
                     } finally {
                         closeIfSupported(it);
@@ -583,8 +585,9 @@ public class Interpreter extends InterpreterBase {
             } else {
                 Object right = child.jjtAccept(this, data);
                 Boolean ok = p.test(right);
-                if (ok && any || !ok && !any)
+                if (ok && any || !ok && !any) {
                     return ok;
+                }
             }
         }
         return !any;
@@ -960,8 +963,9 @@ public class Interpreter extends InterpreterBase {
                 return null;
             }
         }
-        if (val instanceof GetPointer)
+        if (val instanceof GetPointer) {
             return ((GetPointer) val).get();
+        }
 
         return operators.indirect(node, val);
     }
@@ -1240,7 +1244,9 @@ public class Interpreter extends InterpreterBase {
             Object iterableValue = valNode.jjtAccept(this, data);
             if (iterableValue != null) {
                 Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
-                Iterator<?> itemsIterator = forEach instanceof Iterator ? (Iterator<?>) forEach : uberspect.getIndexedIterator(iterableValue);
+                Iterator<?> itemsIterator = forEach instanceof Iterator ? 
+                    (Iterator<?>) forEach : 
+                    uberspect.getIndexedIterator(iterableValue);
                 return itemsIterator;
             } else {
                 return null;
@@ -1290,16 +1296,18 @@ public class Interpreter extends InterpreterBase {
 
         @Override
         public boolean hasNext() {
-            if (i == -1)
+            if (i == -1) {
                 prepareNextValue();
+            }
             return nextValue;
         }
 
         @Override
         public Object next() {
             cancelCheck(node);
-            if (!hasNext())
+            if (!hasNext()) {
                 throw new NoSuchElementException();
+            }
             Object result = value;
             prepareNextValue();
             return result;
@@ -1493,9 +1501,10 @@ public class Interpreter extends InterpreterBase {
             }
             return result;
         } finally {
-              // restore lexical frame
-              if (lexical)
-                  block = block.pop();
+            // restore lexical frame
+            if (lexical) {
+                block = block.pop();
+            }
         }
     }
 
@@ -1537,7 +1546,9 @@ public class Interpreter extends InterpreterBase {
         /* first objectNode is the loop variable */
         ASTForeachVar loopReference = (ASTForeachVar) node.jjtGetChild(0);
         ASTIdentifier loopVariable = (ASTIdentifier) loopReference.jjtGetChild(0);
-        ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? (ASTIdentifier) loopReference.jjtGetChild(1) : null;
+        ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? 
+            (ASTIdentifier) loopReference.jjtGetChild(1) : 
+            null;
         final boolean lexical = options.isLexical();// && node.getSymbolCount() > 0;
         if (lexical) {
             // create lexical frame
@@ -1565,11 +1576,15 @@ public class Interpreter extends InterpreterBase {
                 if (loopValueVariable != null) {
                     // get an iterator for the collection/array etc via the introspector.
                     Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
-                    itemsIterator = forEach instanceof Iterator ? (Iterator<?>) forEach : uberspect.getIndexedIterator(iterableValue);
+                    itemsIterator = forEach instanceof Iterator ? 
+                         (Iterator<?>) forEach : 
+                         uberspect.getIndexedIterator(iterableValue);
                 } else {
                     // get an iterator for the collection/array etc via the introspector.
                     Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH, iterableValue);
-                    itemsIterator = forEach instanceof Iterator ? (Iterator<?>) forEach : uberspect.getIterator(iterableValue);
+                    itemsIterator = forEach instanceof Iterator ? 
+                         (Iterator<?>) forEach : 
+                         uberspect.getIterator(iterableValue);
                 }
             }
             if (itemsIterator != null) {
@@ -1629,8 +1644,9 @@ public class Interpreter extends InterpreterBase {
             }
         } finally {
             // restore lexical frame
-            if (lexical)
+            if (lexical) {
                 block = block.pop();
+            }
         }
         return result;
     }
@@ -1704,8 +1720,9 @@ public class Interpreter extends InterpreterBase {
             // execute finally block if any
             if (num > 1) {
                 JexlNode fb = node.jjtGetChild(num - 1);
-                if (!(fb instanceof ASTCatchBlock))
+                if (!(fb instanceof ASTCatchBlock)) {
                     fb.jjtAccept(this, data);
+                }
             }
         }
         return result;
@@ -1722,10 +1739,13 @@ public class Interpreter extends InterpreterBase {
             Object r = resReference.jjtGetChild(resReference.jjtGetNumChildren() - 1).jjtAccept(this, data);
             // get a resource manager for the resource via the introspector
             Object rman = operators.tryOverload(node, JexlOperator.TRY_WITH, r);
-            if (JexlEngine.TRY_FAILED != rman)
+            if (JexlEngine.TRY_FAILED != rman) {
                 r = rman;
+            }
 
-            ASTTryVar resDeclaration = resReference.jjtGetChild(0) instanceof ASTTryVar ? (ASTTryVar) resReference.jjtGetChild(0) : null;
+            ASTTryVar resDeclaration = resReference.jjtGetChild(0) instanceof ASTTryVar ? 
+                (ASTTryVar) resReference.jjtGetChild(0) : 
+                null;
             ASTIdentifier resVariable = resDeclaration != null ? (ASTIdentifier) resDeclaration.jjtGetChild(0) : null;
             final int symbol = resVariable != null ? resVariable.getSymbol() : -1;
             final boolean lexical = options.isLexical() && symbol >= 0;
@@ -1749,8 +1769,9 @@ public class Interpreter extends InterpreterBase {
                 }
             } finally {
                 // restore lexical frame
-                if (lexical)
+                if (lexical) {
                     block = block.pop();
+                }
             }
         } catch (JexlException.Break stmtBreak) {
             String target = stmtBreak.getLabel();
@@ -1809,8 +1830,9 @@ public class Interpreter extends InterpreterBase {
             // execute finally block if any
             if (num > 2) {
                 JexlNode fb = node.jjtGetChild(num - 1);
-                if (!(fb instanceof ASTCatchBlock))
+                if (!(fb instanceof ASTCatchBlock)) {
                     fb.jjtAccept(this, data);
+                }
             }
         }
         return result;
@@ -1846,8 +1868,9 @@ public class Interpreter extends InterpreterBase {
                 node.jjtGetChild(1).jjtAccept(this, null);
             } finally {
                 // restore lexical frame
-                if (lexical)
+                if (lexical) {
                     block = block.pop();
+                }
             }
         } else {
             // just execute catch block
@@ -1865,8 +1888,9 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(ASTThrowStatement node, Object data) {
         cancelCheck(node);
         Object val = node.jjtGetChild(0).jjtAccept(this, data);
-        if (val instanceof Throwable)
+        if (val instanceof Throwable) {
             InterpreterBase.<RuntimeException>doThrow((Throwable) val);
+        }
         String message = arithmetic.toString(val);
         if (message != null) {
             throw new RuntimeException(message);
@@ -1965,8 +1989,9 @@ public class Interpreter extends InterpreterBase {
         try {
             synchronized (expressionNode.jjtAccept(this, data)) {
                 // execute statement
-                if (node.jjtGetNumChildren() > 1)
+                if (node.jjtGetNumChildren() > 1) {
                     result = node.jjtGetChild(1).jjtAccept(this, data);
+                }
             }
         } catch (final JexlException.Break stmtBreak) {
             String target = stmtBreak.getLabel();
@@ -2003,11 +2028,14 @@ public class Interpreter extends InterpreterBase {
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                             JexlNode label = labels.jjtGetChild(j);
-                            Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
+                            Object right = label instanceof ASTIdentifier ? 
+                                label.jjtAccept(this, scope) : 
+                                label.jjtAccept(this, data);
                             try {
                                 Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                                if (caseMatched == JexlEngine.TRY_FAILED)
+                                if (caseMatched == JexlEngine.TRY_FAILED) {
                                     caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                }
                                 matched = arithmetic.toBoolean(caseMatched);
                             } catch (ArithmeticException xrt) {
                                 throw new JexlException(node, "== error", xrt);
@@ -2047,8 +2075,9 @@ public class Interpreter extends InterpreterBase {
             return result;
         } finally {
             // restore lexical frame
-            if (lexical)
+            if (lexical) {
                 block = block.pop();
+            }
         }
     }
 
@@ -2093,8 +2122,9 @@ public class Interpreter extends InterpreterBase {
                         Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
                         try {
                             Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                            if (caseMatched == JexlEngine.TRY_FAILED)
+                            if (caseMatched == JexlEngine.TRY_FAILED) {
                                 caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                            }
                             matched = arithmetic.toBoolean(caseMatched);
                         } catch (ArithmeticException xrt) {
                             throw new JexlException(node, "== error", xrt);
@@ -2122,8 +2152,9 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTSwitchExpressionCase node, final Object data) {
         Object result = null;
         int childCount = node.jjtGetNumChildren();
-        if (childCount > 1)
+        if (childCount > 1) {
             result = node.jjtGetChild(1).jjtAccept(this, data);
+        }
         return result;
     }
 
@@ -2136,8 +2167,9 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTSwitchExpressionDefault node, final Object data) {
         Object result = null;
         int childCount = node.jjtGetNumChildren();
-        if (childCount > 0)
+        if (childCount > 0) {
             result = node.jjtGetChild(0).jjtAccept(this, data);
+        }
         return result;
     }
 
@@ -2267,9 +2299,9 @@ public class Interpreter extends InterpreterBase {
         boolean immutable = node.isImmutable();
         final boolean cacheable = cache && immutable && node.isConstant();
         Object cached = cacheable ? node.jjtGetValue() : null;
-        if (cached != null)
+        if (cached != null) {
             return cached;
-
+        }
         for (int i = 0; i < childCount; i++) {
             cancelCheck(node);
             JexlNode child = node.jjtGetChild(i);
@@ -2292,10 +2324,12 @@ public class Interpreter extends InterpreterBase {
         }
         if (immutable) {
             Object result = ab.create(true);
-            if (result instanceof List<?>)
+            if (result instanceof List<?>) {
                 result = Collections.unmodifiableList((List<?>) result);
-            if (cacheable)
+            }
+            if (cacheable) {
                 node.jjtSetValue(result);
+            }
             return result;
         } else {
             return ab.create(extended);
@@ -2312,8 +2346,9 @@ public class Interpreter extends InterpreterBase {
         boolean immutable = node.isImmutable();
         final boolean cacheable = cache && immutable && node.isConstant();
         Object cached = cacheable ? node.jjtGetValue() : null;
-        if (cached != null)
+        if (cached != null) {
             return cached;
+        }
         int childCount = node.jjtGetNumChildren();
         boolean ordered = node.isOrdered();
         JexlArithmetic.SetBuilder mb = arithmetic.setBuilder(childCount, ordered);
@@ -2339,10 +2374,12 @@ public class Interpreter extends InterpreterBase {
         }
         Object result = mb.create();
         if (immutable) {
-            if (result instanceof Set<?>)
+            if (result instanceof Set<?>) {
                 result = Collections.unmodifiableSet((Set<?>) result);
-            if (cacheable)
+            }
+            if (cacheable) {
                 node.jjtSetValue(result);
+            }
         }
         return result;
     }
@@ -2352,8 +2389,9 @@ public class Interpreter extends InterpreterBase {
         boolean immutable = node.isImmutable();
         final boolean cacheable = cache && immutable && node.isConstant();
         Object cached = cacheable ? node.jjtGetValue() : null;
-        if (cached != null)
+        if (cached != null) {
             return cached;
+        }
         int childCount = node.jjtGetNumChildren();
         boolean ordered = node.isOrdered();
         JexlArithmetic.MapBuilder mb = arithmetic.mapBuilder(childCount, ordered);
@@ -2386,10 +2424,12 @@ public class Interpreter extends InterpreterBase {
         }
         if (immutable) {
             Object result = mb.create();
-            if (result instanceof Map<?,?>)
+            if (result instanceof Map<?,?>) {
                 result = Collections.unmodifiableMap((Map<?,?>) result);
-            if (cacheable)
+            }
+            if (cacheable) {
                 node.jjtSetValue(result);
+            }
             return result;
         } else {
             return mb.create();
@@ -2641,8 +2681,9 @@ public class Interpreter extends InterpreterBase {
             condition = null;
         }
         // ternary as in "x ? y : z"
-        if (condition != null && arithmetic.toBoolean(condition))
+        if (condition != null && arithmetic.toBoolean(condition)) {
             return node.jjtGetChild(1).jjtAccept(this, data);
+        }
         if (node.jjtGetNumChildren() == 3) {
             return node.jjtGetChild(2).jjtAccept(this, data);
         }
@@ -3088,7 +3129,8 @@ public class Interpreter extends InterpreterBase {
      * @param data        the data
      * @return the left hand side
      */
-    protected Object executeMultipleAssign(final JexlNode node, final JexlNode identifiers, final Object value, final Object data) { // CSOFF: MethodLength
+    protected Object executeMultipleAssign(final JexlNode node, final JexlNode identifiers, final Object value, 
+                                           final Object data) { // CSOFF: MethodLength
         Object result = null;
         final int num = identifiers.jjtGetNumChildren();
         // Use separate logic for maps and non-iterable objects for destructuring
@@ -3115,19 +3157,22 @@ public class Interpreter extends InterpreterBase {
                         cancelCheck(node);
                         i += 1;
                         // Stop if we are out of variables to assign to
-                        if (i == num)
+                        if (i == num) {
                             break;
+                        }
                         // The value to assign
                         Object right = itemsIterator.next();
                         // The identifier to assign to
                         JexlNode left = identifiers.jjtGetChild(i);
-                        if (left instanceof ASTIdentifier)
+                        if (left instanceof ASTIdentifier) {
                             result = executeAssign(left, left, right, null, data);
+                        }
                     }
                     while (i + 1 < num) {
                         JexlNode left = identifiers.jjtGetChild(++i);
-                        if (left instanceof ASTIdentifier)
+                        if (left instanceof ASTIdentifier) {
                             result = executeAssign(left, left, null, null, data);
+                        }
                     }
                 } finally {
                     //  closeable iterator handling
@@ -3148,8 +3193,9 @@ public class Interpreter extends InterpreterBase {
             for (int i = 0; i < num; i++) {
                 cancelCheck(node);
                 JexlNode left = identifiers.jjtGetChild(i);
-                if (left instanceof ASTIdentifier)
+                if (left instanceof ASTIdentifier) {
                     result = executeAssign(left, left, null, null, data);
+                }
             }
         }
         return result;
@@ -3348,7 +3394,8 @@ public class Interpreter extends InterpreterBase {
      * @param data     the data
      * @return the left hand side
      */
-    protected Object executeAssign(final JexlNode node, final JexlNode left, final Object right, final JexlOperator assignop, final Object data) { // CSOFF: MethodLength
+    protected Object executeAssign(final JexlNode node, final JexlNode left, final Object right, 
+                                   final JexlOperator assignop, final Object data) { // CSOFF: MethodLength
         cancelCheck(node);
         // left contains the reference to assign to
         ASTIdentifier var = null;
@@ -3393,12 +3440,14 @@ public class Interpreter extends InterpreterBase {
                         } else {
                             value = arithmetic.cast(type, value);
                         }
-                        if (type.isPrimitive() && value == null)
+                        if (type.isPrimitive() && value == null) {
                             throw new JexlException(node, "not null value required for: " + var.getName());
+                        }
                     }
                     boolean isRequired = block.isVariableRequired(symbol);
-                    if (isRequired && value == null)
+                    if (isRequired && value == null) {
                         throw new JexlException(node, "not null value required for: " + var.getName());
+                    }
 
                     frame.set(symbol, value);
                     // make the closure accessible to itself, ie capture the currently set variable after frame creation
@@ -3433,33 +3482,38 @@ public class Interpreter extends InterpreterBase {
         } else if (left instanceof ASTIndirectNode) {
             if (assignop == null) {
                 Object self = left.jjtGetChild(0).jjtAccept(this, data);
-                if (self == null)
+                if (self == null) {
                     throw new JexlException(left, "illegal assignment form *0");
+                }
                 if (self instanceof SetPointer) {
                     ((SetPointer) self).set(right);
                 } else {
                     Object result = operators.indirectAssign(node, self, right);
-                    if (result == JexlEngine.TRY_FAILED)
+                    if (result == JexlEngine.TRY_FAILED) {
                         throw new JexlException(left, "illegal dereferenced assignment");
+                    }
                 }
                 return right;
             } else {
                 Object self = left.jjtAccept(this, data);
-                if (self == null)
+                if (self == null) {
                     throw new JexlException(left, "illegal assignment form *0");
+                }
                 Object result = operators.tryAssignOverload(node, assignop, self, right);
                 if (result == JexlOperator.ASSIGN) {
                     return self;
                 } else if (result != JexlEngine.TRY_FAILED) {
                     self = left.jjtGetChild(0).jjtAccept(this, data);
-                    if (self == null)
+                    if (self == null) {
                         throw new JexlException(left, "illegal assignment form *0");
+                    }
                     if (self instanceof SetPointer) {
                         ((SetPointer) self).set(result);
                     } else {
                         result = operators.indirectAssign(node, self, result);
-                        if (result == JexlEngine.TRY_FAILED)
+                        if (result == JexlEngine.TRY_FAILED) {
                             throw new JexlException(left, "illegal dereferenced assignment");
+                        }
                     }
                 }
                 return right;
@@ -3668,8 +3722,9 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTMethodReference node, Object data) {
         ASTIdentifier methodNode = (ASTIdentifier) node.jjtGetChild(0);
         String methodName = methodNode.getName();
-        if (data == null)
+        if (data == null) {
             return unsolvableMethod(methodNode, "<null>::" + methodName);
+        }
         Object result = MethodReference.create(this, data, methodName);
         return result != null ? result : unsolvableMethod(methodNode, "::" + methodName);
     }
@@ -3859,8 +3914,9 @@ public class Interpreter extends InterpreterBase {
                             String[] params = s.getUnboundParameters();
                             int paramCount = params != null ? params.length : 0;
                             int argCount = argv != null ? argv.length : 0;
-                            if (argCount > paramCount)
+                            if (argCount > paramCount) {
                                 return unsolvableMethod(node, "(...)");
+                            }
                         }
                         return s.execute(context, argv);
                     }
@@ -4103,8 +4159,9 @@ public class Interpreter extends InterpreterBase {
         boolean comprehensions = false;
         for (int i = 0; i < argc; i++) {
             JexlNode child = node.jjtGetChild(i + 1);
-            if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference)
+            if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference) {
                 comprehensions = true;
+            }
         }
         try {
             if (comprehensions) {
@@ -4170,8 +4227,9 @@ public class Interpreter extends InterpreterBase {
         }
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
-        if (!Collection.class.isAssignableFrom(target))
+        if (!Collection.class.isAssignableFrom(target)) {
             throw new JexlException(node, "Not a Collection", null);
+        }
         try {
             JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
             if (ctor != null) {
@@ -4212,8 +4270,9 @@ public class Interpreter extends InterpreterBase {
         }
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
-        if (!Map.class.isAssignableFrom(target))
+        if (!Map.class.isAssignableFrom(target)) {
             throw new JexlException(node, "Not a Map", null);
+        }
         try {
             JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
             if (ctor != null) {
@@ -4481,8 +4540,9 @@ public class Interpreter extends InterpreterBase {
         protected JexlNode getProjectionExpresssion(JexlNode node) {
             if (node instanceof ASTSimpleLambda && node.jjtGetNumChildren() == 1) {
                 JexlNode expr = node.jjtGetChild(0);
-                if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode)
+                if (expr instanceof ASTJexlLambda || expr instanceof ASTCurrentNode) {
                     node = expr;
+                }
             }
             return node;
         }
@@ -4614,18 +4674,21 @@ public class Interpreter extends InterpreterBase {
 
         @Override
         public boolean hasNext() {
-            if (!hasNextItem)
+            if (!hasNextItem) {
                 findNextItem();
+            }
             return hasNextItem;
         }
 
         @Override
         public Object next() {
             cancelCheck(node);
-            if (!hasNextItem)
+            if (!hasNextItem) {
                 findNextItem();
-            if (!hasNextItem)
+            }
+            if (!hasNextItem) {
                 throw new NoSuchElementException();
+            }
             i += 1;
             hasNextItem = false;
             return nextItem;
@@ -4654,8 +4717,9 @@ public class Interpreter extends InterpreterBase {
         @Override
         public Object next() {
             cancelCheck(node);
-            if (!hasNext())
+            if (!hasNext()) {
                 throw new NoSuchElementException();
+            }
             i += 1;
             return itemsIterator.next();
         }
@@ -4671,8 +4735,9 @@ public class Interpreter extends InterpreterBase {
         protected StartCountIterator(Iterator<?> iterator, JexlNode node, int startCount) {
             super(iterator, node);
 
-            if (startCount > 0)
+            if (startCount > 0) {
                 skipItems(startCount);
+            }
         }
 
         protected void skipItems(int skipCount) {
@@ -4693,8 +4758,9 @@ public class Interpreter extends InterpreterBase {
         @Override
         public Object next() {
             cancelCheck(node);
-            if (!hasNext())
+            if (!hasNext()) {
                 throw new NoSuchElementException();
+            }
             i += 1;
             return itemsIterator.next();
         }
@@ -4720,8 +4786,10 @@ public class Interpreter extends InterpreterBase {
         }
 
         ASTJexlLambda script = (ASTJexlLambda) child;
-        if (script instanceof ASTSimpleLambda && script.jjtGetNumChildren() == 1 && script.jjtGetChild(0) instanceof ASTJexlLambda)
+        if (script instanceof ASTSimpleLambda && script.jjtGetNumChildren() == 1 && 
+            script.jjtGetChild(0) instanceof ASTJexlLambda) {
            script = (ASTJexlLambda) script.jjtGetChild(0);
+        }
 
         Iterator<?> itemsIterator = prepareIndexedIterator(child, data);
         return itemsIterator != null ? new SelectionIterator(itemsIterator, script) : null;

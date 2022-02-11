@@ -33,7 +33,6 @@ import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.parser.ASTArrayAccess;
-import org.apache.commons.jexl3.parser.ASTArrayAccessSafe;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
@@ -513,7 +512,8 @@ public class Engine extends JexlEngine {
      * @param current the current evaluation object
      * @return an Interpreter
      */
-    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, final Object current) {
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, 
+        final Object current) {
         return new Interpreter(this, opts, context, frame, current);
     }
 

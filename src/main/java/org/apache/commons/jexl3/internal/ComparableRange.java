@@ -18,8 +18,6 @@ package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.JexlArithmetic;
 
-import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

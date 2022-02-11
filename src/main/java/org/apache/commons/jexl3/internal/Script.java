@@ -232,8 +232,9 @@ public class Script implements JexlScript, JexlExpression {
                 } else {
                     arg = arithmetic.cast(type, arg);
                 }
-                if (type.isPrimitive() && arg == null)
+                if (type.isPrimitive() && arg == null) {
                     throw new JexlException(script, "not null value required");
+                }
             }
             Array.set(varg, i, arg);
         }
@@ -272,8 +273,9 @@ public class Script implements JexlScript, JexlExpression {
             String name = params[params.length - 1];
             int symbol = frame.getSymbol(name);
             Class type = frame.getVariableType(symbol);
-            if (type == null)
+            if (type == null) {
                 type = Object.class;
+            }
             if (argCount > 0) {
                 result = new Object[argCount];
                 System.arraycopy(args, 0, result, 0, argCount - 1);
@@ -335,8 +337,9 @@ public class Script implements JexlScript, JexlExpression {
                     Object value = frame.getVariableValue(symbol);
                     if (value != null) {
                         Object[] e = new Object[result.length + pos + 1];
-                        if (result.length > 0)
+                        if (result.length > 0) {
                             System.arraycopy(result, 0, e, 0, result.length);
+                        }
                         result = e;
                         result[pos] = value;
                     }
@@ -349,8 +352,9 @@ public class Script implements JexlScript, JexlExpression {
             for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
                 int pos = i - curried;
                 // Check if the passed arguments list is shorter than the parameters list
-                if (pos >= result.length)
+                if (pos >= result.length) {
                     break;
+                }
                 String name = params[i];
                 int symbol = frame.getSymbol(name);
                 Class type = frame.getVariableType(symbol);
@@ -362,8 +366,9 @@ public class Script implements JexlScript, JexlExpression {
                         } else {
                             arg = arithmetic.cast(type, arg);
                         }
-                        if (type.isPrimitive() && arg == null)
+                        if (type.isPrimitive() && arg == null) {
                             throw new JexlException(script, "not null value required for: " + name);
+                        }
                         result[pos] = arg;
                     }
                 }
@@ -376,8 +381,9 @@ public class Script implements JexlScript, JexlExpression {
                 int pos = i - curried;
                 // Check if the passed arguments list is shorter than the parameters list
                 Object arg = (pos >= result.length) ? null : result[pos];
-                if (arg != null)
+                if (arg != null) {
                     continue;
+                }
                 String name = params[i];
                 int symbol = frame.getSymbol(name);
                 boolean isRequired = frame.isVariableRequired(symbol);
@@ -393,8 +399,9 @@ public class Script implements JexlScript, JexlExpression {
     @Override
     public JexlScript curry(final Object... args) {
         final String[] parms = getUnboundParameters();
-        if (parms == null || parms.length == 0 || args == null || args.length == 0)
+        if (parms == null || parms.length == 0 || args == null || args.length == 0) {
             return this;
+        }
         return Closure.create(this, args);
     }
 

@@ -329,7 +329,8 @@ public final class Scope {
      * @param value the default parameter value
      * @return the register index storing this variable
      */
-    public int declareParameter(final String name, final Class type, final boolean isFinal, final boolean isRequired, final Object value) {
+    public int declareParameter(final String name, final Class type, final boolean isFinal, final boolean isRequired, 
+                                final Object value) {
         if (vars > 0) {
             throw new IllegalStateException("cant declare parameters after variables");
         }

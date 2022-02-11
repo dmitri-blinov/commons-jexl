@@ -362,13 +362,16 @@ public abstract class InterpreterBase extends ParserVisitor {
 
                 if (identifier.jjtGetParent() instanceof ASTReference) {
                     Class type = JexlParser.resolveType(name);
-                    if (type != null)
+                    if (type != null) {
                         return type;
+                    }
                 }
 
                 // not defined, ignore in some cases...
                 final boolean ignore =
-                        (isSafe() && (symbol >= 0 || identifier.jjtGetParent() instanceof ASTAssignment || identifier.jjtGetParent() instanceof ASTInitialization))
+                        (isSafe() && (symbol >= 0 
+                                        || identifier.jjtGetParent() instanceof ASTAssignment
+                                        || identifier.jjtGetParent() instanceof ASTInitialization))
                          || (identifier.jjtGetParent() instanceof ASTReference);
                 if (!ignore) {
                     return undefinedVariable(identifier, name); // undefined
@@ -798,7 +801,8 @@ public abstract class InterpreterBase extends ParserVisitor {
          * @param args   the method arguments
          * @return the method invocation result (or JexlEngine.TRY_FAILED)
          */
-        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, final Object[] args) throws Exception {
+        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, 
+                                   final Object[] args) throws Exception {
             return me.tryInvoke(name, target, ii.functionArguments(null, narrow, args));
         }
     }
@@ -817,7 +821,8 @@ public abstract class InterpreterBase extends ParserVisitor {
         }
 
         @Override
-        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, final Object[] args) throws Exception {
+        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, 
+                                   final Object[] args) throws Exception {
             return me.tryInvoke(name, ii.arithmetic, ii.functionArguments(target, narrow, args));
         }
     }
@@ -836,7 +841,8 @@ public abstract class InterpreterBase extends ParserVisitor {
         }
 
         @Override
-        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, final Object[] args) throws Exception {
+        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, 
+                                   final Object[] args) throws Exception {
             return me.tryInvoke(name, ii.context, ii.functionArguments(target, narrow, args));
         }
     }
@@ -855,7 +861,8 @@ public abstract class InterpreterBase extends ParserVisitor {
         }
 
         @Override
-        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, final Object[] args) throws Exception {
+        protected Object tryInvoke(final InterpreterBase ii, final String name, final Object target, 
+                                   final Object[] args) throws Exception {
             return me.tryInvoke(name, target, ii.callArguments(ii.context, narrow, args));
         }
     }
@@ -1076,7 +1083,8 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @param right     the value to assign to the object's attribute
      * @param node      the node that evaluated as the object
      */
-    protected void setAttribute(final Object object, final Object attribute, final Object right, final JexlNode node, final JexlOperator operator) {
+    protected void setAttribute(final Object object, final Object attribute, final Object right, final JexlNode node, 
+                                final JexlOperator operator) {
         cancelCheck(node);
         Object value = right;
         Object result = operators.tryOverload(node, operator, object, attribute, value);

@@ -551,8 +551,9 @@ public class JexlArithmetic {
      * @return true if Integer, Long, Byte, Short or Character.
      */
     protected boolean isNumberable(final Object o) {
-        if (o == null)
+        if (o == null) {
             return false;
+        }
         Class c = o.getClass();
         return c == Integer.class
                 || c == Long.class
@@ -745,8 +746,9 @@ public class JexlArithmetic {
      * @param object  argument
      */
     protected boolean isIntegerPrecisionNumber(Object value) {
-        if (value == null)
+        if (value == null) {
             return false;
+        }
         Class c = value.getClass();
         return c == Integer.class || c == Short.class || c == Byte.class;
     }
@@ -757,8 +759,9 @@ public class JexlArithmetic {
      * @param object  argument
      */
     protected boolean isLongPrecisionNumber(Object value) {
-        if (value == null)
+        if (value == null) {
             return false;
+        }
         Class c = value.getClass();
         return c == Long.class || c == Integer.class || c == Short.class || c == Byte.class;
     }
@@ -893,11 +896,12 @@ public class JexlArithmetic {
      * @return ++left.
      */
     public Object increment(Object left) {
-        if (left instanceof BigInteger) 
+        if (left instanceof BigInteger) {
             return selfAdd(left, BigInteger.ONE);
-
-        if (left instanceof BigDecimal) 
+        }
+        if (left instanceof BigDecimal) {
             return selfAdd(left, BigDecimal.ONE);
+        }
 
         return selfAdd(left, 1);
     }
@@ -1176,13 +1180,12 @@ public class JexlArithmetic {
      * @return --left.
      */
     public Object decrement(Object left) {
-
-        if (left instanceof BigInteger) 
+        if (left instanceof BigInteger) {
             return selfSubtract(left, BigInteger.ONE);
-
-        if (left instanceof BigDecimal) 
+        }
+        if (left instanceof BigDecimal) {
             return selfSubtract(left, BigDecimal.ONE);
-
+        }
         return selfSubtract(left, 1);
     }
 
@@ -1665,12 +1668,15 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object propertyGet(Object object, Object key) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer)
+        if (object instanceof IndexedType.IndexedContainer) {
             return ((IndexedType.IndexedContainer) object).get(key);
-        if (object != null && object.getClass().isArray())
+        }
+        if (object != null && object.getClass().isArray()) {
             return Array.get(object, toInteger(key));
-        if (object instanceof JexlContext)
+        }
+        if (object instanceof JexlContext) {
             return ((JexlContext) object).get(toString(key));
+        }
         return JexlEngine.TRY_FAILED;
     }
 
@@ -1705,8 +1711,9 @@ public class JexlArithmetic {
      * @return JexlEngine.TRY_FAILED or other result if succesful
      */
     public Object propertySet(Object object, Object key, Object value) throws Exception {
-        if (object instanceof IndexedType.IndexedContainer)
+        if (object instanceof IndexedType.IndexedContainer) {
             return ((IndexedType.IndexedContainer) object).set(key, value);
+        }
         if (object != null && object.getClass().isArray()) {
             Array.set(object, toInteger(key), value);
             return null;
@@ -1875,9 +1882,9 @@ public class JexlArithmetic {
      */
     public Object cast(Class type, Object val) {
         type = getWrapperClass(type);
-        if (type.isInstance(val))
+        if (type.isInstance(val)) {
             return val;
-        if (type == Integer.class) {
+        } else if (type == Integer.class) {
             return toInteger(val);
         } else if (type == Long.class) {
             return toLong(val);
@@ -1912,27 +1919,28 @@ public class JexlArithmetic {
      */
     public Object implicitCast(Class type, Object val) {
         type = getWrapperClass(type);
-        if (type.isInstance(val))
+        if (type.isInstance(val)) {
             return val;
-        if (type == Short.class && val instanceof Byte)
+        } else if (type == Short.class && val instanceof Byte) {
             return ((Number) val).shortValue();
-        if (type == Integer.class && (val instanceof Byte || val instanceof Short || val instanceof AtomicInteger))
+        } else if (type == Integer.class && (val instanceof Byte || val instanceof Short || val instanceof AtomicInteger)) {
             return ((Number) val).intValue();
-        if (type == Long.class && (val instanceof Byte || val instanceof Short || val instanceof Integer ||
-                                   val instanceof AtomicInteger || val instanceof AtomicLong))
+        } else if (type == Long.class && (val instanceof Byte || val instanceof Short || val instanceof Integer ||
+                                   val instanceof AtomicInteger || val instanceof AtomicLong)) {
             return ((Number) val).longValue();
-        if (type == Float.class && (val instanceof Byte || val instanceof Short || val instanceof Integer || val instanceof Long ||
-                                   val instanceof AtomicInteger || val instanceof AtomicLong))
+        } else if (type == Float.class && (val instanceof Byte || val instanceof Short || val instanceof Integer || 
+                                   val instanceof Long || val instanceof AtomicInteger || val instanceof AtomicLong)) {
             return ((Number) val).floatValue();
-        if (type == Double.class)
+        } else if (type == Double.class) {
             return ((Number) val).doubleValue();
-        if (val instanceof CharSequence && type == Character.class) {
+        } else if (val instanceof CharSequence && type == Character.class) {
             CharSequence cs = (CharSequence) val;
-            if (cs.length() == 1)
+            if (cs.length() == 1) {
                 return cs.charAt(0);
-        }
-        if (type == Boolean.class && val instanceof AtomicBoolean)
+            }
+        } else if (type == Boolean.class && val instanceof AtomicBoolean) {
             return ((AtomicBoolean) val).get();
+        }
         return type.cast(val);
     }
 

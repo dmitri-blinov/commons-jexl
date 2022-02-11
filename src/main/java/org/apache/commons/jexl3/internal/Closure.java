@@ -20,14 +20,54 @@ import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
-import org.apache.commons.jexl3.parser.JexlNode;
 
 import java.lang.reflect.Array;
 
 import java.util.Comparator;
 import java.util.concurrent.Callable;
-import java.util.function.*;
-
+import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
+import java.util.function.Function;
+import java.util.function.DoubleFunction;
+import java.util.function.LongFunction;
+import java.util.function.IntFunction;
+import java.util.function.UnaryOperator;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
+import java.util.function.LongToDoubleFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.LongUnaryOperator;
+import java.util.function.IntUnaryOperator;
+import java.util.function.IntPredicate;
+import java.util.function.BiConsumer;
+import java.util.function.ObjDoubleConsumer;
+import java.util.function.ObjLongConsumer;
+import java.util.function.ObjIntConsumer;
+import java.util.function.LongPredicate;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.DoubleToLongFunction;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.LongBinaryOperator;
+import java.util.function.IntBinaryOperator;
+import java.util.function.ToLongBiFunction;
+import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToIntBiFunction;
 
 import java.util.Objects;
 
@@ -138,10 +178,12 @@ public class Closure extends Script {
     protected static Closure create(Script base, Object[] args) {
         String[] parms = base.getUnboundParameters();
         int argCount = parms != null ? parms.length : 0;
-        if (args != null)
+        if (args != null) {
             argCount -= args.length;
-        if (argCount < 0)
+        }
+        if (argCount < 0) {
             argCount = 0;
+        }
         switch (argCount) {
             case 0: 
                 return new ClosureSupplier(base, args);
@@ -212,8 +254,9 @@ public class Closure extends Script {
      */
     @Override
     protected Interpreter createInterpreter(JexlContext context, Frame frame) {
-        if (context == null)
+        if (context == null) {
             context = this.context;
+        }
         JexlOptions opts = jexl.evalOptions(script, context);
         return jexl.createInterpreter(context, frame, opts, caller != null ? caller.current : null);
     }
@@ -243,8 +286,9 @@ public class Closure extends Script {
            String name = params[params.length - 1];
            int varArgPos = frame.getScope().getSymbol(name);
            Class type = frame.getScope().getVariableType(varArgPos);
-           if (type == null)
+           if (type == null) {
                type = Object.class;
+           }
            // Previous vararg array
            Object carg = frame.get(varArgPos);
            int len = carg != null ? Array.getLength(carg) : 0;
@@ -294,11 +338,10 @@ public class Closure extends Script {
 
         String[] scriptParams = super.getParameters();
 
-        if (scriptParams == null || scriptParams.length == 0)
+        if (scriptParams == null || scriptParams.length == 0) {
             return scriptParams;
-
+        }
         String[] unboundParams = frame.getUnboundParameters();
-
         boolean varArgs = script.isVarArgs();
 
         if (unboundParams.length == 0 && varArgs) {
@@ -376,8 +419,9 @@ public class Closure extends Script {
     public Object execute(JexlContext context, Object... args) {
         Interpreter interpreter = createInterpreter(context, args);
         Object result = interpreter.runClosure(this, null);
-        if (chained == null)
+        if (chained == null) {
             return result;
+        }
         return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);
     }
 
@@ -387,8 +431,9 @@ public class Closure extends Script {
             @Override
             public Object interpret() {
                 Object result = interpreter.runClosure(Closure.this, null);
-                if (chained == null)
+                if (chained == null) {
                     return result;
+                }
                 return result instanceof Object[] ? chained.execute(context, (Object[]) result) : chained.execute(context, result);
             }
         };

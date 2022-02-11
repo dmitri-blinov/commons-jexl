@@ -232,8 +232,9 @@ final class ClassMap {
      * @throws MethodKey.AmbiguousException When more than one method is a match for the parameters.
      */
     Method getMethod(final MethodKey methodKey) throws MethodKey.AmbiguousException {
-        if (aClass == null)
+        if (aClass == null) {
             return null;
+        }
         // Look up by key
         Method cacheEntry = byKey.computeIfAbsent(methodKey, x -> {
             Method result = null;
@@ -308,9 +309,10 @@ final class ClassMap {
         Method cacheEntry = propertyGetters.computeIfAbsent(name, x -> {
             Method m = getPropertyGetMethod("get", name);
             if (m == null) {
-               m = getPropertyGetMethod("is", name);
-               if (m != null && !(m.getReturnType() == Boolean.TYPE || m.getReturnType() == Boolean.class))
-                  m = null;
+                m = getPropertyGetMethod("is", name);
+                if (m != null && !(m.getReturnType() == Boolean.TYPE || m.getReturnType() == Boolean.class)) {
+                    m = null;
+                }
             }
             return m != null ? m : CACHE_MISS;
         });

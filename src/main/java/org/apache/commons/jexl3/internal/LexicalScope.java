@@ -161,8 +161,9 @@ public class LexicalScope {
      * @param req whether the variable is required
      */
     public void setModifiers(int r, Class c, boolean fin, boolean req) {
-        if (modifiers == null)
+        if (modifiers == null) {
             modifiers = new HashMap<Integer, VariableModifier> ();
+        }
         modifiers.put(r, new VariableModifier(c, fin, req));
     }
     /**
@@ -171,12 +172,15 @@ public class LexicalScope {
      * @return the type if any
      */
     public Class typeof(int s) {
-        if (modifiers != null && modifiers.containsKey(s))
+        if (modifiers != null && modifiers.containsKey(s)) {
             return modifiers.get(s).getType();
-        if (previous != null) 
+        }
+        if (previous != null) {
             return previous.typeof(s);
-        if (frame != null && frame.getScope() != null)
+        }
+        if (frame != null && frame.getScope() != null) {
             return frame.getScope().getVariableType(s);
+        }
         return null;
     }
     /**
@@ -185,12 +189,15 @@ public class LexicalScope {
      * @return true if final, false otherwise
      */
     public boolean isVariableFinal(int s) {
-        if (modifiers != null && modifiers.containsKey(s))
+        if (modifiers != null && modifiers.containsKey(s)) {
             return modifiers.get(s).isFinal();
-        if (previous != null)
+        }
+        if (previous != null) {
             return previous.isVariableFinal(s);
-        if (frame != null && frame.getScope() != null)
+        }
+        if (frame != null && frame.getScope() != null) {
             return frame.getScope().isVariableFinal(s);
+        }
         return false;
     }
     /**
@@ -199,12 +206,15 @@ public class LexicalScope {
      * @return true if non-null, false otherwise
      */
     public boolean isVariableRequired(int s) {
-        if (modifiers != null && modifiers.containsKey(s))
+        if (modifiers != null && modifiers.containsKey(s)) {
             return modifiers.get(s).isRequired();
-        if (previous != null)
+        }
+        if (previous != null) {
             return previous.isVariableRequired(s);
-        if (frame != null && frame.getScope() != null)
+        }
+        if (frame != null && frame.getScope() != null) {
             return frame.getScope().isVariableRequired(s);
+        }
         return false;
     }
     /**

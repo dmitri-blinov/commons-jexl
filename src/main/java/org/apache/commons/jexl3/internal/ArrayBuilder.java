@@ -21,9 +21,7 @@ import org.apache.commons.jexl3.JexlArithmetic;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * Helper class to create typed arrays.
@@ -112,10 +110,9 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
         if (extended) {
             return untyped;
         }
-
-        if (commonClass == null)
+        if (commonClass == null) {
             commonClass = Object.class;
-
+        }
         // convert untyped array to the common class
         final int size = untyped.size();
         // if the commonClass is a number, it has an equivalent primitive type, get it

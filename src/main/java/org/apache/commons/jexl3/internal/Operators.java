@@ -130,7 +130,8 @@ public class Operators {
      * @param arg3     the third argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
-    protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2, final Object arg3) {
+    protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2, 
+        final Object arg3) {
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2, arg3);
         }
