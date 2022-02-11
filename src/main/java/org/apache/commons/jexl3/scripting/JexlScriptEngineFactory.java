@@ -17,13 +17,13 @@
 
 package org.apache.commons.jexl3.scripting;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.apache.commons.jexl3.parser.StringParser;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
-import org.apache.commons.jexl3.parser.StringParser;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Implements the JEXL ScriptEngineFactory for JSF-223.
@@ -49,7 +49,7 @@ public class JexlScriptEngineFactory implements ScriptEngineFactory {
 
     @Override
     public String getEngineVersion() {
-        return "3.2"; // ensure this is updated if function changes are made to this class
+        return "3.3"; // ensure this is updated if function changes are made to this class
     }
 
     @Override
