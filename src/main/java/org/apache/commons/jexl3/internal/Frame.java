@@ -22,7 +22,7 @@ import java.util.Arrays;
  * A call frame, created from a scope, stores the arguments and local variables in a "stack frame" (sic).
  * @since 3.0
  */
-public final class Frame {
+public final class Frame implements Cloneable {
     /** The scope. */
     private final Scope scope;
     /** The actual stack frame. */

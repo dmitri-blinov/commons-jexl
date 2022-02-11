@@ -29,7 +29,7 @@ public class LexicalScope {
      * A variable modifier, stores additional variable attributes.
      * @since 3.2
      */
-    protected static final class VariableModifier {
+    protected static final class VariableModifier implements Cloneable {
         /** The var 'final' modifier. */
         private final boolean isFinal;
         /** The var 'required' modifier. */

@@ -72,7 +72,7 @@ public final class ConstructorMethod implements JexlMethod {
         } else {
             return null;
         }
-        Constructor<?>[] ctors = is.getConstructors(clazz);
+        Constructor<?>[] ctors = is.getConstructors(clazz, className);
         if (ctors == null || ctors.length == 0) {
             return null;
         }

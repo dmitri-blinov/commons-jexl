@@ -55,7 +55,7 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
         return prim == null ? parm : prim;
     }
 
-    protected static Object[] EMPTY_ARRAY = new Object[0];
+    protected static final Object[] EMPTY_ARRAY = new Object[0];
 
     /** The intended class array. */
     protected Class<?> commonClass = null;
