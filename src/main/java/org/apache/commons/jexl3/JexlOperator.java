@@ -106,7 +106,7 @@ public enum JexlOperator {
 
     /**
      * Left-shift operator.
-     * <br><strong>Syntax:</strong> <code>x << y</code>
+     * <br><strong>Syntax:</strong> <code>x &lt;&lt; y</code>
      * <br><strong>Method:</strong> <code>T leftShift(L x, R y);</code>.
      * @see JexlArithmetic#leftShift
      */
@@ -114,7 +114,7 @@ public enum JexlOperator {
 
     /**
      * Right-shift operator.
-     * <br><strong>Syntax:</strong> <code>x >> y</code>
+     * <br><strong>Syntax:</strong> <code>x &gt;&gt; y</code>
      * <br><strong>Method:</strong> <code>T rightShift(L x, R y);</code>.
      * @see JexlArithmetic#rightShift
      */
@@ -122,7 +122,7 @@ public enum JexlOperator {
 
     /**
      * Right-shift unsigned operator.
-     * <br><strong>Syntax:</strong> <code>x >>> y</code>
+     * <br><strong>Syntax:</strong> <code>x &gt;&gt;&gt; y</code>
      * <br><strong>Method:</strong> <code>T rightShiftUnsigned(L x, R y);</code>.
      * @see JexlArithmetic#rightShiftUnsigned
      */
@@ -298,21 +298,21 @@ public enum JexlOperator {
 
     /**
      * Self-shl operator.
-     * <br><strong>Syntax:</strong> <code>x <<= y</code>
+     * <br><strong>Syntax:</strong> <code>x &lt;&lt;= y</code>
      * <br><strong>Method:</strong> <code>T selfLeftShift(L x, R y);</code>.
      */
     SELF_SHL("<<=", "selfLeftShift", SHL),
 
     /**
      * Self-sar operator.
-     * <br><strong>Syntax:</strong> <code>x >>= y</code>
+     * <br><strong>Syntax:</strong> <code>x &gt;&gt;= y</code>
      * <br><strong>Method:</strong> <code>T selfRightShift(L x, R y);</code>.
      */
     SELF_SAR(">>=", "selfRightShift", SAR),
 
     /**
      * Self-shr operator.
-     * <br><strong>Syntax:</strong> <code>x >>>= y</code>
+     * <br><strong>Syntax:</strong> <code>x &gt;&gt;&gt;= y</code>
      * <br><strong>Method:</strong> <code>T selfRightShiftUnsigned(L x, R y);</code>.
      */
     SELF_SHR(">>>=", "selfRightShiftUnsigned", SHR),

@@ -1252,7 +1252,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left << right.
+     * @return left &lt;&lt; right.
      */
     public Object leftShift(Object left, Object right) {
         if (left == null && right == null) {
@@ -1293,7 +1293,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left << right.
+     * @return left &lt;&lt;= right.
      */
     public Object selfLeftShift(Object left, Object right) {
         return leftShift(left, right);
@@ -1304,7 +1304,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left >> right.
+     * @return left &gt;&gt; right.
      */
     public Object rightShift(Object left, Object right) {
         if (left == null && right == null) {
@@ -1339,7 +1339,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left >> right.
+     * @return left &gt;&gt; right.
      */
     public Object selfRightShift(Object left, Object right) {
         return rightShift(left, right);
@@ -1350,7 +1350,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left >>> right.
+     * @return left &gt;&gt;&gt; right.
      */
     public Object rightShiftUnsigned(Object left, Object right) {
         if (left == null && right == null) {
@@ -1375,7 +1375,7 @@ public class JexlArithmetic {
      *
      * @param left  left argument
      * @param right  right argument
-     * @return left >>> right.
+     * @return left &gt;&gt;&gt; right.
      */
     public Object selfRightShiftUnsigned(Object left, Object right) {
         return rightShiftUnsigned(left, right);
@@ -1666,6 +1666,7 @@ public class JexlArithmetic {
      * @param object the object to be derefenced
      * @param key the property key
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if access fails
      */
     public Object propertyGet(Object object, Object key) throws Exception {
         if (object instanceof IndexedType.IndexedContainer) {
@@ -1686,6 +1687,7 @@ public class JexlArithmetic {
      * @param object the object to be derefenced
      * @param key the field key
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if access fails
      */
     public Object fieldGet(Object object, Object key) throws Exception {
         return JexlEngine.TRY_FAILED;
@@ -1697,6 +1699,7 @@ public class JexlArithmetic {
      * @param object the object to be derefenced
      * @param key the property key
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if access fails
      */
     public Object arrayGet(Object object, Object key) throws Exception {
         return propertyGet(object, key);
@@ -1709,6 +1712,7 @@ public class JexlArithmetic {
      * @param key the property key
      * @param value the value to assign to property
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if assignment fails
      */
     public Object propertySet(Object object, Object key, Object value) throws Exception {
         if (object instanceof IndexedType.IndexedContainer) {
@@ -1732,6 +1736,7 @@ public class JexlArithmetic {
      * @param key the field key
      * @param value the value to assign to property
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if assignment fails
      */
     public Object fieldSet(Object object, Object key, Object value) throws Exception {
         return JexlEngine.TRY_FAILED;
@@ -1744,6 +1749,7 @@ public class JexlArithmetic {
      * @param key the property key
      * @param value the value to assign to property
      * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if assignment fails
      */
     public Object arraySet(Object object, Object key, Object value) throws Exception {
         return propertySet(object, key, value);
