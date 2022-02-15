@@ -402,7 +402,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.ADD, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.add(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, "+ error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "+ error", xrt);
         }
     }
 
@@ -414,7 +414,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.SUBTRACT, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.subtract(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, "- error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "- error", xrt);
         }
     }
 
@@ -426,8 +426,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.MULTIPLY, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.multiply(left, right);
         } catch (final ArithmeticException xrt) {
-            final JexlNode xnode = findNullOperand(xrt, node, left, right);
-            throw new JexlException(xnode, "* error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "* error", xrt);
         }
     }
 
@@ -442,8 +441,7 @@ public class Interpreter extends InterpreterBase {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            final JexlNode xnode = findNullOperand(xrt, node, left, right);
-            throw new JexlException(xnode, "/ error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "/ error", xrt);
         }
     }
 
@@ -458,8 +456,7 @@ public class Interpreter extends InterpreterBase {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            final JexlNode xnode = findNullOperand(xrt, node, left, right);
-            throw new JexlException(xnode, "% error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "% error", xrt);
         }
     }
 
@@ -510,7 +507,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.AND, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.and(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, "& error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "& error", xrt);
         }
     }
 
@@ -518,11 +515,14 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTBitwiseOrNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         final Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        if (arithmetic.isStrict(JexlOperator.OR) && left == null || right == null) {
+            // boum
+        }
         try {
             final Object result = operators.tryOverload(node, JexlOperator.OR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.or(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, "| error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "| error", xrt);
         }
     }
 
@@ -534,7 +534,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.XOR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.xor(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, "^ error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), "^ error", xrt);
         }
     }
 
@@ -605,7 +605,7 @@ public class Interpreter extends InterpreterBase {
                            ? arithmetic.toBoolean(result)
                            : arithmetic.equals(left, right);
                 } catch (ArithmeticException xrt) {
-                    throw new JexlException(node, "== error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), "== error", xrt);
                 }
             });
         } else {
@@ -616,7 +616,7 @@ public class Interpreter extends InterpreterBase {
                        ? arithmetic.toBoolean(result)
                        : arithmetic.equals(left, right);
             } catch (ArithmeticException xrt) {
-                throw new JexlException(node, "== error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), "== error", xrt);
             }
         }
     }
@@ -633,7 +633,7 @@ public class Interpreter extends InterpreterBase {
                            ? !arithmetic.toBoolean(result)
                            : !arithmetic.equals(left, right);
                 } catch (final ArithmeticException xrt) {
-                    throw new JexlException(node, "!= error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), "!= error", xrt);
                 }
             });
         } else {
@@ -644,8 +644,7 @@ public class Interpreter extends InterpreterBase {
                        ? !arithmetic.toBoolean(result)
                        : !arithmetic.equals(left, right);
             } catch (final ArithmeticException xrt) {
-                JexlNode xnode = findNullOperand(xrt, node, left, right);
-                throw new JexlException(xnode, "!= error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), "!= error", xrt);
             }
         }
     }
@@ -662,7 +661,7 @@ public class Interpreter extends InterpreterBase {
                            ? arithmetic.toBoolean(result)
                            : arithmetic.greaterThanOrEqual(left, right);
                 } catch (ArithmeticException xrt) {
-                    throw new JexlException(node, ">= error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), ">= error", xrt);
                 }
             });
         } else {
@@ -673,7 +672,7 @@ public class Interpreter extends InterpreterBase {
                        ? arithmetic.toBoolean(result) 
                        : arithmetic.greaterThanOrEqual(left, right);
             } catch (ArithmeticException xrt) {
-                throw new JexlException(node, ">= error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), ">= error", xrt);
             }
         }
     }
@@ -690,7 +689,7 @@ public class Interpreter extends InterpreterBase {
                            ? arithmetic.toBoolean(result)
                            : arithmetic.greaterThan(left, right);
                 } catch (ArithmeticException xrt) {
-                    throw new JexlException(node, "> error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), "> error", xrt);
                 }
             });
         } else {
@@ -701,7 +700,7 @@ public class Interpreter extends InterpreterBase {
                        ? arithmetic.toBoolean(result)
                        : arithmetic.greaterThan(left, right);
             } catch (ArithmeticException xrt) {
-                throw new JexlException(node, "> error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), "> error", xrt);
             }
         }
     }
@@ -718,7 +717,7 @@ public class Interpreter extends InterpreterBase {
                            ? arithmetic.toBoolean(result)
                            : arithmetic.lessThanOrEqual(left, right);
                 } catch (ArithmeticException xrt) {
-                    throw new JexlException(node, "<= error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), "<= error", xrt);
                 }
             });
         } else {
@@ -729,7 +728,7 @@ public class Interpreter extends InterpreterBase {
                        ? arithmetic.toBoolean(result)
                        : arithmetic.lessThanOrEqual(left, right);
             } catch (ArithmeticException xrt) {
-                throw new JexlException(node, "<= error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), "<= error", xrt);
             }
         }
     }
@@ -746,7 +745,7 @@ public class Interpreter extends InterpreterBase {
                            ? arithmetic.toBoolean(result)
                            : arithmetic.lessThan(left, right);
                 } catch (ArithmeticException xrt) {
-                    throw new JexlException(node, "< error", xrt);
+                    throw new JexlException(findNullOperand(node, left, right), "< error", xrt);
                 }
             });
         } else {
@@ -757,7 +756,7 @@ public class Interpreter extends InterpreterBase {
                        ? arithmetic.toBoolean(result)
                        : arithmetic.lessThan(left, right);
             } catch (ArithmeticException xrt) {
-                throw new JexlException(node, "< error", xrt);
+                throw new JexlException(findNullOperand(node, left, right), "< error", xrt);
             }
         }
     }
@@ -893,8 +892,7 @@ public class Interpreter extends InterpreterBase {
         try {
             return arithmetic.createRange(left, right);
         } catch (final ArithmeticException xrt) {
-            final JexlNode xnode = findNullOperand(xrt, node, left, right);
-            throw new JexlException(xnode, ".. error", xrt);
+            throw new JexlException(findNullOperand(node, left, right), ".. error", xrt);
         }
     }
 
@@ -3081,7 +3079,7 @@ public class Interpreter extends InterpreterBase {
                 final String aname = ant != null ? ant.toString() : "?";
                 final boolean defined = isVariableDefined(frame, block, aname);
                 // defined but null; arg of a strict operator?
-                if (defined && (!arithmetic.isStrict() || !node.jjtGetParent().isStrictOperator())) {
+                if (defined && !node.jjtGetParent().isStrictOperator(arithmetic)) {
                     return null;
                 }
                 return unsolvableVariable(node, aname, !defined);

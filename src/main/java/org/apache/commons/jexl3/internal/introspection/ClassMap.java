@@ -62,9 +62,9 @@ final class ClassMap {
     /**
      * The cache miss marker method.
      */
-    private static final Method CACHE_MISS = cacheMiss();
+    static final Method CACHE_MISS = cacheMiss();
     /** A marker for getter parameter list. **/
-    private static final Class<?>[] GETTER_ARGS = new Class<?>[0];
+    static final Class<?>[] GETTER_ARGS = new Class<?>[0];
     /** The Class. */
     private final Class aClass;
     /**
