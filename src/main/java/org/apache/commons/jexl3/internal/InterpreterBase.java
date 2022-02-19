@@ -40,8 +40,13 @@ import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTInitialization;
+import org.apache.commons.jexl3.parser.ASTElvisNode;
 import org.apache.commons.jexl3.parser.ASTMethodNode;
+import org.apache.commons.jexl3.parser.ASTNullpNode;
+import org.apache.commons.jexl3.parser.ASTNullAssignment;
+import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTReference;
+import org.apache.commons.jexl3.parser.ASTTernaryNode;
 import org.apache.commons.jexl3.parser.ASTVar;
 import org.apache.commons.jexl3.parser.JexlNode;
 import org.apache.commons.jexl3.parser.JexlParser;
@@ -188,6 +193,14 @@ public abstract class InterpreterBase extends ParserVisitor {
                 }
             }
         }
+    }
+
+    /**
+     * @param node the operand node
+     * @return true if this node is an operand of a strict operator, false otherwise
+     */
+    protected boolean isStrictOperand(JexlNode node) {
+       return node.jjtGetParent().isStrictOperator(arithmetic);
     }
 
     /**
@@ -346,8 +359,8 @@ public abstract class InterpreterBase extends ParserVisitor {
             final Object value = frame.get(symbol);
             // not out of scope with no lexical shade ?
             if (value != Scope.UNDEFINED) {
-                // null argument of an arithmetic operator ?
-                if (value == null && identifier.jjtGetParent().isStrictOperator(arithmetic)) {
+                // null operand of an arithmetic operator ?
+                if (value == null && isStrictOperand(identifier)) {
                     return unsolvableVariable(identifier, name, false); // defined but null
                 }
                 return value;
@@ -368,15 +381,14 @@ public abstract class InterpreterBase extends ParserVisitor {
                 }
 
                 // not defined, ignore in some cases...
-                final boolean ignore =
-                        (isSafe() && (symbol >= 0 
-                                        || identifier.jjtGetParent() instanceof ASTAssignment
-                                        || identifier.jjtGetParent() instanceof ASTInitialization))
-                         || (identifier.jjtGetParent() instanceof ASTReference);
+                final boolean ignore = identifier.jjtGetParent() instanceof ASTReference
+                        || (isSafe() && (symbol >= 0 
+                                          || identifier.jjtGetParent() instanceof ASTAssignment
+                                          || identifier.jjtGetParent() instanceof ASTInitialization));
                 if (!ignore) {
                     return undefinedVariable(identifier, name); // undefined
                 }
-            } else if (identifier.jjtGetParent().isStrictOperator(arithmetic)) {
+            } else if (isStrictOperand(identifier)) {
                 return unsolvableVariable(identifier, name, false); // defined but null
             }
         }
@@ -495,6 +507,33 @@ public abstract class InterpreterBase extends ParserVisitor {
     }
 
     /**
+     * Check if a null evaluated expression is protected by a ternary expression.
+     * <p>
+     * The rationale is that the ternary / elvis expressions are meant for the user to explicitly take control
+     * over the error generation; ie, ternaries can return null even if the engine in strict mode
+     * would normally throw an exception.
+     * </p>
+     * @return true if nullable variable, false otherwise
+     */
+    protected boolean isTernaryProtected(JexlNode node) {
+        for (JexlNode walk = node.jjtGetParent(); walk != null; walk = walk.jjtGetParent()) {
+            // protect only the condition part of the ternary
+            if (walk instanceof ASTTernaryNode
+                || walk instanceof ASTNullpNode
+                || walk instanceof ASTElvisNode
+                || walk instanceof ASTNullAssignment
+                || walk instanceof ASTNEAssignment) {
+                return node == walk.jjtGetChild(0);
+            }
+            if (!(walk instanceof ASTReference || walk instanceof ASTArrayAccess)) {
+                break;
+            }
+            node = walk;
+        }
+        return false;
+    }
+
+    /**
      * Triggered when a variable generates an issue.
      * @param node  the node where the error originated from
      * @param var   the variable name
@@ -502,7 +541,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object variableError(final JexlNode node, final String var, final VariableIssue issue) {
-        if (isStrictEngine() && !node.isTernaryProtected()) {
+        if (isStrictEngine() && !isTernaryProtected(node)) {
             throw new JexlException.Variable(node, var, issue);
         }
         if (logger.isDebugEnabled()) {
@@ -546,7 +585,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object unsolvableProperty(final JexlNode node, final String property, final boolean undef, final Throwable cause) {
-        if (isStrictEngine() && !node.isTernaryProtected()) {
+        if (isStrictEngine() && !isTernaryProtected(node)) {
             throw new JexlException.Property(node, property, undef, cause);
         }
         if (logger.isDebugEnabled()) {
@@ -564,7 +603,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @return throws JexlException if strict and not silent, null otherwise
      */
     protected Object unsolvableField(final JexlNode node, final String field, final boolean undef, final Throwable cause) {
-        if (isStrictEngine() && !node.isTernaryProtected()) {
+        if (isStrictEngine() && !isTernaryProtected(node)) {
             throw new JexlException.Field(node, field, undef, cause);
         }
         if (logger.isDebugEnabled()) {
