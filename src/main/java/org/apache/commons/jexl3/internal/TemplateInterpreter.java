@@ -149,7 +149,7 @@ public class TemplateInterpreter extends Interpreter {
         }
         TemplateEngine.TemplateExpression expr = exprs[e];
         if (expr.isDeferred()) {
-            expr = expr.prepare(frame, context);
+            expr = expr.prepare(context, frame, options);
         }
         if (expr instanceof TemplateEngine.CompositeExpression) {
             printComposite((TemplateEngine.CompositeExpression) expr);
@@ -270,14 +270,13 @@ public class TemplateInterpreter extends Interpreter {
             return new Closure(this, (ASTJexlLambda) script) {
                 @Override
                 protected Interpreter createInterpreter(final JexlContext context, final Frame local) {
-                    final JexlOptions opts = jexl.evalOptions(script, context);
                     final TemplateInterpreter.Arguments targs = new TemplateInterpreter.Arguments(jexl)
                             .context(context)
-                            .options(opts)
+                            .options(options)
                             .frame(local)
                             .expressions(exprs)
                             .writer(writer);
-                    return new TemplateInterpreter(targs);
+                    return jexl.createTemplateInterpreter(targs);
                 }
             };
         }

@@ -187,4 +187,11 @@ public class ASTJexlScript extends JexlLexicalNode  {
         return scope != null? scope.isVariableFinal(symbol) : false;
     }
 
+    /**
+     * Gets this script captured variable, i.e. symbols captured from outer scopes.
+     * @return the captured variable names
+     */
+    public String[] getCapturedVariables() {
+        return scope != null? scope.getCapturedVariables() : null;
+    }
 }
