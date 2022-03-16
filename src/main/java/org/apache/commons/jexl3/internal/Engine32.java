@@ -26,6 +26,9 @@ import org.apache.commons.jexl3.parser.ASTEQNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTNENode;
 import org.apache.commons.jexl3.parser.ASTNullpNode;
+import org.apache.commons.jexl3.parser.ASTNullAssignment;
+import org.apache.commons.jexl3.parser.ASTNEAssignment;
+import org.apache.commons.jexl3.parser.ASTElvisNode;
 import org.apache.commons.jexl3.parser.ASTReference;
 import org.apache.commons.jexl3.parser.ASTTernaryNode;
 import org.apache.commons.jexl3.parser.JexlNode;
@@ -52,9 +55,12 @@ public class Engine32 extends Engine {
         for (JexlNode walk = node.jjtGetParent(); walk != null; walk = walk.jjtGetParent()) {
             // protect only the condition part of the ternary
             if (walk instanceof ASTTernaryNode
-                    || walk instanceof ASTNullpNode
-                    || walk instanceof ASTEQNode
-                    || walk instanceof ASTNENode) {
+                || walk instanceof ASTNullpNode
+                || walk instanceof ASTElvisNode
+                || walk instanceof ASTEQNode
+                || walk instanceof ASTNENode
+                || walk instanceof ASTNullAssignment
+                || walk instanceof ASTNEAssignment) {
                 return node == walk.jjtGetChild(0);
             }
             if (!(walk instanceof ASTReference || walk instanceof ASTArrayAccess)) {
@@ -102,8 +108,9 @@ public class Engine32 extends Engine {
     }
 
     @Override
-    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts) {
-        return new Interpreter(this, opts, context, frame) {
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, 
+        final Object current) {
+        return new Interpreter(this, opts, context, frame, current) {
             @Override
             protected boolean isStrictOperand(JexlNode node) {
                 return false;

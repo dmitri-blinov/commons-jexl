@@ -269,7 +269,7 @@ public class TemplateInterpreter extends Interpreter {
         if (script instanceof ASTJexlLambda && !((ASTJexlLambda) script).isTopLevel()) {
             return new Closure(this, (ASTJexlLambda) script) {
                 @Override
-                protected Interpreter createInterpreter(final JexlContext context, final Frame local, final JexlOptions options) {
+                protected Interpreter createInterpreter(final JexlContext context, final Frame local) {
                     final TemplateInterpreter.Arguments targs = new TemplateInterpreter.Arguments(jexl)
                             .context(context)
                             .options(options)

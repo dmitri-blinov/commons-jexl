@@ -50,21 +50,21 @@ public class CollectionLiteralTest extends JexlTestCase {
             super(strict);
         }
 
-        @Override public MapBuilder mapBuilder(int size) {
-            return new CountingMapBuilder(maps, size);
+        @Override public MapBuilder mapBuilder(final int size, boolean ordered) {
+            return new CountingMapBuilder(maps, size, ordered);
         }
-        @Override public SetBuilder setBuilder(int size) {
-            return new CountingSetBuilder(sets, size);
+        @Override public SetBuilder setBuilder(final int size, boolean ordered) {
+            return new CountingSetBuilder(sets, size, ordered);
         }
-        @Override public ArrayBuilder arrayBuilder(int size) {
+        @Override public ArrayBuilder arrayBuilder(final int size) {
             return new CountingArrayBuilder(arrays, size);
         }
     }
 
     static class CountingSetBuilder extends SetBuilder {
         final AtomicInteger count;
-        public CountingSetBuilder(AtomicInteger ai, int size) {
-            super(size);
+        public CountingSetBuilder(AtomicInteger ai, int size, boolean ordered) {
+            super(size, ordered);
             count = ai;
         }
         @Override public Set<?> create() {
@@ -76,8 +76,8 @@ public class CollectionLiteralTest extends JexlTestCase {
 
     static class CountingMapBuilder extends MapBuilder {
         final AtomicInteger count;
-        public CountingMapBuilder(AtomicInteger ai, int size) {
-            super(size);
+        public CountingMapBuilder(AtomicInteger ai, int size, boolean ordered) {
+            super(size, ordered);
             count = ai;
         }
         @Override public Map<Object, Object> create() {
