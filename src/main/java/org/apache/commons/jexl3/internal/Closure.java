@@ -18,6 +18,7 @@ package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 
@@ -85,6 +86,8 @@ public class Closure extends Script {
     protected final Closure chained;
     /** The caller. */
     protected final Interpreter caller;
+    /** The options. */
+    protected final JexlOptions options;
 
     /**
      * Creates a closure.
@@ -98,6 +101,8 @@ public class Closure extends Script {
         context = theCaller.context;
         curried = 0;
         chained = null;
+        JexlOptions callerOptions = theCaller.options;
+        options = callerOptions != null ? callerOptions.copy() :  null;
     }
 
     /**
@@ -127,12 +132,15 @@ public class Closure extends Script {
             context = closure.context;
             curried = baseCurried + args.length;
             chained = closure.chained;
+            JexlOptions callerOptions = closure.options;
+            options = callerOptions != null ? callerOptions.copy() :  null;
         } else {
             caller = null;
             frame = script.createFrame(scriptArgs(args));
             context = null;
             curried = args.length;
             chained = null;
+            options = null;
         }
     }
 
@@ -147,6 +155,8 @@ public class Closure extends Script {
         frame = base.frame.assign();
         context = base.context;
         curried = base.curried;
+        JexlOptions callerOptions = base.options;
+        options = callerOptions != null ? callerOptions.copy() :  null;
         this.chained = chained;
     }
 
@@ -257,8 +267,7 @@ public class Closure extends Script {
         if (context == null) {
             context = this.context;
         }
-        JexlOptions opts = jexl.evalOptions(script, context);
-        return jexl.createInterpreter(context, frame, opts, caller != null ? caller.current : null);
+        return jexl.createInterpreter(context, frame, options, caller != null ? caller.current : null);
     }
 
     /**

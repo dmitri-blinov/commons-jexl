@@ -14,30 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.commons.jexl3.parser;
+package org.apache.commons.jexl3.internal;
+
+import org.apache.commons.jexl3.MapContext;
 
 /**
- * Lambda (function).
+ * A map context that has access to the interpreter evaluation options.
  */
-public class ASTJexlLambda extends ASTJexlScript {
-    ASTJexlLambda(final int id) {
-        super(id);
-    }
-
-    ASTJexlLambda(final Parser p, final int id) {
-        super(p, id);
-    }
-
-    /**
-     * @return true if outermost script.
-     */
-    public boolean isTopLevel() {
-        return jjtGetParent() == null;
+public class OptionsContext extends MapContext {
+    @Override
+    public Object get(final String name) {
+        if ("$options".equals(name)) {
+            Interpreter pinter = Interpreter.INTER.get();
+            return pinter.options;
+        }
+        return super.get(name);
     }
 
     @Override
-    protected boolean isConstant(final boolean literal) {
-        // a closure is constant if it does not capture any variables
-        return getCapturedVariables().length == 0;
+    public boolean has(final String name) {
+        return "$options".equals(name) || super.has(name);
     }
 }
