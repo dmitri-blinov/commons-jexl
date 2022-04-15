@@ -191,8 +191,6 @@ Enhancements
 
 + Array element assignment operator `arr[x] = value` now tries to perform implicit type cast of the assigned value
 
-+ Single expression functions can be defined by using `=>` fat arrow operator without outer curly braces
-
 + Variadic functions can be defined by using `(a...)` syntax after the last function argument
 
 + Function closures implement all basic Java 8 `@FunctionalInterface` interfaces,

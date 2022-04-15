@@ -281,7 +281,7 @@
                         <p>The following function definition syntax is also supported
                         <code>var fun = (x, y) -> { x + y }</code>
                         If the function body is a simple expression then the following syntax without curly braces can also be used
-                        <code>var fun = (x, y) => x + y</code></p>
+                        <code>var fun = (x, y) -> x + y</code></p>
                         <p>A function can accept variable number of arguments, in that case the following syntax can be used
                         <code>var fun = (x, y...) -> {x + y[0] + y[1]}</code>. The last parameter of a function accepting the variable
                         number of arguments can not have a default value.
