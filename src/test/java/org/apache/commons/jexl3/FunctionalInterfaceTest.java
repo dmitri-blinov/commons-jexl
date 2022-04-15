@@ -118,10 +118,10 @@ public class FunctionalInterfaceTest extends JexlTestCase {
     @Test
     public void testIntFunction() throws Exception {
         JexlContext jc = new TestContext(new MapContext());
-        JexlScript e = JEXL.createScript("{'dd1','ddd2','dddd3'}.stream().mapToInt(e => e.length()).anyMatch((int x) => x > 4)");
+        JexlScript e = JEXL.createScript("{'dd1','ddd2','dddd3'}.stream().mapToInt(e -> e.length()).anyMatch((int x) -> x > 4)");
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", Boolean.TRUE, o);
-        e = JEXL.createScript("{'dd1','ddd2','dddd3'}.stream().mapToInt(e => e.length()).allMatch((int x) => x > 4)");
+        e = JEXL.createScript("{'dd1','ddd2','dddd3'}.stream().mapToInt(e -> e.length()).allMatch((int x) -> x > 4)");
         o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", Boolean.FALSE, o);
     }
