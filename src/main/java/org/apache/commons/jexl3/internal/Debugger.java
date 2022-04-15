@@ -395,6 +395,44 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     /**
+     * Whether a node is a statement (vs an expression).
+     * @param child the node
+     * @return true if node is a statement
+     */
+    private static boolean isStatement(JexlNode child) {
+        return child instanceof ASTJexlScript
+                || child instanceof ASTBlock
+                || child instanceof ASTIfStatement
+                || child instanceof ASTForStatement
+                || child instanceof ASTForeachStatement
+                || child instanceof ASTWhileStatement
+                || child instanceof ASTDoWhileStatement
+                || child instanceof ASTTryStatement
+                || child instanceof ASTTryWithResourceStatement
+                || child instanceof ASTSwitchStatement
+                || child instanceof ASTSynchronizedStatement
+                || child instanceof ASTAnnotation;
+    }
+
+    /**
+     * Whether a script or expression ends with a semicolumn.
+     * @param cs the string
+     * @return true if a semicolumn is the last non-whitespace character
+     */
+    private static boolean semicolTerminated(CharSequence cs) {
+        for(int i = cs.length() - 1; i >= 0; --i) {
+            char c = cs.charAt(i);
+            if (c == ';') {
+                return true;
+            }
+            if (!Character.isWhitespace(c)) {
+                break;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Adds a statement node to the rebuilt expression.
      * @param child the child node
      * @param data  visitor pattern argument
@@ -413,18 +451,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         final Object value = accept(child, data);
         depth += 1;
         // blocks, if, for & while don't need a ';' at end
-        if (!(child instanceof ASTJexlScript
-            || child instanceof ASTBlock
-            || child instanceof ASTIfStatement
-            || child instanceof ASTForStatement
-            || child instanceof ASTForeachStatement
-            || child instanceof ASTWhileStatement
-            || child instanceof ASTDoWhileStatement
-            || child instanceof ASTTryStatement
-            || child instanceof ASTTryWithResourceStatement
-            || child instanceof ASTSwitchStatement
-            || child instanceof ASTSynchronizedStatement
-            || child instanceof ASTAnnotation)) {
+        if (!isStatement(child) && !semicolTerminated(builder)) {
             builder.append(';');
             if (indent > 0) {
                 builder.append('\n');
@@ -434,6 +461,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
         return value;
     }
+
 
     /**
      * Gets printable class name
@@ -1065,8 +1093,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
      */
     protected boolean needQuotes(final String str) {
         return QUOTED_IDENTIFIER.matcher(str).find()
-            || "size".equals(str)
-            || "empty".equals(str);
+                || "size".equals(str)
+                || "empty".equals(str);
     }
 
     @Override
@@ -1196,6 +1224,10 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         }
     }
 
+    private static  boolean isLambdaExpr(ASTJexlLambda lambda) {
+        return lambda.jjtGetNumChildren() == 1 && !isStatement(lambda.jjtGetChild(0));
+    }
+
     @Override
     protected Object visit(final ASTJexlScript node, final Object arg) {
         Object data = arg;
@@ -1311,12 +1343,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 builder.append(' ');
             } else {
                 if (expr) {
-                    builder.append("=>");
+                    builder.append("->");
                 } else if (!function) {
                     builder.append("->");
                 }
             }
-            // we will need a block...
         }
         // no parameters or done with them
         final int num = node.jjtGetNumChildren();

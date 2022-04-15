@@ -45,7 +45,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         Assert.assertEquals(42, result);
         result = s42.execute(ctxt);
         Assert.assertEquals(42, result);
-        s42 = jexl.createScript("x => x + x");
+        s42 = jexl.createScript("x -> x + x");
         result = s42.execute(ctxt, 21);
         Assert.assertEquals(42, result);
     }
@@ -53,11 +53,11 @@ public class LambdaExpressionTest extends JexlTestCase {
     @Test
     public void testLambda() throws Exception {
         JexlEngine jexl = new Engine();
-        String strs = "var s = x => x + x; s(21)";
+        String strs = "var s = x -> x + x; s(21)";
         JexlScript s42 = jexl.createScript(strs);
         Object result = s42.execute(null);
         Assert.assertEquals(42, result);
-        strs = "var s = (x, y) => x + y; s(15, 27)";
+        strs = "var s = (x, y) -> x + y; s(15, 27)";
         s42 = jexl.createScript(strs);
         result = s42.execute(null);
         Assert.assertEquals(42, result);
@@ -66,11 +66,11 @@ public class LambdaExpressionTest extends JexlTestCase {
     @Test
     public void testLambdaClosure() throws Exception {
         JexlEngine jexl = new Engine();
-        String strs = "var t = 20; var s = (x, y) => x + y + t; s(15, 7)";
+        String strs = "var t = 20; var s = (x, y) -> x + y + t; s(15, 7)";
         JexlScript s42 = jexl.createScript(strs);
         Object result = s42.execute(null);
         Assert.assertEquals(42, result);
-        strs = "var t = 20; var s = (x, y) => x + y + t; t = 54; s(15, 7)";
+        strs = "var t = 20; var s = (x, y) -> x + y + t; t = 54; s(15, 7)";
         s42 = jexl.createScript(strs);
         result = s42.execute(null);
         Assert.assertEquals(42, result);
@@ -80,7 +80,7 @@ public class LambdaExpressionTest extends JexlTestCase {
     public void testLambdaLambda() throws Exception {
         JexlEngine jexl = new Engine();
 
-        String strs = "( (x, y) => ( (xx, yy) => xx + yy)(x, y))(15, 27)";
+        String strs = "( (x, y) -> ( (xx, yy) -> xx + yy)(x, y))(15, 27)";
         JexlScript s42 = jexl.createScript(strs);
         Object result = s42.execute(null);
         Assert.assertEquals(42, result);
@@ -89,7 +89,7 @@ public class LambdaExpressionTest extends JexlTestCase {
     @Test
     public void testNestLambda() throws Exception {
         JexlEngine jexl = new Engine();
-        String strs = "( (x) => (y) => x + y)(15)(27)";
+        String strs = "( (x) -> (y) -> x + y)(15)(27)";
         JexlScript s42 = jexl.createScript(strs);
         Object result = s42.execute(null);
         Assert.assertEquals(42, result);
@@ -100,7 +100,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         JexlEngine jexl = new Engine();
         JexlContext jc = new MapContext();
         try {
-            JexlScript script = jexl.createScript("var fact = x => (x <= 1) ? 1 : x * fact(x - 1); fact(5)");
+            JexlScript script = jexl.createScript("var fact = x -> (x <= 1) ? 1 : x * fact(x - 1); fact(5)");
             int result = (Integer) script.execute(jc);
             Assert.assertEquals(120, result);
         } catch (JexlException xany) {
@@ -117,7 +117,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         try {
             JexlScript script = jexl.createScript(
                     "var y = 1; var z = 1; "
-                    +"var fact = (x) => (x <= y) ? z : x * fact(x - 1); fact(6)");
+                    +"var fact = (x) -> (x <= y) ? z : x * fact(x - 1); fact(6)");
             int result = (Integer) script.execute(jc);
             Assert.assertEquals(720, result);
         } catch (JexlException xany) {
@@ -132,7 +132,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         JexlScript script;
         Object result;
 
-        script = jexl.createScript("(x) => x");
+        script = jexl.createScript("(x) -> x");
         Assert.assertArrayEquals(new String[]{"x"}, script.getParameters());
         result = script.execute(null, 42);
         Assert.assertEquals(42, result);
@@ -144,7 +144,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         JexlScript script;
         Object result;
 
-        JexlScript base = jexl.createScript("(x, y, z)=>x + y + z");
+        JexlScript base = jexl.createScript("(x, y, z)->x + y + z");
         script = base.curry(5);
         script = script.curry(15);
         script = script.curry(22);
@@ -158,7 +158,7 @@ public class LambdaExpressionTest extends JexlTestCase {
         JexlScript script;
         Object result;
 
-        JexlScript base = jexl.createScript("(x, y, z)=>x + y + z");
+        JexlScript base = jexl.createScript("(x, y, z)->x + y + z");
         script = base.curry(5, 15);
         script = script.curry(22);
         result = script.execute(null);

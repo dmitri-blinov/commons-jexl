@@ -122,7 +122,7 @@ public class MethodReferenceTest extends JexlTestCase {
     public void testConstructor() throws Exception {
         JexlContext context = new MapContext();
         context.set("Character", Character.class);
-        JexlScript rm = JEXL.createScript("'abc'.chars().mapToObj(c => (char) c).map(Character::new).count()");
+        JexlScript rm = JEXL.createScript("'abc'.chars().mapToObj(c -> (char) c).map(Character::new).count()");
         Object o = rm.execute(context);
         Assert.assertEquals("Result is not as expected", 3L, o);
     }

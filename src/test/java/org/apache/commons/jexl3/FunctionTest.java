@@ -46,10 +46,10 @@ public class FunctionTest extends JexlTestCase {
     @Test
     public void testExprSyntax() throws Exception {
         JexlEngine jexl = createEngine();
-        JexlScript s = jexl.createScript("function x() => 42; x()");
+        JexlScript s = jexl.createScript("function x() -> 42; x()");
         Object result = s.execute(null, s);
         Assert.assertEquals(42, result);
-        s = jexl.createScript("function x(a,b) => a+b; x(11,31)");
+        s = jexl.createScript("function x(a,b) -> a+b; x(11,31)");
         result = s.execute(null, s);
         Assert.assertEquals(42, result);
     }
