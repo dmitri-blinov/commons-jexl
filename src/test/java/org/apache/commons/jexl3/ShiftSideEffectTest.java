@@ -291,29 +291,29 @@ public class ShiftSideEffectTest extends JexlTestCase {
             return "VALUE".equals(property)? var.value = v : JexlEngine.TRY_FAILED;
         }
     
-        public Var leftShift(Var lhs, Var rhs) {
+        public Var shiftLeft(Var lhs, Var rhs) {
             return new Var(lhs.value << rhs.value);
         }
 
-        public JexlOperator selfLeftShift(Var lhs, Var rhs) {
+        public JexlOperator selfShiftLeft(Var lhs, Var rhs) {
             lhs.value <<= rhs.value;
             return JexlOperator.ASSIGN;
         }
 
-        public Var rightShift(Var lhs, Var rhs) {
+        public Var shiftRight(Var lhs, Var rhs) {
             return new Var(lhs.value >> rhs.value);
         }
 
-        public JexlOperator selfRightShift(Var lhs, Var rhs) {
+        public JexlOperator selfShiftRight(Var lhs, Var rhs) {
             lhs.value >>= rhs.value;
             return JexlOperator.ASSIGN;
         }
 
-        public Var rightShiftUnsigned(Var lhs, Var rhs) {
+        public Var shiftRightUnsigned(Var lhs, Var rhs) {
             return new Var(lhs.value >>> rhs.value);
         }
 
-        public JexlOperator selfRightShiftUnsigned(Var lhs, Var rhs) {
+        public JexlOperator selfShiftRightUnsigned(Var lhs, Var rhs) {
             lhs.value >>>= rhs.value;
             return JexlOperator.ASSIGN;
         }

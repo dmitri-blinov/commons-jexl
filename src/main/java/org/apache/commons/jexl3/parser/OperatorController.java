@@ -199,32 +199,32 @@ class OperatorController extends ScriptVisitor {
 
     @Override
     protected Object visit(final ASTShiftLeftNode node, final Object data) {
-        return true;
+        return JexlOperator.SHIFTLEFT;
     }
 
     @Override
     protected Object visit(final ASTShiftRightNode node, final Object data) {
-        return true;
+        return JexlOperator.SHIFTRIGHT;
     }
 
     @Override
     protected Object visit(final ASTShiftRightUnsignedNode node, final Object data) {
-        return true;
+        return JexlOperator.SHIFTRIGHTU;
     }
 
     @Override
-    protected Object visit(final ASTSetShlNode node, final Object data) {
-        return true;
+    protected Object visit(final ASTSetShiftLeftNode node, final Object data) {
+        return JexlOperator.SELF_SHIFTLEFT;
     }
 
     @Override
-    protected Object visit(final ASTSetSarNode node, final Object data) {
-        return true;
+    protected Object visit(final ASTSetShiftRightNode node, final Object data) {
+        return JexlOperator.SELF_SHIFTRIGHT;
     }
 
     @Override
-    protected Object visit(final ASTSetShrNode node, final Object data) {
-        return true;
+    protected Object visit(final ASTSetShiftRightUnsignedNode node, final Object data) {
+        return JexlOperator.SELF_SHIFTRIGHTU;
     }
 
 }

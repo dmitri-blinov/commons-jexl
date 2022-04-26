@@ -228,12 +228,12 @@ public class Operators {
                     return arithmetic.selfOr(arg1, arg2);
                 case SELF_XOR:
                     return arithmetic.selfXor(arg1, arg2);
-                case SELF_SHL:
-                    return arithmetic.selfLeftShift(arg1, arg2);
-                case SELF_SAR:
-                    return arithmetic.selfRightShift(arg1, arg2);
-                case SELF_SHR:
-                    return arithmetic.selfRightShiftUnsigned(arg1, arg2);
+                case SELF_SHIFTLEFT:
+                    return arithmetic.selfShiftLeft(arg1, arg2);
+                case SELF_SHIFTRIGHT:
+                    return arithmetic.selfShiftRight(arg1, arg2);
+                case SELF_SHIFTRIGHTU:
+                    return arithmetic.selfShiftRightUnsigned(arg1, arg2);
                 default:
                     // unexpected, new operator added?
                     throw new UnsupportedOperationException(operator.getOperatorSymbol());

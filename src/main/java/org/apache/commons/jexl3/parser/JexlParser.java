@@ -669,6 +669,9 @@ public abstract class JexlParser extends StringParser {
     private static final Set<Class<? extends JexlNode>> ASSIGN_NODES = new HashSet<>(
         Arrays.asList(
             ASTAssignment.class,
+            ASTMultipleAssignment.class,
+            ASTNullAssignment.class,
+            ASTNEAssignment.class,
             ASTSetAddNode.class,
             ASTSetMultNode.class,
             ASTSetDivNode.class,
@@ -676,9 +679,9 @@ public abstract class JexlParser extends StringParser {
             ASTSetOrNode.class,
             ASTSetXorNode.class,
             ASTSetSubNode.class,
-            ASTSetShlNode.class,
-            ASTSetSarNode.class,
-            ASTSetShrNode.class,
+            ASTSetShiftLeftNode.class,
+            ASTSetShiftRightNode.class,
+            ASTSetShiftRightUnsignedNode.class,
             ASTIncrementNode.class,
             ASTDecrementNode.class,
             ASTIncrementPostfixNode.class,
