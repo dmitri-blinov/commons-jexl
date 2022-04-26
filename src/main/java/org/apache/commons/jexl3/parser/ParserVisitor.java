@@ -334,11 +334,11 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTSetXorNode node, Object data);
 
-    protected abstract Object visit(ASTSetShlNode node, Object data);
+    protected abstract Object visit(ASTSetShiftLeftNode node, final Object data);
 
-    protected abstract Object visit(ASTSetSarNode node, Object data);
+    protected abstract Object visit(ASTSetShiftRightNode node, final Object data);
 
-    protected abstract Object visit(ASTSetShrNode node, Object data);
+    protected abstract Object visit(ASTSetShiftRightUnsignedNode node, final Object data);
 
     protected abstract Object visit(ASTJxltLiteral node, Object data);
 

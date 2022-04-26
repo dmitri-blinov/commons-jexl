@@ -142,9 +142,9 @@ import org.apache.commons.jexl3.parser.ASTSetMultNode;
 import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
-import org.apache.commons.jexl3.parser.ASTSetShlNode;
-import org.apache.commons.jexl3.parser.ASTSetSarNode;
-import org.apache.commons.jexl3.parser.ASTSetShrNode;
+import org.apache.commons.jexl3.parser.ASTSetShiftLeftNode;
+import org.apache.commons.jexl3.parser.ASTSetShiftRightNode;
+import org.apache.commons.jexl3.parser.ASTSetShiftRightUnsignedNode;
 import org.apache.commons.jexl3.parser.ASTSetXorNode;
 import org.apache.commons.jexl3.parser.ASTShiftLeftNode;
 import org.apache.commons.jexl3.parser.ASTShiftRightNode;
@@ -969,17 +969,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
-    protected Object visit(final ASTSetShlNode node, final Object data) {
+    protected Object visit(final ASTSetShiftLeftNode node, final Object data) {
         return visitNode(node, data);
     }
 
     @Override
-    protected Object visit(final ASTSetSarNode node, final Object data) {
+    protected Object visit(final ASTSetShiftRightUnsignedNode node, final Object data) {
         return visitNode(node, data);
     }
 
     @Override
-    protected Object visit(final ASTSetShrNode node, final Object data) {
+    protected Object visit(final ASTSetShiftRightNode node, final Object data) {
         return visitNode(node, data);
     }
 

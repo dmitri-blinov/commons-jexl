@@ -258,10 +258,9 @@ TOKEN_MGR_DECLS : {
     | < and_assign : "&=" >
     | < or_assign : "|=" >
     | < xor_assign : "^=" >
-    | < shl_assign : "<<=" >
-    | < sar_assign : ">>=" >
-    | < shr_assign : ">>>=" >
-
+    | < lshift_assign : "<<=" >
+    | < rshiftu_assign : ">>>=" >
+    | < rshift_assign : ">>=" >
     | < null_assign : "?=" >
     | < ne_assign : ":=" >
     | < assign : "=" >
@@ -280,10 +279,9 @@ TOKEN_MGR_DECLS : {
     | < and : "&" >
     | < or : "|" >
     | < xor : "^" >
-    | < shl : "<<" >
-    | < shr : ">>>" >
-    | < sar : ">>" >
-
+    | < lshift : "<<" >
+    | < rshiftu : ">>>" >
+    | < rshift : ">>" >
     | < tilda : "~" >
     | < range : ".." | "\u2025" >
 }
@@ -1160,11 +1158,11 @@ void AssignmentExpression() #void : {}
       |
       <minus_assign> Expression() #SetSubNode(2)
       |
-      <shl_assign> Expression() #SetShlNode(2)
+      <lshift_assign>  Expression() #SetShiftLeftNode(2)
       |
-      <sar_assign> Expression() #SetSarNode(2)
+      <rshift_assign>  Expression() #SetShiftRightNode(2)
       |
-      <shr_assign> Expression() #SetShrNode(2)
+      <rshiftu_assign>  Expression() #SetShiftRightUnsignedNode(2)
       |
       <null_assign> Expression() #NullAssignment(2)
       |
@@ -1302,16 +1300,15 @@ void RangeExpression() #void : {}
 /***************************************
  *      Arithmetic
  ***************************************/
-
 void ShiftExpression() #void : {}
 {
     AdditiveExpression()
     ( LOOKAHEAD(2) (
-      <shl> AdditiveExpression() #ShiftLeftNode(2)
-    |
-      <shr> AdditiveExpression() #ShiftRightUnsignedNode(2)
-    |
-      <sar> AdditiveExpression() #ShiftRightNode(2)
+      <lshift> AdditiveExpression() #ShiftLeftNode(2) // left shift
+      |
+      <rshift> AdditiveExpression() #ShiftRightNode(2) // right shift
+      |
+      <rshiftu> AdditiveExpression() #ShiftRightUnsignedNode(2) // right shift unsigned
     ) )*
 }
 
@@ -1320,7 +1317,7 @@ void AdditiveExpression() #void : {}
     MultiplicativeExpression()
     ( LOOKAHEAD(2) (
       <plus> MultiplicativeExpression() #AddNode(2)
-    |
+      |
       <minus> MultiplicativeExpression() #SubNode(2)
     ) )*
 }
@@ -1330,9 +1327,9 @@ void MultiplicativeExpression() #void : {}
     UnaryExpression()
     ( LOOKAHEAD(2) (
       <mult> UnaryExpression() #MulNode(2)
-    |
+      |
       (<div>|<DIV>) UnaryExpression() #DivNode(2)
-    |
+      |
       (<mod>|<MOD>) UnaryExpression() #ModNode(2)
     ) )*
 }
@@ -1378,7 +1375,7 @@ void PostfixExpression() #void : {}
     PointerExpression()
     ( LOOKAHEAD(1) (
       <increment> #IncrementPostfixNode(1)
-    |
+      |
       <decrement> #DecrementPostfixNode(1)
     ) )*
 }

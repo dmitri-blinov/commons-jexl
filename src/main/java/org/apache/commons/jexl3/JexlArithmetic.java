@@ -1262,15 +1262,13 @@ public class JexlArithmetic {
     }
 
     /**
-
-    /**
-     * Shifts a bit pattern to the left.
+     * Shifts a bit pattern to the right.
      *
      * @param left  left argument
      * @param right  right argument
      * @return left &lt;&lt; right.
      */
-    public Object leftShift(Object left, Object right) {
+    public Object shiftLeft(Object left, Object right) {
         if (left == null && right == null) {
             return controlNullNullOperands();
         }
@@ -1311,8 +1309,8 @@ public class JexlArithmetic {
      * @param right  right argument
      * @return left &lt;&lt;= right.
      */
-    public Object selfLeftShift(Object left, Object right) {
-        return leftShift(left, right);
+    public Object selfShiftLeft(Object left, Object right) {
+        return shiftLeft(left, right);
     }
 
     /**
@@ -1322,7 +1320,8 @@ public class JexlArithmetic {
      * @param right  right argument
      * @return left &gt;&gt; right.
      */
-    public Object rightShift(Object left, Object right) {
+    public Object shiftRight(Object left, Object right) {
+
         if (left == null && right == null) {
             return controlNullNullOperands();
         }
@@ -1357,8 +1356,8 @@ public class JexlArithmetic {
      * @param right  right argument
      * @return left &gt;&gt; right.
      */
-    public Object selfRightShift(Object left, Object right) {
-        return rightShift(left, right);
+    public Object selfShiftRight(Object left, Object right) {
+        return shiftRight(left, right);
     }
 
     /**
@@ -1368,7 +1367,7 @@ public class JexlArithmetic {
      * @param right  right argument
      * @return left &gt;&gt;&gt; right.
      */
-    public Object rightShiftUnsigned(Object left, Object right) {
+    public Object shiftRightUnsigned(Object left, Object right) {
         if (left == null && right == null) {
             return controlNullNullOperands();
         }
@@ -1393,8 +1392,8 @@ public class JexlArithmetic {
      * @param right  right argument
      * @return left &gt;&gt;&gt; right.
      */
-    public Object selfRightShiftUnsigned(Object left, Object right) {
-        return rightShiftUnsigned(left, right);
+    public Object selfShiftRightUnsigned(Object left, Object right) {
+        return shiftRightUnsigned(left, right);
     }
 
     /**

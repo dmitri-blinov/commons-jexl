@@ -16,11 +16,11 @@
  */
 package org.apache.commons.jexl3;
 
+import org.apache.commons.jexl3.junit.Asserter;
+
 import java.math.BigInteger;
 import org.junit.Assert;
 import org.junit.Test;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Tests shift operators.
@@ -28,186 +28,122 @@ import org.apache.commons.logging.LogFactory;
 @SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class ShiftOperatorsTest extends JexlTestCase {
 
+    private Asserter asserter;
+
+    private Asserter a360;
+
     public ShiftOperatorsTest() {
         super("ShiftOperatorsTest");
+        asserter = new Asserter(JEXL);
+        asserter.setStrict(false, false);
+
+        JexlEngine j360 = new JexlBuilder().arithmetic(new Arithmetic360(true)).strict(true).create();
+        a360 = new Asserter(j360);
+        a360.setStrict(false, false);
     }
 
     @Test
     public void testLeftShiftIntValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("1 << 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 1 << 2, o);
+        final String expr = "(x, y)-> x << y";
+        asserter.assertExpression(expr, 1L << 2, 1L, 2);
+        asserter.assertExpression(expr, 1L << -2, 1L, -2);
+        asserter.assertExpression(expr, -1L << 2, -1L, 2);
+        asserter.assertExpression(expr, -1L << -2, -1L, -2);
 
-        e = JEXL.createScript("1 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 1 << -2, o);
+        a360.assertExpression(expr, 1L << 2, 1L, 2);
+        a360.assertExpression(expr, 1L << -2, 1L, -2);
+        a360.assertExpression(expr, -1L << 2, -1L, 2);
+        a360.assertExpression(expr, -1L << -2, -1L, -2);
 
-        e = JEXL.createScript("-1 << 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -1 << 2, o);
-
-        e = JEXL.createScript("-1 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -1 << -2, o);
+        a360.assertExpression(expr, 1 << 2, 1, 2);
+        a360.assertExpression(expr, 1 << -2, 1, -2);
+        a360.assertExpression(expr, -1 << 2, -1, 2);
+        a360.assertExpression(expr, -1 << -2, -1, -2);
     }
 
     @Test
     public void testRightShiftIntValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("42 >> 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 42 >> 2, o);
+        final String expr = "(x, y)-> x >> y";
+        asserter.assertExpression(expr, 42L >> 2, 42L, 2);
+        asserter.assertExpression(expr, 42L >> -2, 42L, -2);
+        asserter.assertExpression(expr, -42L >> 2, -42L, 2);
+        asserter.assertExpression(expr, -42L >> -2, -42L, -2);
 
-        e = JEXL.createScript("42 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 42 >> -2, o);
+        a360.assertExpression(expr, 42L >> 2, 42L, 2);
+        a360.assertExpression(expr, 42L >> -2, 42L, -2);
+        a360.assertExpression(expr, -42L >> 2, -42L, 2);
+        a360.assertExpression(expr, -42L >> -2, -42L, -2);
 
-        e = JEXL.createScript("-42 >> 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -42 >> 2, o);
-
-        e = JEXL.createScript("-42 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -42 >> -2, o);
+        a360.assertExpression(expr, 42 >> 2, 42, 2);
+        a360.assertExpression(expr, 42 >> -2, 42, -2);
+        a360.assertExpression(expr, -42 >> 2, -42, 2);
+        a360.assertExpression(expr, -42 >> -2, -42, -2);
     }
 
     @Test
     public void testRightShiftUnsignedIntValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("42 >>> 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 42 >>> 2, o);
-
-        e = JEXL.createScript("42 >>> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 42 >>> -2, o);
-
-        e = JEXL.createScript("-42 >>> 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -42 >>> 2, o);
-
-        e = JEXL.createScript("-42 >>> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -42 >>> -2, o);
+        final String expr = "(x, y)-> x >>> y";
+        asserter.assertExpression(expr, 42L >>> 2, 42L, 2);
+        asserter.assertExpression(expr, 42L >>> -2, 42L, -2);
+        asserter.assertExpression(expr, -42L >>> 2, -42L, 2);
+        asserter.assertExpression(expr, -42L >>> -2, -42L, -2);
     }
 
     @Test
     public void testLeftShiftLongValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("2147483648 << 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 2147483648L << 2, o);
-
-        e = JEXL.createScript("2147483648 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 2147483648L << -2, o);
-
-        e = JEXL.createScript("-2147483649 << 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -2147483649L << 2, o);
-
-        e = JEXL.createScript("-2147483649 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -2147483649L << -2, o);
+        a360.assertExpression("2147483648 << 2", 2147483648L << 2);
+        a360.assertExpression("2147483648 << -2", 2147483648L << -2);
+        a360.assertExpression("-2147483649 << 2", -2147483649L << 2);
+        a360.assertExpression("-2147483649 << -2", -2147483649L << -2);
     }
 
     @Test
     public void testRightShiftLongValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("8589934592 >> 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 8589934592L >> 2, o);
-
-        e = JEXL.createScript("8589934592 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 8589934592L >> -2, o);
-
-        e = JEXL.createScript("-8589934596 >> 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -8589934596L >> 2, o);
-
-        e = JEXL.createScript("-8589934596 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -8589934596L >> -2, o);
-    }
-
-    @Test
-    public void testRightShiftUnsignedLongValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("8589934592 >>> 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 8589934592L >>> 2, o);
-
-        e = JEXL.createScript("8589934592 >>> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 8589934592L >>> -2, o);
-
-        e = JEXL.createScript("-8589934596 >>> 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -8589934596L >>> 2, o);
-
-        e = JEXL.createScript("-8589934596 >>> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", -8589934596L >>> -2, o);
-    }
-
-    @Test
-    public void testLeftShiftBigValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("9223372036854775808 << 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("9223372036854775808").shiftLeft(2), o);
-
-        e = JEXL.createScript("9223372036854775808 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("9223372036854775808").shiftLeft(-2), o);
-
-        e = JEXL.createScript("-9223372036854775809 << 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("-9223372036854775809").shiftLeft(2), o);
-
-        e = JEXL.createScript("-9223372036854775809 << -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("-9223372036854775809").shiftLeft(-2), o);
+        a360.assertExpression("8589934592 >> 2", 8589934592L >> 2);
+        a360.assertExpression("8589934592 >> -2", 8589934592L >> -2);
+        a360.assertExpression("-8589934592 >> 2", -8589934592L >> 2);
+        a360.assertExpression("-8589934592 >> -2", -8589934592L >> -2);
     }
 
     @Test
     public void testRightShiftBigValue() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("9223372036854775808 >> 2");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("9223372036854775808").shiftRight(2), o);
+        a360.assertExpression( "9223372036854775808 >> 2", new BigInteger("9223372036854775808").shiftRight(2));
+        a360.assertExpression("9223372036854775808 >> -2", new BigInteger("9223372036854775808").shiftRight(-2));
+        a360.assertExpression("-9223372036854775809 >> 2", new BigInteger("-9223372036854775809").shiftRight(2));
+        a360.assertExpression("-9223372036854775809 >> -2", new BigInteger("-9223372036854775809").shiftRight(-2));
+    }
 
-        e = JEXL.createScript("9223372036854775808 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("9223372036854775808").shiftRight(-2), o);
+    static BigInteger shiftRightUnsigned(String bl, int r) {
+        return shiftRightUnsigned(new BigInteger(bl), r);
+    }
+    static BigInteger shiftRightUnsigned(BigInteger bl, int r) {
+        return bl.signum() < 0 ? bl.negate().shiftRight(r) : bl.shiftRight(r);
+    }
 
-        e = JEXL.createScript("-9223372036854775809 >> 2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("-9223372036854775809").shiftRight(2), o);
-
-        e = JEXL.createScript("-9223372036854775809 >> -2");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", new BigInteger("-9223372036854775809").shiftRight(-2), o);
+    @Test
+    public void testRightShiftUnsignedBigValue() throws Exception {
+        a360.assertExpression( "9223372036854775808 >>> 2", shiftRightUnsigned("9223372036854775808", 2));
+        a360.assertExpression("9223372036854775808 >>> -2", shiftRightUnsigned("9223372036854775808",-2));
+        a360.assertExpression("-9223372036854775809 >>> 2", shiftRightUnsigned("-9223372036854775809", 2));
+        a360.assertExpression("-9223372036854775809 >>> -2", shiftRightUnsigned("-9223372036854775809",-2));
     }
 
     public static class ShiftArithmetic extends JexlArithmetic {
         ShiftArithmetic(boolean flag) {
             super(flag);
         }
-       
-        public Object leftShift(StringBuilder c, String value) {
+
+        public Object shiftLeft(StringBuilder c, String value) {
             c.append(value);
             return c;
         }
 
-        public Object rightShift(String value, StringBuilder c) {
+        public Object shiftRight(String value, StringBuilder c) {
             c.append(value);
             return c;
         }
 
-        public Object rightShiftUnsigned(String value, StringBuilder c) {
+        public Object shiftRightUnsigned(String value, StringBuilder c) {
             c.append(value.toLowerCase());
             return c;
         }
@@ -216,42 +152,35 @@ public class ShiftOperatorsTest extends JexlTestCase {
     @Test
     public void testOverloadedShift() throws Exception {
         JexlEngine jexl = new JexlBuilder().arithmetic(new ShiftArithmetic(true)).create();
-        JexlScript e = jexl.createScript("x << 'Left'");
-        JexlContext jc = new MapContext();
-        StringBuilder c = new StringBuilder("1");
-        jc.set("x", c);
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", "1Left", c.toString());
+        JexlScript e = jexl.createScript("x << 'Left'", "x");
+        StringBuilder x = new StringBuilder("1");
+        Object o = e.execute(null, x);
+        Assert.assertEquals(e.getSourceText(), "1Left", x.toString());
 
-        e = jexl.createScript("'Right' >> x");
-        jc = new MapContext();
-        c = new StringBuilder("1");
-        jc.set("x", c);
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", "1Right", c.toString());
+        e = jexl.createScript("'Right' >> x", "x");
+        x = new StringBuilder("1");
+        o = e.execute(null, x);
+        Assert.assertEquals(e.getSourceText(), "1Right", x.toString());
 
-        e = jexl.createScript("'Right' >>> x");
-        jc = new MapContext();
-        c = new StringBuilder("1");
-        jc.set("x", c);
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", "1right", c.toString());
+        e = jexl.createScript("'Right' >>> x", "x");
+        x = new StringBuilder("1");
+        o = e.execute(null, x);
+        Assert.assertEquals(e.getSourceText(), "1right", x.toString());
     }
 
     @Test
     public void testPrecedence() throws Exception {
-        JexlContext jc = new MapContext();
-        JexlScript e = JEXL.createScript("40 + 2 << 1 + 1");
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 40 + 2 << 1 + 1, o);
+        a360.assertExpression("40 + 2 << 1 + 1", 40 + 2 << 1 + 1);
+        a360.assertExpression("40 + (2 << 1) + 1", 40 + (2 << 1) + 1);
+        a360.assertExpression("(40 + 2) << (1 + 1)", (40 + 2) << (1 + 1));
 
-        e = JEXL.createScript("40 + (2 << 1) + 1");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", 40 + (2 << 1) + 1, o);
+        a360.assertExpression("40 + 2L << 1 + 1", 40 + 2L << 1 + 1);
+        a360.assertExpression("40 + (2L << 1) + 1", 40 + (2L << 1) + 1);
+        a360.assertExpression("(40 + 2L) << (1 + 1)", (40 + 2L) << (1 + 1));
 
-        e = JEXL.createScript("(40 + 2) << (1 + 1)");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not expected", (40 + 2) << (1 + 1), o);
+        a360.assertExpression("40L + 2 << 1 + 1", 40L + 2L << 1 + 1);
+        a360.assertExpression("40L + (2 << 1) + 1", 40L + (2L << 1) + 1);
+        a360.assertExpression("(40L + 2) << (1 + 1)", (40L + 2L) << (1 + 1));
     }
 
 }

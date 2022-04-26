@@ -308,17 +308,17 @@ public class FeatureController extends ScriptVisitor {
     }
 
     @Override
-    protected Object visit(ASTSetShlNode node, Object data) {
+    protected Object visit(ASTSetShiftLeftNode node, Object data) {
         return controlSideEffect(node, data);
     }
 
     @Override
-    protected Object visit(ASTSetSarNode node, Object data) {
+    protected Object visit(ASTSetShiftRightNode node, Object data) {
         return controlSideEffect(node, data);
     }
 
     @Override
-    protected Object visit(ASTSetShrNode node, Object data) {
+    protected Object visit(ASTSetShiftRightUnsignedNode node, Object data) {
         return controlSideEffect(node, data);
     }
 
