@@ -120,10 +120,6 @@ New features
 
 + Java-like `this` literal is introduced to allow easier access to the current evaluation context
 
-+ Java-like bitwise shift `<<`,`>>`,`>>>` operators are introduced
-
-+ Java-like shift self-assignment `<<=`,`>>=`,`>>>=` operators are introduced
-
 + Java-like increment/decrement `++` and `--`  operators are introduced. Prefix and postfix forms are supported
 
 + Java-like `instanceof` operator is introduced
