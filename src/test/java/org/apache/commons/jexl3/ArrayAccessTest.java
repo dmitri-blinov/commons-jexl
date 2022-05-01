@@ -328,4 +328,14 @@ public class ArrayAccessTest extends JexlTestCase {
         asserter.assertExpression("var list = null; list?[1]", null);
     }
 
+    @Test
+    public void testArrayLengthPropertyAccess() throws Exception {
+
+        /*
+         * test List access
+         */
+
+        asserter.assertExpression("var list = [1,2,3]; list.length", 3);
+    }
+
 }

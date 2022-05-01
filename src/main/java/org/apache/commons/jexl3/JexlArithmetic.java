@@ -1688,7 +1688,7 @@ public class JexlArithmetic {
             return ((IndexedType.IndexedContainer) object).get(key);
         }
         if (object != null && object.getClass().isArray()) {
-            return Array.get(object, toInteger(key));
+            return "length".equals(key) ? Array.getLength(object) : Array.get(object, toInteger(key));
         }
         if (object instanceof JexlContext) {
             return ((JexlContext) object).get(toString(key));
