@@ -138,6 +138,8 @@ New features
 
 + Java-like text block `"""\nabcd"""` literal is introduced
 
++ Java-like `.length` property is exposed for arrays
+
 + Groovy-like `.@` field access operator is introduced
 
 + Groovy-like `!instanceof` operator is introduced
