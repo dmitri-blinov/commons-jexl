@@ -270,6 +270,7 @@ public class ArithmeticTest extends JexlTestCase {
         asserter.failExpression("left > y.right", ".*null.*");
         asserter.failExpression("left >= y.right", ".*null.*");
     }
+
     @Test
     public void testNullOperands() throws Exception {
         asserter.setVariable("left", null);
@@ -785,20 +786,20 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testNullArgs() throws Exception {
+    public void testNullArgs() {
         JexlEngine jexl =  new JexlBuilder().arithmetic(new JexlArithmetic(true) {
             @Override public boolean isStrict(JexlOperator op) {
                 return JexlOperator.ADD == op? false: super.isStrict(op);
             }
         }).create();
         JexlScript script = jexl.createScript("'1.2' + x ", "x");
-        Object result = script.execute(null, null);
+        Object result = script.execute(null);
         Assert.assertEquals("1.2", result);
     }
 
     @Test
-    public void testOption() throws Exception {
-        final Map<String, Object> vars = new HashMap<String, Object>();
+    public void testOption() {
+        final Map<String, Object> vars = new HashMap<>();
         final JexlEvalContext context = new JexlEvalContext(vars);
         final JexlOptions options = context.getEngineOptions();
         options.setStrictArithmetic(true);
@@ -815,7 +816,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testIsFloatingPointPattern() throws Exception {
+    public void testIsFloatingPointPattern() {
         final JexlArithmetic ja = new JexlArithmetic(true);
 
         Assert.assertFalse(ja.isFloatingPointNumber("floating point"));
@@ -922,7 +923,7 @@ public class ArithmeticTest extends JexlTestCase {
         }
     }
 
-    // an arithmetic that know how to subtract strings
+    // an arithmetic that knows how to deal with vars
     public static class ArithmeticPlus extends JexlArithmetic {
         public ArithmeticPlus(final boolean strict) {
             super(strict);
@@ -1045,7 +1046,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testArithmeticPlusNoCache() throws Exception {
+    public void testArithmeticPlusNoCache() {
         final JexlEngine jexl = new JexlBuilder().cache(0).arithmetic(new ArithmeticPlus(false)).create();
         final JexlContext jc = new EmptyTestContext();
         runOverload(jexl, jc);
@@ -1262,7 +1263,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testJexl173() throws Exception {
+    public void testJexl173() {
         final JexlEngine jexl = new JexlBuilder().create();
         final JexlContext jc = new MapContext();
         final Callable173 c173 = new Callable173();
@@ -1526,7 +1527,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testEmptyLong() throws Exception {
+    public void testEmptyLong()  {
         Object x;
         x = JEXL.createScript("new('java.lang.Long', 4294967296)").execute(null);
         Assert.assertEquals(4294967296L, ((Long) x).longValue());
@@ -1543,7 +1544,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testEmptyFloat() throws Exception {
+    public void testEmptyFloat()  {
         Object x;
         x = JEXL.createScript("4294967296.f").execute(null);
         Assert.assertEquals(4294967296.0f, (Float) x, EPSILON);
@@ -1559,7 +1560,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testEmptyDouble() throws Exception {
+    public void testEmptyDouble()  {
         Object x;
         x = JEXL.createScript("4294967296.d").execute(null);
         Assert.assertEquals(4294967296.0d, (Double) x, EPSILON);
@@ -1585,7 +1586,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testCoerceInteger() throws Exception {
+    public void testCoerceInteger() {
         final JexlArithmetic ja = JEXL.getArithmetic();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -1604,7 +1605,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testCoerceLong() throws Exception {
+    public void testCoerceLong() {
         final JexlArithmetic ja = JEXL.getArithmetic();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -1623,7 +1624,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testCoerceDouble() throws Exception {
+    public void testCoerceDouble() {
         final JexlArithmetic ja = JEXL.getArithmetic();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -1642,7 +1643,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testCoerceBigInteger() throws Exception {
+    public void testCoerceBigInteger() {
         final JexlArithmetic ja = JEXL.getArithmetic();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -1661,7 +1662,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testCoerceBigDecimal() throws Exception {
+    public void testCoerceBigDecimal() {
         final JexlArithmetic ja = JEXL.getArithmetic();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -1680,7 +1681,7 @@ public class ArithmeticTest extends JexlTestCase {
     }
 
     @Test
-    public void testAtomicBoolean() throws Exception {
+    public void testAtomicBoolean() {
         // in a condition
         JexlScript e = JEXL.createScript("if (x) 1 else 2;", "x");
         final JexlContext jc = new MapContext();
@@ -1748,5 +1749,70 @@ public class ArithmeticTest extends JexlTestCase {
         ab.set(false);
         o = e.execute(jc, ab);
         Assert.assertTrue((Boolean) o);
+    }
+
+    @Test
+    public void testCompare() {
+        // JEXL doesn't support more than one operator in the same expression, for example: 1 == 1 == 1
+        final Object[] EXPRESSIONS = {
+                // Basic compare
+                "1 == 1", true,
+                "1 != 1", false,
+                "1 != 2", true,
+                "1 > 2", false,
+                "1 >= 2", false,
+                "1 < 2", true,
+                "1 <= 2", true,
+                // Int <-> Float Coercion
+                "1.0 == 1", true,
+                "1 == 1.0", true,
+                "1.1 != 1", true,
+                "1.1 < 2", true,
+                // Big Decimal <-> Big Integer Coercion
+                "1.0b == 1h", true,
+                "1h == 1.0b", true,
+                "1.1b != 1h", true,
+                "1.1b < 2h", true,
+                // Mix all type of numbers
+                "1l == 1.0", true, // long and int
+                "1.0d == 1.0f", true, // double and float
+                "1l == 1.0b", true,
+                "1l == 1h", true,
+                "1.0d == 1.0b", true,
+                "1.0f == 1.0b", true,
+                "1.0d == 1h", true,
+                "1.0f == 1h", true,
+                // numbers and strings
+                "'1' == 1", true,
+                "'1' == 1l", true,
+                "'1' == 1h", true,
+                "'' == 0", true, // empty string is coerced to zero (ECMA compliance)
+                "'1.0' == 1", true,
+                "'1.0' == 1.0f", true,
+                "'1.0' == 1.0d", true,
+                "'1.0' == 1.0b", true,
+                "'1.01' == 1.01", true,
+                "'1.01' == 1", false,
+                "'1.01' == 1b", false,
+                "'1.01' == 1h", false,
+                "'1.00001' == 1b", false,
+                "'1.00001' == 1h", false,
+                "'1.00000001' == 1", false,
+                "'1.00000001' == 1b", false,
+                "'1.00000001' == 1h", false,
+                "1.0 >= '1'", true,
+                "1.0 > '1'", false,
+        };
+        final JexlEngine jexl = new JexlBuilder().create();
+        final JexlContext jc = new EmptyTestContext();
+        JexlExpression expression;
+
+        for (int e = 0; e < EXPRESSIONS.length; e += 2) {
+            final String stext = (String) EXPRESSIONS[e];
+            final Object expected = EXPRESSIONS[e + 1];
+            expression = jexl.createExpression(stext);
+            final Object result = expression.evaluate(jc);
+            Assert.assertEquals("failed on " + stext, expected, result);
+        }
     }
 }

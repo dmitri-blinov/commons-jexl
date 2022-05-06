@@ -328,8 +328,8 @@ public class Interpreter extends InterpreterBase {
                     throw new JexlException(node, "not null return value required");
                 }
             }
-            return result;
-        } catch (StackOverflowError xstack) {
+            return arithmetic.controlReturn(result);
+        } catch (final StackOverflowError xstack) {
             final JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
             if (!isSilent()) {
                 throw xjexl.clean();
@@ -351,13 +351,16 @@ public class Interpreter extends InterpreterBase {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());
             }
         } finally {
-            synchronized(this) {
-                if (functors != null) {
-                    for (final Object functor : functors.values()) {
-                        closeIfSupported(functor);
+            // clean functors at top level
+            if (fp == 0) {
+                synchronized (this) {
+                    if (functors != null) {
+                        for (final Object functor : functors.values()) {
+                            closeIfSupported(functor);
+                        }
+                        functors.clear();
+                        functors = null;
                     }
-                    functors.clear();
-                    functors = null;
                 }
             }
             jexl.putThreadEngine(tjexl);
