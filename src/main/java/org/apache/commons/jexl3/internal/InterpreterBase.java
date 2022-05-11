@@ -369,7 +369,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         final int symbol = identifier.getSymbol();
         final String name = identifier.getName();
         // if we have a symbol, we have a scope thus a frame
-        if (options.isLexicalShade() && identifier.isShaded()) {
+        if ((options.isLexicalShade() || identifier.isLexical()) && identifier.isShaded()) {
             return undefinedVariable(identifier, name);
         }
         // a local var ?
@@ -422,7 +422,11 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @param value the variable value
      */
     protected void setContextVariable(final JexlNode node, final String name, final Object value) {
-        if (options.isLexicalShade() && !context.has(name)) {
+        boolean lexical = options.isLexicalShade();
+        if (!lexical && node instanceof ASTIdentifier) {
+            lexical = ((ASTIdentifier) node).isLexical();
+        }
+        if (lexical && !context.has(name)) {
             throw new JexlException.Variable(node, name, true);
         }
         try {
