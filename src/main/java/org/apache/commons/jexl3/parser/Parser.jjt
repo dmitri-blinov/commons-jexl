@@ -631,7 +631,7 @@ void FunctionVar() #Var :
     Token t;
 }
 {
-    t=<IDENTIFIER> { jjtThis.setFinal(); declareVariable(jjtThis, t); }
+    t=<IDENTIFIER> { jjtThis.setConstant(true); declareVariable(jjtThis, t); }
 }
 
 void Function(boolean isStatic, Class type) #JexlLambda :
@@ -909,7 +909,7 @@ void ForeachVar() :
 void DeclareVar(boolean isFinal) #Var :
 {
     Token t;
-    if (isFinal) jjtThis.setFinal();
+    if (isFinal) jjtThis.setConstant(true);
 }
 {
     <VAR> t=<IDENTIFIER> { declareVariable(jjtThis, t); }
@@ -918,7 +918,7 @@ void DeclareVar(boolean isFinal) #Var :
 ASTVar DeclareExtVar(boolean isFinal, Class type) #ExtVar :
 {
     Token t;
-    if (isFinal) jjtThis.setFinal();
+    if (isFinal) jjtThis.setConstant(true);
     if (type != null) jjtThis.setType(type);
 }
 {
@@ -936,7 +936,7 @@ void DeclareForVar() #Var :
     Class type;
 }
 {
-    [ <FINAL> { jjtThis.setFinal(); } ]
+    [ <FINAL> { jjtThis.setConstant(true); } ]
     ( <INT> { jjtThis.setType(Integer.TYPE); }
       |
       <LONG> { jjtThis.setType(Long.TYPE); }
@@ -968,7 +968,7 @@ ASTVar DeclareLocalVar() #Var :
     Class type;
 }
 {
-    [ <FINAL> { jjtThis.setFinal(); } ]
+    [ <FINAL> { jjtThis.setConstant(true); } ]
     ( <VAR>
       |
       ( <INT> { jjtThis.setType(Integer.TYPE); }
@@ -1008,14 +1008,14 @@ void VarStatement() :
 {
     ( 
         var = DeclareLocalVar() 
-        { if ((var.isFinal() || var.isRequired()) && getToken(1).kind != assign) throwParsingException(jjtThis); } 
+        { if ((var.isConstant() || var.isRequired()) && getToken(1).kind != assign) throwParsingException(jjtThis); } 
         [ <assign> Expression() ]
     ) #Initialization()
     (
         LOOKAHEAD(2) <COMMA> 
         ( 
-            extvar = DeclareExtVar(var.isFinal, var.getType()) 
-            { if ((var.isFinal() || extvar.isRequired()) && getToken(1).kind != assign) throwParsingException(jjtThis); } 
+            extvar = DeclareExtVar(var.isConstant(), var.getType()) 
+            { if ((var.isConstant() || extvar.isRequired()) && getToken(1).kind != assign) throwParsingException(jjtThis); } 
             [ <assign> Expression() ]
         ) #Initialization()
     )*
@@ -1031,7 +1031,7 @@ void MultipleDeclareVar() #MultipleIdentifier :
     boolean isFinal = false;
 }
 {
-    [ <FINAL> { isFinal = true; jjtThis.setFinal(); } ] <VAR> <LPAREN> DeclareExtVar(isFinal, null) (<COMMA> DeclareExtVar(isFinal, null))* <RPAREN>
+    [ <FINAL> { isFinal = true; jjtThis.setConstant(true); } ] <VAR> <LPAREN> DeclareExtVar(isFinal, null) (<COMMA> DeclareExtVar(isFinal, null))* <RPAREN>
 }
 
 void DeclareTryVar() #Var :
@@ -1041,7 +1041,7 @@ void DeclareTryVar() #Var :
     Class type;
 }
 {
-    [ <FINAL> { jjtThis.setFinal(); } ]
+    [ <FINAL> { jjtThis.setConstant(true); } ]
     ( <VAR>
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
@@ -1059,7 +1059,7 @@ void DeclareCatchVar() #Var :
     Class type;
 }
 {
-    [ <FINAL> { jjtThis.setFinal(); } ]
+    [ <FINAL> { jjtThis.setConstant(true); } ]
     ( <VAR>
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
@@ -1509,7 +1509,7 @@ void Identifier(boolean top) :
     Token t;
 }
 {
-    t=<IDENTIFIER> { jjtThis.setSymbol(top? checkVariable(jjtThis, t.image) : t.image); if (top && isFinalVariable(t.image)) jjtThis.setFinal(); }
+    t=<IDENTIFIER> { jjtThis.setSymbol(top? checkVariable(jjtThis, t.image) : t.image); if (top && isFinalVariable(t.image)) jjtThis.setConstant(true); }
     |
     t=<REGISTER> { jjtThis.setSymbol(t.image); }
 }

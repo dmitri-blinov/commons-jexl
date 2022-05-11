@@ -1100,7 +1100,7 @@ public class Interpreter extends InterpreterBase {
             } else {
                 int symbol = var.getSymbol();
                 if (symbol >= 0) {
-                    return var.isFinal() ? new FinalVarPointer(var) : new VarPointer(var);
+                    return var.isConstant() ? new FinalVarPointer(var) : new VarPointer(var);
                 } else {
                     return new ContextVarPointer(var.getName());
                 }
@@ -2819,7 +2819,7 @@ public class Interpreter extends InterpreterBase {
             throw new JexlException(node, "can not redefine a final variable: " + node.getName());
         }
         // Adjust frame variable modifiers
-        block.setModifiers(symbol, node.getType(), node.isFinal(), node.isRequired());
+        block.setModifiers(symbol, node.getType(), node.isConstant(), node.isRequired());
         // if we have a var, we have a scope thus a frame
         if (options.isLexical() || !frame.has(symbol)) {
             frame.set(symbol, null);

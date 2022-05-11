@@ -21,7 +21,7 @@ package org.apache.commons.jexl3.parser;
  */
 public class ASTMultipleIdentifier extends JexlNode {
 
-    protected boolean isFinal;
+    protected boolean isConstant;
 
     ASTMultipleIdentifier(int id) {
         super(id);
@@ -31,12 +31,12 @@ public class ASTMultipleIdentifier extends JexlNode {
         super(p, id);
     }
 
-    public boolean isFinal() {
-        return isFinal;
+    public boolean isConstant() {
+        return isConstant;
     }
 
-    void setFinal() {
-        isFinal = true;
+    void setConstant(final boolean f) {
+        isConstant = f;
     }
 
     @Override

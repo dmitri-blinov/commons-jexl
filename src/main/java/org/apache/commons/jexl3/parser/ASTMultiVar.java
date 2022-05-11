@@ -46,7 +46,8 @@ public class ASTMultiVar extends ASTVar {
     }
 
     // Always final
-    public boolean isFinal() {
+    @Override
+    public boolean isConstant() {
         return true;
     }
 

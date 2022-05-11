@@ -486,7 +486,7 @@ public abstract class JexlParser extends StringParser {
             variable.setCaptured(true);
         }
         // lexical feature error
-        if (!declareSymbol(symbol, variable.getType(), variable.isFinal(), variable.isRequired())) {
+        if (!declareSymbol(symbol, variable.getType(), variable.isConstant(), variable.isRequired())) {
             if (getFeatures().isLexical()) {
                 throw new JexlException(variable, name + ": variable is already declared");
             }

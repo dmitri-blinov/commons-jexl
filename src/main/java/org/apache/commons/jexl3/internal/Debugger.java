@@ -2011,7 +2011,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTVar node, final Object data) {
-        boolean isFinal = node.isFinal();
+        boolean isFinal = node.isConstant();
         boolean isRequired = node.isRequired();
         if (isFinal) {
             builder.append("final ");
