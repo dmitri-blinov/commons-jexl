@@ -50,7 +50,7 @@ import org.apache.commons.jexl3.internal.Scope;
 
 public final class Parser extends JexlParser
 {
-    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, String jexlSrc, Scope scope) {
+    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, String jexlSrc, Scope jexlScope) {
         JexlFeatures previous = getFeatures();
         try {
             setFeatures(jexlFeatures);
@@ -62,10 +62,10 @@ public final class Parser extends JexlParser
             info = jexlInfo != null? jexlInfo : new JexlInfo();
             source = jexlSrc;
             pragmas = null;
-            frame = scope;
+            scope = jexlScope;
             branchScope = new BranchScope();
             ReInit(jexlSrc);
-            ASTJexlScript script = jexlFeatures.supportsScript()? JexlScript(scope) : JexlExpression(scope);
+            ASTJexlScript script = jexlFeatures.supportsScript()? JexlScript(jexlScope) : JexlExpression(jexlScope);
             script.jjtSetValue(info.detach());
             script.setFeatures(jexlFeatures);
             script.setPragmas(pragmas != null
@@ -396,9 +396,9 @@ TOKEN_MGR_DECLS : {
  *      Statements
  ***************************************/
 
-ASTJexlScript JexlScript(Scope frame) :
+ASTJexlScript JexlScript(Scope scope) :
 {
-    jjtThis.setScope(frame);
+    jjtThis.setScope(scope);
     pushUnit(jjtThis);
 }
 {
@@ -411,14 +411,14 @@ ASTJexlScript JexlScript(Scope frame) :
 {
     popUnit(jjtThis);
     jjtThis.setScope(getFrame());
-    popFrame();
+    popScope();
     return jjtThis.script();
 }
 }
 
-ASTJexlScript JexlExpression(Scope frame) #JexlScript :
+ASTJexlScript JexlExpression(Scope scope) #JexlScript :
 {
-    jjtThis.setScope(frame);
+    jjtThis.setScope(scope);
     pushUnit(jjtThis);
 }
 {
@@ -426,7 +426,7 @@ ASTJexlScript JexlExpression(Scope frame) #JexlScript :
 {
     popUnit(jjtThis);
     jjtThis.setScope(getFrame());
-    popFrame();
+    popScope();
     return jjtThis.script();
 }
 }
@@ -636,7 +636,7 @@ void FunctionVar() #Var :
 
 void Function(boolean isStatic, Class type) #JexlLambda :
 {
-    pushFrame();
+    pushScope();
     pushUnit(jjtThis);
     if (isStatic) declareStaticSupport();
     if (type != null) declareReturnType(type);
@@ -645,22 +645,22 @@ void Function(boolean isStatic, Class type) #JexlLambda :
     Parameters() ( Block() | <LAMBDA> Expression() )
 {
     popUnit(jjtThis);
-    jjtThis.setScope(frame);
-    popFrame();
+    jjtThis.setScope(scope);
+    popScope();
 }
 }
 
 void ExpressionLambda() #SimpleLambda :
 {
-    pushFrame();
+    pushScope();
     pushUnit(jjtThis);
 }
 {
     ConditionalExpression()
 {
     popUnit(jjtThis);
-    jjtThis.setScope(frame);
-    popFrame();
+    jjtThis.setScope(scope);
+    popScope();
 }
 }
 
@@ -1446,7 +1446,7 @@ void IteratorExpression() #EnumerationNode : {}
 
 void IteratorBlock() #SimpleLambda :
 {
-    pushFrame();
+    pushScope();
     pushUnit(jjtThis);
     branchScope.yieldReturnCount += 1;
 }
@@ -1455,8 +1455,8 @@ void IteratorBlock() #SimpleLambda :
 {
     branchScope.yieldReturnCount -= 1;
     popUnit(jjtThis);
-    jjtThis.setScope(frame);
-    popFrame();
+    jjtThis.setScope(scope);
+    popScope();
 }
 }
 
@@ -2106,7 +2106,7 @@ void LambdaLookahead() #void : {}
 
 void Lambda() #JexlLambda :
 {
-    pushFrame();
+    pushScope();
     pushUnit(jjtThis);
     Class type = null;
 }
@@ -2125,8 +2125,8 @@ void Lambda() #JexlLambda :
     )
 {
     popUnit(jjtThis);
-    jjtThis.setScope(frame);
-    popFrame();
+    jjtThis.setScope(scope);
+    popScope();
 }
 }
 
