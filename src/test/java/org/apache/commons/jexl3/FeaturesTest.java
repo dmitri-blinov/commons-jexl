@@ -125,9 +125,13 @@ public class FeaturesTest extends JexlTestCase {
             "x -= 1",
             "x *= 1",
             "x /= 1",
+            "x %= 1",
             "x ^= 1",
             "x &= 1",
             "x |= 1",
+            "x >>= 1",
+            "x <<= 1",
+            "x >>>= 1",
         };
         checkFeature(f, scripts);
     }
@@ -145,9 +149,13 @@ public class FeaturesTest extends JexlTestCase {
             "x -= 1",
             "x *= 1",
             "x /= 1",
+            "x %= 1",
             "x ^= 1",
             "x &= 1",
             "x |= 1",
+            "x >>= 1",
+            "x <<= 1",
+            "x >>>= 1",
             "4 + (x.y = 1)",
             "if (true) x.y.z = 4"
         };
