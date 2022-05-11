@@ -1410,7 +1410,7 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(final ASTBlock node, final Object data) {
         final int cnt = node.getSymbolCount();
-        if (!options.isLexical() || cnt <= 0) {
+        if (cnt <= 0) {
             return visitBlock(node, data);
         }
         LexicalScope lexical = block;
@@ -1544,7 +1544,7 @@ public class Interpreter extends InterpreterBase {
         ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? 
             (ASTIdentifier) loopReference.jjtGetChild(1) : 
             null;
-        final boolean lexical = options.isLexical();// && node.getSymbolCount() > 0;
+        final boolean lexical = loopVariable.isLexical() || options.isLexical() ;// && node.getSymbolCount() > 0;
         if (lexical) {
             // create lexical frame
             final LexicalFrame locals = new LexicalFrame(frame, block);
@@ -2810,7 +2810,7 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(final ASTVar node, final Object data) {
         final int symbol = node.getSymbol();
-        if (options.isLexical() && !defineVariable(node, block)) {
+        if ((options.isLexical() || node.isLexical()) && !defineVariable(node, block)) {
             return redefinedVariable(node, node.getName());
         }
         // if we have a var, we have a scope thus a frame
@@ -2821,7 +2821,7 @@ public class Interpreter extends InterpreterBase {
         // Adjust frame variable modifiers
         block.setModifiers(symbol, node.getType(), node.isConstant(), node.isRequired());
         // if we have a var, we have a scope thus a frame
-        if (options.isLexical() || !frame.has(symbol)) {
+        if (options.isLexical() || node.isLexical() || !frame.has(symbol)) {
             frame.set(symbol, null);
             return null;
         } else {
@@ -3398,8 +3398,8 @@ public class Interpreter extends InterpreterBase {
         if (left instanceof ASTIdentifier) {
             var = (ASTIdentifier) left;
             symbol = var.getSymbol();
-            if (symbol >= 0 && options.isLexical()) {
-                if (options.isLexicalShade() && var.isShaded()) {
+            if (symbol >= 0 && (var.isLexical() || options.isLexical())) {
+                if (var.isShaded() && (var.isLexical() || options.isLexicalShade())) {
                     return undefinedVariable(var, var.getName());
                 }
             }
