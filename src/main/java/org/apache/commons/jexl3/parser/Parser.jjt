@@ -899,17 +899,18 @@ void ForeachVar() :
     boolean isFinal = false;
 }
 {
-    LOOKAHEAD(2) [ <FINAL> { isFinal = true; } ] DeclareVar(isFinal) [ <COMMA> DeclareExtVar(isFinal, null) ]
+    LOOKAHEAD(2) [ <FINAL> { isFinal = true; } ] DeclareVar(false, isFinal) [ <COMMA> DeclareExtVar(isFinal, null) ]
     |
     LOOKAHEAD(DeclareForVar()) DeclareForVar()
     |
     Identifier(true) [ <COMMA> Identifier(true) ]
 }
 
-void DeclareVar(boolean isFinal) #Var :
+void DeclareVar(boolean lexical, boolean constant) #Var :
 {
     Token t;
-    if (isFinal) jjtThis.setConstant(true);
+    if (constant) jjtThis.setConstant(true);
+    if (lexical) jjtThis.setLexical(true);
 }
 {
     <VAR> t=<IDENTIFIER> { declareVariable(jjtThis, t); }
