@@ -516,7 +516,7 @@ void LabelledStatement() #void :
     ASTLabelledStatement s;
 }
 {
-    t=<IDENTIFIER> { label = t.image; if (branchScope.breakSupported(label)) throwParsingException(null, t); } <COLON>
+    t=<IDENTIFIER> { label = t.image; if (branchScope.breakSupported(label)) throwParsingException(t); } <COLON>
     (
         LOOKAHEAD(<LCURLY>) { branchScope.pushBlockLabel(label); } s = Block() { s.setLabel(label); branchScope.popBlockLabel(); }
         |
@@ -617,7 +617,7 @@ Class FunctionType() #void :
          |
          LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
          t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
        )
        ( LOOKAHEAD( <LBRACKET> ) <LBRACKET> <RBRACKET> { type = JexlParser.arrayType(type); })*
     )
@@ -1046,7 +1046,7 @@ void DeclareTryVar() #Var :
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
       t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
       { if (type == null || !AutoCloseable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
@@ -1064,7 +1064,7 @@ void DeclareCatchVar() #Var :
       |
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
       t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
       { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
@@ -1079,11 +1079,11 @@ void DeclareMultiCatchVar() #MultiVar :
 {
     LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null && getToken(2).kind == or} )
     t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-    ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+    ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
     { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.addType(type); }
     ( LOOKAHEAD({ getToken(1).kind == or && getToken(2).kind == IDENTIFIER && Parser.resolveType(Throwable.class, getToken(2).image) != null})
         <or> t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-        ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+        ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
         { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.addType(type); }
     )+
     t=<IDENTIFIER> { declareVariable(jjtThis, t); }
@@ -2046,7 +2046,7 @@ void VarParameter() #void :
          |
          LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
          t=<IDENTIFIER> { type = Parser.resolveType(t.image); }
-         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(null, te); } )*
+         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
       ) 
       (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )

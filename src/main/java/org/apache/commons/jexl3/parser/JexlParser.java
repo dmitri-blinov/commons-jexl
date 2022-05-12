@@ -719,17 +719,17 @@ public abstract class JexlParser extends StringParser {
         } else if (ASSIGN_NODES.contains(node.getClass())) {
             final JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                throwParsingException(JexlException.Assignment.class, null);
+                throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
             }
         } else if (node instanceof ASTPointerNode) {
             JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                throwParsingException(JexlException.Assignment.class, null);
+                throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
             }
         } else if (node instanceof ASTMultipleAssignment) {
             JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                throwParsingException(JexlException.Assignment.class, null);
+                throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
             }
         }
 
@@ -786,7 +786,7 @@ public abstract class JexlParser extends StringParser {
      * @param node the node that caused it
      */
     protected void throwParsingException(final JexlNode node) {
-        throwParsingException(null, null);
+        throwParsingException((Token) null);
     }
 
     /**
@@ -796,7 +796,7 @@ public abstract class JexlParser extends StringParser {
      * @param <T> the parsing exception subclass
      * @throws JexlException.Parsing in all cases
      */
-    protected <T extends JexlException.Parsing> void throwParsingException(final Class<T> xclazz, final Token parsed) {
+    protected void throwParsingException(final Token parsed) {
         JexlInfo xinfo  = null;
         String msg = "unrecoverable state";
         JexlException.Parsing xparse = null;
@@ -807,17 +807,8 @@ public abstract class JexlParser extends StringParser {
         if (token != null) {
             xinfo = info.at(token.beginLine, token.beginColumn);
             msg = token.image;
-            if (xclazz != null) {
-                try {
-                    final Constructor<T> ctor = xclazz.getConstructor(JexlInfo.class, String.class);
-                    xparse = ctor.newInstance(xinfo, msg);
-                } catch (final Exception xany) {
-                    // ignore, very unlikely but then again..
-                }
-            }
         }
-        // unlikely but safe
-        throw xparse != null ? xparse : new JexlException.Parsing(xinfo, msg);
+        throw new JexlException.Parsing(xinfo, msg).clean();
     }
 
     /**
@@ -981,7 +972,7 @@ public abstract class JexlParser extends StringParser {
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             //
         }
-        throwParsingException(null, t);
+        throwParsingException(t);
         return null;
     }
 
