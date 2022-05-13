@@ -305,7 +305,7 @@ public abstract class JexlParser extends StringParser {
      */
     private boolean isSymbolDeclared(final JexlNode.Info info, final int symbol) {
         JexlNode walk = info.getNode();
-        while(walk != null) {
+        while (walk != null) {
             if (walk instanceof JexlParser.LexicalUnit) {
                 final LexicalScope scope = ((JexlParser.LexicalUnit) walk).getLexicalScope();
                 if (scope != null && scope.hasSymbol(symbol)) {
@@ -333,7 +333,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Checks whether an identifier is a local variable or argument, ie a symbol, stored in a register.
      * @param identifier the identifier
-     * @param name      the identifier name
+     * @param name the identifier name
      * @return the image
      */
     protected String checkVariable(final ASTIdentifier identifier, final String name) {
@@ -378,7 +378,7 @@ public abstract class JexlParser extends StringParser {
 
     /**
      * Checks whether a local variable is final.
-     * @param image      the identifier image
+     * @param image the identifier image
      * @return true if final, false otherwise
      */
     protected boolean isFinalVariable(String image) {

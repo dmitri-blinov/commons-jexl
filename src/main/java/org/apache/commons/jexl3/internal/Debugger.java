@@ -2011,19 +2011,25 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTVar node, final Object data) {
-        boolean isFinal = node.isConstant();
-        boolean isRequired = node.isRequired();
-        if (isFinal) {
-            builder.append("final ");
-        }
-        Class type = node.getType();
-        if (type == null) {
-            builder.append("var ");
+        if (node.isLexical()) {
+            if (node.isConstant()) {
+                builder.append("const ");
+            } else {
+                builder.append("let ");
+            }
         } else {
-            builder.append(getClassName(type)).append(" ");
-        }
-        if (isRequired) {
-            builder.append("&");
+            if (node.isConstant()) {
+                builder.append("final ");
+            }
+            Class type = node.getType();
+            if (type == null) {
+                builder.append("var ");
+            } else {
+                builder.append(getClassName(type)).append(" ");
+            }
+            if (node.isRequired()) {
+                builder.append("&");
+            }
         }
         check(node, node.getName(), data);
         return data;

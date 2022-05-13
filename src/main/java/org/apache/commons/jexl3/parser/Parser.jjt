@@ -153,6 +153,8 @@ TOKEN_MGR_DECLS : {
     | < SYNCHRONIZED : "synchronized" > { popDot(); }
     | < NEW : "new" > { popDot(); pushQ(); } /* Lexical state is now QUALIFIED */
     | < VAR : "var" > { popDot(); } /* Revert state to default if was DOT_ID. */
+    | < LET : "let" >  { popDot(); }
+    | < CONST : "const" >  { popDot(); }
     | < FINAL : "final" > { popDot(); }
     | < EMPTY : "empty" > { popDot(); } /* Revert state to default if was DOT_ID. */
     | < SIZE : "size" > { popDot(); } /* Revert state to default if was DOT_ID. */
@@ -631,7 +633,11 @@ void FunctionVar() #Var :
     Token t;
 }
 {
-    t=<IDENTIFIER> { jjtThis.setConstant(true); declareVariable(jjtThis, t); }
+    t=<IDENTIFIER> 
+{
+    jjtThis.setConstant(true); 
+    declareVariable(jjtThis, t); 
+}
 }
 
 void Function(boolean isStatic, Class type) #JexlLambda :
@@ -896,36 +902,45 @@ ASTForeachStatement ForeachStatement() :
 
 void ForeachVar() :
 {
-    boolean isFinal = false;
+    ASTVar var;
 }
 {
-    LOOKAHEAD(2) [ <FINAL> { isFinal = true; } ] DeclareVar(false, isFinal) [ <COMMA> DeclareExtVar(isFinal, null) ]
+    LOOKAHEAD(2) var = DeclareVar() [ <COMMA> DeclareExtVar(var.isLexical(), var.isConstant(), null) ]
     |
     LOOKAHEAD(DeclareForVar()) DeclareForVar()
     |
     Identifier(true) [ <COMMA> Identifier(true) ]
 }
 
-void DeclareVar(boolean lexical, boolean constant) #Var :
+ASTVar DeclareVar() #Var :
+{
+    Token t;
+}
+{
+    (
+        <LET> { jjtThis.setLexical(true); } t=<IDENTIFIER> 
+        |
+        <CONST> { jjtThis.setLexical(true); jjtThis.setConstant(true); } t=<IDENTIFIER> 
+        |
+        [ <FINAL> { jjtThis.setConstant(true); } ] <VAR> t=<IDENTIFIER> 
+    )
+{
+    declareVariable(jjtThis, t);
+    return jjtThis;
+}
+}
+
+ASTVar DeclareExtVar(boolean lexical, boolean constant, Class type) #ExtVar :
 {
     Token t;
     if (constant) jjtThis.setConstant(true);
     if (lexical) jjtThis.setLexical(true);
-}
-{
-    <VAR> t=<IDENTIFIER> { declareVariable(jjtThis, t); }
-}
-
-ASTVar DeclareExtVar(boolean isFinal, Class type) #ExtVar :
-{
-    Token t;
-    if (isFinal) jjtThis.setConstant(true);
     if (type != null) jjtThis.setType(type);
 }
 {
-    [ <and> { jjtThis.setRequired(); } ]
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    [ <and> { jjtThis.setRequired(); } ] t=<IDENTIFIER>
 {
+    declareVariable(jjtThis, t);
     return jjtThis;
 }
 }
@@ -959,7 +974,10 @@ void DeclareForVar() #Var :
       ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setType(type); } )*
     ) 
     (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    t=<IDENTIFIER> 
+{ 
+    declareVariable(jjtThis, t); 
+}
 }
 
 ASTVar DeclareLocalVar() #Var :
@@ -969,34 +987,42 @@ ASTVar DeclareLocalVar() #Var :
     Class type;
 }
 {
-    [ <FINAL> { jjtThis.setConstant(true); } ]
-    ( <VAR>
-      |
-      ( <INT> { jjtThis.setType(Integer.TYPE); }
+    (
+        <LET> { jjtThis.setLexical(true); }
         |
-        <LONG> { jjtThis.setType(Long.TYPE); }
+        <CONST> { jjtThis.setLexical(true); jjtThis.setConstant(true); }
         |
-        <SHORT> { jjtThis.setType(Short.TYPE); }
-        |
-        <BYTE> { jjtThis.setType(Byte.TYPE); }
-        |
-        <CHAR> { jjtThis.setType(Character.TYPE); }
-        |
-        <BOOLEAN> { jjtThis.setType(Boolean.TYPE); }
-        |
-        <FLOAT> { jjtThis.setType(Float.TYPE); }
-        |
-        <DOUBLE> { jjtThis.setType(Double.TYPE); }
-        |
-        LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
-        t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
-        ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setType(type); } )*
-      ) 
-      (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
-    )
-    [ <and> { jjtThis.setRequired(); } ]
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
-{ 
+        (
+            [ <FINAL> { jjtThis.setConstant(true); } ]
+            ( <VAR>
+              |
+              ( <INT> { jjtThis.setType(Integer.TYPE); }
+                |
+                <LONG> { jjtThis.setType(Long.TYPE); }
+                |
+                <SHORT> { jjtThis.setType(Short.TYPE); }
+                |
+                <BYTE> { jjtThis.setType(Byte.TYPE); }
+                |
+                <CHAR> { jjtThis.setType(Character.TYPE); }
+                |
+                <BOOLEAN> { jjtThis.setType(Boolean.TYPE); }
+                |
+                <FLOAT> { jjtThis.setType(Float.TYPE); }
+                |
+                <DOUBLE> { jjtThis.setType(Double.TYPE); }
+                |
+                LOOKAHEAD( { getToken(1).kind == IDENTIFIER && Parser.resolveType(getToken(1).image) != null } ) 
+                t=<IDENTIFIER> { jjtThis.setType(Parser.resolveType(t.image)); }
+                ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(jjtThis); jjtThis.setType(type); } )*
+              ) 
+              (<LBRACKET> <RBRACKET> { jjtThis.setArray(); } )*
+            )
+            [ <and> { jjtThis.setRequired(); } ]
+        )
+    ) t=<IDENTIFIER>
+{
+    declareVariable(jjtThis, t); 
     return jjtThis;
 }
 }
@@ -1015,7 +1041,7 @@ void VarStatement() :
     (
         LOOKAHEAD(2) <COMMA> 
         ( 
-            extvar = DeclareExtVar(var.isConstant(), var.getType()) 
+            extvar = DeclareExtVar(var.isLexical(), var.isConstant(), var.getType()) 
             { if ((var.isConstant() || extvar.isRequired()) && getToken(1).kind != assign) throwParsingException(jjtThis); } 
             [ <assign> Expression() ]
         ) #Initialization()
@@ -1029,10 +1055,10 @@ void MultipleVarStatement() : {}
 
 void MultipleDeclareVar() #MultipleIdentifier :
 {
-    boolean isFinal = false;
+    boolean constant = false;
 }
 {
-    [ <FINAL> { isFinal = true; jjtThis.setConstant(true); } ] <VAR> <LPAREN> DeclareExtVar(isFinal, null) (<COMMA> DeclareExtVar(isFinal, null))* <RPAREN>
+    [ <FINAL> { constant = true; jjtThis.setConstant(true); } ] <VAR> <LPAREN> DeclareExtVar(false, constant, null) (<COMMA> DeclareExtVar(false, constant, null))* <RPAREN>
 }
 
 void DeclareTryVar() #Var :
@@ -1050,7 +1076,10 @@ void DeclareTryVar() #Var :
       ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
       { if (type == null || !AutoCloseable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    t=<IDENTIFIER> 
+{
+    declareVariable(jjtThis, t); 
+}
 }
 
 void DeclareCatchVar() #Var :
@@ -1068,7 +1097,10 @@ void DeclareCatchVar() #Var :
       ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
       { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.setType(type); }
     )
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    t=<IDENTIFIER> 
+{
+    declareVariable(jjtThis, t);
+}
 }
 
 void DeclareMultiCatchVar() #MultiVar :
@@ -1087,7 +1119,10 @@ void DeclareMultiCatchVar() #MultiVar :
         ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(type, te.image); if (type == null) throwParsingException(te); } )*
         { if (type == null || !Throwable.class.isAssignableFrom(type)) throwParsingException(jjtThis); jjtThis.addType(type); }
     )+
-    t=<IDENTIFIER> { declareVariable(jjtThis, t); }
+    t=<IDENTIFIER>
+{
+    declareVariable(jjtThis, t); 
+}
 }
 
 void Pragma() #void :

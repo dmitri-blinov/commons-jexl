@@ -34,16 +34,16 @@ import org.junit.Test;
 public class LexicalTest {
 
     @Test
-    public void testLexical0a() throws Exception {
+    public void testLexical0a() {
         runLexical0(false);
     }
 
     @Test
-    public void testLexical0b() throws Exception {
+    public void testLexical0b() {
         runLexical0(true);
     }
 
-    void runLexical0(final boolean feature) throws Exception {
+    void runLexical0(final boolean feature)  {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(feature);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
@@ -123,16 +123,16 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical1a() throws Exception {
+    public void testLexical1a() {
         runLexical1(false);
     }
 
     @Test
-    public void testLexical1b() throws Exception {
+    public void testLexical1b() {
         runLexical1(true);
     }
 
-    void runLexical1(final boolean shade) throws Exception {
+    void runLexical1(final boolean shade)  {
         final JexlEngine jexl = new JexlBuilder().strict(true).create();
         final JexlEvalContext ctxt = new JexlEvalContext();
         Object result;
@@ -202,7 +202,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical1() throws Exception {
+    public void testLexical1() {
         final JexlEngine jexl = new JexlBuilder().strict(true).create();
         final JexlEvalContext ctxt = new JexlEvalContext();
         final JexlOptions options = ctxt.getEngineOptions();
@@ -234,16 +234,16 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical2a() throws Exception {
+    public void testLexical2a() {
         runLexical2(true);
     }
 
     @Test
-    public void testLexical2b() throws Exception {
+    public void testLexical2b() {
         runLexical2(false);
     }
 
-    protected void runLexical2(final boolean lexical) throws Exception {
+    protected void runLexical2(final boolean lexical)  {
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(lexical).create();
         final JexlContext ctxt = new MapContext();
         final JexlScript script = jexl.createScript("{var x = 42}; {var x; return x; }");
@@ -256,7 +256,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical3() throws Exception {
+    public void testLexical3() {
         final String str = "var s = {}; for (var i : [1]) s.add(i); s";
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
         JexlScript e = jexl.createScript(str);
@@ -270,7 +270,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical4() throws Exception {
+    public void testLexical4() {
         final JexlEngine Jexl = new JexlBuilder().silent(false).strict(true).lexical(true).create();
         final JxltEngine Jxlt = Jexl.createJxltEngine();
         final JexlContext ctxt = new MapContext();
@@ -296,7 +296,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical5() throws Exception {
+    public void testLexical5() {
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
         final JexlContext ctxt = new DebugContext();
         JexlScript script;
@@ -312,7 +312,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical6a() throws Exception {
+    public void testLexical6a() {
         final String str = "i = 0; { var i = 32; }; i";
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
         final JexlScript e = jexl.createScript(str);
@@ -322,7 +322,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical6b() throws Exception {
+    public void testLexical6b() {
         final String str = "i = 0; { var i = 32; }; i";
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).lexicalShade(true).create();
         final JexlScript e = jexl.createScript(str);
@@ -336,7 +336,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical6c() throws Exception {
+    public void testLexical6c() {
         final String str = "i = 0; for (var i : [42]) i; i";
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).lexicalShade(false).create();
         final JexlScript e = jexl.createScript(str);
@@ -346,7 +346,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical6d() throws Exception {
+    public void testLexical6d() {
         final String str = "i = 0; for (var i : [42]) i; i";
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).lexicalShade(true).create();
         final JexlScript e = jexl.createScript(str);
@@ -360,7 +360,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testPragmaOptions() throws Exception {
+    public void testPragmaOptions() {
         // same as 6d but using a pragma
         final String str = "#pragma jexl.options '+strict +lexical +lexicalShade -safe'\n"
                 + "i = 0; for (var i : [42]) i; i";
@@ -376,7 +376,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testPragmaNoop() throws Exception {
+    public void testPragmaNoop() {
         // unknow pragma
         final String str = "#pragma jexl.options 'no effect'\ni = -42; for (var i : [42]) i; i";
         final JexlEngine jexl = new JexlBuilder().lexical(false).strict(true).create();
@@ -388,7 +388,7 @@ public class LexicalTest {
 
 
     @Test
-    public void testScopeFrame() throws Exception {
+    public void testScopeFrame() {
         final LexicalScope scope = new LexicalScope();
         for(int i = 0; i < 128; i += 2) {
             Assert.assertTrue(scope.addSymbol(i));
@@ -401,7 +401,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testContextualOptions0() throws Exception {
+    public void testContextualOptions0() {
         final JexlFeatures f= new JexlFeatures();
         final JexlEngine jexl = new JexlBuilder().features(f).strict(true).create();
         final JexlEvalContext ctxt = new JexlEvalContext();
@@ -447,7 +447,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testContextualOptions1() throws Exception {
+    public void testContextualOptions1() {
         final JexlFeatures f = new JexlFeatures();
         final JexlEngine jexl = new JexlBuilder().features(f).strict(true).create();
         final JexlEvalContext ctxt = new TestContext();
@@ -474,7 +474,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testParameter0() throws Exception {
+    public void testParameter0() {
         final String str = "function(u) {}";
         final JexlEngine jexl = new JexlBuilder().create();
         JexlScript e = jexl.createScript(str);
@@ -484,7 +484,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testParameter1() throws Exception {
+    public void testParameter1() {
         final JexlEngine jexl = new JexlBuilder().strict(true).safe(false).lexical(true).create();
         final JexlContext jc = new MapContext();
         final String strs = "var s = function(x) { for (var i : 1..2) {if (i > 1) return x}}; s(42)";
@@ -494,7 +494,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testInnerAccess0() throws Exception {
+    public void testInnerAccess0() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
@@ -506,13 +506,36 @@ public class LexicalTest {
     }
 
     @Test
-    public void testInnerAccess1() throws Exception {
+    public void testInnerAccess1() {
         final JexlEngine jexl = new JexlBuilder().strict(true).lexical(true).create();
         final JexlScript script = jexl.createScript("var x = 32; (()->{ for(var x : null) { var c = 0; {return x; }} })();");
     }
 
     @Test
-    public void testForVariable0() throws Exception {
+    public void testInnerAccess1b() {
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        final JexlScript script = jexl.createScript("let x = 32; (()->{ for(let x : null) { let c = 0; { return x; } } } )(); ");
+        Assert.assertNotNull(script);
+        String dbg = script.getParsedText();
+        String src = script.getSourceText();
+        Assert.assertTrue(JexlTestCase.equalsIgnoreWhiteSpace(src, dbg));
+    }
+
+    @Test
+    public void testForVariable0a() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexicalShade(true);
+        final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        try {
+            final JexlScript script = jexl.createScript("for(let x : 1..3) { let c = 0}; return x");
+            Assert.fail("Should not have been parsed");
+        } catch (final JexlException ex) {
+           // OK
+        }
+    }
+
+    @Test
+    public void testForVariable0() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         f.lexicalShade(true);
@@ -526,7 +549,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testForVariable1() throws Exception {
+    public void testForVariable1() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         f.lexicalShade(true);
@@ -541,7 +564,21 @@ public class LexicalTest {
     }
 
     @Test
-    public void testUndeclaredVariable() throws Exception {
+    public void testForVariable1b() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexicalShade(true);
+        final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        try {
+            final JexlScript script = jexl.createScript("for(let x : 1..3) { let c = 0} for(let x : 1..3) { var c = 0}; return x");
+            Assert.fail("Should not have been parsed");
+        } catch (final JexlException ex) {
+            // OK
+            Assert.assertTrue(ex instanceof JexlException);
+        }
+    }
+
+    @Test
+    public void testUndeclaredVariable() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         f.lexicalShade(true);
@@ -556,7 +593,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testLexical6a1() throws Exception {
+    public void testLexical6a1() {
         final String str = "i = 0; { var i = 32; }; i";
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
@@ -593,7 +630,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testInternalLexicalFeatures() throws Exception {
+    public void testInternalLexicalFeatures() {
         final String str = "42";
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
@@ -615,7 +652,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testOptionsPragma() throws Exception {
+    public void testOptionsPragma() {
         try {
             JexlOptions.setDefaultFlags("+safe", "-lexical", "-lexicalShade");
             final VarContext vars = new VarContext();
@@ -649,7 +686,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testVarLoop0() throws Exception {
+    public void testVarLoop0() {
         final String src0 = "var count = 10;\n"
                 + "for (var i : 0 .. count-1) {\n"
                 + "  $out.add(i);\n"
@@ -683,7 +720,7 @@ public class LexicalTest {
         Assert.assertNotEquals(sff0, sft1);
     }
 
-    private JexlFeatures runVarLoop(final boolean flag, final String src) throws Exception {
+    private JexlFeatures runVarLoop(final boolean flag, final String src)  {
         final VarContext vars = new VarContext();
         final JexlOptions options = vars.getEngineOptions();
         options.setLexical(true);
@@ -723,7 +760,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testAnnotation() throws Exception {
+    public void testAnnotation() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
@@ -734,7 +771,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testNamed() throws Exception {
+    public void testNamed() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
@@ -745,7 +782,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testCaptured0() throws Exception {
+    public void testCaptured0() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
@@ -757,7 +794,7 @@ public class LexicalTest {
     }
 
     @Test
-    public void testCaptured1() throws Exception {
+    public void testCaptured1() {
         final JexlFeatures f = new JexlFeatures();
         f.lexical(true);
         final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
