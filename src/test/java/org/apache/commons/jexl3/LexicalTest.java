@@ -19,6 +19,7 @@ package org.apache.commons.jexl3;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -804,5 +805,65 @@ public class LexicalTest {
         jc.set("x", 11);
         final Object result = script.execute(jc);
         Assert.assertEquals(43, result);
+    }
+
+    @Test
+    public void testSingleStatementDeclFail() {
+        List<String> srcs = Arrays.asList(
+                "if (true) let x ;",
+                "if (true) let x = 1;",
+  
+              "if (true) var x = 1;",
+                "if (true) { 1 } else let x ;",
+                "if (true) { 1 } else let x = 1;",
+                "if (true) { 1 } else var x = 1;",
+                "while (true) let x ;",
+                "while (true) let x = 1;",
+                "while (true) var x = 1;",
+                "do let x ; while (true)",
+                "do let x = 1; while (true)",
+                "do var x = 1; while (true)",
+                "for (let i:ii) let x ;",
+                "for (let i:ii) let x = 1;",
+                "for (let i:ii) var x = 1;",
+                ""
+        );
+        JexlFeatures f=  new JexlFeatures();
+        f.lexical(true).lexicalShade(true);
+        checkParse(f, srcs, false);
+    }
+
+    @Test
+    public void testSingleStatementVarSucceed() {
+        List<String> srcs = Arrays.asList(
+                "if (true) var x = 1;",
+                "if (true) { 1 } else var x = 1;",
+                "while (true) var x = 1;",
+                "do var x = 1 while (true)",
+                "for (let i:ii) var x = 1;",
+                ""
+        );
+        checkParse(srcs, true);
+    }
+
+    private void checkParse(List<String> srcs, boolean expected) {
+        checkParse(null, srcs, expected);
+    }
+
+    private void checkParse(JexlFeatures f, List<String> srcs, boolean expected) {
+        final JexlEngine jexl = new JexlBuilder().features(f).strict(true).create();
+        for(String src : srcs) {
+            if (!src.isEmpty()) try {
+                final JexlScript script = jexl.createScript(src);
+                if (!expected) {
+                    Assert.fail(src);
+                }
+            } catch (JexlException.Parsing xlexical) {
+                if (expected) {
+                    Assert.fail(src);
+                }
+                //Assert.assertTrue(xlexical.detailedMessage().contains("x"));
+            }
+        }
     }
 }
