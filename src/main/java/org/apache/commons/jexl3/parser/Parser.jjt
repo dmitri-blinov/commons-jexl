@@ -1159,9 +1159,9 @@ Object PragmaValue() #void :
     |
     v=<NAN_LITERAL> { result = Double.NaN; }
   )
-  {
+{
     return result;
-  }
+}
 }
 
 
@@ -2112,7 +2112,9 @@ void VarParameter() #void :
        |
        <ELLIPSIS> { declareVarArgSupport(); } 
     ]
-    { declareParameter(t, type, isFinal, isRequired, value); }
+{
+    declareParameter(t, type, isFinal, isRequired, value); 
+}
 }
 
 void Parameters() #void : {}

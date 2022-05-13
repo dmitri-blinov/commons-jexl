@@ -432,15 +432,13 @@ public abstract class JexlParser extends StringParser {
      * if it is already declared
      */
     private boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
-        if (blocks != null) {
-            for(LexicalUnit lu : blocks) {
-                if (lu.hasSymbol(symbol)) {
-                    return false;
-                }
-                // stop at first new scope reset, aka lambda
-                if (lu instanceof ASTJexlLambda) {
-                    break;
-                }
+        for (LexicalUnit lu : blocks) {
+            if (lu.hasSymbol(symbol)) {
+                return false;
+            }
+            // stop at first new scope reset, aka lambda
+            if (lu instanceof ASTJexlLambda) {
+                break;
             }
         }
         return block == null || block.declareSymbol(symbol, c, fin, req);
