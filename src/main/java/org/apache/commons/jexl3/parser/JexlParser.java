@@ -387,7 +387,7 @@ public abstract class JexlParser extends StringParser {
             if (symbol != null) {
                 if (scope.isVariableFinal(symbol)) {
                     return true;
-                } else if (getFeatures().isLexical()) {
+                } else {
                     if (block.hasSymbol(symbol))
                         return block.isSymbolFinal(symbol);
                     // one of the lexical blocks above should declare it
@@ -720,6 +720,15 @@ public abstract class JexlParser extends StringParser {
             final JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
                 throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
+            }
+            if (lv instanceof ASTIdentifier) {
+                ASTIdentifier var = (ASTIdentifier) lv;
+                if (!(var instanceof ASTVar)) { // if not a declaration...
+                    int symbol = var.getSymbol();
+                    if (symbol >= 0 && isFinalVariable(var.getName())) {
+                        throw new JexlException.Assignment(var.jexlInfo(), var.getName()).clean();
+                    }
+                }
             }
         } else if (node instanceof ASTPointerNode) {
             JexlNode lv = node.jjtGetChild(0);

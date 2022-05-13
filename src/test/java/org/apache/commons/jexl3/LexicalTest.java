@@ -808,6 +808,35 @@ public class LexicalTest {
     }
 
     @Test
+    public void testVarFail() {
+        List<String> srcs = Arrays.asList(
+                "var x = 0; var x = 1;",
+                "var x = 0; let x = 1;",
+                "let x = 0; var x = 1;",
+                "var x = 0; const f = (var x) -> { let x = 1; } f()",
+                "var x = 0; const f = (let x) -> { var x = 1; } f()",
+                "var x = 0; const f = (var x) -> { var x = 1; } f()",
+                ""
+        );
+        JexlFeatures f=  new JexlFeatures();
+        f.lexical(true).lexicalShade(true);
+        checkParse(f, srcs, false);
+    }
+
+    @Test
+    public void testConstFail() {
+        List<String> srcs = Arrays.asList(
+                "const x = 0;  x = 1;",
+                "const x = 0; x *= 1;",
+                "cont x = 0; var x = 1;",
+                "cont x = 0; if (true) { var x = 1;}" ,
+                "cont x = 0; if (true) { x = 1;}" ,
+                ""
+        );
+        checkParse(srcs, false);
+    }
+
+    @Test
     public void testSingleStatementDeclFail() {
         List<String> srcs = Arrays.asList(
                 "if (true) let x ;",
