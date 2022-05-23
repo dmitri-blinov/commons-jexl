@@ -87,6 +87,10 @@ public final class Scope {
      */
     private Map<Integer, Class> variableTypes = null;
     /**
+     * The set of lexically defined variables.
+     */
+    private Set<Integer> lexicalVariables = null;
+    /**
      * The set of final variables.
      */
     private Set<Integer> finalVariables = null;
@@ -240,6 +244,26 @@ public final class Scope {
             }
             variableTypes.put(symbol, type);
         }
+    }
+
+    /**
+     * Returns if the local variable is declared lexically scoped.
+     * @param symbol the symbol index
+     * @return true if lexical, false otherwise
+     */
+    public boolean isVariableLexical(int symbol) {
+        return lexicalVariables == null ? false : lexicalVariables.contains(symbol);
+    }
+
+    /**
+     * Sets the local variable as declared lexically scoped.
+     * @param symbol the symbol index
+     */
+    protected void setVariableLexical(int symbol) {
+        if (lexicalVariables == null) {
+            lexicalVariables = new HashSet<Integer>();
+        }
+        lexicalVariables.add(symbol);
     }
 
     /**

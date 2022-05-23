@@ -30,6 +30,8 @@ public class LexicalScope {
      * @since 3.2
      */
     protected static final class VariableModifier implements Cloneable {
+        /** The var 'lexical' modifier. */
+        private final boolean isLexical;
         /** The var 'final' modifier. */
         private final boolean isFinal;
         /** The var 'required' modifier. */
@@ -40,17 +42,23 @@ public class LexicalScope {
         /**
          * Creates a new variable modifier.
          * @param c the variable type
+         * @param lex whether the variable is lexical
          * @param fin whether the variable is final
          * @param req whether the variable is required
          */
-        protected VariableModifier(Class c, boolean fin, boolean req) {
+        protected VariableModifier(Class c, boolean lex, boolean fin, boolean req) {
             type = c;
+            isLexical = lex;
             isFinal = fin;
             isRequired = req;
         }
 
         public Class getType() {
             return type;
+        }
+
+        public boolean isLexical() {
+            return isLexical;
         }
 
         public boolean isFinal() {
@@ -66,7 +74,7 @@ public class LexicalScope {
          * @return new modifier
         */
         public VariableModifier clone() {
-            return new VariableModifier(this.type, this.isFinal, this.isRequired);
+            return new VariableModifier(this.type, this.isLexical, this.isFinal, this.isRequired);
         }
     }
     /**
@@ -157,14 +165,15 @@ public class LexicalScope {
      * Sets a variable modifiers.
      * @param r the offset in this frame
      * @param c the variable type
+     * @param lex whether the variable is lexical
      * @param fin whether the variable is final
      * @param req whether the variable is required
      */
-    public void setModifiers(int r, Class c, boolean fin, boolean req) {
+    public void setModifiers(int r, Class c, boolean lex, boolean fin, boolean req) {
         if (modifiers == null) {
             modifiers = new HashMap<Integer, VariableModifier> ();
         }
-        modifiers.put(r, new VariableModifier(c, fin, req));
+        modifiers.put(r, new VariableModifier(c, lex, fin, req));
     }
     /**
      * Gets a symbol type.
@@ -183,6 +192,25 @@ public class LexicalScope {
         }
         return null;
     }
+
+    /**
+     * Returns if the local variable is declared lexically scoped.
+     * @param s the symbol index
+     * @return true if lexical, false otherwise
+     */
+    public boolean isVariableLexical(int s) {
+        if (modifiers != null && modifiers.containsKey(s)) {
+            return modifiers.get(s).isLexical();
+        }
+        if (previous != null) {
+            return previous.isVariableLexical(s);
+        }
+        if (frame != null && frame.getScope() != null) {
+            return frame.getScope().isVariableLexical(s);
+        }
+        return false;
+    }
+
     /**
      * Returns if the local variable is declared final.
      * @param s the symbol index
@@ -200,6 +228,7 @@ public class LexicalScope {
         }
         return false;
     }
+
     /**
      * Returns if the local variable is declared non-null.
      * @param s the symbol index
@@ -222,14 +251,15 @@ public class LexicalScope {
      *
      * @param symbol the symbol index
      * @param c the variable type
+     * @param lex whether the variable is lexical
      * @param fin whether the variable is final
      * @param req whether the variable is required
      * @return true if was not already declared, false if lexical clash (error)
      */
-    public boolean addSymbol(int symbol, Class c, boolean fin, boolean req) {
+    public boolean addSymbol(int symbol, Class c, boolean lex, boolean fin, boolean req) {
         boolean result = addSymbol(symbol);
         if (result) {
-            setModifiers(symbol, c, fin, req);
+            setModifiers(symbol, c, lex, fin, req);
         }
         return result;
     }

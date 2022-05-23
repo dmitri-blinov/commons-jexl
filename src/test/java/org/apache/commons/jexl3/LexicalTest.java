@@ -808,6 +808,20 @@ public class LexicalTest {
     }
 
     @Test
+    public void testLetFail() {
+        List<String> srcs = Arrays.asList(
+            "let x = 0; var x = 1;",
+            "var x = 0; let x = 1;",
+            "let x = 0; let x = 1;",
+            "var x = 0; const f = (var x) -> { let x = 1; } f()",
+            "var x = 0; const f = (let x) -> { let x = 1; } f()",
+            "var x = 0; const f = (let x) -> { var x = 1; } f()",
+            ""
+        );
+        checkParse(srcs, false);
+    }
+
+    @Test
     public void testVarFail() {
         List<String> srcs = Arrays.asList(
                 "var x = 0; var x = 1;",

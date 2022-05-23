@@ -111,11 +111,12 @@ public abstract class JexlParser extends StringParser {
          * Declares a local symbol.
          * @param symbol the symbol index in the scope
          * @param c the variable type
+         * @param lex whether the variable is lexical
          * @param fin whether the variable is final
          * @param req whether the variable is required
          * @return true if declaration was successful, false if symbol was already declared
          */
-        boolean declareSymbol(int symbol, Class c, boolean fin, boolean req);
+        boolean declareSymbol(int symbol, Class c, boolean lex, boolean fin, boolean req);
 
         /**
          * Checks whether a symbol is declared in this lexical unit.
@@ -123,6 +124,13 @@ public abstract class JexlParser extends StringParser {
          * @return true if declared, false otherwise
          */
         boolean hasSymbol(int symbol);
+
+        /**
+         * Checks whether a symbol is declared lexically scoped in this lexical unit.
+         * @param symbol the symbol
+         * @return true if declared lexical, false otherwise
+         */
+        boolean isSymbolLexical(int symbol);
 
         /**
          * Checks whether a symbol is declared final in this lexical unit.
@@ -346,11 +354,13 @@ public abstract class JexlParser extends StringParser {
                     // captured are declared in all cases
                     identifier.setCaptured(true);
                 } else {
-                    declared = block.hasSymbol(symbol);
+                    LexicalUnit unit = block;
+                    declared = unit.hasSymbol(symbol);
                     // one of the lexical blocks above should declare it
                     if (!declared) {
                         for (final LexicalUnit u : blocks) {
                             if (u.hasSymbol(symbol)) {
+                                unit = u;
                                 declared = true;
                                 break;
                             }
@@ -360,13 +370,18 @@ public abstract class JexlParser extends StringParser {
                             }
                         }
                     }
-                    if (!declared && info instanceof JexlNode.Info) {
+                    if (declared) {
+                        // track if const is defined or not
+                        // if (unit.isConstant(symbol)) {
+                        //    identifier.setConstant(true);
+                        // }
+                    } else if (info instanceof JexlNode.Info) {
                         declared = isSymbolDeclared((JexlNode.Info) info, symbol);
                     }
                 }
                 if (!declared) {
                     identifier.setShaded(true);
-                    if (identifier.isLexical() || getFeatures().isLexicalShade()) {
+                    if (getFeatures().isLexicalShade()) {
                         // can not reuse a local as a global
                         throw new JexlException.Parsing(info, name + ": variable is not defined").clean();
                     }
@@ -374,6 +389,36 @@ public abstract class JexlParser extends StringParser {
             }
         }
         return name;
+    }
+
+    /**
+     * Checks whether a local variable is lexically defined.
+     * @param image the identifier image
+     * @return true if final, false otherwise
+     */
+    protected boolean isLexicalVariable(String image) {
+        if (scope != null) {
+            Integer symbol = scope.getSymbol(image);
+            if (symbol != null) {
+                if (scope.isVariableLexical(symbol)) {
+                    return true;
+                } else {
+                    if (block.hasSymbol(symbol))
+                        return block.isSymbolLexical(symbol);
+                    // one of the lexical blocks above should declare it
+                    for (LexicalUnit u : blocks) {
+                        if (u.hasSymbol(symbol)) {
+                            return u.isSymbolLexical(symbol);
+                        }
+                        // stop at first new scope reset, aka lambda
+                        if (u instanceof ASTJexlLambda) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -426,12 +471,13 @@ public abstract class JexlParser extends StringParser {
      * Declares a symbol.
      * @param symbol the symbol index
      * @param c the variable type
+     * @param lex whether the variable is lexical
      * @param fin whether the variable is final
      * @param req whether the variable is required
      * @return true if symbol can be declared in lexical scope, false (error)
      * if it is already declared
      */
-    private boolean declareSymbol(int symbol, Class c, boolean fin, boolean req) {
+    private boolean declareSymbol(int symbol, Class c, boolean lex, boolean fin, boolean req) {
         for (LexicalUnit lu : blocks) {
             if (lu.hasSymbol(symbol)) {
                 return false;
@@ -441,7 +487,7 @@ public abstract class JexlParser extends StringParser {
                 break;
             }
         }
-        return block == null || block.declareSymbol(symbol, c, fin, req);
+        return block == null || block.declareSymbol(symbol, c, lex, fin, req);
     }
 
     /**
@@ -487,8 +533,8 @@ public abstract class JexlParser extends StringParser {
             variable.setCaptured(true);
         }
         // if not the first time we declare this symbol...
-        if (!declareSymbol(symbol, variable.getType(), variable.isConstant(), variable.isRequired())) {
-            if (variable.isLexical() || getFeatures().isLexical()) {
+        if (!declareSymbol(symbol, variable.getType(), variable.isLexical(), variable.isConstant(), variable.isRequired())) {
+            if (isLexicalVariable(name) || variable.isLexical() || getFeatures().isLexical()) {
                 throw new JexlException.Parsing(variable.jexlInfo(), name + ": variable is already declared").clean();
             }
             variable.setRedefined(true);

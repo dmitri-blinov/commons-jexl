@@ -42,11 +42,11 @@ public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit 
     }
 
     @Override
-    public boolean declareSymbol(final int symbol, final Class c, final boolean fin, final boolean req) {
+    public boolean declareSymbol(final int symbol, final Class c, final boolean lex, final boolean fin, final boolean req) {
         if (locals == null) {
             locals  = new LexicalScope();
         }
-        return locals.addSymbol(symbol, c, fin, req);
+        return locals.addSymbol(symbol, c, lex, fin, req);
     }
 
     @Override
@@ -57,6 +57,11 @@ public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit 
     @Override
     public boolean hasSymbol(final int symbol) {
         return locals != null && locals.hasSymbol(symbol);
+    }
+
+    @Override
+    public boolean isSymbolLexical(int symbol) {
+        return locals != null && locals.isVariableLexical(symbol);
     }
 
     @Override
