@@ -413,7 +413,7 @@ ASTJexlScript JexlScript(Scope scope) :
     ) <EOF>
 {
     popUnit(jjtThis);
-    jjtThis.setScope(getFrame());
+    jjtThis.setScope(getScope());
     popScope();
     return jjtThis.script();
 }
@@ -428,7 +428,7 @@ ASTJexlScript JexlExpression(Scope scope) #JexlScript :
     [ Expression() ] <EOF>
 {
     popUnit(jjtThis);
-    jjtThis.setScope(getFrame());
+    jjtThis.setScope(getScope());
     popScope();
     return jjtThis.script();
 }
