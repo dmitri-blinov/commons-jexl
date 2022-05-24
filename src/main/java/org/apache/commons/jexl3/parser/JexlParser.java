@@ -784,6 +784,23 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Check fat vs thin arrow syntax feature.
+     * @param token the arrow token
+     */
+    protected void checkLambda(Token token) {
+        final String arrow = token.image;
+        if ("->".equals(arrow)) {
+            if (!getFeatures().supportsThinArrow()) {
+                throwFeatureException(JexlFeatures.THIN_ARROW, token);
+            }
+            return;
+        }
+        if ("=>".equals(arrow) && !getFeatures().supportsFatArrow()) {
+            throwFeatureException(JexlFeatures.FAT_ARROW, token);
+        }
+    }
+
+    /**
      * Throws Ambiguous exception.
      * <p>Seeks the end of the ambiguous statement to recover.
      * @param node the first token in ambiguous expression

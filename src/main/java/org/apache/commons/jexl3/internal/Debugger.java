@@ -18,6 +18,7 @@ package org.apache.commons.jexl3.internal;
 
 
 import org.apache.commons.jexl3.JexlExpression;
+import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.parser.ASTAddNode;
@@ -221,6 +222,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected int indent = 2;
     /** accept() relative depth. */
     protected int depth = Integer.MAX_VALUE;
+    /** Arrow symbol. */
+    protected String arrow = "->";
 
     /**
      * Creates a Debugger.
@@ -243,13 +246,44 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     }
 
     /**
+     * Tries (hard) to find the features used to parse a node.
+     * @param node the node
+     * @return the features or null
+     */
+    protected JexlFeatures getFeatures(JexlNode node) {
+        JexlNode walk = node;
+        while(walk != null) {
+            if (walk instanceof ASTJexlScript) {
+                ASTJexlScript script = (ASTJexlScript) walk;
+                return script.getFeatures();
+            }
+            walk = walk.jjtGetParent();
+        }
+        return null;
+    }
+
+    /**
+     * Sets the arrow style (fat or thin) depending on features.
+     * @param node the node to start seeking features from.
+     */
+    protected void setArrowSymbol(JexlNode node) {
+        JexlFeatures features = getFeatures(node);
+        if (features != null && features.supportsFatArrow() && !features.supportsThinArrow()) {
+            arrow = "=>";
+        } else {
+            arrow = "->";
+        }
+    }
+
+    /**
      * Position the debugger on the root of an expression.
      * @param jscript the expression
      * @return true if the expression was a {@link Script} instance, false otherwise
      */
     public boolean debug(final JexlExpression jscript) {
         if (jscript instanceof Script) {
-            return debug(((Script) jscript).script);
+            Script script = (Script) jscript;
+            return debug(script.script);
         }
         return false;
     }
@@ -261,7 +295,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
      */
     public boolean debug(final JexlScript jscript) {
         if (jscript instanceof Script) {
-            return debug(((Script) jscript).script);
+            Script script = (Script) jscript;
+            return debug(script.script);
         }
         return false;
     }
@@ -285,6 +320,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         start = 0;
         end = 0;
         indentLevel = 0;
+        setArrowSymbol(node);
         if (node != null) {
             builder.setLength(0);
             cause = node;
@@ -318,6 +354,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         start = 0;
         end = 0;
         indentLevel = 0;
+        setArrowSymbol(node);
         if (node != null) {
             builder.setLength(0);
             cause = node;
@@ -1359,9 +1396,9 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 builder.append(' ');
             } else {
                 if (expr) {
-                    builder.append("->");
+                    builder.append(arrow);
                 } else if (!function) {
-                    builder.append("->");
+                    builder.append(arrow);
                 }
             }
         }

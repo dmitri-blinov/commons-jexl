@@ -167,7 +167,8 @@ TOKEN_MGR_DECLS : {
     | < STATIC : "static" > { popDot(); }
     | < CLASS : "class" > { popDot(); }
     | < FUNCTION : "function" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < LAMBDA : "->" | "\u2192" >
+    | < LAMBDA : "->" | "\u2192" > { popDot(); }
+    | < FATARROW : "=>" > { popDot(); }
     | < BREAK : "break" > { popDot(); }
     | < CONTINUE : "continue" > { popDot(); }
     | < REMOVE : "remove" > { popDot(); } /* Revert state to default if was DOT_ID. */
@@ -648,7 +649,7 @@ void Function(boolean isStatic, Class type) #JexlLambda :
     if (type != null) declareReturnType(type);
 }
 {
-    Parameters() ( Block() | <LAMBDA> Expression() )
+    Parameters() ( Block() | ( <LAMBDA> | <FATARROW> ) Expression() )
 {
     popUnit(jjtThis);
     jjtThis.setScope(scope);
@@ -2146,10 +2147,10 @@ void LambdaLookahead() #void : {}
         |
         FunctionType() Parameters() <LCURLY>
         |
-        Parameters() <LAMBDA> 
+        Parameters() ( <LAMBDA> | <FATARROW> ) 
     )
     |
-    Parameter() <LAMBDA> 
+    Parameter() ( <LAMBDA> | <FATARROW> )
 }
 
 void Lambda() #JexlLambda :
@@ -2157,6 +2158,7 @@ void Lambda() #JexlLambda :
     pushScope();
     pushUnit(jjtThis);
     Class type = null;
+    Token arrow;
 }
 {
     (
@@ -2166,12 +2168,12 @@ void Lambda() #JexlLambda :
           |
           LOOKAHEAD( FunctionType() ) type = FunctionType() { declareReturnType(type); } Parameters() Block()
           |
-          Parameters() <LAMBDA> ( LOOKAHEAD(3) Block() | Expression())
+          Parameters() (arrow=<LAMBDA> | arrow=<FATARROW>) { checkLambda(arrow); } ( LOOKAHEAD(3) Block() | Expression())
         )
         |
-        Parameter() <LAMBDA> ( LOOKAHEAD(3) Block() | Expression())
+        Parameter() (arrow=<LAMBDA> | arrow=<FATARROW>) { checkLambda(arrow); } ( LOOKAHEAD(3) Block() | Expression())
     )
-{
+{    
     popUnit(jjtThis);
     jjtThis.setScope(scope);
     popScope();
