@@ -2044,9 +2044,19 @@ void InitializedMapLiteral() #void : {}
 void Parameter() #void :
 {
     Token t;
+    boolean lexical = false;
+    boolean constant = false;
 }
 {
-    t=<IDENTIFIER> { declareParameter(t); }
+    [ 
+       <LET> { lexical = true; } 
+       |
+       <CONST> { lexical = true; constant = true; }
+    ]
+    t=<IDENTIFIER> 
+{
+    declareParameter(t, null, lexical, constant, false, null); 
+}
 }
 
 void VarParameter() #void :
@@ -2054,13 +2064,13 @@ void VarParameter() #void :
     Token t;
     Token te;
     Class type = null;
-    boolean isFinal = false;
-    boolean isRequired = false;
+    boolean constant = false;
+    boolean required = false;
     Token v;
     Object value = null;
 }
 {
-    [ <FINAL> { isFinal = true; } ]
+    [ <FINAL> { constant = true; } ]
     ( <VAR>
       |
       (
@@ -2086,7 +2096,7 @@ void VarParameter() #void :
       ) 
       (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { type = Parser.arrayType(type); })*
     )
-    [ <and> { isRequired = true; } ]
+    [ <and> { required = true; } ]
     t = <IDENTIFIER> 
     [ 
        <assign> 
@@ -2113,7 +2123,7 @@ void VarParameter() #void :
        <ELLIPSIS> { declareVarArgSupport(); } 
     ]
 {
-    declareParameter(t, type, isFinal, isRequired, value); 
+    declareParameter(t, type, false, constant, required, value); 
 }
 }
 

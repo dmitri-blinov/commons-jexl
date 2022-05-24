@@ -71,6 +71,10 @@ public class JexlTestCase {
         return new JexlBuilder().create();
     }
 
+    static JexlEngine createEngine(JexlFeatures features) {
+        return new JexlBuilder().features(features).create();
+    }
+
     // define mode pro50
     static final JexlOptions MODE_PRO50 = new JexlOptions();
     static {

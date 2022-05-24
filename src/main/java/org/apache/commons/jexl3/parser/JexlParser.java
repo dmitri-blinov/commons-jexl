@@ -605,7 +605,7 @@ public abstract class JexlParser extends StringParser {
      * @param token the parameter name token
      */
     protected void declareParameter(final Token token) {
-        declareParameter(token, null, false, false, null);
+        declareParameter(token, null, false, false, false, null);
     }
 
     /**
@@ -613,11 +613,12 @@ public abstract class JexlParser extends StringParser {
      * <p> This method creates an new entry in the symbol map. </p>
      * @param token the parameter name token
      * @param type the parameter class if any
-     * @param isFinal whether the declared parameter is final
-     * @param isRequired whether the declared parameter is required
+     * @param lexical whether the declared parameter is lexical
+     * @param constant whether the declared parameter is final
+     * @param required whether the declared parameter is required
      * @param value the parameter default value
      */
-    protected void declareParameter(final Token token, final Class type, final boolean isFinal, final boolean isRequired, final Object value) {
+    protected void declareParameter(final Token token, final Class type, final boolean lexical, final boolean constant, final boolean required, final Object value) {
         final String identifier = token.image;
         if (!allowVariable(identifier)) {
             throwFeatureException(JexlFeatures.LOCAL_VAR, token);
@@ -625,7 +626,7 @@ public abstract class JexlParser extends StringParser {
         if (scope == null) {
             scope = new Scope();
         }
-        final int symbol = scope.declareParameter(identifier, type, isFinal, isRequired, value);
+        final int symbol = scope.declareParameter(identifier, type, lexical, constant, required, value);
         // not sure how declaring a parameter could fail...
         // lexical feature error
         if (!block.declareSymbol(symbol) && getFeatures().isLexical()) {

@@ -338,7 +338,7 @@ public final class Scope {
      * @return the register index storing this variable
      */
     public int declareParameter(final String name) {
-        return declareParameter(name, null, false, false, null);
+        return declareParameter(name, null, false, false, false, null);
     }
 
     /**
@@ -348,13 +348,14 @@ public final class Scope {
      * </p>
      * @param name the parameter name
      * @param type the parameter class
+     * @param isLexical if the declared parameter is lexically defined
      * @param isFinal if the declared parameter is final
      * @param isRequired if the declared parameter is non-null
      * @param value the default parameter value
      * @return the register index storing this variable
      */
-    public int declareParameter(final String name, final Class type, final boolean isFinal, final boolean isRequired, 
-                                final Object value) {
+    public int declareParameter(final String name, final Class type, final boolean isLexical, 
+                                final boolean isFinal, final boolean isRequired, final Object value) {
         if (vars > 0) {
             throw new IllegalStateException("cant declare parameters after variables");
         }
@@ -363,6 +364,9 @@ public final class Scope {
             register = addSymbol(name);
             parms += 1;
             setVariableType(register, type);
+            if (isLexical) {
+                setVariableLexical(register);
+            }
             if (isFinal) {
                 setVariableFinal(register);
             }
