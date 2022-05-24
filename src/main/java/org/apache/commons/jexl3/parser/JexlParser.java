@@ -237,7 +237,7 @@ public abstract class JexlParser extends StringParser {
      * regain access after parsing to known which / how-many registers are needed. </p>
      * @return the named register map
      */
-    protected Scope getFrame() {
+    protected Scope getScope() {
         return scope;
     }
 
