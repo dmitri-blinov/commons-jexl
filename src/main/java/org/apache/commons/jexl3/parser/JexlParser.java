@@ -372,9 +372,9 @@ public abstract class JexlParser extends StringParser {
                     }
                     if (declared) {
                         // track if const is defined or not
-                        // if (unit.isConstant(symbol)) {
-                        //    identifier.setConstant(true);
-                        // }
+                        if (unit.isSymbolFinal(symbol)) {
+                            identifier.setConstant(true);
+                        }
                     } else if (info instanceof JexlNode.Info) {
                         declared = isSymbolDeclared((JexlNode.Info) info, symbol);
                     }
@@ -764,16 +764,8 @@ public abstract class JexlParser extends StringParser {
         } else if (ASSIGN_NODES.contains(node.getClass())) {
             final JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
-            }
-            if (lv instanceof ASTIdentifier) {
-                ASTIdentifier var = (ASTIdentifier) lv;
-                if (!(var instanceof ASTVar)) { // if not a declaration...
-                    int symbol = var.getSymbol();
-                    if (symbol >= 0 && isFinalVariable(var.getName())) {
-                        throw new JexlException.Assignment(var.jexlInfo(), var.getName()).clean();
-                    }
-                }
+                String var = lv instanceof ASTIdentifier ? ((ASTIdentifier) lv).getName() : null;
+                throw new JexlException.Assignment(lv.jexlInfo(), var).clean();
             }
         } else if (node instanceof ASTPointerNode) {
             JexlNode lv = node.jjtGetChild(0);
