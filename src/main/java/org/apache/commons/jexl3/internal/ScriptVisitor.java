@@ -66,6 +66,7 @@ import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
+import org.apache.commons.jexl3.parser.ASTFunctionVar;
 import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
@@ -415,6 +416,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(final ASTMultiVar node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTFunctionVar node, final Object data) {
         return visitNode(node, data);
     }
 

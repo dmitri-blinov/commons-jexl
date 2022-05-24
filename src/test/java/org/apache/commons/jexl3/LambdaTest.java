@@ -467,6 +467,54 @@ public class LambdaTest extends JexlTestCase {
         }
     }
 
+    @Test
+    public void testNamedFunc() {
+        String src = "(let a)->{ function fact(const x) { x <= 1? 1 : x * fact(x - 1); } fact(a); }";
+        JexlEngine jexl = createEngine();
+        JexlScript script = jexl.createScript(src);
+        Object result = script.execute(null, 6);
+        Assert.assertEquals(720, result);
+        String parsed = simpleWhitespace(script.getParsedText());
+        Assert.assertEquals(simpleWhitespace(src), parsed);
+    }
+
+    @Test
+    public void testNamedFuncIsConst() {
+        JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        // Only valid if lexical mode is enabled
+        String src = "function foo(x) { x + x }; var foo ='nonononon'";
+        JexlEngine jexl = createEngine(f);
+        try {
+            JexlScript script = jexl.createScript(src);
+            Assert.fail("should fail, foo is already defined");
+        } catch(JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.getMessage().contains("foo"));
+        }
+    }
+
+    @Test
+    public void testFailParseFunc0() {
+        String src = "if (false) function foo(x) { x + x }; var foo = 1";
+        JexlEngine jexl = createEngine();
+        try {
+            JexlScript script = jexl.createScript(src);
+        } catch(JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.getMessage().contains("function"));
+        }
+    }
+
+    @Test
+    public void testFailParseFunc1() {
+        String src = "if (false) let foo = (x) { x + x }; var foo = 1";
+        JexlEngine jexl = createEngine();
+        try {
+            JexlScript script = jexl.createScript(src);
+        } catch(JexlException.Parsing xparse) {
+            // Assert.assertTrue(xparse.getMessage().contains("let"));
+        }
+    }
+
     @Test public void testLambdaExpr0() {
         String src = "(x, y) -> x + y";
         JexlEngine jexl = createEngine();

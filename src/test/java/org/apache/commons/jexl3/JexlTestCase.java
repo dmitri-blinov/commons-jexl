@@ -125,6 +125,10 @@ public class JexlTestCase {
         return lhsw.equals(rhsw);
     }
 
+    public String simpleWhitespace(String arg) {
+        return arg.trim().replaceAll("\\s+", " ");
+    }
+
     /**
      * A very secure singleton.
      */

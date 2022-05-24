@@ -629,7 +629,7 @@ Class FunctionType() #void :
 }
 }
 
-void FunctionVar() #Var :
+void FunctionVar() :
 {
     Token t;
 }

@@ -68,6 +68,7 @@ import org.apache.commons.jexl3.parser.ASTForeachStatement;
 import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTFunctionNode;
+import org.apache.commons.jexl3.parser.ASTFunctionVar;
 import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
@@ -442,6 +443,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 || child instanceof ASTIfStatement
                 || child instanceof ASTForStatement
                 || child instanceof ASTForeachStatement
+                || child instanceof ASTFunctionStatement
                 || child instanceof ASTWhileStatement
                 || child instanceof ASTDoWhileStatement
                 || child instanceof ASTTryStatement
@@ -1326,10 +1328,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 for (String param : params) {
                     int symbol = scope.getSymbol(param);
                     Class type = scope.getVariableType(symbol);
+                    boolean isLexical = scope.isVariableLexical(symbol);
                     boolean isFinal = scope.isVariableFinal(symbol);
                     boolean isRequired = scope.isVariableRequired(symbol);
                     Object value = scope.getVariableValue(symbol);
-                    if (isFinal || isRequired || type != null || value != null) {
+                    if (isLexical || isFinal || isRequired || type != null || value != null) {
                         varSyntax = true;
                         break;
                     }
@@ -1360,21 +1363,31 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                     }
                     String param = params[p];
                     int symbol = scope.getSymbol(param);
+                    boolean isLexical = scope.isVariableLexical(symbol);
                     boolean isFinal = scope.isVariableFinal(symbol);
-                    if (isFinal) {
-                        builder.append("final ");
-                    }
-                    if (varSyntax) {
-                        Class type = scope.getVariableType(symbol);
-                        if (type == null) {
-                            builder.append("var ");
+
+                    if (isLexical) {
+                        if (isFinal) {
+                            builder.append("const ");
                         } else {
-                            builder.append(getClassName(type)).append(" ");
+                            builder.append("let ");
                         }
-                    }
-                    boolean isRequired = scope.isVariableRequired(symbol);
-                    if (isRequired) {
-                        builder.append("&");
+                    } else {
+                        if (isFinal) {
+                            builder.append("final ");
+                        }
+                        if (varSyntax) {
+                            Class type = scope.getVariableType(symbol);
+                            if (type == null) {
+                                builder.append("var ");
+                            } else {
+                                builder.append(getClassName(type)).append(" ");
+                            }
+                        }
+                        boolean isRequired = scope.isVariableRequired(symbol);
+                        if (isRequired) {
+                            builder.append("&");
+                        }
                     }
                     builder.append(visitParameter(param, data));
                     Object value = scope.getVariableValue(symbol);
@@ -2067,6 +2080,16 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             if (node.isRequired()) {
                 builder.append("&");
             }
+        }
+        check(node, node.getName(), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(final ASTFunctionVar node, final Object data) {
+        Class type = node.getType();
+        if (type != null) {
+            builder.append(getClassName(type)).append(" ");
         }
         check(node, node.getName(), data);
         return data;
