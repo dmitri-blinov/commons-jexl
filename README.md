@@ -26,7 +26,7 @@ I feel that something more can be done to fill the gap between what functionalit
 how it can be tackled in JEXL by its current means. The fork is intended to be source compatible with the JEXL, but provide some
 enhancements and changes to the capabilities of the scripting language. In result, compatibility with Java language is greatly improved,
 as the majority of modern Java syntax is now supported. Such compatibility gives the script writers the opportunity to start using
-the language faster, for example, the following Java code snippet is perfectly valid
+the language faster by using well-known patterns, for example, the following Java code snippet is perfectly valid
 construct in JEXL Pro and gives the same results as in Java:
 
 ```
@@ -59,9 +59,16 @@ There are also some under-the-hood performance and memory usage improvements.
 Development Roadmap
 ----------------------
 The fork is feature complete and stable in both design and implementation, though minor enhancements are likely to come.
+The library source code is aligned with upstream as much as possible, passing practically all original test cases, except a coulple
+of those that were intentionally disabled as obsolete due to incompatible changes, see below.
+Periodic alignment with upstream is being done, with fork being already more than three years old.
+
+Distribution Status
+----------------------
 I have no intention of promoting this fork as an alternative to the main library, and I would be happy to have all
 the changes to be backported to the base JEXL library one day, but the decision whether these changes are the ones
-the JEXL community would benefit from remains at the descretion of the Apache JEXL team.
+the JEXL community would benefit from remains at the descretion of the Apache JEXL team. In a mean time everyone is welcomed
+to use it for testing or work
 
 Language Compatibility
 ----------------------
@@ -146,8 +153,6 @@ New features
 
 + Groovy-like `?=` conditional assignment operator is introduced
 
-+ Javascript-like function definition `function a() {}` statement is introduced
-
 + Javascript-like `===` and `!==` identity operators are introduced
 
 + C-like pointer `&` and pointer dereference `*` operators are introduced
@@ -195,8 +200,6 @@ Enhancements
   so that it is possible to pass a function closure as an argument to a java method that accepts such interfaces
 
 + Function can be declared as `static` to prevent variable capturing
-
-+ Function parameters can use `var` keyword for parameter definition `function(var x) {}`
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
 
