@@ -87,6 +87,9 @@ public class JexlArithmetic {
     /** Default BigDecimal scale. */
     protected static final int BIGD_SCALE = -1;
 
+    /** Double ONE */
+    protected static final Double DOUBLE_ONE = 1.;
+
     /** Whether this JexlArithmetic instance behaves in strict or lenient mode. */
     private final boolean strict;
 
@@ -929,6 +932,9 @@ public class JexlArithmetic {
         if (left instanceof BigDecimal) {
             return selfAdd(left, BigDecimal.ONE);
         }
+        if (left instanceof Double || left instanceof Float) {
+            return selfAdd(left, DOUBLE_ONE);
+        }
 
         return selfAdd(left, 1);
     }
@@ -1212,6 +1218,9 @@ public class JexlArithmetic {
         }
         if (left instanceof BigDecimal) {
             return selfSubtract(left, BigDecimal.ONE);
+        }
+        if (left instanceof Double || left instanceof Float) {
+            return selfSubtract(left, DOUBLE_ONE);
         }
         return selfSubtract(left, 1);
     }
