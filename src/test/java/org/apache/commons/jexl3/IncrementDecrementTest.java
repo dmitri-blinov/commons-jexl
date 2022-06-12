@@ -119,4 +119,24 @@ public class IncrementDecrementTest extends JexlTestCase {
         Assert.assertEquals("Result is not 43", new Integer(43), o);
     }
 
+    @Test
+    public void testPostfixOperatorPrecedence() throws Exception {
+        final JexlEngine jexl = new JexlBuilder().create();
+        JexlScript script;
+        Object result;
+
+        script = jexl.createScript("var i = 0; !i++");
+        result = script.execute(null);
+        Assert.assertTrue(result instanceof Boolean);
+        Assert.assertTrue((Boolean) result);
+    }
+
+    @Test
+    public void testIncrementOperatorOnNull() throws Exception {
+        final JexlEngine jexl = new JexlBuilder().strict(false).create();
+        JexlScript script;
+        Object result;        script = jexl.createScript("var i = null; ++i");
+        result = script.execute(null);
+        Assert.assertEquals(1, result);
+    }
 }
