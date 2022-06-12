@@ -1467,7 +1467,7 @@ public class Interpreter extends InterpreterBase {
         try {
             final int numChildren = node.jjtGetNumChildren();
             // Initialize for-loop
-            Object result = node.jjtGetChild(0).jjtAccept(this, data);
+            node.jjtGetChild(0).jjtAccept(this, data);
             boolean when = false;
             /* third objectNode is the statement to execute */
             JexlNode statement = node.jjtGetNumChildren() > 3 ? node.jjtGetChild(3) : null;
@@ -1476,7 +1476,7 @@ public class Interpreter extends InterpreterBase {
                 // Execute loop body
                 if (statement != null) {
                     try {
-                        result = statement.jjtAccept(this, data);
+                        statement.jjtAccept(this, data);
                     } catch (JexlException.Break stmtBreak) {
                         String target = stmtBreak.getLabel();
                         if (target == null || target.equals(node.getLabel())) {
@@ -1493,9 +1493,10 @@ public class Interpreter extends InterpreterBase {
                     }
                 }
                 // for-increment node
-                result = node.jjtGetChild(2).jjtAccept(this, data);
+                node.jjtGetChild(2).jjtAccept(this, data);
             }
-            return result;
+            // undefined result
+            return null;
         } finally {
             // restore lexical frame
             if (lexical) {
@@ -1517,10 +1518,10 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTForTerminationNode node, final Object data) {
-        if (node.jjtGetNumChildren() > 0) {
-            return arithmetic.toBoolean(node.jjtGetChild(0).jjtAccept(this, data));
-        } else {
+        if (node.jjtGetNumChildren() == 0) {
             return Boolean.TRUE;
+        } else {
+            return arithmetic.toBoolean(node.jjtGetChild(0).jjtAccept(this, data));
         }
     }
 
