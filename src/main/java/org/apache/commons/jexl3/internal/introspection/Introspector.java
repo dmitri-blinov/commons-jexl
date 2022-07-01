@@ -259,7 +259,7 @@ public final class Introspector {
                     l.add(ictor);
                 }
             }
-            return l.toArray(new Constructor<?>[l.size()]);
+            return l.toArray(new Constructor<?>[0]);
         }
         return null;
     }

@@ -29,6 +29,15 @@ public class SetBuilder implements JexlArithmetic.SetBuilder {
     protected final Set<Object> set;
 
     /**
+     * Creates a new unordered builder with specified set size.
+     * @param size the initial set size
+     */
+    public SetBuilder(final int size) {
+        this(size, false);
+    }
+
+
+    /**
      * Creates a new builder with specified set size.
      * @param size the initial set size
      * @param ordered whether the set should be ordered

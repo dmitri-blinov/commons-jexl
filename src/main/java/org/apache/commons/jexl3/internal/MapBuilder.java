@@ -29,8 +29,17 @@ public class MapBuilder implements JexlArithmetic.MapBuilder {
     protected final Map<Object, Object> map;
 
     /**
+     * Creates a new unordered builder.
+     * @param size the expected map size
+     */
+    public MapBuilder(final int size) {
+        this(size, false);
+    }
+
+    /**
      * Creates a new builder.
      * @param size the expected map size
+     * @param ordered whether the set should be ordered
      */
     public MapBuilder(final int size, final boolean ordered) {
         map = ordered ? new LinkedHashMap<Object, Object>(size) : new HashMap<Object, Object>(size);
