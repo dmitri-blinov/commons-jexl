@@ -3055,7 +3055,7 @@ public class Interpreter extends InterpreterBase {
                 object = context.get(ant.toString());
             } else if (c != numChildren - 1) {
                 // only the last one may be null
-                ptyNode = objectNode;
+                ptyNode = c == 0 && numChildren > 1 ? node.jjtGetChild(1) : objectNode;
                 break; //
             }
         }
