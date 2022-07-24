@@ -123,7 +123,7 @@ final class ClassMap {
             }
             @Override
             public Set<Entry<MethodKey, Method>> entrySet() {
-                return null;
+                return Collections.emptySet();
             }
             @Override public Method get(Object name) {
                 return CACHE_MISS;
@@ -235,21 +235,30 @@ final class ClassMap {
         if (aClass == null) {
             return null;
         }
-        // Look up by key
-        Method cacheEntry = byKey.computeIfAbsent(methodKey, x -> {
-            Method result = null;
-            // That one is expensive...
-            Method[] methodList = byName.get(x.getMethod());
-            if (methodList != null) {
-                result = methodKey.getMostSpecificMethod(methodList);
+
+        try {
+            // Look up by key
+            Method cacheEntry = byKey.computeIfAbsent(methodKey, x -> {
+                Method result = null;
+                // That one is expensive...
+                Method[] methodList = byName.get(x.getMethod());
+
+                if (methodList != null) {
+                    result = methodKey.getMostSpecificMethod(methodList);
+                }
+                return (result == null) ? CACHE_MISS : result;
+            });
+
+            // We looked this up before and failed.
+            if (cacheEntry == CACHE_MISS) {
+                return null;
             }
-            return (result == null) ? CACHE_MISS : result;
-        });
-        // We looked this up before and failed.
-        if (cacheEntry == CACHE_MISS) {
-            return null;
+            return cacheEntry;
+        } catch (final MethodKey.AmbiguousException ae) {
+            // that's a miss :-)
+            byKey.put(methodKey, CACHE_MISS);
+            throw ae;
         }
-        return cacheEntry;
     }
 
     /**
@@ -409,7 +418,7 @@ final class ClassMap {
      */
     private static void create(final ClassMap cache, final JexlPermissions permissions, Class<?> clazz, final Log log) {
         //
-        // Build a list of all elements in the class hierarchy. This one is bottom-first (i.e. we start
+        // Build a list of all elements in the class hierarchy. This one is bottom-first; we start
         // with the actual declaring class and its interfaces and then move up (superclass etc.) until we
         // hit java.lang.Object. That is important because it will give us the methods of the declaring class
         // which might in turn be abstract further up the tree.
@@ -417,7 +426,7 @@ final class ClassMap {
         // We also ignore all SecurityExceptions that might happen due to SecurityManager restrictions.
         //
         for (Class<?> classToReflect = clazz; classToReflect != null; classToReflect = classToReflect.getSuperclass()) {
-            if (Modifier.isPublic(classToReflect.getModifiers())) {
+            if (Modifier.isPublic(classToReflect.getModifiers()) && ClassTool.isExported(classToReflect)) {
                 populateWithClass(cache, permissions, classToReflect, log);
             }
             final Class<?>[] interfaces = classToReflect.getInterfaces();
