@@ -194,6 +194,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Locale;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -225,6 +228,10 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     protected int depth = Integer.MAX_VALUE;
     /** Arrow symbol. */
     protected String arrow = "->";
+    /** EOL. */
+    protected String lf = "\n";
+    /** Pragmas out. */
+    protected boolean outputPragmas = false;
 
     /**
      * Creates a Debugger.
@@ -378,6 +385,16 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     public int end() {
         return end;
+    }
+
+    /**
+     * Lets the debugger write out pragmas if any.
+     * @param flag turn on or off
+     * @return this debugger instance
+     */
+    public Debugger outputPragmas(boolean flag) {
+        this.outputPragmas = flag;
+        return this;
     }
 
     /**
@@ -1283,27 +1300,35 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
         return lambda.jjtGetNumChildren() == 1 && !isStatement(lambda.jjtGetChild(0));
     }
 
-    @Override
-    protected Object visit(final ASTJexlScript node, final Object arg) {
-        Object data = arg;
-        // dump pragmas
-        Map<String, Object> pragmas = node.getPragmas();
+    /**
+     * Stringifies the pragmas.
+     * @param builder where to stringify
+     * @param pragmas the pragmas, may be null
+     */
+    private static void writePragmas(StringBuilder builder, Map<String, Object> pragmas) {
         if (pragmas != null) {
-            for (Map.Entry<String, Object> entry : pragmas.entrySet()) {
-                String name = entry.getKey();
-                Object value = entry.getValue();
-                builder.append("#pragma ");
-                builder.append(name);
-                builder.append(' ');
-                if (value instanceof String) {
-                    String img = ((String)value).replace("'", "\\'");
-                    builder.append("'").append(img).append("'");
-                } else {
-                    builder.append(value);
+            for (Map.Entry<String, Object> pragma : pragmas.entrySet()) {
+                String key = pragma.getKey();
+                Object value = pragma.getValue();
+                Set<Object> values = value instanceof Set ? (Set) value : Collections.singleton(value);
+                for (Object pragmaValue : values) {
+                    builder.append("#pragma ");
+                    builder.append(key);
+                    builder.append(' ');
+                    builder.append(pragmaValue.toString());
+                    builder.append('\n');
                 }
-                builder.append('\r');
             }
         }
+
+    }
+
+    @Override
+    protected Object visit(final ASTJexlScript node, final Object arg) {
+        if (outputPragmas) {
+            writePragmas(builder, node.getPragmas());
+        }
+        Object data = arg;
         // if single expression lambda
         boolean expr = false;
         // if lambda, produce parameters

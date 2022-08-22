@@ -571,18 +571,18 @@ public abstract class JexlParser extends StringParser {
                 namespaces.add(nsname);
             }
         }
-        Object previous = pragmas.put(key, value);
-        if (previous != null) {
-            Set<Object> values;
+        // merge new value into a set created on the fly if key is already mapped
+        pragmas.merge(key, value, (previous, newValue)->{
             if (previous instanceof Set<?>) {
-                values = (Set<Object>) previous;
+                ((Set<Object>) previous).add(newValue);
+                return previous;
             } else {
-                values = new LinkedHashSet<Object>();
-                pragmas.put(key, values);
+                Set<Object> values = new LinkedHashSet<>();
                 values.add(previous);
+                values.add(newValue);
+                return values;
             }
-            values.add(value);
-        }
+        });
     }
 
     /**
