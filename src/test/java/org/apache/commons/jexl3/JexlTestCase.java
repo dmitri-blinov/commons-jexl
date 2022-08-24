@@ -19,6 +19,7 @@ package org.apache.commons.jexl3;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 
 import org.apache.commons.jexl3.internal.Interpreter;
@@ -50,7 +51,7 @@ public class JexlTestCase {
     protected final JexlEngine JEXL;
 
     public JexlTestCase(final String name) {
-        this(name, new JexlBuilder().permissions(null).cache(128).create());
+        this(name, new JexlBuilder().imports(Arrays.asList("java.lang","java.math")).permissions(null).cache(128).create());
     }
 
     protected JexlTestCase(final String name, final JexlEngine jexl) {

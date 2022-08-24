@@ -31,7 +31,7 @@ public class FeatureControllerTest extends JexlTestCase {
     }
 
     private JexlEngine createEngine(JexlFeatures features) {
-        return new JexlBuilder().features(features).create();
+        return new JexlBuilder().features(features).imports("java.lang").create();
     }
 
     @Test
@@ -48,14 +48,26 @@ public class FeatureControllerTest extends JexlTestCase {
         onAsserter.assertExpression(whileExpr, 1);
         offAsserter.failExpression(whileExpr, matchException);
 
+        onAsserter.setVariable("i", 0);
+        offAsserter.setVariable("i", 0);
         String doWhileExpr = "do { i++; } while(false); i;";
-        onAsserter.assertExpression(doWhileExpr, 2);
+        onAsserter.assertExpression(doWhileExpr, 1);
         offAsserter.failExpression(doWhileExpr, matchException);
 
-        String forExpr = "for (j : [1, 1]) { i = i + j; }; i;";
-        onAsserter.assertExpression(forExpr, 4);
+        onAsserter.setVariable("i", 0);
+        offAsserter.setVariable("i", 0);
+        String forExpr = "for (let j : [1, 2]) { i = i + j; }; i;";
+        onAsserter.assertExpression(forExpr, 3);
         offAsserter.failExpression(forExpr, matchException);
 
+        int[] a = new int[]{1, 2};
+        onAsserter.setVariable("a", a);
+        offAsserter.setVariable("a", a);
+        onAsserter.setVariable("i", 0);
+        offAsserter.setVariable("i", 0);
+        forExpr = "for(let j = 0; j < 2; ++j) { i = i + a[j]; } i;";
+        onAsserter.assertExpression(forExpr, 3);
+        offAsserter.failExpression(forExpr, matchException);
     }
 
     @Test
