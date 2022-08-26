@@ -764,8 +764,11 @@ public abstract class JexlParser extends StringParser {
         } else if (ASSIGN_NODES.contains(node.getClass())) {
             final JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                String var = lv instanceof ASTIdentifier ? ((ASTIdentifier) lv).getName() : null;
-                throw new JexlException.Assignment(lv.jexlInfo(), var).clean();
+                JexlInfo xinfo = lv.jexlInfo();
+                xinfo = info.at(xinfo.getLine(), xinfo.getColumn());
+                final String msg = lv instanceof ASTIdentifier ? ((ASTIdentifier) lv).getName() :
+                    readSourceLine(source, xinfo.getLine());
+                throw new JexlException.Assignment(xinfo, msg).clean();
             }
         } else if (node instanceof ASTPointerNode) {
             JexlNode lv = node.jjtGetChild(0);
@@ -775,7 +778,10 @@ public abstract class JexlParser extends StringParser {
         } else if (node instanceof ASTMultipleAssignment) {
             JexlNode lv = node.jjtGetChild(0);
             if (!lv.isLeftValue()) {
-                throw new JexlException.Assignment(lv.jexlInfo(), null).clean();
+                JexlInfo xinfo = lv.jexlInfo();
+                xinfo = info.at(xinfo.getLine(), xinfo.getColumn());
+                final String msg = readSourceLine(source, xinfo.getLine());
+                throw new JexlException.Assignment(xinfo, msg).clean();
             }
         }
 

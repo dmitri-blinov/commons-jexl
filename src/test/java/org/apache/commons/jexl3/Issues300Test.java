@@ -874,4 +874,40 @@ public class Issues300Test {
         DOMICILE
     }
 
+    @Test
+    public void test377() {
+        String text = "function add(x, y) { x + y } add(a, b)";
+        JexlEngine jexl = new JexlBuilder().safe(true).create();
+        JexlScript script = jexl.createScript(text, "a", "b");
+        Object result = script.execute(null, 20, 22);
+        Assert.assertEquals(42, result);
+    }
+
+    @Test
+    public void test379a() {
+        final String src =
+                "#pragma jexl.import java.util\n"+
+                "const map = new LinkedHashMap({0 : 'zero'});";
+        JexlEngine jexl = new JexlBuilder().safe(true).create();
+        JexlScript script = jexl.createScript(src);
+        Assert.assertNotNull(script);
+        Object result = script.execute(null);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result instanceof LinkedHashMap);
+        Assert.assertEquals(1, ((Map) result).size());
+    }
+
+    @Test
+    public void test373b() {
+        final String src = "var i = ++1";
+        JexlEngine jexl = new JexlBuilder().safe(true).create();
+        JexlInfo info = new JexlInfo("badscript", 0, 0);
+        try {
+            JexlScript script = jexl.createScript(info, src);
+            Assert.fail("should not parse");
+        } catch(JexlException.Parsing xparse) {
+            String msg = xparse.getMessage();
+            Assert.assertTrue(msg.contains("badscript"));
+        }
+    }
 }
