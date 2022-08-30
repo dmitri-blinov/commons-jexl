@@ -23,8 +23,8 @@ import java.util.BitSet;
 /**
  * The set of symbols declared in a lexical scope.
  * <p>The symbol identifiers are determined by the functional scope.</p>
- * <p>We use 2 bits per symbol; bit 0 sets the actual symbol as lexical (let), bit 1 as a const.
- * There are actually only 4 used states: 0, 1, 3</p>
+ * <p>We use 2 bits per symbol s; bit (s*2)+0 sets the actual symbol as lexical (let), bit (s*2)+1 as a const.
+ * There are actually only 2 used states: 1 and 3</p>
  */
 public class LexicalScope {
     /**
@@ -85,14 +85,19 @@ public class LexicalScope {
     protected static final int LONGBITS = 64;
     /**
      * Bits per symbol.
-     * Declared, const, defined.
+     * let (b + 0) + const (b + 1).
      */
     protected static final int BITS_PER_SYMBOL = 2;
+    /**
+     * Bits per symbol.
+     * Declared, const, defined.
+     */
+    protected static final int SYMBOL_SHIFT = 1;
     /**
      * Bitmask for symbols.
      * Declared, const, defined.
      */
-    protected static final long SYMBOL_MASK = (1L << BITS_PER_SYMBOL) - 1; // 3, as 1+2, 2 bits
+    protected static final long SYMBOL_MASK = (1L << (BITS_PER_SYMBOL - 1)) - 1; // 3, as 1+2, 2 bits
     /**
      * Number of symbols.
      */
@@ -163,17 +168,6 @@ public class LexicalScope {
             moreSymbols = new BitSet();
         }
         return moreSymbols;
-    }
-
-    /**
-     * Checks whether a symbol has already been declared.
-     *
-     * @param symbol the symbol
-     * @return true if declared, false otherwise
-     */
-    public boolean hasSymbol(final int symbol) {
-        final int bit = symbol << BITS_PER_SYMBOL;
-        return isSet(bit);
     }
 
     /**
@@ -315,6 +309,22 @@ public class LexicalScope {
         return result;
     }
 
+    public boolean hasSymbol(final int symbol) {
+        final int bit = symbol << SYMBOL_SHIFT;
+        return isSet(bit);
+    }
+
+    /**
+     * Checks whether a symbol is declared as a constant.
+     *
+     * @param symbol the symbol
+     * @return true if declared as constant, false otherwise
+     */
+    public boolean isConstant(final int symbol) {
+        final int bit = (symbol << SYMBOL_SHIFT) | 1;
+        return isSet(bit);
+    }
+
     /**
      * Adds a symbol in this scope.
      *
@@ -322,13 +332,29 @@ public class LexicalScope {
      * @return true if registered, false if symbol was already registered
      */
     public boolean addSymbol(final int symbol) {
-        final int bit = (symbol << BITS_PER_SYMBOL) ;
+        final int bit = (symbol << SYMBOL_SHIFT) ;
         if (set(bit)) {
             count += 1;
             return true;
         }
         return false;
     }
+
+    /**
+     * Adds a constant in this scope.
+     *
+     * @param symbol the symbol
+     * @return true if registered, false if symbol was already registered
+     */
+    public boolean addConstant(final int symbol) {
+        final int letb = (symbol << SYMBOL_SHIFT) ;
+        if (!isSet(letb)) {
+            throw new IllegalStateException("symbol not declared before const " + symbol);
+        }
+        final int bit = (symbol << SYMBOL_SHIFT) | 1;
+        return set(bit);
+    }
+
     /**
      * Clear all symbols.
      *
@@ -342,15 +368,20 @@ public class LexicalScope {
                 final int s = Long.numberOfTrailingZeros(clean);
                 // call clean for symbol definition (3 as a mask for 2 bits,1+2)
                 clean &= ~(SYMBOL_MASK << s);
-                cleanSymbol.accept(s >> BITS_PER_SYMBOL);
+                cleanSymbol.accept(s >> SYMBOL_SHIFT);
             }
         }
         symbols = 0L;
         if (moreSymbols != null) {
             if (cleanSymbol != null) {
                 // step by bits per symbol
-                for (int s = moreSymbols.nextSetBit(0); s != -1; s = moreSymbols.nextSetBit(s + BITS_PER_SYMBOL)) {
-                    cleanSymbol.accept(s + LONGBITS);
+                for (int s = moreSymbols.nextSetBit(0);
+                     s != -1;
+                     s = moreSymbols.nextSetBit(s + BITS_PER_SYMBOL)) {
+                    // skip const bit indicator
+                    if ((s & 1) == 0) {
+                        cleanSymbol.accept((s >> SYMBOL_SHIFT) + LONGBITS);
+                    }
                 }
             }
             moreSymbols.clear();
