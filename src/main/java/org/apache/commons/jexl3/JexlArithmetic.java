@@ -1060,7 +1060,7 @@ public class JexlArithmetic {
         if (BigInteger.ZERO.equals(r)) {
             throw new ArithmeticException("%");
         }
-        final BigInteger result = l.mod(r);
+        final BigInteger result = l.remainder(r);
         return narrowBigInteger(left, right, result);
     }
 
