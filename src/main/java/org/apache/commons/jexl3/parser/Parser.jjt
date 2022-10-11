@@ -1379,9 +1379,9 @@ void UnaryExpression() #void : {}
     |
     <plus> UnaryExpression() #UnaryPlusNode(1)
     |
-    <increment> UnaryExpression() #IncrementNode(1)
+    <increment> UnaryExpression() #IncrementGetNode(1)
     |
-    <decrement> UnaryExpression() #DecrementNode(1)
+    <decrement> UnaryExpression() #DecrementGetNode(1)
     |
     <mult> UnaryExpression() #IndirectNode(1)
     |
@@ -1411,9 +1411,9 @@ void PostfixExpression() #void : {}
 {
     PointerExpression()
     ( LOOKAHEAD(1) (
-      <increment> #IncrementPostfixNode(1)
+      <increment> #GetIncrementNode(1)
       |
-      <decrement> #DecrementPostfixNode(1)
+      <decrement> #GetDecrementNode(1)
     ) )*
 }
 

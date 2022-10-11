@@ -44,8 +44,8 @@ import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
-import org.apache.commons.jexl3.parser.ASTDecrementNode;
-import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
+import org.apache.commons.jexl3.parser.ASTDecrementGetNode;
+import org.apache.commons.jexl3.parser.ASTGetDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
@@ -71,8 +71,8 @@ import org.apache.commons.jexl3.parser.ASTGENode;
 import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
-import org.apache.commons.jexl3.parser.ASTIncrementNode;
-import org.apache.commons.jexl3.parser.ASTIncrementPostfixNode;
+import org.apache.commons.jexl3.parser.ASTIncrementGetNode;
+import org.apache.commons.jexl3.parser.ASTGetIncrementNode;
 import org.apache.commons.jexl3.parser.ASTIndirectNode;
 import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
@@ -605,22 +605,22 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
-    protected Object visit(final ASTIncrementNode node, final Object data) {
+    protected Object visit(final ASTIncrementGetNode node, final Object data) {
         return visitNode(node, data);
     }
 
     @Override
-    protected Object visit(final ASTDecrementNode node, final Object data) {
+    protected Object visit(final ASTDecrementGetNode node, final Object data) {
         return visitNode(node, data);
     }
 
     @Override
-    protected Object visit(final ASTIncrementPostfixNode node, final Object data) {
+    protected Object visit(final ASTGetIncrementNode node, final Object data) {
         return visitNode(node, data);
     }
 
     @Override
-    protected Object visit(final ASTDecrementPostfixNode node, final Object data) {
+    protected Object visit(final ASTGetDecrementNode node, final Object data) {
         return visitNode(node, data);
     }
 

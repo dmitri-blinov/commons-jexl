@@ -64,7 +64,7 @@ public class FeatureControllerTest extends JexlTestCase {
         Asserter offAsserter = new Asserter(createEngine(new JexlFeatures().newInstance(false)));
         String expr = "new('java.lang.String', 'JEXL')";
         onAsserter.assertExpression(expr, "JEXL");
-        offAsserter.failExpression(expr, "@1:1 create instance error in ''");
+        offAsserter.failExpression(expr, "@1:4 create instance error in ''");
     }
 
     @Test

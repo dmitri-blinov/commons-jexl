@@ -55,8 +55,8 @@ import org.apache.commons.jexl3.parser.ASTClassLiteral;
 import org.apache.commons.jexl3.parser.ASTConstructorNode;
 import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
-import org.apache.commons.jexl3.parser.ASTDecrementNode;
-import org.apache.commons.jexl3.parser.ASTDecrementPostfixNode;
+import org.apache.commons.jexl3.parser.ASTDecrementGetNode;
+import org.apache.commons.jexl3.parser.ASTGetDecrementNode;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
@@ -83,8 +83,8 @@ import org.apache.commons.jexl3.parser.ASTGTNode;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccessJxlt;
-import org.apache.commons.jexl3.parser.ASTIncrementNode;
-import org.apache.commons.jexl3.parser.ASTIncrementPostfixNode;
+import org.apache.commons.jexl3.parser.ASTIncrementGetNode;
+import org.apache.commons.jexl3.parser.ASTGetIncrementNode;
 import org.apache.commons.jexl3.parser.ASTIndirectNode;
 import org.apache.commons.jexl3.parser.ASTInitialization;
 import org.apache.commons.jexl3.parser.ASTInitializedArrayConstructorNode;
@@ -3357,19 +3357,19 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(final ASTIncrementNode node, final Object data) {
+    protected Object visit(final ASTIncrementGetNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
         return executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
     }
 
     @Override
-    protected Object visit(final ASTDecrementNode node, final Object data) {
+    protected Object visit(final ASTDecrementGetNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
         return executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
     }
 
     @Override
-    protected Object visit(final ASTIncrementPostfixNode node, final Object data) {
+    protected Object visit(final ASTGetIncrementNode node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object value = left.jjtAccept(this, data);
         executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
@@ -3377,7 +3377,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
-    protected Object visit(final ASTDecrementPostfixNode node, final Object data) {
+    protected Object visit(final ASTGetDecrementNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
         final Object value = left.jjtAccept(this, data);
         executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
