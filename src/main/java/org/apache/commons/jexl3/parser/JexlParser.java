@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.TreeMap;
 import java.math.BigInteger;
 import java.math.BigDecimal;
@@ -570,7 +571,18 @@ public abstract class JexlParser extends StringParser {
                 namespaces.add(nsname);
             }
         }
-        pragmas.put(key, value);
+        Object previous = pragmas.put(key, value);
+        if (previous != null) {
+            Set<Object> values;
+            if (previous instanceof Set<?>) {
+                values = (Set<Object>) previous;
+            } else {
+                values = new LinkedHashSet<Object>();
+                pragmas.put(key, values);
+                values.add(previous);
+            }
+            values.add(value);
+        }
     }
 
     /**
