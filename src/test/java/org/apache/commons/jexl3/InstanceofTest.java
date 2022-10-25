@@ -68,10 +68,6 @@ public class InstanceofTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not true", Boolean.TRUE, o);
-
-        e = JEXL.createScript("var x = [123,456]; not (x instanceof int)");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o);
     }
 
     @Test
@@ -80,10 +76,6 @@ public class InstanceofTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not false", Boolean.FALSE, o);
-
-        e = JEXL.createScript("var x = [123,456]; x !instanceof int");
-        o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o);
     }
 
     @Test
@@ -120,18 +112,20 @@ public class InstanceofTest extends JexlTestCase {
 
     @Test
     public void testPrimitive() throws Exception {
-        JexlScript e = JEXL.createScript("var x = 123; x instanceof int");
-        JexlContext jc = new MapContext();
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is true", Boolean.FALSE, o);
+        try {
+           JexlScript e = JEXL.createScript("var x = 123; x instanceof int");
+           Assert.fail("Should have failed");
+        } catch (Exception ex) {
+        }
     }
 
     @Test
     public void testNotPrimitive() throws Exception {
-        JexlScript e = JEXL.createScript("var x = 123; x !instanceof int");
-        JexlContext jc = new MapContext();
-        Object o = e.execute(jc);
-        Assert.assertEquals("Result is not true", Boolean.TRUE, o);
+        try {
+           JexlScript e = JEXL.createScript("var x = 123; x !instanceof int");
+           Assert.fail("Should have failed");
+        } catch (Exception ex) {
+        }
     }
 
     @Test

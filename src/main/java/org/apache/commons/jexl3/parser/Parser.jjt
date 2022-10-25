@@ -1780,17 +1780,31 @@ void TypeReference() #TypeLiteral :
     (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })+
     |
     (
-        t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
-      | t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
-      | t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
-      | t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
-      | t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
-      | t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
-      | t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
-      | t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
-      | t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+      (
+         t=<INT> { jjtThis.setLiteral(Integer.TYPE); }
+         |
+         t=<LONG> { jjtThis.setLiteral(Long.TYPE); }
+         |
+         t=<SHORT> { jjtThis.setLiteral(Short.TYPE); }
+         |
+         t=<BYTE> { jjtThis.setLiteral(Byte.TYPE); }
+         |
+         t=<CHAR> { jjtThis.setLiteral(Character.TYPE); }
+         |
+         t=<BOOLEAN> { jjtThis.setLiteral(Boolean.TYPE); }
+         |
+         t=<FLOAT> { jjtThis.setLiteral(Float.TYPE); }
+         |
+         t=<DOUBLE> { jjtThis.setLiteral(Double.TYPE); }
+      )
+      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })+
     )
-    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    |
+    (
+      t=<QUALIFIED_IDENTIFIER> { value = Parser.resolveType(t.image); if (value == null) throwParsingException(jjtThis); jjtThis.setLiteral(value); }
+      (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    )
+
 }
 
 void NewTypeReference(Class type) #TypeLiteral :
