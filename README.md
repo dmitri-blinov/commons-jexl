@@ -121,13 +121,9 @@ New features
 
 + Java-like `throw` statement is introduced
 
-+ Java-like `for` classical loop statement is introduced
-
 + Java-like `assert` statement is introduced
 
 + Java-like `this` literal is introduced to allow easier access to the current evaluation context
-
-+ Java-like increment/decrement `++` and `--`  operators are introduced. Prefix and postfix forms are supported
 
 + Java-like `instanceof` operator is introduced
 
@@ -199,6 +195,10 @@ Enhancements
 + Function closures implement all basic Java 8 `@FunctionalInterface` interfaces,
   so that it is possible to pass a function closure as an argument to a java method that accepts such interfaces
 
++ Java-like `for` classical loop statement is supported with full java syntax
+
++ Java-like increment/decrement `++` and `--`  operators use self-asignment operators for evaluation
+
 + Function can be declared as `static` to prevent variable capturing
 
 + Function parameters can be declared strongly typed by using java class or primitive types `function(int a, int b) {a+b}`
@@ -226,8 +226,6 @@ Enhancements
 + Last part of the ternary expression `x?y:z` (along with the separating `:`) can be omitted, implying `null` as a result
 
 + Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases
-
-+ Operator `new` supports Java-like object creation syntax `new String()`
 
 + Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
 
