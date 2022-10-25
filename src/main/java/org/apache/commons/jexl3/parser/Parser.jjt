@@ -1509,6 +1509,11 @@ void SwitchExpressionBlock() #void : {}
     SwitchExpressionDefault() (LOOKAHEAD(SwitchExpressionCase()) SwitchExpressionCase())*
 }
 
+void SwitchExpressionDefault() : {}
+{
+    <DCASE> <LAMBDA> Statement()
+}
+
 void SwitchExpressionCase() : {}
 {
     <CASE> SwitchCaseLabel() <LAMBDA> Statement()
@@ -1516,6 +1521,8 @@ void SwitchExpressionCase() : {}
 
 void SwitchCaseLabel() : {}
 {
+    NullLiteral() [ <COMMA> <DCASE> { jjtThis.setDefault(); } ]
+    |
     (SwitchCaseLiteral() | Identifier()) (<COMMA> (SwitchCaseLiteral() | Identifier()))*
 }
 
@@ -1528,13 +1535,6 @@ void SwitchCaseLiteral() #void : {}
     TextBlockLiteral()
     |
     StringLiteral()
-    |
-    NullLiteral()
-}
-
-void SwitchExpressionDefault() : {}
-{
-    <DCASE> <LAMBDA> Statement()
 }
 
 /***************************************

@@ -100,4 +100,22 @@ public class SwitchExpressionTest extends JexlTestCase {
         }
     }
 
+    @Test
+    public void testNull() throws Exception {
+        JexlScript e = JEXL.createScript("var e = switch (x) {case null -> 1; default -> 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", null);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
+    @Test
+    public void testNullDefault() throws Exception {
+        JexlScript e = JEXL.createScript("var e = switch (x) {case null, default -> 1; case 1 -> 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", 2);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 1, o);
+    }
+
 }

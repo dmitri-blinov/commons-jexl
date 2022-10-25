@@ -2052,6 +2052,13 @@ public class Interpreter extends InterpreterBase {
                             matched = true;
                             start = i;
                             break;
+                        } else {
+                            ASTSwitchCaseLabel labels = (ASTSwitchCaseLabel) child.jjtGetChild(0);
+                            if (labels.isDefault()) {
+                                matched = true;
+                                start = i;
+                                break;
+                            }
                         }
                     }
                 }
@@ -2137,7 +2144,13 @@ public class Interpreter extends InterpreterBase {
                 JexlNode child = node.jjtGetChild(i);
                 if (child instanceof ASTSwitchExpressionDefault) {
                     return child.jjtAccept(this, data);
+                } else {
+                    ASTSwitchCaseLabel labels = (ASTSwitchCaseLabel) child.jjtGetChild(0);
+                    if (labels.isDefault()) {
+                        return child.jjtAccept(this, data);
+                    }
                 }
+
             }
             return null;
         } catch (JexlException.Yield stmtYield) {

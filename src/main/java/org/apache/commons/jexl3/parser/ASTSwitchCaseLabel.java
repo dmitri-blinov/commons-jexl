@@ -17,15 +17,18 @@
 package org.apache.commons.jexl3.parser;
 
 /**
- * Switch/case statement.
+ * Switch/case statement label.
  */
-public class ASTSwitchStatement extends ASTLabelledStatement {
+public class ASTSwitchCaseLabel extends JexlNode {
 
-    public ASTSwitchStatement(int id) {
+    /** Whether this case label is default or not. */
+    private boolean dflt = false;
+
+    public ASTSwitchCaseLabel(int id) {
         super(id);
     }
 
-    public ASTSwitchStatement(Parser p, int id) {
+    public ASTSwitchCaseLabel(Parser p, int id) {
         super(p, id);
     }
 
@@ -33,4 +36,13 @@ public class ASTSwitchStatement extends ASTLabelledStatement {
     public Object jjtAccept(ParserVisitor visitor, Object data) {
         return visitor.visit(this, data);
     }
+
+    public boolean isDefault() {
+        return dflt;
+    }
+
+    public void setDefault() {
+        dflt = true;
+    }
+
 }
