@@ -1393,7 +1393,7 @@ void PostfixExpression() #void : {}
       <increment> #GetIncrementNode(1)
       |
       <decrement> #GetDecrementNode(1)
-    ) )*
+    ) )?
 }
 
 void PointerExpression() #void : {}
