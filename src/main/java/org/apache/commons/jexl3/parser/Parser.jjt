@@ -54,10 +54,6 @@ public final class Parser extends JexlParser
         JexlFeatures previous = getFeatures();
         try {
             setFeatures(jexlFeatures);
-            // If registers are allowed, the default parser state has to be REGISTERS.
-            if (jexlFeatures.supportsRegister()) {
-                token_source.defaultLexState = REGISTERS;
-            }
             // lets do the 'Unique Init' in here to be safe - it's a pain to remember
             info = jexlInfo != null? jexlInfo : new JexlInfo();
             source = jexlSrc;
@@ -87,125 +83,55 @@ public final class Parser extends JexlParser
 
 PARSER_END(Parser)
 
-TOKEN_MGR_DECLS : {
-    /**
-     *   A stack of 1 for keeping state to deal with dotted identifiers
-     */
-    int dotLexState = DEFAULT;
+TOKEN_MGR_DECLS : {}
 
-    public void pushDot() {
-        dotLexState = curLexState;
-        curLexState = DOT_ID;
-    }
-
-    public void popDot() {
-        if (curLexState == DOT_ID) {
-            curLexState = dotLexState;
-            dotLexState = defaultLexState;
-        }
-    }
-
-    public void pushQ() {
-        dotLexState = curLexState;
-        curLexState = QUALIFIED;
-    }
-
-    public void popQ() {
-        if (curLexState == QUALIFIED) {
-            curLexState = dotLexState;
-            dotLexState = defaultLexState;
-        }
-    }
-
-}
 /***************************************
  *     Skip & Number literal tokens
  ***************************************/
 
 <*> SKIP : /* WHITE SPACE */
 {
-      <"##" (~["\n","\r"])* ("\n" | "\r" | "\r\n")? >
-    | <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
-    | <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")? >
-    | " "
+      " "
     | "\t"
     | "\n"
     | "\r"
     | "\f"
     | "\u00A0"
-}
-
-<*> TOKEN : /* KEYWORDS */
-{
-      < IF : "if" > { popDot(); }
-    | < ELSE : "else" > { popDot(); }
-    | < FOR : "for" > { popDot(); }
-    | < WHILE : "while" > { popDot(); }
-    | < DO : "do" > { popDot(); }
-    | < SWITCH : "switch" > { popDot(); }
-    | < CASE : "case" > { popDot(); }
-    | < DCASE : "default" > { popDot(); }
-    | < TRY : "try" > { popDot(); }
-    | < CATCH : "catch" > { popDot(); }
-    | < FINALLY : "finally" > { popDot(); }
-    | < THROW : "throw" > { popDot(); }
-    | < ASSERT : "assert" > { popDot(); }
-    | < SYNCHRONIZED : "synchronized" > { popDot(); }
-    | < NEW : "new" > { popDot(); pushQ(); } /* Lexical state is now QUALIFIED */
-    | < VAR : "var" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < LET : "let" >  { popDot(); }
-    | < CONST : "const" >  { popDot(); }
-    | < FINAL : "final" > { popDot(); }
-    | < EMPTY : "empty" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < SIZE : "size" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < THIS : "this" > { popDot(); }
-    | < NULL : "null" | "\u2205" > { popDot(); }
-    | < TRUE : "true" > { popDot(); }
-    | < FALSE : "false" > { popDot(); }
-    | < RETURN : "return" > { popDot(); }
-    | < YIELD : "yield" > { popDot(); }
-    | < STATIC : "static" > { popDot(); }
-    | < CLASS : "class" > { popDot(); }
-    | < FUNCTION : "function" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < LAMBDA : "->" | "\u2192" > { popDot(); }
-    | < FATARROW : "=>" > { popDot(); }
-    | < BREAK : "break" > { popDot(); }
-    | < CONTINUE : "continue" > { popDot(); }
-    | < REMOVE : "remove" > { popDot(); } /* Revert state to default if was DOT_ID. */
-    | < PRAGMA : "#pragma" > { pushQ(); } /* Lexical state is now QUALIFIED */
-    | < UNDERSCORE : "_" > { popDot(); }
+    | <"##" (~["\n","\r"])* ("\n" | "\r" | "\r\n")? >
+    | <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+    | <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")? >
 }
 
 <*> TOKEN : { /* SEPARATORS */
-      < LPAREN : "("> { popQ(); } /* Revert state to default. */
-    | < RPAREN : ")"> { popQ(); } /* Revert state to default. */
+      < LPAREN : "(" > : DEFAULT
+    | < RPAREN : ")" > : DEFAULT
     | < LCURLY : "{" >
     | < RCURLY : "}" >
-    | < LBRACKET : "[" > { popQ(); } /* Revert state to default. */
+    | < LBRACKET : "[" >
     | < RBRACKET : "]" >
-    | < SEMICOL : ";" > { popQ(); } /* Revert state to default. */
+    | < SEMICOL : ";" >
     | < COLON : ":" >
     | < DCOLON : "::" >
-    | < COMMA : "," > { popQ(); } /* Revert state to default. */
-    | < DOT : "." > { pushDot(); } /* Lexical state is now DOT_ID */
-    | < QDOT : "?." > { pushDot(); } /* Lexical state is now DOT_ID */
-    | < DOTAT : ".@" > { pushDot(); } /* Lexical state is now DOT_ID */
-    | < QLBRACKET : "?[" > { popDot(); } /* Revert state to default */
+    | < COMMA : "," >
+    | < DOT : "." > : DOT_ID
+    | < QDOT : "?." > : DOT_ID
+    | < DOTAT : ".@" > : DOT_ID
+    | < QLBRACKET : "?[" >
     | < ELLIPSIS : "..." | "\u2026">
     | < HBRACKET : "#[" >
     | < HCURLY : "#{" >
 }
 
-<*> TOKEN : { /* PRIMITIVE TYPES */
-      < CHAR :    "char" > { popDot(); }
-    | < BYTE :    "byte" > { popDot(); }
-    | < SHORT :   "short" > { popDot(); }
-    | < INT :     "int" > { popDot(); }
-    | < LONG :    "long" > { popDot(); }
-    | < FLOAT :   "float" > { popDot(); }
-    | < DOUBLE :  "double" > { popDot(); }
-    | < BOOLEAN : "boolean" > { popDot(); }
-    | < VOID :    "void" > { popDot(); }
+<DEFAULT, QUALIFIED> TOKEN : { /* PRIMITIVE TYPES */
+      < INT :     "int" > : DEFAULT
+    | < CHAR :    "char" > : DEFAULT
+    | < BYTE :    "byte" > : DEFAULT
+    | < VOID :    "void" > : DEFAULT
+    | < LONG :    "long" > : DEFAULT
+    | < SHORT :   "short" > : DEFAULT
+    | < FLOAT :   "float" > : DEFAULT
+    | < DOUBLE :  "double" > : DEFAULT
+    | < BOOLEAN : "boolean" > : DEFAULT
 }
 
 <*> TOKEN : { /* STREAMS */
@@ -220,18 +146,18 @@ TOKEN_MGR_DECLS : {
     | < EN_ASSIGN : "=:" >
     | < NULLP : "??" >
     | < AND : "&&" | "\u2227" >
-    | < _AND :  "and" >  { popDot(); }
     | < OR : "||" | "\u2228" >
-    | < _OR: "or" > { popDot(); }
+}
+
+<DEFAULT> TOKEN : { /* CONDITIONALS */
+      < _AND :  "and" >
+    | < _OR: "or" >
 }
 
 <*> TOKEN : { /* COMPARISONS */
       < eq : "==" | "\u2261">
-    | < EQ : "eq" > { popDot(); }
     | < ne : "!=" | "\u2260" >
-    | < NE : "ne" > { popDot(); }
     | < req : "=~" | "\u2208" > // regexp equal
-    | < IN : "in" > { popDot(); }
     | < rne : "!~" | "!in" | "\u2209" > // regexp not equal
     | < is : "===" > // identitical
     | < ni : "!==" > // not identitical
@@ -240,16 +166,21 @@ TOKEN_MGR_DECLS : {
     | < sne : "!^" > // start not equal
     | < ene : "!$" > // ends not equal
     | < gt : ">" >
-    | < GT : "gt" > { popDot(); }
     | < ge : ">=" | "\u2265" >
-    | < GE : "ge" > { popDot(); }
     | < lt : "<" >
-    | < LT : "lt" > { popDot(); }
     | < le : "<=" | "\u2264" >
-    | < LE : "le"  > { popDot(); }
-    | < iof : "instanceof" > { popDot(); pushQ(); }
-    | < niof : "!instanceof" > { pushQ(); }
+}
 
+<DEFAULT> TOKEN : { /* COMPARISONS */
+      < EQ : "eq" >
+    | < NE : "ne" >
+    | < IN : "in" >
+    | < GT : "gt" >
+    | < GE : "ge" >
+    | < LT : "lt" >
+    | < LE : "le" >
+    | < iof : "instanceof" > : QUALIFIED
+    | < niof : "!instanceof" > : QUALIFIED
 }
 
 <*> TOKEN : { /* OPERATORS */
@@ -274,11 +205,8 @@ TOKEN_MGR_DECLS : {
     | < unary_minus : "\u2212" >
     | < mult : "*" | "\u22C5" >
     | < div : "/" >
-    | < DIV : "div" > { popDot(); }
     | < mod : "%" >
-    | < MOD : "mod" > { popDot(); }
     | < not : "!" | "\u00AC" >
-    | < NOT : "not" > { popDot(); }
     | < and : "&" >
     | < or : "|" >
     | < xor : "^" >
@@ -289,53 +217,104 @@ TOKEN_MGR_DECLS : {
     | < range : ".." | "\u2025" >
 }
 
+<DEFAULT> TOKEN : { /* OPERATORS */
+      < DIV : "div" >
+    | < MOD : "mod" >
+    | < NOT : "not" >
+}
+
+<*> TOKEN : /* KEYWORDS */
+{
+      < LAMBDA : "->" | "\u2192" > 
+    | < FATARROW : "=>" >
+    | < NEW : "new" > : QUALIFIED 
+    | < PRAGMA : "#pragma" > : QUALIFIED
+    | < CLASS : "class" >
+}
+
+<DEFAULT> TOKEN : /* KEYWORDS */
+{
+      < UNDERSCORE : "_" > 
+    | < IF : "if" > 
+    | < DO : "do" > 
+    | < FOR : "for" > 
+    | < TRY : "try" > 
+    | < VAR : "var" >
+    | < LET : "let" >
+    | < CASE : "case" > 
+    | < ELSE : "else" > 
+    | < SIZE : "size" >
+    | < THIS : "this" >
+    | < NULL : "null" | "\u2205" >
+    | < TRUE : "true" >
+    | < FALSE : "false" >
+    | < WHILE : "while" > 
+    | < CATCH : "catch" > 
+    | < THROW : "throw" > 
+    | < CONST : "const" >
+    | < FINAL : "final" >
+    | < EMPTY : "empty" >
+    | < YIELD : "yield" >
+    | < BREAK : "break" >
+    | < ASSERT : "assert" > 
+    | < SWITCH : "switch" > 
+    | < REMOVE : "remove" >
+    | < RETURN : "return" >
+    | < STATIC : "static" >
+    | < DCASE : "default" > 
+    | < FINALLY : "finally" > 
+    | < FUNCTION : "function" >
+    | < CONTINUE : "continue" >
+    | < SYNCHRONIZED : "synchronized" > 
+}
+
 /***************************************
  *     Identifier & String tokens
  ***************************************/
-<*> TOKEN :  /* NaN */
+<DEFAULT> TOKEN :  /* NaN */
 {
     < NAN_LITERAL : "NaN" >
 }
 
-<*> TOKEN : /* ANNOTATION */
+<DEFAULT> TOKEN : /* ANNOTATION */
 {
   < ANNOTATION: "@" ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$" ])+ >
 }
 
-<*> TOKEN : /* CURRENT CONTEXT */
+<DEFAULT,DOT_ID> TOKEN : /* CURRENT CONTEXT */
 {
-  < CURRENT: "@" > { popDot(); } /* Revert state to default. */
+  < CURRENT: "@" > : DEFAULT
 }
 
 <DOT_ID> TOKEN : /* IDENTIFIERS */
 {
-  < DOT_IDENTIFIER: ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$", "@" ])+ > { popDot(); } /* Revert state to default. */
+  < DOT_IDENTIFIER: ( [ "0"-"9", "a"-"z", "A"-"Z", "_", "$", "@" ])+ > : DEFAULT
 }
 
-<DEFAULT, REGISTERS> TOKEN : /* IDENTIFIERS */
+<DEFAULT> TOKEN : /* IDENTIFIERS */
 {
   < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>|<ESCAPE>)* > { matchedToken.image = StringParser.unescapeIdentifier(matchedToken.image); }
-|
+  |
   < #LETTER: [ "a"-"z", "A"-"Z", "_", "$", "@" ] >
-|
+  |
   < #DIGIT: [ "0"-"9"] >
-|
+  |
   < #ESCAPE: "\\" [" ", "'", "\"", "\\"] >
 }
 
 <QUALIFIED> TOKEN : /* IDENTIFIERS */
 {
-  < QUALIFIED_IDENTIFIER: <QNAME> ("." <QNAME>)* > { popQ(); } /* Revert state to default. */
-|
+  < QUALIFIED_IDENTIFIER: <QNAME> ("." <QNAME>)* > : DEFAULT
+  |
   < #QNAME: [ "a"-"z", "A"-"Z", "_", "$", "@" ] ([ "a"-"z", "A"-"Z", "_", "$", "@", "0"-"9" ])* >
 }
 
-<REGISTERS> TOKEN : /* REGISTERS: parser.ALLOW_REGISTER must be set to true before calling parse */
+<DEFAULT> TOKEN : /* REGISTERS: parser.ALLOW_REGISTER must be set to true before calling parse */
 {
   < REGISTER: "#" (["0"-"9"])+ >
 }
 
-<DEFAULT, REGISTERS> TOKEN : /* LITERALS */
+<DEFAULT> TOKEN : /* LITERALS */
 {
  <INTEGER_LITERAL:
       <DECIMAL_LITERAL> (<INT_SFX>)?
@@ -371,28 +350,28 @@ TOKEN_MGR_DECLS : {
     "\u2018" (~["\u2018","\u2019","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "\u2019"
     |
     "'" (~["'","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "'"
-  > { popDot(); } /* Revert state to default if was DOT_ID. */
+  > : DEFAULT
 }
 
 <*> TOKEN :
 {
   < JXLT_LITERAL:
     "`" (~["`","\\"] | "\\" ~["\u0000"])* "`"
-  > { popDot(); } /* Revert state to default if was DOT_ID. */
+  > : DEFAULT
 }
 
-<*> TOKEN :
+<DEFAULT> TOKEN :
 {
   < REGEX_LITERAL:
     "~" "/" (~["/","\n","\r","\u2028","\u2029"] | "\\" "/" )* "/"
-  > { popDot(); } /* Revert state to default if was DOT_ID. */
+  >
 }
 
 <*> TOKEN :
 {
   < BLOCK_LITERAL:
     "\"\"\"" ([" ","\t"])* ("\n" | "\r" | "\r\n") ("\\" "\"" | ~[])* "\"\"\""
-  > { popDot(); } /* Revert state to default if was DOT_ID. */
+  > : DEFAULT
 }
 
 /***************************************
@@ -1548,7 +1527,7 @@ void Identifier(boolean top) :
 {
     t=<IDENTIFIER> { jjtThis.setSymbol(top? checkVariable(jjtThis, t.image) : t.image); if (top && isFinalVariable(t.image)) jjtThis.setConstant(true); }
     |
-    t=<REGISTER> { jjtThis.setSymbol(t.image); }
+    t=<REGISTER> { if (!getFeatures().supportsRegister()) throwParsingException(t); jjtThis.setSymbol(t.image); }
 }
 
 void NamespaceIdentifier()  #NamespaceIdentifier :
