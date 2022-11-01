@@ -1185,7 +1185,7 @@ void AssignmentExpression() #void : {}
       <ne_assign> Expression() #NEAssignment(2)
       |
       <assign> Expression() #Assignment(2)
-    ) )*
+    ) )?
 }
 
 /***************************************
