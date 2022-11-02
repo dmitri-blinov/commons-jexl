@@ -2176,29 +2176,17 @@ void Lambda() #JexlLambda :
  *     References
  ***************************************/
 
-Token dotName() #void :
-{
-    Token t;
-}
-{
-    ( t = <DOT_IDENTIFIER> | t=<IF> | t=<ELSE> | t=<FOR> | t=<WHILE> | t=<DO> | t=<NEW> | t=<EMPTY> | t=<SIZE> | t=<TRUE> | t=<FALSE> | t=<NULL>
-    | t=<TRY> | t=<CATCH> | t=<THROW> | t=<ASSERT> | t=<SYNCHRONIZED> | t=<REMOVE> | t=<THIS> | t=<YIELD> | t=<CLASS>
-    | t=<CHAR> | t=<BOOLEAN> | t=<BYTE> | t=<SHORT> | t=<INT> | t=<LONG> | t=<FLOAT> | t=<DOUBLE> | t=<VOID>
-    | t=<SWITCH> | t=<CASE> | t=<DCASE> | t=<FINAL> | t=<IN> | t=<iof>
-    | t=<_OR> | t=<_AND>| t=<NOT> | t=<NE> | t=<EQ> | t=<GT> | t=<GE> | t=<LT> | t=<LE>
-    | t=<VAR> | t=<FUNCTION> | t=<STATIC> )
-{
-    return t;
-}
-}
-
 void IdentifierAccess() #void :
 {
     Token t;
 }
 {
     <DOT> (
-        t=dotName() { jjtThis.setIdentifier(t.image); } #IdentifierAccess
+        t=<DOT_IDENTIFIER> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
+        |
+        t=<NEW> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
+        |
+        t=<CLASS> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
         |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccess
         |
@@ -2206,7 +2194,11 @@ void IdentifierAccess() #void :
     )
     |
     <QDOT> (
-        t=dotName() { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
+        t=<DOT_IDENTIFIER> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
+        |
+        t=<NEW> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
+        |
+        t=<CLASS> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
         |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessSafe
         |
@@ -2220,7 +2212,7 @@ void FieldAccess() #void :
 }
 {
     <DOTAT> (
-        t=dotName() { jjtThis.setIdentifier(t.image); } #FieldAccess
+        t=<DOT_IDENTIFIER> { jjtThis.setIdentifier(t.image); } #FieldAccess
     )
 }
 
