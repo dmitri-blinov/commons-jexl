@@ -1204,9 +1204,7 @@ void ConditionalExpression() #void : {}
 
 void TernaryExpression() #void : {}
 {
-    LOOKAHEAD(Expression() <COLON>) Expression() <COLON> Expression() #TernaryNode(3)
-    |
-    Expression() #TernaryNode(2)
+    ( Expression() [ LOOKAHEAD(<COLON>) <COLON> Expression() ] ) #TernaryNode( jjtree.nodeArity() + 1 )
 }
 
 void ConditionalOrExpression() #void : {}
