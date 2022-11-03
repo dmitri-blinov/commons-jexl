@@ -895,7 +895,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Implicitly imported java packages for resolving simple class names from
      */
-    protected static String[] implicitPackages = {"java.lang","java.util.function","java.util.regex","java.util.stream","java.util","java.io","java.net"};
+    protected static String[] implicitPackages = {"java.lang","java.util.function","java.util.regex","java.util.stream","java.util","java.io","java.net", "java.math"};
 
     /**
      * Checks whether the class has simple name 
@@ -906,7 +906,7 @@ public abstract class JexlParser extends StringParser {
         String qn = c.getName();
         Package pack = c.getPackage();
         String p = pack != null ? pack.getName() : null;
-        if (p == null || qn.equals("java.math.BigDecimal") || qn.equals("java.math.BigInteger"))
+        if (p == null)
             return true;
         for (String packageName : implicitPackages) {
             if (p.equals(packageName))
@@ -956,6 +956,8 @@ public abstract class JexlParser extends StringParser {
             case "BigDecimal" : return BigDecimal.class;
             case "Object" : return Object.class;
             case "String" : return String.class;
+            case "Exception" : return Exception.class;
+            case "Throwable" : return Throwable.class;
         }
 
         if (Character.isLowerCase(name.charAt(0)) && name.indexOf(".") == -1)
