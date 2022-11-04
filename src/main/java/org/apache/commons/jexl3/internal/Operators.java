@@ -87,15 +87,63 @@ public class Operators {
     }
 
     /**
+     * Throw a NPE if operator is strict and one of the arguments is null.
+     * @param arithmetic the JEXL arithmetic instance
+     * @param operator the operator to check
+     * @param arg1 the operand
+     * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
+     */
+    protected void controlNullOperands(JexlOperator operator, Object arg1) {
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
+        // only check operator if necessary
+        if (arg1 == null) {
+            // check operator only once if it is not strict
+            if (arithmetic.isStrict(operator)) {
+                throw new JexlArithmetic.NullOperand();
+            }
+        }
+    }
+
+    /**
+     * Throw a NPE if operator is strict and one of the arguments is null.
+     * @param arithmetic the JEXL arithmetic instance
+     * @param operator the operator to check
+     * @param args the operands
+     * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
+     */
+    protected void controlNullOperands(JexlOperator operator, Object arg1, Object arg2) {
+        controlNullOperands(operator, arg1);
+        controlNullOperands(operator, arg2);
+    }
+
+    /**
+     * Throw a NPE if operator is strict and one of the arguments is null.
+     * @param arithmetic the JEXL arithmetic instance
+     * @param operator the operator to check
+     * @param args the operands
+     * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
+     */
+    protected void controlNullOperands(JexlOperator operator, Object arg1, Object arg2, Object arg3) {
+        controlNullOperands(operator, arg1);
+        controlNullOperands(operator, arg2);
+        controlNullOperands(operator, arg3);
+    }
+
+    /**
      * Attempts to call an operator.
      * <p>
-     * This takes care of finding and caching the operator method when appropriate
+     *     This performs the null argument control against the strictness of the operator.
+     * </p>
+     * <p>
+     * This takes care of finding and caching the operator method when appropriate.
+     * </p>
      * @param node     the syntactic node
      * @param operator the operator
      * @param arg1     the first argument
      * @return the result of the operator evaluation or TRY_FAILED
      */
     protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1) {
+        controlNullOperands(operator, arg1);
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1);
         }
@@ -113,6 +161,7 @@ public class Operators {
      * @return the result of the operator evaluation or TRY_FAILED
      */
     protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2) {
+        controlNullOperands(operator, arg1, arg2);
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2);
         }
@@ -132,6 +181,8 @@ public class Operators {
      */
     protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2, 
         final Object arg3) {
+        final JexlArithmetic arithmetic = interpreter.arithmetic;
+        controlNullOperands(operator, arg1, arg2, arg3);
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2, arg3);
         }
