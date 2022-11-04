@@ -107,8 +107,8 @@ TOKEN_MGR_DECLS : {}
     | < RPAREN : ")" > : DEFAULT
     | < LCURLY : "{" >
     | < RCURLY : "}" >
-    | < LBRACKET : "[" >
-    | < RBRACKET : "]" >
+    | < LBRACKET : "[" > : DEFAULT
+    | < RBRACKET : "]" > : DEFAULT
     | < SEMICOL : ";" >
     | < COLON : ":" >
     | < DCOLON : "::" >
