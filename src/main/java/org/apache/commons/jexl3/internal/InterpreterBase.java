@@ -399,14 +399,6 @@ public abstract class InterpreterBase extends ParserVisitor {
         if (value == null) {
             // is it defined ?
             if (!context.has(name)) {
-
-                if (identifier.jjtGetParent() instanceof ASTReference) {
-                    Class type = JexlParser.resolveType(name);
-                    if (type != null) {
-                        return type;
-                    }
-                }
-
                 // not defined, ignore in some cases...
                 final boolean ignore = identifier.jjtGetParent() instanceof ASTReference
                         || (isSafe() && (symbol >= 0 

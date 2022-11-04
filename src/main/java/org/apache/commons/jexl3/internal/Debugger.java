@@ -521,7 +521,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     /**
      * Gets printable class name
-     * @param � the type
+     * @param c the type
      * @return class name value
      */
     protected String getClassName(Class c) {
@@ -537,11 +537,7 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 result.append(getClassName(literal.getEnclosingClass()));
                 result.append(".");
             }
-            if (literal.isMemberClass() || JexlParser.isSimpleName(literal)) {
-                result.append(literal.getSimpleName());
-            } else {
-                result.append(literal.getName());
-            }
+            result.append(literal.getSimpleName());
         }
         for (int i = 0; i < array; i++) {
             result.append("[]");

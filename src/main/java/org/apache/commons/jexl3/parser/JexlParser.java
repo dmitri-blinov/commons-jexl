@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.TreeMap;
 import java.math.BigInteger;
 import java.math.BigDecimal;
@@ -87,6 +88,13 @@ public abstract class JexlParser extends StringParser {
      * The known namespaces.
      */
     protected Set<String> namespaces = null;
+    /**
+     * Implicitly imported java packages for resolving simple class names from
+     */
+    protected List<String> implicitPackages = Arrays.asList(
+        "java.lang","java.lang.ref","java.math","java.util.function","java.util.regex","java.util.stream","java.util","java.text","java.io","java.net"
+    );
+
     /**
      * The current lexical block.
      */
@@ -893,16 +901,11 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
-     * Implicitly imported java packages for resolving simple class names from
-     */
-    protected static String[] implicitPackages = {"java.lang","java.util.function","java.util.regex","java.util.stream","java.util","java.io","java.net", "java.math"};
-
-    /**
      * Checks whether the class has simple name 
      * @param c the type
      * @return true if class has simple name
      */
-    public static boolean isSimpleName(Class c) {
+    public boolean isSimpleName(Class c) {
         String qn = c.getName();
         Package pack = c.getPackage();
         String p = pack != null ? pack.getName() : null;
@@ -931,7 +934,7 @@ public abstract class JexlParser extends StringParser {
      * @param name the name of the type
      * @return the Class
      */
-    public static Class resolveType(String name) {
+    public Class resolveType(String name) {
         if (name == null || "".equals(name))
             return null;
         switch (name) {
@@ -972,7 +975,7 @@ public abstract class JexlParser extends StringParser {
      * @param name the name of the type
      * @return the Class that is subtype of the specified type, or null otherwise
      */
-    public static Class resolveType(Class type, String name) {
+    public Class resolveType(Class type, String name) {
         Class result = resolveType(name);
         if (result != null && type.isAssignableFrom(type)) {
             return result;
@@ -1002,7 +1005,7 @@ public abstract class JexlParser extends StringParser {
      * @param name the name of the class
      * @return the Class
      */
-    protected static Class forName(String name) {
+    protected Class forName(String name) {
         if (name.indexOf(".") == -1) {
             for (String prefix : implicitPackages) {
                 String className = prefix + "." + name;
@@ -1026,7 +1029,7 @@ public abstract class JexlParser extends StringParser {
      * @param name the name of the type
      * @return the Class
      */
-    protected static Class resolveInstantiableType(String name) {
+    protected Class resolveInstantiableType(String name) {
         Class result = resolveType(name);
         return (result == null || result.isPrimitive() || result.isInterface() || result.isMemberClass() ||
                 result.isAnnotation() || result.isEnum() || result.isArray() ||

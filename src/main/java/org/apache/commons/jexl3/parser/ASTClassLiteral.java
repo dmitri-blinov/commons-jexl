@@ -20,7 +20,8 @@ public class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class
 
     /** The actual literal value; the inherited 'value' member may host a cached getter. */
 
-    private Class literal;
+    protected Class literal;
+    protected boolean simpleName;
 
     ASTClassLiteral(int id) {
         super(id);
@@ -34,7 +35,7 @@ public class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (literal != null) {
-            if (JexlParser.isSimpleName(literal)) {
+            if (simpleName) {
                 result.append(literal.getSimpleName());
             } else {
                 result.append(literal.getName());
@@ -59,6 +60,10 @@ public class ASTClassLiteral extends JexlNode implements JexlNode.Constant<Class
 
     void setLiteral(Class literal) {
         this.literal = literal;
+    }
+
+    void setSimpleName() {
+        simpleName = true;
     }
 
     @Override
