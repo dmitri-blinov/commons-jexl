@@ -452,7 +452,7 @@ public class Engine extends JexlEngine {
                         final String[] vs = value.toString().split(" ");
                         opts.setFlags(vs);
                     }
-                }  else if (PRAGMA_IMPORT.equals(key)) {
+                } else if (PRAGMA_IMPORT.equals(key)) {
                     // jexl.import, may use a set
                     Set<?> values = value instanceof Set<?>
                             ? (Set<?>) value
@@ -967,7 +967,7 @@ public class Engine extends JexlEngine {
         if (parsing.compareAndSet(false, true)) {
             try {
                 // lets parse
-                script = parser.parse(ninfo, features, src, scope);
+                script = parser.parse(ninfo, features, options, src, scope);
             } finally {
                 // no longer in use
                 parsing.set(false);
@@ -975,7 +975,7 @@ public class Engine extends JexlEngine {
         } else {
             // ...otherwise parser was in use, create a new temporary one
             final Parser lparser = new Parser(new StringProvider(";"));
-            script = lparser.parse(ninfo, features, src, scope);
+            script = lparser.parse(ninfo, features, options, src, scope);
         }
         if (source != null) {
             cache.put(source, script);

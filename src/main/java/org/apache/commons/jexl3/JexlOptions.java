@@ -21,6 +21,7 @@ import java.math.MathContext;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Arrays;
 
 import org.apache.commons.jexl3.internal.Engine;
 
@@ -78,7 +79,7 @@ public final class JexlOptions {
     /** The namespaces .*/
     private Map<String, Object> namespaces = Collections.emptyMap();
     /** The imports. */
-    private Collection<String> imports = Collections.emptySet();
+    private Collection<String> imports = Arrays.asList("java.lang");
 
     /**
      * Sets the value of a flag in a mask.

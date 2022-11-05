@@ -17,6 +17,7 @@
 package org.apache.commons.jexl3;
 
 import java.util.Map;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,7 @@ import org.junit.Test;
 @SuppressWarnings({"UnnecessaryBoxing", "AssertEqualsBetweenInconvertibleTypes"})
 public class ScopedVarTest extends JexlTestCase {
 
-    JexlEngine jexl = new JexlBuilder().strict(false).arithmetic(new JexlArithmetic(false)).create();
+    JexlEngine jexl = new JexlBuilder().imports(Arrays.asList("java.lang","java.util")).strict(false).arithmetic(new JexlArithmetic(false)).create();
 
     public ScopedVarTest() {
         super("ScopedVarTest");

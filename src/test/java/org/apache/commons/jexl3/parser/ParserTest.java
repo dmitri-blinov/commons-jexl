@@ -18,6 +18,7 @@ package org.apache.commons.jexl3.parser;
 
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlFeatures;
+import org.apache.commons.jexl3.JexlOptions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,6 +28,7 @@ import org.junit.Test;
  */
 public class ParserTest {
     static final JexlFeatures FEATURES = new JexlFeatures();
+    static final JexlOptions OPTIONS = new JexlOptions();
     public ParserTest() {}
 
     /**
@@ -36,13 +38,13 @@ public class ParserTest {
     public void testParse() throws Exception {
         final Parser parser = new Parser(";");
         JexlNode sn;
-        sn = parser.parse(null, FEATURES, "foo = 1;", null);
+        sn = parser.parse(null, FEATURES, OPTIONS, "foo = 1;", null);
         Assert.assertNotNull("parsed node is null", sn);
 
-        sn = parser.parse(null, FEATURES, "foo = \"bar\";", null);
+        sn = parser.parse(null, FEATURES, OPTIONS, "foo = \"bar\";", null);
         Assert.assertNotNull("parsed node is null", sn);
 
-        sn = parser.parse(null, FEATURES, "foo = 'bar';", null);
+        sn = parser.parse(null, FEATURES, OPTIONS, "foo = 'bar';", null);
         Assert.assertNotNull("parsed node is null", sn);
     }
 
@@ -52,7 +54,7 @@ public class ParserTest {
         for(final String op : ops) {
             final Parser parser = new Parser(";");
             try {
-                final JexlNode sn = parser.parse(null, FEATURES, "foo() "+op+" 1;", null);
+                final JexlNode sn = parser.parse(null, FEATURES, OPTIONS, "foo() "+op+" 1;", null);
                 Assert.fail("should have failed on invalid assignment " + op);
             } catch (final JexlException.Parsing xparse) {
                 // ok
@@ -66,7 +68,7 @@ public class ParserTest {
     public void testErrorAmbiguous() throws Exception {
         final Parser parser = new Parser(";");
         try {
-            final JexlNode sn = parser.parse(null, FEATURES, "x = 1 y = 5", null);
+            final JexlNode sn = parser.parse(null, FEATURES, OPTIONS, "x = 1 y = 5", null);
             Assert.fail("should have failed on ambiguous statement");
         } catch (final JexlException.Ambiguous xambiguous) {
             // ok

@@ -51,7 +51,7 @@ public class JexlTestCase {
     protected final JexlEngine JEXL;
 
     public JexlTestCase(final String name) {
-        this(name, new JexlBuilder().imports(Arrays.asList("java.lang","java.math")).permissions(null).cache(128).create());
+        this(name, new JexlBuilder().imports(Arrays.asList("java.lang","java.math","java.util","java.io","java.net")).permissions(null).cache(128).create());
     }
 
     protected JexlTestCase(final String name, final JexlEngine jexl) {

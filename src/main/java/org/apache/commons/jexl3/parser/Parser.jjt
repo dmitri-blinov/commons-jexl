@@ -41,16 +41,18 @@ import java.util.Collections;
 import java.util.Collection;
 import java.util.Map;
 import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlFeatures;
+import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.internal.Scope;
 
 public final class Parser extends JexlParser
 {
-    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, String jexlSrc, Scope jexlScope) {
+    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, JexlOptions jexlOptions, String jexlSrc, Scope jexlScope) {
         JexlFeatures previous = getFeatures();
         try {
             setFeatures(jexlFeatures);
@@ -58,6 +60,7 @@ public final class Parser extends JexlParser
             info = jexlInfo != null? jexlInfo : new JexlInfo();
             source = jexlSrc;
             pragmas = null;
+            implicitPackages = new LinkedHashSet(jexlOptions.getImports());
             scope = jexlScope;
             branchScope = new BranchScope();
             ReInit(jexlSrc);

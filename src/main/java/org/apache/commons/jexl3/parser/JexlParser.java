@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
@@ -91,10 +92,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Implicitly imported java packages for resolving simple class names from
      */
-    protected List<String> implicitPackages = Arrays.asList(
-        "java.lang","java.lang.ref","java.math","java.util.function","java.util.regex","java.util.stream","java.util","java.text","java.io","java.net"
-    );
-
+    protected Set<String> implicitPackages = null;
     /**
      * The current lexical block.
      */
@@ -169,6 +167,7 @@ public abstract class JexlParser extends StringParser {
         scope = null;
         scopes.clear();
         pragmas = null;
+        implicitPackages = null;
         branchScope = null;
         branchScopes.clear();
         namespaces = null;
@@ -554,6 +553,10 @@ public abstract class JexlParser extends StringParser {
      * The prefix of a namespace pragma.
      */
     protected static final String PRAGMA_JEXLNS = "jexl.namespace.";
+    /**
+     * The prefix of an import pragma.
+     */
+    protected static final String PRAGMA_IMPORT = "jexl.import";
 
     /**
      * Adds a pragma declaration.
@@ -578,7 +581,21 @@ public abstract class JexlParser extends StringParser {
                 }
                 namespaces.add(nsname);
             }
+        } else if (PRAGMA_IMPORT.equals(key)) {
+            // jexl.import, may use a set
+            Set<?> values = value instanceof Set<?>
+                    ? (Set<?>) value
+                    : Collections.singleton(value);
+            for (Object o : values) {
+                if (o instanceof String) {
+                    if (implicitPackages == null) {
+                        implicitPackages = new LinkedHashSet<>();
+                    }
+                    implicitPackages.add(o.toString());
+                }
+            }
         }
+
         // merge new value into a set created on the fly if key is already mapped
         pragmas.merge(key, value, (previous, newValue)->{
             if (previous instanceof Set<?>) {

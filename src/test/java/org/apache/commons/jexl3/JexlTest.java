@@ -703,7 +703,7 @@ public class JexlTest extends JexlTestCase {
         final Foo foo = new Foo();
         jc.set("foo", foo);
         final Parser parser = new Parser(";");
-        parser.parse(null, new JexlFeatures().register(false), "aString = 'World';", null);
+        parser.parse(null, new JexlFeatures().register(false), new JexlOptions(), "aString = 'World';", null);
 
         assertExpression(jc, "hello = 'world'", "world");
         Assert.assertEquals("hello variable not changed", "world", jc.get("hello"));
