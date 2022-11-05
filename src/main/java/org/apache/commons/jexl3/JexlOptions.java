@@ -36,6 +36,7 @@ import org.apache.commons.jexl3.internal.Engine;
  * <li>strict: whether unknown or unsolvable identifiers are errors</li>
  * <li>strictArithmetic: whether null as operand is an error</li>
  * <li>sharedInstance: whether these options can be modified at runtime during execution (expert)</li>
+ * <li>assertions: whether failed assertions is an error</li>
  * </ul>
  * The sensible default is cancellable, strict and strictArithmetic.
  * <p>This interface replaces the now deprecated JexlEngine.Options.
@@ -62,7 +63,7 @@ public final class JexlOptions {
     private static final int CANCELLABLE = 0;
     /** The flag names ordered. */
     private static final String[] NAMES = {
-        "cancellable", "strict", "silent", "safe", "lexical", "antish", "lexicalShade", "sharedInstance"
+        "cancellable", "strict", "silent", "safe", "lexical", "antish", "lexicalShade", "sharedInstance", "assertions"
     };
     /** Default mask .*/
     private static int DEFAULT = 1 /*<< CANCELLABLE*/ | 1 << STRICT | 1 << ANTISH | 1 << SAFE;
@@ -114,7 +115,7 @@ public final class JexlOptions {
      * engine; this method should only be used for testing / validation.
      * <p>A '+flag' or 'flag' will set the option named 'flag' as true, '-flag' set as false.
      * The possible flag names are:
-     * cancellable, strict, silent, safe, lexical, antish, lexicalShade
+     * cancellable, strict, silent, safe, lexical, antish, lexicalShade, assertions
      * <p>Calling JexlBuilder.setDefaultOptions("+safe") once before JEXL engine creation
      * may ease validating JEXL3.2 in your environment.
      * @param flags the flags to set
@@ -127,7 +128,7 @@ public final class JexlOptions {
      * Parses flags by name.
      * <p>A '+flag' or 'flag' will set flag as true, '-flag' set as false.
      * The possible flag names are:
-     * cancellable, strict, silent, safe, lexical, antish, lexicalShade
+     * cancellable, strict, silent, safe, lexical, antish, lexicalShade, assertions
      * @param initial the initial mask state
      * @param flags the flags to set
      * @return the flag mask updated
