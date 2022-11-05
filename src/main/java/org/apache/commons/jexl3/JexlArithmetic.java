@@ -25,6 +25,7 @@ import java.lang.ref.Reference;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -93,6 +94,9 @@ public class JexlArithmetic {
     /** Whether this JexlArithmetic instance behaves in strict or lenient mode. */
     private final boolean strict;
 
+    /** Whether this JexlArithmetic instance allows null as argument to cast methods - toXXX(). */
+    private final boolean strictCast;
+
     /** The big decimal math context. */
     private final MathContext mathContext;
 
@@ -132,6 +136,17 @@ public class JexlArithmetic {
             // ignore
         }
         this.ctor = actor;
+        boolean cast = strict;
+        // if isStrict is not overridden, we are in strict-cast mode
+        if (cast) {
+            try {
+                Method istrict = getClass().getMethod("isStrict", JexlOperator.class);
+                cast = JexlArithmetic.class == istrict.getDeclaringClass();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        this.strictCast = cast;
     }
 
     /**
@@ -452,7 +467,17 @@ public class JexlArithmetic {
      * @return true if strict, false if lenient
      */
     public boolean isStrict() {
-        return this.strict;
+        return strict;
+    }
+
+    /**
+     * Checks whether this JexlArithmetic instance
+     * strictly considers null as an error when used as operand of a cast method (toXXX())..
+     *
+     * @return true if strict-cast, false if lenient
+     */
+    public boolean isStrictCast() {
+        return strictCast;
     }
 
     /**
@@ -461,21 +486,32 @@ public class JexlArithmetic {
      * If null-safe (ie not-strict), the operator does accept null arguments even if the arithmetic itself is strict.</p>
      * <p>The default implementation considers equal/not-equal operators as null-safe so one can check for null as in
      * <code>if (myvar == null) {...}</code>. Note that this operator is used for equal and not-equal syntax. The complete
-     * list of operators that are not strict are (==, [], []=, ., .=). </p>
-     * <p>An arithmetic refining its strict behavior handling for more operators must declare which by overriding
-     * this method.</p>
+     * list of operators that are not strict are (==, [], []=, ., .=, empty, size, contains). </p>
+     * <p>
+     *     An arithmetic refining its strict behavior handling for more operators must declare which by overriding
+     * this method.
+     * </p>
+     * <p>
+     *     If this method is overridden, the arithmetic instance is <em>NOT</em> in strict-cast mode. Tp restore the
+     *     strict-cast behavior, override the {@link #isStrictCast()} method/
+     * </p>
      * @param operator the operator to check for null-argument(s) handling
      * @return true if operator considers null arguments as errors, false if operator has appropriate semantics
      * for null argument(s)
      */
     public boolean isStrict(JexlOperator operator) {
-        switch(operator) {
-            case EQ:
-            case ARRAY_GET:
-            case ARRAY_SET:
-            case PROPERTY_GET:
-            case PROPERTY_SET:
-                return false;
+        if (operator != null) {
+            switch (operator) {
+                case EQ:
+                case ARRAY_GET:
+                case ARRAY_SET:
+                case PROPERTY_GET:
+                case PROPERTY_SET:
+                case EMPTY:
+                case SIZE:
+                case CONTAINS:
+                    return false;
+            }
         }
         return isStrict();
     }
@@ -516,22 +552,25 @@ public class JexlArithmetic {
      * The result of +,/,-,*,% when both operands are null.
      *
      * @return Integer(0) if lenient
-     * @throws ArithmeticException if strict
+     * @throws ArithmeticException if strict-cast
      */
     protected Object controlNullNullOperands() {
-        if (isStrict()) {
+        if (isStrictCast()) {
             throw new NullOperand();
         }
         return 0;
     }
 
     /**
-     * Throw a NPE if arithmetic is strict.
+     * Throw a NPE if arithmetic is strict-cast.
+     * <p>This method is called by the cast methods ({@link #toBoolean(Object)}, {@link #toInteger(Object)},
+     * {@link #toDouble(Object)}, {@link #toString(Object)}, {@link #toBigInteger(Object)}, {@link #toBigDecimal(Object)})
+     * when they encounter a null argument.</p>
      *
      * @throws ArithmeticException if strict
      */
     protected void controlNullOperand() {
-        if (isStrict()) {
+        if (isStrictCast()) {
             throw new NullOperand();
         }
     }
@@ -641,7 +680,7 @@ public class JexlArithmetic {
         Number result = original;
         if (original instanceof BigDecimal) {
             final BigDecimal bigd = (BigDecimal) original;
-            // if it's bigger than a double it can't be narrowed
+            // if it is bigger than a double, it can not be narrowed
             if (bigd.compareTo(BIGD_DOUBLE_MAX_VALUE) > 0
                 || bigd.compareTo(BIGD_DOUBLE_MIN_VALUE) < 0) {
                 return original;
@@ -671,7 +710,7 @@ public class JexlArithmetic {
         } else {
             if (original instanceof BigInteger) {
                 final BigInteger bigi = (BigInteger) original;
-                // if it's bigger than a Long it can't be narrowed
+                // if it is bigger than a Long, it can not be narrowed
                 if (bigi.compareTo(BIGI_LONG_MAX_VALUE) > 0
                         || bigi.compareTo(BIGI_LONG_MIN_VALUE) < 0) {
                     return original;
@@ -909,9 +948,7 @@ public class JexlArithmetic {
                 final BigInteger result = l.add(r);
                 return narrowBigInteger(left, right, result);
             } catch (final ArithmeticException nfe) {
-                if (left == null || right == null) {
-                    controlNullOperand();
-                }
+                // ignore and continue in sequence
             }
         }
         return (left == null? "" : toString(left)).concat(right == null ? "" : toString(right));
@@ -1242,7 +1279,6 @@ public class JexlArithmetic {
      */
     public Object negate(final Object val) {
         if (val == null) {
-            controlNullOperand();
             return null;
         }
         if (val instanceof Integer) {
@@ -1435,7 +1471,6 @@ public class JexlArithmetic {
      */
     public Object positivize(final Object val) {
         if (val == null) {
-            controlNullOperand();
             return null;
         }
         if (val instanceof Byte) {

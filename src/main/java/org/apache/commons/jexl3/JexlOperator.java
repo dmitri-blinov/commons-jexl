@@ -413,6 +413,13 @@ public enum JexlOperator {
     FOR_EACH_INDEXED("for(i,j:y)", "forEachIndexed", 1),
 
     /**
+     * Test condition in if, for, while.
+     * <br><strong>Method:</strong> <code>boolean testCondition(R y);</code>.
+     * @since 3.3
+     */
+    CONDITION("?", "testCondition", 1),
+
+    /**
      * Resource generator as in try(var x : y).
      * If the returned Resource is AutoCloseable, close will be called after the execution of the statement.
      * <br><strong>Syntax:</strong> <code>try(var x : y){...} </code>
