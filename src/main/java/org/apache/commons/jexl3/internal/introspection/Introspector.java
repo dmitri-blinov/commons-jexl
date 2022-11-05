@@ -110,7 +110,8 @@ public final class Introspector {
      */
     public Class<?> getClassByName(final String className) {
         try {
-            return Class.forName(className, false, loader);
+            Class r = Class.forName(className, false, loader);
+            return permissions.allow(r) ? r : null;
         } catch (final ClassNotFoundException xignore) {
             return null;
         }
