@@ -60,7 +60,7 @@ public final class Introspector {
     /**
      * the logger.
      */
-    protected final Log logger;
+    private final Log logger;
     /**
      * The class loader used to solve constructors if needed.
      */
@@ -72,15 +72,15 @@ public final class Introspector {
     /**
      * Holds the method maps for the classes we know about, keyed by Class.
      */
-    private final Map<Class<?>, ClassMap> classMethodMaps = new ConcurrentHashMap<Class<?>, ClassMap>();
+    private final Map<Class<?>, ClassMap> classMethodMaps = new ConcurrentHashMap<>();
     /**
      * Holds the map of classes ctors we know about as well as unknown ones.
      */
-    private final Map<MethodKey, Constructor<?>> constructorsMap = new ConcurrentHashMap<MethodKey, Constructor<?>>();
+    private final Map<MethodKey, Constructor<?>> constructorsMap = new ConcurrentHashMap<>();
     /**
      * Holds the set of classes we have introspected.
      */
-    private final Map<String, Class<?>> constructibleClasses = new ConcurrentHashMap<String, Class<?>>();
+    private final Map<String, Class<?>> constructibleClasses = new ConcurrentHashMap<>();
 
     /**
      * Create the introspector.
@@ -110,8 +110,8 @@ public final class Introspector {
      */
     public Class<?> getClassByName(final String className) {
         try {
-            Class r = Class.forName(className, false, loader);
-            return permissions.allow(r) ? r : null;
+            Class<?> clazz = Class.forName(className, false, loader);
+            return permissions.allow(clazz)? clazz : null;
         } catch (final ClassNotFoundException xignore) {
             return null;
         }
