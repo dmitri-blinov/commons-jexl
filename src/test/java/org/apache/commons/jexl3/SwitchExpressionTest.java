@@ -118,4 +118,23 @@ public class SwitchExpressionTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 1, o);
     }
 
+    @Test
+    public void testTypePattern() throws Exception {
+        JexlScript e = JEXL.createScript("var e = switch (x) {case Long l -> -1; case Integer i -> i; default -> 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", 42);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
+    @Test
+    public void testTypePatternVarScope() throws Exception {
+        JexlScript e = JEXL.createScript("var e = switch (x) {case Long i -> -1; default -> i + 22}");
+        JexlContext jc = new MapContext();
+        jc.set("i", 20);
+        jc.set("x", 42);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
 }

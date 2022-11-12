@@ -2025,21 +2025,60 @@ public class Interpreter extends InterpreterBase {
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                             JexlNode label = labels.jjtGetChild(j);
-                            Object right = label instanceof ASTIdentifier ? 
-                                label.jjtAccept(this, scope) : 
-                                label.jjtAccept(this, data);
-                            try {
-                                Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                                if (caseMatched == JexlEngine.TRY_FAILED) {
-                                    caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+
+                            if (label instanceof ASTVar) {
+
+                                ASTVar caseVar = (ASTVar) label;
+                                Class type = caseVar.getType();
+
+                                if (left != null && type.isAssignableFrom(left.getClass())) {
+                                    final int symbol = caseVar.getSymbol();
+                                    final boolean lxl = options.isLexical() && symbol >= 0;
+                                    if (lxl) {
+                                        // create lexical frame
+                                        LexicalFrame locals = new LexicalFrame(frame, block);
+                                        if (!defineVariable((ASTVar) caseVar, locals)) {
+                                            return redefinedVariable(node, caseVar.getName());
+                                        }
+                                        block = locals;
+                                    }
+                                    try {
+                                        // Set case variable
+                                        executeAssign(node, caseVar, left, null, null);
+                                        // execute case block
+                                        result = child.jjtAccept(this, data);
+                                    } finally {
+                                        // restore lexical frame
+                                        if (lxl) {
+                                            block = block.pop();
+                                        }
+                                    }
+
+                                    // Fallthrough lables
+                                    for (int ii = i + 1; ii < childCount; ii++) {
+                                        result = node.jjtGetChild(ii).jjtAccept(this, data);
+                                    }
+
+                                    return result;
+
                                 }
-                                matched = arithmetic.toBoolean(caseMatched);
-                            } catch (ArithmeticException xrt) {
-                                throw new JexlException(node, "== error", xrt);
-                            }
-                            if (matched) {
-                                start = i;
-                                break l;
+                            } else {
+                                Object right = label instanceof ASTIdentifier ? 
+                                    label.jjtAccept(this, scope) : 
+                                    label.jjtAccept(this, data);
+                                try {
+                                    Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
+                                    if (caseMatched == JexlEngine.TRY_FAILED) {
+                                        caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                    }
+                                    matched = arithmetic.toBoolean(caseMatched);
+                                } catch (ArithmeticException xrt) {
+                                    throw new JexlException(node, "== error", xrt);
+                                }
+                                if (matched) {
+                                    start = i;
+                                    break l;
+                                }
                             }
                         }
                     }
@@ -2065,8 +2104,7 @@ public class Interpreter extends InterpreterBase {
                 // execute all cases starting from matched one
                 if (matched) {
                     for (int i = start; i < childCount; i++) {
-                        JexlNode child = node.jjtGetChild(i);
-                        result = child.jjtAccept(this, data);
+                        result = node.jjtGetChild(i).jjtAccept(this, data);
                     }
                 }
             } catch (JexlException.Break stmtBreak) {
@@ -2123,18 +2161,51 @@ public class Interpreter extends InterpreterBase {
                     // check all labels
                     for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                         JexlNode label = labels.jjtGetChild(j);
-                        Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
-                        try {
-                            Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                            if (caseMatched == JexlEngine.TRY_FAILED) {
-                                caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+
+                        if (label instanceof ASTVar) {
+
+                            ASTVar caseVar = (ASTVar) label;
+                            Class type = caseVar.getType();
+
+                            if (left != null && type.isAssignableFrom(left.getClass())) {
+                                final int symbol = caseVar.getSymbol();
+                                final boolean lexical = options.isLexical() && symbol >= 0;
+                                if (lexical) {
+                                    // create lexical frame
+                                    LexicalFrame locals = new LexicalFrame(frame, block);
+                                    if (!defineVariable((ASTVar) caseVar, locals)) {
+                                        return redefinedVariable(node, caseVar.getName());
+                                    }
+                                    block = locals;
+                                }
+                                try {
+                                    // Set case variable
+                                    executeAssign(node, caseVar, left, null, null);
+
+                                    // execute case block
+                                    return child.jjtAccept(this, data);
+                                } finally {
+                                    // restore lexical frame
+                                    if (lexical) {
+                                        block = block.pop();
+                                    }
+                                }
                             }
-                            matched = arithmetic.toBoolean(caseMatched);
-                        } catch (ArithmeticException xrt) {
-                            throw new JexlException(node, "== error", xrt);
-                        }
-                        if (matched) {
-                            return child.jjtAccept(this, data);
+                        } else {
+                            Object right = label instanceof ASTIdentifier ? label.jjtAccept(this, scope) : label.jjtAccept(this, data);
+                            try {
+                                Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
+                                if (caseMatched == JexlEngine.TRY_FAILED) {
+                                    caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                }
+                                matched = arithmetic.toBoolean(caseMatched);
+                            } catch (ArithmeticException xrt) {
+                                throw new JexlException(node, "== error", xrt);
+                            }
+                            if (matched) {
+                                return child.jjtAccept(this, data);
+                            }
+
                         }
                     }
                 }

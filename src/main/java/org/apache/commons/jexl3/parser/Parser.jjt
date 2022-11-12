@@ -792,9 +792,15 @@ void SwitchStatementBlock() #void : {}
     SwitchStatementDefault() (LOOKAHEAD(SwitchStatementCase()) SwitchStatementCase())*
 }
 
-void SwitchStatementCase() : {}
+void SwitchStatementCase() :
+{
+    pushUnit(jjtThis);
+}
 {
     <CASE> SwitchCaseLabel() <COLON> (GenericStatement())*
+{
+    popUnit(jjtThis);
+}
 }
 
 void SwitchStatementDefault() : {}
@@ -1083,6 +1089,25 @@ void DeclareCatchVar() #Var :
     t=<IDENTIFIER> 
 {
     declareVariable(jjtThis, t);
+}
+}
+
+void DeclareSwitchCaseVar() #Var :
+{
+    Token t;
+    Token te;
+    Class type;
+}
+{
+    ( 
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && resolveType(getToken(1).image) != null } ) 
+      t=<IDENTIFIER> { jjtThis.setType(resolveType(t.image));}
+      ( LOOKAHEAD(2) <DOT> te=<DOT_IDENTIFIER> { type = Parser.resolveNestedType(jjtThis.getType(), te.image); if (type == null) throwParsingException(te); jjtThis.setType(type); } )*
+    )
+    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+    t=<IDENTIFIER> 
+{
+    declareVariable(jjtThis, t); 
 }
 }
 
@@ -1494,14 +1519,22 @@ void SwitchExpressionDefault() : {}
     <DCASE> <LAMBDA> Statement()
 }
 
-void SwitchExpressionCase() : {}
+void SwitchExpressionCase() :
+{
+    pushUnit(jjtThis);
+}
 {
     <CASE> SwitchCaseLabel() <LAMBDA> Statement()
+{
+    popUnit(jjtThis);
+}
 }
 
 void SwitchCaseLabel() : {}
 {
     NullLiteral() [ <COMMA> <DCASE> { jjtThis.setDefault(); } ]
+    |
+    LOOKAHEAD(DeclareSwitchCaseVar()) DeclareSwitchCaseVar()
     |
     (SwitchCaseLiteral() | Identifier()) (<COMMA> (SwitchCaseLiteral() | Identifier()))*
 }
@@ -1754,13 +1787,28 @@ void TypeCastReference() #TypeLiteral :
 void StaticTypeReference() #TypeLiteral :
 {
     Token t;
-    Token te;
 }
 {
     (
       LOOKAHEAD( { getToken(1).kind == IDENTIFIER && resolveType(getToken(1).image) != null } ) 
       t=<IDENTIFIER> { jjtThis.setLiteral(resolveType(t.image)); }
     )
+{ 
+    if (isSimpleName(jjtThis.getLiteral())) jjtThis.setSimpleName();
+}
+}
+
+void TypePatternReference() #TypeLiteral :
+{
+    Token t;
+}
+{
+    (
+      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && resolveType(getToken(1).image) != null } ) 
+      t=<IDENTIFIER> { jjtThis.setLiteral(resolveType(t.image)); }
+    )
+    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
+
 { 
     if (isSimpleName(jjtThis.getLiteral())) jjtThis.setSimpleName();
 }
