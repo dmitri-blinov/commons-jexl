@@ -2025,13 +2025,16 @@ public class Interpreter extends InterpreterBase {
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                             JexlNode label = labels.jjtGetChild(j);
-
-                            if (label instanceof ASTVar) {
-
+                            if (left == null) {
+                                if (label instanceof ASTNullLiteral) {
+                                    matched = true;
+                                    start = i;
+                                    break l;
+                                }
+                            } else if (label instanceof ASTVar) {
                                 ASTVar caseVar = (ASTVar) label;
                                 Class type = caseVar.getType();
-
-                                if (left != null && type.isAssignableFrom(left.getClass())) {
+                                if (type.isAssignableFrom(left.getClass())) {
                                     final int symbol = caseVar.getSymbol();
                                     final boolean lxl = options.isLexical() && symbol >= 0;
                                     if (lxl) {
@@ -2054,13 +2057,10 @@ public class Interpreter extends InterpreterBase {
                                         }
                                     }
 
-                                    // Fallthrough lables
-                                    for (int ii = i + 1; ii < childCount; ii++) {
-                                        result = node.jjtGetChild(ii).jjtAccept(this, data);
-                                    }
-
-                                    return result;
-
+                                    // Execute fallthrough labeles
+                                    matched = true;
+                                    start = i+1;
+                                    break l;
                                 }
                             } else {
                                 Object right = label instanceof ASTIdentifier ? 
@@ -2161,13 +2161,13 @@ public class Interpreter extends InterpreterBase {
                     // check all labels
                     for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                         JexlNode label = labels.jjtGetChild(j);
-
-                        if (label instanceof ASTVar) {
-
+                        if (left == null) {
+                            if (label instanceof ASTNullLiteral)
+                                return child.jjtAccept(this, data); 
+                        } else if (label instanceof ASTVar) {
                             ASTVar caseVar = (ASTVar) label;
                             Class type = caseVar.getType();
-
-                            if (left != null && type.isAssignableFrom(left.getClass())) {
+                            if (type.isAssignableFrom(left.getClass())) {
                                 final int symbol = caseVar.getSymbol();
                                 final boolean lexical = options.isLexical() && symbol >= 0;
                                 if (lexical) {
@@ -2181,7 +2181,6 @@ public class Interpreter extends InterpreterBase {
                                 try {
                                     // Set case variable
                                     executeAssign(node, caseVar, left, null, null);
-
                                     // execute case block
                                     return child.jjtAccept(this, data);
                                 } finally {
@@ -2205,7 +2204,6 @@ public class Interpreter extends InterpreterBase {
                             if (matched) {
                                 return child.jjtAccept(this, data);
                             }
-
                         }
                     }
                 }
