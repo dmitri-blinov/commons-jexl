@@ -1798,22 +1798,6 @@ void StaticTypeReference() #TypeLiteral :
 }
 }
 
-void TypePatternReference() #TypeLiteral :
-{
-    Token t;
-}
-{
-    (
-      LOOKAHEAD( { getToken(1).kind == IDENTIFIER && resolveType(getToken(1).image) != null } ) 
-      t=<IDENTIFIER> { jjtThis.setLiteral(resolveType(t.image)); }
-    )
-    (LOOKAHEAD(<LBRACKET>) <LBRACKET> <RBRACKET> { jjtThis.setArray(); })*
-
-{ 
-    if (isSimpleName(jjtThis.getLiteral())) jjtThis.setSimpleName();
-}
-}
-
 void TypeReference() #TypeLiteral :
 {
     Token t;
