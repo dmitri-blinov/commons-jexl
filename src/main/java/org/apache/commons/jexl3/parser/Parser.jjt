@@ -1573,20 +1573,16 @@ void NamespaceIdentifier()  #NamespaceIdentifier :
     ns=<IDENTIFIER> <COLON> id=<IDENTIFIER> { jjtThis.setNamespace(ns.image, id.image); }
 }
 
-void RemoveIdentifier() #Identifier :
+void FunctionIdentifier() #Identifier :
 {
     Token t;
 }
 {
     t=<REMOVE> { jjtThis.setSymbol(t.image); }
-}
-
-void ClassIdentifier() #Identifier :
-{
-    Token t;
-}
-{
+    |
     t=<CLASS> { jjtThis.setSymbol(t.image); }
+    |
+    t=<LET> { jjtThis.setSymbol(t.image); }
 }
 
 void MethodReferenceIdentifier() #Identifier :
@@ -1609,6 +1605,8 @@ void MethodReferenceIdentifier() #Identifier :
     t=<VAR> { jjtThis.setSymbol(t.image); }
     |
     t=<YIELD> { jjtThis.setSymbol(t.image); }
+    |
+    t=<LET> { jjtThis.setSymbol(t.image); }
     |
     t=<IDENTIFIER> { jjtThis.setSymbol(t.image); }
 }
@@ -2001,6 +1999,8 @@ void FunctionCallLookahead() #void : {}
     <REMOVE> <LPAREN>
     |
     <CLASS> <LPAREN>
+    |
+    <LET> <LPAREN>
 }
 
 void FunctionCall() #void : {}
@@ -2009,9 +2009,7 @@ void FunctionCall() #void : {}
     |
     LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isDeclaredNamespace(getToken(1), getToken(2)) }) NamespaceIdentifier() Arguments() #FunctionNode(2)
     |
-    LOOKAHEAD(2) RemoveIdentifier() Arguments() #FunctionNode(2)
-    |
-    LOOKAHEAD(2) ClassIdentifier() Arguments() #FunctionNode(2)
+    LOOKAHEAD(2) FunctionIdentifier() Arguments() #FunctionNode(2)
 }
 
 void Constructor() #void : {}
