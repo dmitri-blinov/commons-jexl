@@ -244,6 +244,7 @@ TOKEN_MGR_DECLS : {}
     | < TRY : "try" > 
     | < VAR : "var" >
     | < LET : "let" >
+    | < WHEN : "when" >
     | < CASE : "case" > 
     | < ELSE : "else" > 
     | < SIZE : "size" >
@@ -1534,7 +1535,7 @@ void SwitchCaseLabel() : {}
 {
     NullLiteral() [ <COMMA> <DCASE> { jjtThis.setDefault(); } ]
     |
-    LOOKAHEAD(DeclareSwitchCaseVar()) DeclareSwitchCaseVar()
+    LOOKAHEAD(DeclareSwitchCaseVar()) DeclareSwitchCaseVar() [ <WHEN> ConditionalExpression() ] 
     |
     (SwitchCaseLiteral() | Identifier()) (<COMMA> (SwitchCaseLiteral() | Identifier()))*
 }
@@ -1583,6 +1584,8 @@ void FunctionIdentifier() #Identifier :
     t=<CLASS> { jjtThis.setSymbol(t.image); }
     |
     t=<LET> { jjtThis.setSymbol(t.image); }
+    |
+    t=<WHEN> { jjtThis.setSymbol(t.image); }
 }
 
 void MethodReferenceIdentifier() #Identifier :

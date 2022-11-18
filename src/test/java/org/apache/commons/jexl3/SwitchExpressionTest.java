@@ -137,4 +137,13 @@ public class SwitchExpressionTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 42, o);
     }
 
+    @Test
+    public void testTypePatternWhen() throws Exception {
+        JexlScript e = JEXL.createScript("var e = switch (x) {case Integer i when false -> -1; case Integer i -> i; default -> 0}");
+        JexlContext jc = new MapContext();
+        jc.set("x", 42);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
 }

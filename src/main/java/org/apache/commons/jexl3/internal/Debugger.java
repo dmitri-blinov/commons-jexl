@@ -2259,15 +2259,23 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTSwitchCaseLabel node, final Object data) {
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            if (i > 0) {
-                builder.append(',');
+        if (node.jjtGetChild(0) instanceof ASTVar) {
+            accept(node.jjtGetChild(0), data);
+            if (node.jjtGetNumChildren() > 1) {
+                builder.append(" when ");
+                accept(node.jjtGetChild(1), data);
             }
-            accept(node.jjtGetChild(i), data);
-        }
+        } else {
+            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+                if (i > 0) {
+                    builder.append(',');
+                }
+                accept(node.jjtGetChild(i), data);
+            }
 
-        if (node.isDefault())
-            builder.append(", default");
+            if (node.isDefault())
+                builder.append(", default");
+        }
 
         return data;
     }
