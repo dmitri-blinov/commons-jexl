@@ -314,6 +314,10 @@ final class ClassMap {
      * @throws MethodKey.AmbiguousException When more than one method is a match for the parameters.
      */
     Method getPropertyGet(final String name) throws MethodKey.AmbiguousException {
+        if (aClass == null) {
+            return null;
+        }
+
         // Look up by name
         Method cacheEntry = propertyGetters.computeIfAbsent(name, x -> {
             Method m = getPropertyGetMethod("get", name);
@@ -340,8 +344,11 @@ final class ClassMap {
      * @throws MethodKey.AmbiguousException When more than one method is a match for the parameters.
      */
     Method getPropertySet(final String name, Class<?> aClass) throws MethodKey.AmbiguousException {
-        // Look up by name
+        if (aClass == null) {
+            return null;
+        }
 
+        // Look up by name
         Map<Class, Method> setters = propertySetters.computeIfAbsent(name, x -> {
             return new ConcurrentHashMap<Class, Method> ();
         });
