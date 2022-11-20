@@ -1995,7 +1995,7 @@ void FunctionCallLookahead() #void : {}
 {
     LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isDeclaredNamespace(getToken(1), getToken(2)) }) <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>
     |
-    LOOKAHEAD(2) <IDENTIFIER> <LPAREN>
+    <IDENTIFIER> <LPAREN>
     |
     <REGISTER> <LPAREN>
     |
@@ -2004,9 +2004,9 @@ void FunctionCallLookahead() #void : {}
 
 void FunctionCall() #void : {}
 {
-    LOOKAHEAD(Identifier() <LPAREN>) Identifier(true) Arguments() #FunctionNode(2)
-    |
     LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>, { isDeclaredNamespace(getToken(1), getToken(2)) }) NamespaceIdentifier() Arguments() #FunctionNode(2)
+    |
+    LOOKAHEAD(Identifier() <LPAREN>) Identifier(true) Arguments() #FunctionNode(2)
     |
     LOOKAHEAD(2) FunctionIdentifier() Arguments() #FunctionNode(2)
 }
