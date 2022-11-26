@@ -1202,7 +1202,7 @@ public class Interpreter extends InterpreterBase {
 
     private boolean testPredicate(JexlNode node, Object condition) {
         final Object predicate = operators.tryOverload(node, JexlOperator.CONDITION, condition);
-        return  arithmetic.toBoolean(predicate != JexlEngine.TRY_FAILED? predicate : condition);
+        return  arithmetic.testPredicate(predicate != JexlEngine.TRY_FAILED? predicate : condition);
     }
 
     @Override
