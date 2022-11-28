@@ -2559,9 +2559,11 @@ public class JexlArithmetic {
      */
     private double parseDouble(String arg) throws ArithmeticException {
         try {
-            return arg.isEmpty()? Double.NaN : Double.parseDouble((String) arg);
-        } catch(NumberFormatException xformat) {
-            throw new ArithmeticException("Double coercion: ("+ arg +")");
+            return arg.isEmpty()? Double.NaN : Double.parseDouble(arg);
+        } catch (NumberFormatException e) {
+            final ArithmeticException arithmeticException = new ArithmeticException("Double coercion: ("+ arg +")");
+            arithmeticException.initCause(e);
+            throw arithmeticException;
         }
     }
 
