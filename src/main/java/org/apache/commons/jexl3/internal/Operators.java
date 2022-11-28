@@ -534,10 +534,10 @@ public class Operators {
             // check if there is an isEmpty method on the object that returns a
             // boolean and if so, just use it
             final JexlUberspect uberspect = interpreter.uberspect;
-            final JexlMethod vm = uberspect.getMethod(object, "isEmpty", Interpreter.EMPTY_PARAMS);
+            final JexlMethod vm = uberspect.getMethod(object, "isEmpty", InterpreterBase.EMPTY_PARAMS);
             if (returnsBoolean(vm)) {
                 try {
-                    result = vm.invoke(object, Interpreter.EMPTY_PARAMS);
+                    result = vm.invoke(object, InterpreterBase.EMPTY_PARAMS);
                 } catch (final Exception xany) {
                     interpreter.operatorError(node, JexlOperator.EMPTY, xany);
                 }
@@ -569,10 +569,10 @@ public class Operators {
             // check if there is a size method on the object that returns an
             // integer and if so, just use it
             final JexlUberspect uberspect = interpreter.uberspect;
-            final JexlMethod vm = uberspect.getMethod(object, "size", Interpreter.EMPTY_PARAMS);
+            final JexlMethod vm = uberspect.getMethod(object, "size", InterpreterBase.EMPTY_PARAMS);
             if (returnsInteger(vm)) {
                 try {
-                    result = vm.invoke(object, Interpreter.EMPTY_PARAMS);
+                    result = vm.invoke(object, InterpreterBase.EMPTY_PARAMS);
                 } catch (final Exception xany) {
                     interpreter.operatorError(node, JexlOperator.SIZE, xany);
                 }
