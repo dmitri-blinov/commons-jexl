@@ -497,7 +497,7 @@ public class Uberspect implements JexlUberspect {
                     for (final JexlOperator op : JexlOperator.values()) {
                         final Method[] methods = getClassMethods(arithmetic.getClass(), op.getMethodName());
                         if (methods != null) {
-                            for (Method method : methods) {
+                            for (final Method method : methods) {
                                 final Class<?>[] parms = method.getParameterTypes();
                                 if (parms.length != op.getArity()) {
                                     continue;
