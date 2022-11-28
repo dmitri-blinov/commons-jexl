@@ -117,6 +117,7 @@ public class ASTIdentifier extends JexlNode {
         flags = set(LEXICAL, flags, f);
     }
 
+    @Override
     public boolean isConstant() {
         return isSet(CONST, flags);
     }
