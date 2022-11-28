@@ -21,6 +21,11 @@ package org.apache.commons.jexl3.parser;
  */
 public class ASTBreak extends ASTLabelledStatement {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public ASTBreak(final int id) {
         super(id);
     }

@@ -16,17 +16,21 @@
  */
 package org.apache.commons.jexl3.parser;
 
-
 /**
  * Field access identifier
  */
 public class ASTFieldAccess extends ASTIdentifierAccess {
 
-    ASTFieldAccess(final int id) {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public ASTFieldAccess(final int id) {
         super(id);
     }
 
-    ASTFieldAccess(final Parser p, final int id) {
+    public ASTFieldAccess(final Parser p, final int id) {
         super(p, id);
     }
 

@@ -23,6 +23,12 @@ import org.apache.commons.jexl3.internal.LexicalScope;
  * @since 3.2
  */
 public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private LexicalScope locals = null;
 
     public JexlLexicalNode(final int id) {

@@ -28,6 +28,10 @@ import java.util.regex.Pattern;
  * Parses number literals.
  */
 public final class NumberParser implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
     /** The type literal value. */
     private Number literal = null;
     /** The expected class. */

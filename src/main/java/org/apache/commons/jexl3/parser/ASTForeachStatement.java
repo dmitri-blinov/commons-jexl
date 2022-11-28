@@ -21,6 +21,11 @@ package org.apache.commons.jexl3.parser;
  */
 public class ASTForeachStatement extends ASTLabelledStatement {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     public ASTForeachStatement(final int id) {
         super(id);
     }
