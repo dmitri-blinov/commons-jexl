@@ -93,7 +93,7 @@ public class Uberspect implements JexlUberspect {
         logger = runtimeLogger == null? LogFactory.getLog(JexlEngine.class) : runtimeLogger;
         strategy = sty == null? JexlUberspect.JEXL_STRATEGY : sty;
         permissions = perms == null? JexlPermissions.RESTRICTED : perms;
-        ref = new SoftReference<Introspector>(null);
+        ref = new SoftReference<>(null);
         loader = getClass().getClassLoader();
         operatorMap = new ConcurrentHashMap<>();
         version = new AtomicInteger(0);
@@ -114,7 +114,7 @@ public class Uberspect implements JexlUberspect {
                 intro = ref.get();
                 if (intro == null) {
                     intro = new Introspector(logger, loader, permissions);
-                    ref = new SoftReference<Introspector>(intro);
+                    ref = new SoftReference<>(intro);
                     version.incrementAndGet();
                 }
             }
@@ -131,7 +131,7 @@ public class Uberspect implements JexlUberspect {
                 intro.setLoader(nloader);
             } else {
                 intro = new Introspector(logger, nloader, permissions);
-                ref = new SoftReference<Introspector>(intro);
+                ref = new SoftReference<>(intro);
             }
             loader = nloader;
             operatorMap.clear();
@@ -410,7 +410,7 @@ public class Uberspect implements JexlUberspect {
             return ((Map<?, ?>) obj).values().iterator();
         }
         if (obj instanceof Enumeration<?>) {
-            return new EnumerationIterator<Object>((Enumeration<Object>) obj);
+            return new EnumerationIterator<>((Enumeration<Object>) obj);
         }
         if (obj instanceof Iterable<?>) {
             return ((Iterable<?>) obj).iterator();

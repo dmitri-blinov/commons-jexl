@@ -176,8 +176,8 @@ public final class JexlTest extends JexlTestCase {
         jc.set("string", "");
         jc.set("array", new Object[0]);
         jc.set("map", new HashMap<>());
-        jc.set("list", new ArrayList<Object>());
-        jc.set("set", (new HashMap<Object, Object>()).keySet());
+        jc.set("list", new ArrayList<>());
+        jc.set("set", (new HashMap<>()).keySet());
         jc.set("longstring", "thingthing");
 
         /*
@@ -201,7 +201,7 @@ public final class JexlTest extends JexlTestCase {
         jc.set("s", "five!");
         jc.set("array", new Object[5]);
 
-        final Map<String, Integer> map = new HashMap<String, Integer>();
+        final Map<String, Integer> map = new HashMap<>();
 
         map.put("1", new Integer(1));
         map.put("2", new Integer(2));
@@ -211,7 +211,7 @@ public final class JexlTest extends JexlTestCase {
 
         jc.set("map", map);
 
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
 
         list.add("1");
         list.add("2");
@@ -222,7 +222,7 @@ public final class JexlTest extends JexlTestCase {
         jc.set("list", list);
 
         // 30652 - support for set
-        final Set<String> set = new HashSet<String>(list);
+        final Set<String> set = new HashSet<>(list);
         set.add("1");
 
         jc.set("set", set);
@@ -250,7 +250,7 @@ public final class JexlTest extends JexlTestCase {
     @Test
     public void testSizeAsProperty() throws Exception {
         final JexlContext jc = new MapContext();
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         map.put("size", "cheese");
         map.put("si & ze", "cheese");
         jc.set("map", map);
@@ -327,8 +327,8 @@ public final class JexlTest extends JexlTestCase {
         jc.set("aChar", new Character('A'));
         jc.set("aBool", Boolean.TRUE);
         final StringBuilder buffer = new StringBuilder("abc");
-        final List<Object> list = new ArrayList<Object>();
-        final List<Object> list2 = new LinkedList<Object>();
+        final List<Object> list = new ArrayList<>();
+        final List<Object> list2 = new LinkedList<>();
         jc.set("aBuffer", buffer);
         jc.set("aList", list);
         jc.set("bList", list2);
@@ -502,7 +502,7 @@ public final class JexlTest extends JexlTestCase {
      */
     @Test
     public void testMapDot() throws Exception {
-        final Map<String, String> foo = new HashMap<String, String>();
+        final Map<String, String> foo = new HashMap<>();
         foo.put("bar", "123");
 
         final JexlContext jc = new MapContext();
@@ -585,8 +585,8 @@ public final class JexlTest extends JexlTestCase {
     @Test
     public void testEmptySubListOfMap() throws Exception {
         final JexlContext jc = new MapContext();
-        final Map<String, ArrayList<?>> m = new HashMap<String, ArrayList<?>>();
-        m.put("aList", new ArrayList<Object>());
+        final Map<String, ArrayList<?>> m = new HashMap<>();
+        m.put("aList", new ArrayList<>());
 
         jc.set("aMap", m);
 

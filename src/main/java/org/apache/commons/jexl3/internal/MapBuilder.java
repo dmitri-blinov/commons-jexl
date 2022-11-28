@@ -42,7 +42,7 @@ public class MapBuilder implements JexlArithmetic.MapBuilder {
      * @param ordered whether the set should be ordered
      */
     public MapBuilder(final int size, final boolean ordered) {
-        map = ordered ? new LinkedHashMap<Object, Object>(size) : new HashMap<Object, Object>(size);
+        map = ordered ? new LinkedHashMap<>(size) : new HashMap<>(size);
     }
 
     @Override

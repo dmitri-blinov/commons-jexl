@@ -1368,7 +1368,7 @@ public class ArithmeticTest extends JexlTestCase {
 
     @Test
     public void testInfiniteArithmetic() throws Exception {
-        final Map<String, Object> ns = new HashMap<String, Object>();
+        final Map<String, Object> ns = new HashMap<>();
         ns.put("math", Math.class);
         final JexlEngine jexl = new JexlBuilder().arithmetic(new Arithmetic132()).namespaces(ns).create();
 

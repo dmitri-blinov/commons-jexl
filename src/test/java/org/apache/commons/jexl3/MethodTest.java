@@ -486,7 +486,7 @@ public class MethodTest extends JexlTestCase {
 
     @Test
     public void testTopLevelCall() throws Exception {
-        final java.util.Map<String, Object> funcs = new java.util.HashMap<String, Object>();
+        final java.util.Map<String, Object> funcs = new java.util.HashMap<>();
         funcs.put(null, new Functor());
         funcs.put("math", new MyMath());
         funcs.put("cx", ContextualFunctor.class);
@@ -517,7 +517,7 @@ public class MethodTest extends JexlTestCase {
 
     @Test
     public void testNamespaceCall() throws Exception {
-        final java.util.Map<String, Object> funcs = new java.util.HashMap<String, Object>();
+        final java.util.Map<String, Object> funcs = new java.util.HashMap<>();
         funcs.put("func", new Functor());
         funcs.put("FUNC", Functor.class);
 
@@ -612,7 +612,7 @@ public class MethodTest extends JexlTestCase {
 
     @Test
     public void testNamespaceCallEdge() throws Exception {
-        final java.util.Map<String, Object> funcs = new java.util.HashMap<String, Object>();
+        final java.util.Map<String, Object> funcs = new java.util.HashMap<>();
         final Edge func = new Edge();
         funcs.put("func", func);
 
@@ -695,7 +695,7 @@ public class MethodTest extends JexlTestCase {
             }
             if ("functor".equals(name)) {
                 return (NamespaceFunctor) context -> {
-                    final Map<String, Object> values = new HashMap<String, Object>();
+                    final Map<String, Object> values = new HashMap<>();
                     if ("gin".equals(context.get("base"))) {
                         values.put("drink", "gin fizz");
                     } else {
@@ -717,7 +717,7 @@ public class MethodTest extends JexlTestCase {
         Object o = forty2.execute(context);
         Assert.assertEquals("Result is not 42", new Integer(42), o);
 
-        final Map<String, Object> foo = new HashMap<String, Object>();
+        final Map<String, Object> foo = new HashMap<>();
         foo.put("plus", plus);
         context.set("foo", foo);
         forty2 = JEXL.createScript("foo.plus(4, 2) * foo.plus(4, 3)");
@@ -842,8 +842,8 @@ public class MethodTest extends JexlTestCase {
     @Test
     public void testVariousFunctionLocation() throws Exception {
         // see JEXL-190
-        final Map<String, Object> vars = new HashMap<String, Object>();
-        final Map<String,Object> funcs = new HashMap<String,Object>();
+        final Map<String, Object> vars = new HashMap<>();
+        final Map<String,Object> funcs = new HashMap<>();
         funcs.put(null, new ZSpace());
         final JexlEngine jexl = new JexlBuilder().namespaces(funcs).arithmetic(new ZArithmetic(true)).create();
 

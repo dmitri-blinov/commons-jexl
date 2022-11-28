@@ -32,7 +32,7 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
     /** The boxing types to primitive conversion map. */
     private static final Map<Class<?>, Class<?>> BOXING_CLASSES;
     static {
-        BOXING_CLASSES = new IdentityHashMap<Class<?>, Class<?>>(PRIMITIVE_SIZE);
+        BOXING_CLASSES = new IdentityHashMap<>(PRIMITIVE_SIZE);
         BOXING_CLASSES.put(Boolean.class, Boolean.TYPE);
         BOXING_CLASSES.put(Byte.class, Byte.TYPE);
         BOXING_CLASSES.put(Character.class, Character.TYPE);
