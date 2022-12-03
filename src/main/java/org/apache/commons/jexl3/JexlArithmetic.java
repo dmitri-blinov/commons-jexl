@@ -449,6 +449,49 @@ public class JexlArithmetic {
     }
 
     /**
+     * Checks if an operand is considered null.
+     * @apram val the operand
+     * @erturn true if operand is considered null
+     */
+    protected boolean isNullOperand(Object value) {
+        return value == null;
+    }
+
+    /**
+     * Throws an NullOperand exception if arithmetic is strict-cast.
+     * <p>This method is called by the cast methods ({@link #toBoolean(boolean, Object)},
+     * {@link #toInteger(boolean, Object)}, {@link #toDouble(boolean, Object)},
+     * {@link #toString(boolean, Object)}, {@link #toBigInteger(boolean, Object)},
+     * {@link #toBigDecimal(boolean, Object)}) when they encounter a null argument.</p>
+     *
+     * @param strictCast whether strict cast is required
+     * @param defaultValue the default value to return, if not strict
+     * @eeturn the default value is strict is false
+     * @throws JexlArithmetic.NullOperand if strict-cast
+     * @since 3.3
+     */
+    protected <T> T controlNullOperand(boolean strictCast, T defaultValue) {
+        if (strictCast) {
+            throw new NullOperand();
+        }
+        return defaultValue;
+    }
+
+    /**
+     * The result of +,/,-,*,% when both operands are null.
+     * @param strictCast whether strict-cast is required
+     * @return Integer(0) if lenient
+     * @throws  JexlArithmetic.NullOperand if strict-cast
+     * @since 3.3
+     */
+    protected Object controlNullNullOperands(boolean strictCast) {
+        if (strictCast ) {
+            throw new NullOperand();
+        }
+        return 0;
+    }
+
+    /**
      * Creates a map entry literal.
      *
      * @param key the entry key
