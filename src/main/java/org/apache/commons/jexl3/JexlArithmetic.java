@@ -761,7 +761,12 @@ public class JexlArithmetic {
      * @return true if it is a Float or a Double.
      */
     protected boolean isFloatingPoint(final Object o) {
-        return o instanceof Double || o instanceof Float;
+        if (o == null) {
+            return false;
+        }
+        Class c = o.getClass();
+        return c == Double.class
+                || c == Float.class;
     }
 
     /**
@@ -850,7 +855,7 @@ public class JexlArithmetic {
             } catch (final ArithmeticException xa) {
                 // ignore, no exact value possible
             }
-        } else if (original instanceof Double || original instanceof Float) {
+        } else if (isFloatingPoint(original)) {
             double value = original.doubleValue();
             if (narrowAccept(narrow, Float.class)
                     && value <= Float.MAX_VALUE
@@ -1033,12 +1038,7 @@ public class JexlArithmetic {
      * @return true if argument can be represented by a long
      */
     protected Number asLongNumber(final Object value) {
-        return value instanceof Long
-                || value instanceof Integer
-                || value instanceof Short
-                || value instanceof Byte
-                        ? (Number) value
-                        : null;
+        return isLongPrecisionNumber(value) ? (Number) value : null;
     }
 
     /**
@@ -1129,7 +1129,7 @@ public class JexlArithmetic {
         if (left instanceof BigDecimal) {
             return selfAdd(left, BigDecimal.ONE);
         }
-        if (left instanceof Double || left instanceof Float) {
+        if (isFloatingPoint(left)) {
             return selfAdd(left, DOUBLE_ONE);
         }
 
@@ -1416,7 +1416,7 @@ public class JexlArithmetic {
         if (left instanceof BigDecimal) {
             return selfSubtract(left, BigDecimal.ONE);
         }
-        if (left instanceof Double || left instanceof Float) {
+        if (isFloatingPoint(left)) {
             return selfSubtract(left, DOUBLE_ONE);
         }
         return selfSubtract(left, 1);
@@ -2825,10 +2825,10 @@ public class JexlArithmetic {
         if (val == null) {
             return controlNullOperand(strict, "");
         }
-        if (!(val instanceof Double)) {
+        if (!isFloatingPoint(val)) {
             return val.toString();
         }
-        final Double dval = (Double) val;
+        final Double dval = toDouble(val);
         if (Double.isNaN(dval)) {
             return "";
         }
