@@ -180,7 +180,6 @@ TOKEN_MGR_DECLS : {
 <NEVER> TOKEN : { /* COMPARISONS */
       < EQ : "eq" >
     | < NE : "ne" >
-    | < IN : "in" >
     | < GT : "gt" >
     | < GE : "ge" >
     | < LT : "lt" >
@@ -190,6 +189,7 @@ TOKEN_MGR_DECLS : {
 <DEFAULT> TOKEN : { /* COMPARISONS */
       < iof : "instanceof" > : QUALIFIED
     | < niof : "!instanceof" > : QUALIFIED
+    | < IN : "in" >
 }
 
 <*> TOKEN : { /* OPERATORS */
