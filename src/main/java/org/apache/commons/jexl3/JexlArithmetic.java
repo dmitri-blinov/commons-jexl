@@ -2305,6 +2305,43 @@ public class JexlArithmetic {
         }
         return type;
     }
+	
+    /**
+     * Any override of this method (pre 3.3) should be modified to match the new signature.
+     * @link JexlArithmetic.compare(String, String, JexlOperator);
+     * @deprecated 3.3
+     */
+    @Deprecated
+    protected int compare(final Object left, final Object right, final String symbol) {
+        JexlOperator operator;
+        try {
+            operator = JexlOperator.valueOf(symbol);
+        } catch (final IllegalArgumentException xill) {
+            // ignore
+            operator = JexlOperator.EQ;
+        }
+        return doCompare(left, right, operator);
+    }
+
+    /**
+     * Determines if the compare method(Object, Object, String) is overriden in this class or one of its
+     * superclasses.
+     */
+    private final boolean compare321 = computeCompare321(this);
+    private static boolean computeCompare321(final JexlArithmetic arithmetic) {
+        Class<?> arithmeticClass = arithmetic.getClass();
+        while(arithmeticClass != JexlArithmetic.class) {
+            try {
+                Method cmp = arithmeticClass.getDeclaredMethod("compare", Object.class, Object.class, String.class);
+               if (cmp != null && cmp.getDeclaringClass() != JexlArithmetic.class) {
+                   return true;
+               }
+            } catch (NoSuchMethodException xany) {
+                arithmeticClass = arithmeticClass.getSuperclass();
+            }
+        }
+        return false;
+    }
 
     /**
      * Performs a comparison.
@@ -2315,7 +2352,16 @@ public class JexlArithmetic {
      * @return -1 if left &lt; right; +1 if left &gt; right; 0 if left == right
      * @throws ArithmeticException if either left or right is null
      */
-    protected int compare(final Object left, final Object right, final String operator) {
+    protected int compare(final Object left, final Object right, final JexlOperator operator) {
+        // this is a temporary way of allowing pre-3.3 code that overrode compare() to still call
+        // the user method. This method will merge with doCompare in 3.4 and the compare321 flag will disappear.
+        return compare321
+                ? compare(left, right, operator.toString())
+                : doCompare(left, right, operator);
+    }
+
+    private int doCompare(final Object left, final Object right, final JexlOperator operator) {
+        final boolean strictCast = isStrict(operator);
         if (left != null && right != null) {
             if (left instanceof BigDecimal || right instanceof BigDecimal) {
                 final BigDecimal l = toBigDecimal(left);

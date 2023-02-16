@@ -132,30 +132,6 @@ public final class Scope {
         parent = scope;
     }
 
-    @Override
-    public int hashCode() {
-        return namedVariables == null ? 0 : parms ^ namedVariables.hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Scope)) {
-            return false;
-        }
-        final Scope scope = (Scope) o;
-        if (parms != scope.parms) {
-            return false;
-        }
-        if (namedVariables == null) {
-            return scope.namedVariables == null;
-        } else {
-            return namedVariables.equals(scope.namedVariables);
-        }
-    }
-
     /**
      * Adds identifier as a local symbol.
      * @param name the symbol name
