@@ -70,8 +70,6 @@ import java.util.function.ToLongBiFunction;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToIntBiFunction;
 
-import java.util.Objects;
-
 /**
  * A Script closure.
  */
