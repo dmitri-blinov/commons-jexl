@@ -70,6 +70,9 @@ import java.util.function.ToLongBiFunction;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToIntBiFunction;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A Script closure.
  */
@@ -356,6 +359,40 @@ public class Closure extends Script {
         } else {
             return unboundParams;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        // CSOFF: Magic number
+        int hash = 17;
+        hash = 31 * hash + Objects.hashCode(jexl);
+        hash = 31 * hash + Objects.hashCode(source);
+        hash = 31 * hash + (frame != null ? Arrays.deepHashCode(frame.nocycleStack(this)) : 0);
+        // CSON: Magic number
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Closure other = (Closure) obj;
+        if (this.jexl != other.jexl) {
+            return false;
+        }
+        if (!Objects.equals(this.source, other.source)) {
+            return false;
+        }
+        if (this.frame == other.frame) {
+            return true;
+        }
+        return Arrays.deepEquals(
+                this.frame.nocycleStack(this),
+                other.frame.nocycleStack(other));
     }
 
     @Override
