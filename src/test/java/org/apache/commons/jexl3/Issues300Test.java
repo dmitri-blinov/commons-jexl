@@ -1127,4 +1127,128 @@ public class Issues300Test {
             Assert.assertEquals("ABC", s1.execute(ctxt, null));
         }
     }
+
+    @Test
+    public void test390() throws Exception {
+        final JexlEngine jexl = new JexlBuilder()
+                .safe(false)
+                .strict(true)
+                .debug(true)
+                .create();
+        JexlScript script = null;
+        String src;
+        src = "if (true) #pragma one 42";
+        try {
+            script = jexl.createScript(src);
+            Assert.fail("should have failed parsing");
+        } catch(JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.getDetail().contains("pragma"));
+        }
+        src = "if (true) { #pragma one 42 }";
+        script = jexl.createScript(src);
+        Object result = script.execute(null);
+        debuggerCheck(jexl);
+    }
+
+    public static class Arithmetic384c extends JexlArithmetic {
+        AtomicInteger cmp = new AtomicInteger(0);
+        int getCmpCalls() {
+            return cmp.get();
+        }
+        public Arithmetic384c(boolean astrict) {
+            super(astrict);
+        }
+        public Arithmetic384c(boolean astrict, MathContext bigdContext, int bigdScale) {
+            super(astrict, bigdContext, bigdScale);
+        }
+        @Override
+        protected int compare(Object l, Object r, String op) {
+            cmp.incrementAndGet();
+            return super.compare(l, r, op);
+        }
+    }
+
+    public static class Arithmetic384d extends Arithmetic384c {
+        public Arithmetic384d(boolean astrict) {
+            super(astrict);
+        }
+        public Arithmetic384d(boolean astrict, MathContext bigdContext, int bigdScale) {
+            super(astrict, bigdContext, bigdScale);
+        }
+    }
+
+    @Test
+    public void test384c() {
+        Arithmetic384c ja = new Arithmetic384c(true);
+        JexlEngine jexl = new JexlBuilder()
+                .safe(false)
+                .strict(true)
+                .arithmetic(ja)
+                .create();
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("3 < 4").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("6 <= 8").evaluate(null)));
+        Assert.assertFalse(ja.toBoolean(jexl.createExpression("6 == 7").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("4 > 2").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("8 > 6").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("7 != 6").evaluate(null)));
+        Assert.assertEquals(6, ja.getCmpCalls());
+    }
+
+    @Test
+    public void test384d() {
+        Arithmetic384c ja = new Arithmetic384d(true);
+        JexlEngine jexl = new JexlBuilder()
+                .safe(false)
+                .strict(true)
+                .arithmetic(ja)
+                .create();
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("3 < 4").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("6 <= 8").evaluate(null)));
+        Assert.assertFalse(ja.toBoolean(jexl.createExpression("6 == 7").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("4 > 2").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("8 > 6").evaluate(null)));
+        Assert.assertTrue(ja.toBoolean(jexl.createExpression("7 != 6").evaluate(null)));
+        Assert.assertEquals(6, ja.getCmpCalls());
+    }
+
+    @Test
+    public void test393() {
+        String src = "const total = 0;\n" +
+                "if (true) {\n" +
+                "  total = 1;\n" +
+                "}\n" +
+                "total; ";
+        JexlEngine jexl = new JexlBuilder()
+                .safe(false)
+                .strict(true)
+                .create();
+        try {
+            JexlScript script = jexl.createScript(src);
+            Assert.fail("should fail on const total assignment");
+        } catch(JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.getMessage().contains("total"));
+        }
+    }
+
+    @Test public void testDow() {
+        String src = "(y, m, d)->{\n" +
+                "// will return 0 for Sunday, 6 for Saturday\n" +
+                "const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];\n"+
+                "if (m < 3) { --y }\n" +
+                "(y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;\n" +
+            "}";
+        JexlEngine jexl = new JexlBuilder()
+                .safe(false)
+                .strict(true)
+                .create();
+            JexlScript script = jexl.createScript(src);
+            Object r = script.execute(null, 2023, 3, 1);
+            Assert.assertTrue(r instanceof Number);
+            Number dow = (Number) r;
+            Assert.assertEquals(3, dow.intValue());
+            r = script.execute(null, 1969, 7, 20);
+            Assert.assertTrue(r instanceof Number);
+            dow = (Number) r;
+            Assert.assertEquals(0, dow.intValue());
+    }
 }
