@@ -3731,7 +3731,7 @@ public class Interpreter extends InterpreterBase {
     }
 
     /**
-     * Executes an assignment with an optional side-effect operator.
+     * Executes an assignment with an optional side effect operator.
      * @param node     the node
      * @param left     the reference to assign to
      * @param right    the value expression to assign
@@ -4082,7 +4082,7 @@ public class Interpreter extends InterpreterBase {
     /**
      * Execute a method call, ie syntactically written as name.call(...).
      * @param node the actual method call node
-     * @param antish non null when name.call is an antish variable
+     * @param antish non-null when name.call is an antish variable
      * @param data the context
      * @return the method call result
      */

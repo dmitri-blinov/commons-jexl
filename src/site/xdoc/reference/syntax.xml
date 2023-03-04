@@ -1414,7 +1414,7 @@
                     <td>
                         The unary <code>+</code> operator is used. It performs an integral promotion meaning
                         that byte, short, char arguments will be promoted to integer as a result.
-                        For example  <code>+12</code> or <code>-(a * b)</code>
+                        For example  <code>+12</code> or <code>+(a * b)</code>
                     </td>
                 </tr>
                 <tr>
@@ -1704,7 +1704,7 @@
                     <td>while</td>
                     <td>
                         Loop until a condition is satisfied, e.g.
-                        <code>while (x lt 10) {
+                        <code>while (x &lt; 10) {
                             x = x + 2;
                             }</code>
                         <p>The labeled syntax is also supported:
