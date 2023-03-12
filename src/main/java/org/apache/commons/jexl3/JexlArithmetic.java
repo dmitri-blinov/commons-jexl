@@ -486,7 +486,8 @@ public class JexlArithmetic {
      *
      * @param strictCast whether strict cast is required
      * @param defaultValue the default value to return, if not strict
-     * @eeturn the default value is strict is false
+     * @param <T> the value type
+     * @return the default value is strict is false
      * @throws JexlArithmetic.NullOperand if strict-cast
      * @since 3.3
      */
@@ -2322,7 +2323,11 @@ public class JexlArithmetic {
 	
     /**
      * Any override of this method (pre 3.3) should be modified to match the new signature.
-     * @link JexlArithmetic.compare(String, String, JexlOperator);
+     * @param left left operand
+     * @param right right operand
+     * @param symbol the operator symbol
+     * @return -1 if left &lt; right; +1 if left &gt; right; 0 if left == right
+     * {@link JexlArithmetic#compare(Object, Object, JexlOperator)}
      * @deprecated 3.3
      */
     @Deprecated
