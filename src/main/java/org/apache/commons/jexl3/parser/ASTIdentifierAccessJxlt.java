@@ -23,14 +23,15 @@ import org.apache.commons.jexl3.JxltEngine;
  * x.`expr`.
  */
 public class ASTIdentifierAccessJxlt extends ASTIdentifierAccess {
-    protected transient JxltEngine.Expression jxltExpression;
+
+    protected JxltEngine.Expression jxltExpr;
 
     ASTIdentifierAccessJxlt(final int id) {
         super(id);
     }
 
     public JxltEngine.Expression getExpression() {
-        return jxltExpression;
+        return jxltExpr;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class ASTIdentifierAccessJxlt extends ASTIdentifierAccess {
     }
 
     public void setExpression(final JxltEngine.Expression tp) {
-        jxltExpression = tp;
+        jxltExpr = tp;
     }
 
 }
