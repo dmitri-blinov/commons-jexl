@@ -491,18 +491,24 @@ public class Engine extends JexlEngine {
                         ns = new LinkedHashMap<>();
                     }
                     processPragmaNamespace(ns, key, value);
+                    if (!ns.isEmpty()) {
+                        opts.setNamespaces(ns);
+                    }					
                 } else if (key.startsWith(PRAGMA_MODULE)) {
                     if (ns == null)  {
                         ns = new LinkedHashMap<>();
                     }
                     processModulePragma(ns, key, value, script.jexlInfo(), context);
+                    if (!ns.isEmpty()) {
+                        opts.setNamespaces(ns);
+                    }					
                 }
+
+                // user-defined processor may alter options
                 if (processor != null) {
-                    opts.setNamespaces(ns);
                     processor.processPragma(opts, key, value);
                 }
             }
-            opts.setNamespaces(ns);
         }
     }
 
