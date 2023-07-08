@@ -479,6 +479,16 @@ public final class Scope {
     }
 
     /**
+     * Gets the index of a captured symbol, ie the source index of a symbol in a parent scope.
+     * @param symbol the symbol index
+     * @return the source symbol index or -1 if the symbol is not captured
+     */
+    public int getCaptureDeclaration(final int symbol) {
+        Integer declared = capturedVariables != null? capturedVariables.get(symbol)  : null;
+        return declared != null ? declared.intValue() : -1;
+    }
+
+    /**
      * Gets this script captured symbols names, i.e. local variables defined in outer scopes and used
      * by this scope.
      * @return the captured names
