@@ -248,8 +248,10 @@ public abstract class JexlParser extends StringParser {
 
     /**
      * Gets the frame used by this parser.
-     * <p> Since local variables create new symbols, it is important to
-     * regain access after parsing to known which / how-many registers are needed. </p>
+     * <p>
+     * Since local variables create new symbols, it is important to
+     * regain access after parsing to known which / how-many registers are needed. 
+     * </p>
      * @return the named register map
      */
     protected Scope getScope() {
@@ -526,7 +528,10 @@ public abstract class JexlParser extends StringParser {
 
     /**
      * Declares a local variable.
-     * <p> This method creates an new entry in the symbol map. </p>
+     * <p>
+     * This method creates an new entry in the symbol map.
+     * </p>
+     *
      * @param variable the identifier used to declare
      * @param token the variable name token
      */
@@ -658,16 +663,21 @@ public abstract class JexlParser extends StringParser {
 
     /**
      * Declares a local parameter.
-     * <p> This method creates an new entry in the symbol map. </p>
+     * <p>
+     * This method creates an new entry in the symbol map.
+     * </p>
+     *
      * @param token the parameter name token
-     */
+     */ 
     protected void declareParameter(final Token token) {
         declareParameter(token, null, false, false, false, null);
     }
 
     /**
      * Declares a local parameter.
-     * <p> This method creates an new entry in the symbol map. </p>
+     * <p>
+     * This method creates an new entry in the symbol map.
+     * </p>
      * @param token the parameter name token
      * @param type the parameter class if any
      * @param lexical whether the declared parameter is lexical
