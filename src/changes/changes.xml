@@ -27,6 +27,19 @@
     <body>
         <release version="3.3" date="YYYY-MM-DD">
             <!-- ADD -->
+            <action dev="henrib" type="add" issue="JEXL-404" due-to="Xu Pengcheng">
+                Support array-access safe navigation (x?[y])
+            </action>
+            <action dev="henrib" type="add" issue="JEXL-401">
+                Captured variables should be read-only
+            </action>
+            <action dev="henrib" type="add" issue="JEXL-398" due-to="Xu Pengcheng">
+                Allow 'trailing commas' or ellipsis while defining array, map and set literals
+            </action>
+            <!-- FIX -->
+            <action dev="henrib" type="fix" issue="JEXL-405">
+                Recursive functions corrupt evaluation frame if reassigned
+            </action>
             <action dev="henrib" type="fix" issue="JEXL-403" due-to="Xu Pengcheng" >
                 Exception while evaluating template literal used in array assignment in loop.
             </action>
