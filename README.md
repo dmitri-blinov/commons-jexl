@@ -225,7 +225,7 @@ Enhancements
 
 + Last part of the ternary expression `x?y:z` (along with the separating `:`) can be omitted, implying `null` as a result
 
-+ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases
++ Pattern matching operators `=~` and `!~` can use new `in` and `!in` aliases, may be disabled
 
 + Operator `new` supports Java-like inner object creation syntax `outerObject.new InnerClass()`
 
