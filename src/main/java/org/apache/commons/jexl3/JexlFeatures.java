@@ -60,7 +60,7 @@ public final class JexlFeatures {
         "register", "reserved variable", "local variable", "assign/modify",
         "global assign/modify", "array reference", "create instance", "loop", "function",
         "method call", "set/map/array literal", "pragma", "annotation", "script", "lexical", "lexicalShade",
-        "thin-arrow", "fat-arrow", "namespace pragma", "import pragma", "comparator names"
+        "thin-arrow", "fat-arrow", "namespace pragma", "import pragma", "comparator names", "matching names"
     };
     /** Registers feature ordinal. */
     private static final int REGISTER = 0;
@@ -104,6 +104,8 @@ public final class JexlFeatures {
     public static final int IMPORT_PRAGMA = 19;
     /** Comparator names (legacy) syntax. */
     public static final int COMPARATOR_NAMES = 20;
+    /** Matching names (in) syntax. */
+    public static final int MATCHING_NAMES = 21;
     /**
      * The default features flag mask.
      */
@@ -123,7 +125,8 @@ public final class JexlFeatures {
             | (1L << THIN_ARROW)
             | (1L << NS_PRAGMA)
             | (1L << IMPORT_PRAGMA)
-            | (1L << COMPARATOR_NAMES);
+            | (1L << COMPARATOR_NAMES)
+            | (1L << MATCHING_NAMES);
 
     /**
      * Creates an all-features-enabled instance.
@@ -517,6 +520,28 @@ public final class JexlFeatures {
      */
     public boolean supportsComparatorNames() {
         return getFeature(COMPARATOR_NAMES);
+    }
+
+    /**
+     * Sets whether the matching operators name syntax is enabled.
+     * <p>
+     * When disabled, matching operator names (in) 
+     * will be treated as plain identifiers.
+     * @param flag true to enable, false to disable
+     * @return this features instance
+     * @since 3.3
+     */
+    public JexlFeatures matchingNames(final boolean flag) {
+        setFeature(MATCHING_NAMES, flag);
+        return this;
+    }
+
+    /**
+     * @return true if matching operator names syntax is enabled, false otherwise
+     * @since 3.3
+     */
+    public boolean supportsMatchingNames() {
+        return getFeature(MATCHING_NAMES);
     }
 
     /**

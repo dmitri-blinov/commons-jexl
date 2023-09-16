@@ -64,6 +64,7 @@ public final class Parser extends JexlParser
             scope = jexlScope;
             branchScope = new BranchScope();
             token_source.comparatorNames = jexlFeatures.supportsComparatorNames();
+            token_source.matchingNames = jexlFeatures.supportsMatchingNames();
             ReInit(jexlSrc);
             ASTJexlScript script = jexlFeatures.supportsScript()? JexlScript(jexlScope) : JexlExpression(jexlScope);
             script.jjtSetValue(info.detach());
@@ -89,6 +90,7 @@ PARSER_END(Parser)
 
 TOKEN_MGR_DECLS : {
     boolean comparatorNames = false;
+    boolean matchingNames = false;
 }
 
 /***************************************
@@ -177,19 +179,20 @@ TOKEN_MGR_DECLS : {
     | < le : "<=" | "\u2264" >
 }
 
-<NEVER> TOKEN : { /* COMPARISONS */
+<NEVER> TOKEN : { /* COMPARISONS and MATCHING */
       < EQ : "eq" >
     | < NE : "ne" >
     | < GT : "gt" >
     | < GE : "ge" >
     | < LT : "lt" >
     | < LE : "le" >
+    | < IN : "in" >
 }
 
 <DEFAULT> TOKEN : { /* COMPARISONS */
       < iof : "instanceof" > : QUALIFIED
     | < niof : "!instanceof" > : QUALIFIED
-    | < IN : "in" >
+
 }
 
 <*> TOKEN : { /* OPERATORS */
@@ -314,6 +317,12 @@ TOKEN_MGR_DECLS : {
              case "le" : matchedToken.kind = LE; break;
              case "gt" : matchedToken.kind = GT; break;
              case "ge" : matchedToken.kind = GE; break;
+          }
+      }
+
+      if (matchingNames && matchedToken.image.length() == 2) {
+          switch (matchedToken.image) {
+             case "in" : matchedToken.kind = IN; break;
           }
       }
   }
