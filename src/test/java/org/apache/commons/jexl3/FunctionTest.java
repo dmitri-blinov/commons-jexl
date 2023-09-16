@@ -84,7 +84,7 @@ public class FunctionTest extends JexlTestCase {
     @Test
     public void testNestedTypedFunction() throws Exception {
         JexlEngine jexl = createEngine();
-        JexlScript s = jexl.createScript("Map.Entry x() {return [2:42]}; x()");
+        JexlScript s = jexl.createScript("#pragma jexl.import java.util\nMap.Entry x() {return [2:42]}; x()");
         JexlContext jc = new MapContext();
         Object result = s.execute(jc);
         Assert.assertTrue(result instanceof Map.Entry);
