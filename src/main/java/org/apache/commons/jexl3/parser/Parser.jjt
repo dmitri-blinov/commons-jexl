@@ -110,7 +110,7 @@ TOKEN_MGR_DECLS : {
     | <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")? >
 }
 
-<*> TOKEN : { /* SEPARATORS */
+<DEFAULT, QUALIFIED, DOT_ID> TOKEN : { /* SEPARATORS */
       < LPAREN : "(" > : DEFAULT
     | < RPAREN : ")" > : DEFAULT
     | < LCURLY : "{" >
@@ -142,13 +142,13 @@ TOKEN_MGR_DECLS : {
     | < BOOLEAN : "boolean" > : DEFAULT
 }
 
-<*> TOKEN : { /* STREAMS */
+<DEFAULT, QUALIFIED, DOT_ID> TOKEN : { /* STREAMS */
       < DOTP : ".(" >
     | < DOTB : ".[" >
     | < DOTC : ".{" >
 }
 
-<*> TOKEN : { /* CONDITIONALS */
+<DEFAULT, QUALIFIED, DOT_ID> TOKEN : { /* CONDITIONALS */
       < QMARK : "?" >
     | < ELVIS : "?:" >
     | < EN_ASSIGN : "=:" >
@@ -162,17 +162,32 @@ TOKEN_MGR_DECLS : {
     | < _OR: "or" >
 }
 
-<*> TOKEN : { /* COMPARISONS */
+<*> MORE : {
+    "!" { if (matchingNames) {SwitchTo(NOTIN);} else {SwitchTo(WHATNOT);} } 
+}
+
+<NOTIN> TOKEN : { /* COMPARISONS */
+     < nin : "in" > : DEFAULT
+}
+
+<WHATNOT,NOTIN> TOKEN : { /* COMPARISONS */
+     < ne : "=" > : DEFAULT
+   | < rne : "~" > : DEFAULT
+   | < ni : "==" > : DEFAULT
+   | < sne : "^" > : DEFAULT // start not equal
+   | < ene : "$" > : DEFAULT // ends not equal
+   | < niof : "instanceof" > : QUALIFIED
+   | < not : "" > : DEFAULT
+}
+
+<DEFAULT, QUALIFIED> TOKEN : { /* COMPARISONS */
       < eq : "==" | "\u2261">
-    | < ne : "!=" | "\u2260" >
+    | < une : "\u2260" >
     | < req : "=~" | "\u2208" > // regexp equal
-    | < rne : "!~" | "!in" | "\u2209" > // regexp not equal
+    | < urne : "\u2209" > // regexp not equal
     | < is : "===" > // identitical
-    | < ni : "!==" > // not identitical
     | < seq : "=^" > // starts equal
     | < eeq : "=$" > // ends equal
-    | < sne : "!^" > // start not equal
-    | < ene : "!$" > // ends not equal
     | < gt : ">" >
     | < ge : ">=" | "\u2265" >
     | < lt : "<" >
@@ -191,13 +206,18 @@ TOKEN_MGR_DECLS : {
 
 <DEFAULT> TOKEN : { /* COMPARISONS */
       < iof : "instanceof" > : QUALIFIED
-    | < niof : "!instanceof" > : QUALIFIED
 
 }
 
-<*> TOKEN : { /* OPERATORS */
+<DEFAULT, QUALIFIED> TOKEN : { /* OPERATORS */
       < assign : "=" >
-    | < plus_assign : "+=" >
+    | < tilda : "~" >
+    | < xor : "^" >
+}
+
+<DEFAULT, QUALIFIED> TOKEN : { /* OPERATORS */
+
+      < plus_assign : "+=" >
     | < minus_assign : "-=" >
     | < mult_assign : "*=" >
     | < div_assign : "/=" >
@@ -209,17 +229,15 @@ TOKEN_MGR_DECLS : {
     | < ne_assign : ":=" >
     | < increment : "++" >
     | < decrement : "--" >
-    | < tilda : "~" >
     | < plus : "+" >
     | < minus : "-" >
     | < unary_minus : "\u2212" >
     | < mult : "*" | "\u22C5" >
     | < div : "/" >
     | < mod : "%" >
-    | < not : "!" | "\u00AC" >
+    | < unot : "\u00AC" >
     | < and : "&" >
     | < or : "|" >
-    | < xor : "^" >
     | < range : ".." | "\u2025" >
     | < lshift : "<<" >
     | < rshift : ">>" >
@@ -235,7 +253,7 @@ TOKEN_MGR_DECLS : {
     | < NOT : "not" >
 }
 
-<*> TOKEN : /* KEYWORDS */
+<DEFAULT, QUALIFIED, DOT_ID> TOKEN : /* KEYWORDS */
 {
       < LAMBDA : "->" | "\u2192" > 
     | < FATARROW : "=>" >
@@ -372,7 +390,7 @@ TOKEN_MGR_DECLS : {
     |  <#FLT_SFX : <EXPONENT> (<FLT_CLS>)? | <FLT_CLS> >
 }
 
-<*> TOKEN :
+<DEFAULT, DOT_ID> TOKEN :
 {
   < STRING_LITERAL:
     "\"" (~["\"","\\","\n","\r","\u2028","\u2029"] | "\\" ~["\n","\r","\u2028","\u2029"])* "\""
@@ -385,21 +403,21 @@ TOKEN_MGR_DECLS : {
   > : DEFAULT
 }
 
-<*> TOKEN :
+<DEFAULT, DOT_ID> TOKEN :
 {
   < JXLT_LITERAL:
     "`" (~["`","\\"] | "\\" ~["\u0000"])* "`"
   > : DEFAULT
 }
 
-<DEFAULT> TOKEN :
+<DEFAULT, DOT_ID> TOKEN :
 {
   < REGEX_LITERAL:
     "~" "/" (~["/","\n","\r","\u2028","\u2029"] | "\\" "/" )* "/"
   >
 }
 
-<*> TOKEN :
+<DEFAULT, DOT_ID> TOKEN :
 {
   < BLOCK_LITERAL:
     "\"\"\"" ([" ","\t"])* ("\n" | "\r" | "\r\n") ("\\" "\"" | ~[])* "\"\"\""
@@ -1310,11 +1328,11 @@ void EqualityExpression() #void : {}
     [ LOOKAHEAD(2) (
       (<eq> | <EQ>) RelationalExpressionOperand() #EQNode(2)
     |
-      (<ne> | <NE>) RelationalExpressionOperand() #NENode(2)
+      (<ne> | <une> | <NE>) RelationalExpressionOperand() #NENode(2)
     |
       (<req> | <IN>) RelationalExpressionOperand() #ERNode(2) // equals regexp
     |
-      <rne> RelationalExpressionOperand() #NRNode(2) // not equals regexp
+      (<rne> | <urne> | <nin>) RelationalExpressionOperand() #NRNode(2) // not equals regexp
     |
       <is> RangeExpression() #ISNode(2) // identical
     |
@@ -1426,7 +1444,7 @@ void UnaryExpression() #void : {}
 
 void UnaryExpressionNotPlusMinus() #void : {}
 {
-    (<not>|<NOT>) UnaryExpression() #NotNode(1)
+    (<not> | <NOT> | <unot>) UnaryExpression() #NotNode(1)
     |
     <EMPTY> UnaryExpression() #EmptyFunction(1)
     |

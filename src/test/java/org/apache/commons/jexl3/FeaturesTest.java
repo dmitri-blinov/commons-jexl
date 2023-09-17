@@ -317,4 +317,14 @@ public class FeaturesTest extends JexlTestCase {
 
     }
 
+    @Test
+    public void testNotMatchingNames() throws Exception {
+        final JexlFeatures f = new JexlFeatures().matchingNames(false);
+        final String[] scripts = new String[]{
+            "1 !in [1,2]"
+        };
+        checkFeature(f, scripts);
+
+    }
+
 }
