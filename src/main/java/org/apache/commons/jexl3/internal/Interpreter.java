@@ -217,6 +217,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -4052,12 +4053,12 @@ public class Interpreter extends InterpreterBase {
             if (ctor != null) {
                 return ctor.invoke(target, argv);
             }
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");			
             return unsolvableMethod(node, tstr);
         } catch (final JexlException xthru) {
             throw xthru;
         } catch (final Exception xany) {
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4386,12 +4387,12 @@ public class Interpreter extends InterpreterBase {
                 }
                 return eval;
             }
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             return unsolvableMethod(node, tstr, argv);
         } catch (final JexlException xthru) {
             throw xthru;
         } catch (final Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");			
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4457,12 +4458,12 @@ public class Interpreter extends InterpreterBase {
                 }
                 return eval;
             }
-            String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             return unsolvableMethod(node, tstr, argv);
         } catch (final JexlException.Method xmethod) {
             throw xmethod;
         } catch (final Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4483,7 +4484,7 @@ public class Interpreter extends InterpreterBase {
         try {
             return Array.newInstance(target, argv);
         } catch (final Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4561,7 +4562,7 @@ public class Interpreter extends InterpreterBase {
                 return result;
             }
         } catch (final Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");			
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4604,7 +4605,7 @@ public class Interpreter extends InterpreterBase {
             String tstr = target != null ? target.toString() : "?";
             return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+            final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4651,10 +4652,10 @@ public class Interpreter extends InterpreterBase {
                 }
                 return result;
             }
-            final String tstr = target != null ? target.toString() : "?";
+			final String tstr = Objects.toString(target, "?");
             return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (final Exception xany) {
-            final String tstr = target != null ? target.toString() : "?";
+			final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
