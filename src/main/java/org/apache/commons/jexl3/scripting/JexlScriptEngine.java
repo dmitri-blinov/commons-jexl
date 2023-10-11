@@ -374,7 +374,7 @@ public class JexlScriptEngine extends AbstractScriptEngine implements Compilable
     /**
      * Holds singleton JexlScriptEngineFactory (IODH).
      */
-    private static class FactorySingletonHolder {
+    private static final class FactorySingletonHolder {
         /** non instantiable. */
         private FactorySingletonHolder() {}
 
