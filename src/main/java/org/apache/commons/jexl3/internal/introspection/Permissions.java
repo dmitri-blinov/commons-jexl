@@ -75,12 +75,7 @@ public class Permissions implements JexlPermissions {
 
         boolean isEmpty() { return nojexl.isEmpty(); }
 
-        @Override
-        public boolean equals(Object o) {
-            return o == this;
-        }
-
-        NoJexlClass getNoJexl(Class<?> clazz) {
+        NoJexlClass getNoJexl(final Class<?> clazz) {
             return nojexl.get(classKey(clazz));
         }
 
