@@ -173,7 +173,7 @@ public interface JexlPermissions {
      * <p>This enables any public class, method, constructor or field to be visible to JEXL and used in scripts.</p>
      * @since 3.3
      */
-    public static final JexlPermissions UNRESTRICTED = JexlPermissions.parse((String []) null);
+    public static final JexlPermissions UNRESTRICTED = JexlPermissions.parse();
     /**
      * A restricted singleton.
      * <p>The RESTRICTED set is built using the following allowed packages and denied packages/classes.</p>
