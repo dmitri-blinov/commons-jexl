@@ -109,6 +109,100 @@ working with enterprise platforms.
             a map of variables that will be internally wrapped can be optionally provided through its constructor.
             The following example, takes a variable named foo, and invokes the bar() method on the property innerFoo:
             </p>
+            <p>
+                JEXL's intention is a tight integration with its hosting platform; the scripting syntax is very close
+                to JScript but leverages (potentially) any public class or method that Java exposes. How tight and how
+                rich this integration is up to you; deriving JEXL API classes - most notably JexlPermissions, JexlContext,
+                JexlArithmetic - are the means to that end.
+            </p>
+            <p>The following example illustrate these aspects. It uses a specific set of permissions to allow using
+            URI class and a tailored context to expose streams in a convenient manner.</p>
+            <!--
+            using http://java2html.blogspot.com to prettify code, minor edits; ugly to look at a source, pretty rendered
+            -->
+            <div>
+<pre style="text-align: left; border: 1px dashed #008DEF; line-height: 18px; padding: 15px; font-size: 13px; font-family:'Courier New', Courier, monospace; overflow: auto;"><span style='color:#3F5FBF'>/**
+ * A test around scripting streams.
+ */</span>
+<span style='font-weight:bold;color:#7B0052;'>public</span> <span style='font-weight:bold;color:#7B0052;'>class</span> StreamTest <span style='font-weight:bold;color:#D3171B'>{</span>
+    <span style='color:#3F5FBF'>/** Our engine instance. */</span>
+    <span style='font-weight:bold;color:#7B0052;'>private</span> <span style='font-weight:bold;color:#7B0052;'>final</span> JexlEngine jexl;
+
+    <span style='font-weight:bold;color:#7B0052;'>public</span> StreamTest() <span style='font-weight:bold;color:#D3171B'>{</span>
+        <span style='color:#3F7F5F'>// Restricting features; no loops, no side effects
+</span>        JexlFeatures features = <span style='font-weight:bold;color:#7B0052;'>new</span> JexlFeatures()
+                .loops(<span style='font-weight:bold;color:#7B0052;'>false</span>)
+                .sideEffectGlobal(<span style='font-weight:bold;color:#7B0052;'>false</span>)
+                .sideEffect(<span style='font-weight:bold;color:#7B0052;'>false</span>);
+        <span style='color:#3F7F5F'>// Restricted permissions to a safe set but with URI allowed
+</span>        JexlPermissions permissions = <span style='font-weight:bold;color:#7B0052;'>new</span> ClassPermissions(java.net.URI.class);
+        <span style='color:#3F7F5F'>// Create the engine
+</span>        jexl = <span style='font-weight:bold;color:#7B0052;'>new</span> JexlBuilder().features(features).permissions(permissions).create();
+    <span style='font-weight:bold;color:#D3171B'>}</span>
+
+    <span style='color:#3F5FBF'>/**
+     * A MapContext that can operate on streams.
+     */</span>
+    <span style='font-weight:bold;color:#7B0052;'>public</span> <span style='font-weight:bold;color:#7B0052;'>static</span> <span style='font-weight:bold;color:#7B0052;'>class</span> StreamContext <span style='font-weight:bold;color:#7B0052;'>extends</span> MapContext <span style='font-weight:bold;color:#D3171B'>{</span>
+        <span style='color:#3F5FBF'>/**
+         * This allows using a JEXL lambda as a mapper.
+         * @param stream the stream
+         * @param mapper the lambda to use as mapper
+         * @return the mapped stream
+         */</span>
+        <span style='font-weight:bold;color:#7B0052;'>public</span> Stream&lt;?&gt; map(Stream&lt;?&gt; stream, <span style='font-weight:bold;color:#7B0052;'>final</span> JexlScript mapper) <span style='font-weight:bold;color:#D3171B'>{</span>
+            <span style='font-weight:bold;color:#7B0052;'>return</span> stream.map( x -&gt; mapper.execute(this, x));
+        <span style='font-weight:bold;color:#D3171B'>}</span>
+
+        <span style='color:#3F5FBF'>/**
+         * This allows using a JEXL lambda as a filter.
+         * @param stream the stream
+         * @param filter the lambda to use as filter
+         * @return the filtered stream
+         */</span>
+        <span style='font-weight:bold;color:#7B0052;'>public</span> Stream&lt;?&gt; filter(Stream&lt;?&gt; stream, <span style='font-weight:bold;color:#7B0052;'>final</span> JexlScript filter) <span style='font-weight:bold;color:#D3171B'>{</span>
+            <span style='font-weight:bold;color:#7B0052;'>return</span> stream.filter(x -&gt; x =! <span style='font-weight:bold;color:#7B0052;'>null</span> &ampersand;&ampersand; TRUE.equals(filter.execute(this, x)));
+        <span style='font-weight:bold;color:#D3171B'>}</span>
+    <span style='font-weight:bold;color:#D3171B'>}</span>
+
+    @Test
+    <span style='font-weight:bold;color:#7B0052;'>public</span> <span style='font-weight:bold;color:#7B0052;'>void</span> testURIStream() <span style='font-weight:bold;color:#7B0052;'>throws</span> Exception <span style='font-weight:bold;color:#D3171B'>{</span>
+        <span style='color:#3F7F5F'>// let's assume a collection of uris need to be processed and transformed to be simplified ;
+</span>        <span style='color:#3F7F5F'>// we want only http/https ones, only the host part and forcing an https scheme
+</span>        List&lt;URI&gt; uris = Arrays.asList(
+                URI.create(<span style='color:#2A00FF'>"http://user@www.apache.org:8000?qry=true"</span>),
+                URI.create(<span style='color:#2A00FF'>"https://commons.apache.org/releases/prepare.html"</span>),
+                URI.create(<span style='color:#2A00FF'>"mailto:henrib@apache.org"</span>)
+        );
+        <span style='color:#3F7F5F'>// Create the test control, the expected result of our script evaluation
+</span>        List&lt;?&gt; control =  uris.stream()
+                .map(uri -&gt; uri.getScheme().startsWith(<span style='color:#2A00FF'>"http"</span>)? <span style='color:#2A00FF'>"https://"</span> + uri.getHost() : <span style='font-weight:bold;color:#7B0052;'>null</span>)
+                .filter(x -&gt; x != <span style='font-weight:bold;color:#7B0052;'>null</span>)
+                .collect(Collectors.toList());
+        Assert.assertEquals(2, control.size());
+
+        <span style='color:#3F7F5F'>// Create scripts:
+</span>        <span style='color:#3F7F5F'>// uri is the name of the variable used as parameter; the beans are exposed as properties
+</span>        <span style='color:#3F7F5F'>// note the starts-with operator =^
+</span>        <span style='color:#3F7F5F'>// note that uri is also used in the back-quoted string that performs variable interpolation
+</span>        JexlScript mapper = jexl.createScript(<span style='color:#2A00FF'>"uri.scheme =^ 'http'? `https://${uri.host}` : null"</span>, <span style='color:#2A00FF'>"uri"</span>);
+        <span style='color:#3F7F5F'>// using the bang-bang / !! - JScript like -  is the way to coerce to boolean in the filter
+</span>        JexlScript transform = jexl.createScript(
+                <span style='color:#2A00FF'>"list.stream().map(mapper).filter(x -&gt; !!x).collect(Collectors.toList())"</span>, <span style='color:#2A00FF'>"list"</span>);
+
+        <span style='color:#3F7F5F'>// Execute scripts:
+</span>        JexlContext sctxt = <span style='font-weight:bold;color:#7B0052;'>new</span> StreamContext();
+        <span style='color:#3F7F5F'>// expose the static methods of Collectors; java.util.* is allowed by permissions
+</span>        sctxt.set(<span style='color:#2A00FF'>"Collectors"</span>, Collectors.class);
+        <span style='color:#3F7F5F'>// expose the mapper script as a global variable in the context
+</span>        sctxt.set(<span style='color:#2A00FF'>"mapper"</span>, mapper);
+
+        Object transformed = transform.execute(sctxt, uris);
+        Assert.assertTrue(transformed <span style='font-weight:bold;color:#7B0052;'>instanceof</span> List&lt;?&gt;);
+        Assert.assertEquals(control, transformed);
+    <span style='font-weight:bold;color:#D3171B'>}</span>
+<span style='font-weight:bold;color:#D3171B'>}</span></pre>
+            </div>
 
             <source><![CDATA[
     // Create or retrieve an engine
