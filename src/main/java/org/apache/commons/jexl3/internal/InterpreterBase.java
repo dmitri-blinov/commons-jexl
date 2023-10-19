@@ -946,13 +946,13 @@ public abstract class InterpreterBase extends ParserVisitor {
          * Whether the method is a target method.
          *
          * @param ntarget the target instance
-         * @param mname the method name
+         * @param methodName the method name
          * @param arguments the method arguments
          * @return true if arithmetic, false otherwise
          */
-        protected boolean isTargetMethod(final Object ntarget, final String mname, final Object[] arguments) {
+        protected boolean isTargetMethod(final Object ntarget, final String methodName, final Object[] arguments) {
             // try a method
-            vm = uberspect.getMethod(ntarget, mname, arguments);
+            vm = uberspect.getMethod(ntarget, methodName, arguments);
             if (vm != null) {
                 argv = arguments;
                 target = ntarget;
@@ -994,12 +994,12 @@ public abstract class InterpreterBase extends ParserVisitor {
         /**
          * Whether the method is a context method.
          *
-         * @param mname the method name
+         * @param methodName the method name
          * @param arguments the method arguments
          * @return true if arithmetic, false otherwise
          */
-        protected boolean isContextMethod(final String mname, final Object[] arguments) {
-            vm = uberspect.getMethod(context, mname, arguments);
+        protected boolean isContextMethod(final String methodName, final Object[] arguments) {
+            vm = uberspect.getMethod(context, methodName, arguments);
             if (vm != null) {
                 argv = arguments;
                 target = context;
@@ -1014,12 +1014,12 @@ public abstract class InterpreterBase extends ParserVisitor {
         /**
          * Whether the method is an arithmetic method.
          *
-         * @param mname the method name
+         * @param methodName the method name
          * @param arguments the method arguments
          * @return true if arithmetic, false otherwise
          */
-        protected boolean isArithmeticMethod(final String mname, final Object[] arguments) {
-            vm = uberspect.getMethod(arithmetic, mname, arguments);
+        protected boolean isArithmeticMethod(final String methodName, final Object[] arguments) {
+            vm = uberspect.getMethod(arithmetic, methodName, arguments);
             if (vm != null) {
                 argv = arguments;
                 target = arithmetic;
@@ -1036,18 +1036,18 @@ public abstract class InterpreterBase extends ParserVisitor {
          * it was cacheable).
          *
          * @param ntarget the target instance
-         * @param mname the method name
+         * @param methodName the method name
          * @param arguments the method arguments
          * @return TRY_FAILED if invocation was not possible or failed, the
          * result otherwise
          */
-        protected Object tryEval(final Object ntarget, final String mname, final Object[] arguments) throws Exception {
+        protected Object tryEval(final Object ntarget, final String methodName, final Object[] arguments) throws Exception {
             // do we have  a method/function name ?
             // attempt to reuse last funcall cached in volatile JexlNode.value (if it was not a variable)
-            if (mname != null && cacheable && ntarget != null) {
+            if (methodName != null && cacheable && ntarget != null) {
                 final Object cached = node.jjtGetValue();
                 if (cached instanceof Funcall) {
-                    return ((Funcall) cached).tryInvoke(InterpreterBase.this, mname, ntarget, arguments);
+                    return ((Funcall) cached).tryInvoke(InterpreterBase.this, methodName, ntarget, arguments);
                 }
             }
             return JexlEngine.TRY_FAILED;
@@ -1056,11 +1056,11 @@ public abstract class InterpreterBase extends ParserVisitor {
         /**
          * Evaluates the method previously dispatched.
          *
-         * @param mname the method name
+         * @param methodName the method name
          * @return the method invocation result
          * @throws Exception when invocation fails
          */
-        protected Object eval(final String mname) throws Exception {
+        protected Object eval(final String methodName) throws Exception {
             // we have either evaluated and returned or might have found a method
             if (vm != null) {
                 // vm cannot be null if xjexl is null
@@ -1071,7 +1071,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 }
                 return eval;
             }
-            return unsolvableMethod(node, mname, argv);
+            return unsolvableMethod(node, methodName, argv);
         }
     }
 

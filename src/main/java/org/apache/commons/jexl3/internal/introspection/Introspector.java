@@ -300,9 +300,9 @@ public final class Introspector {
      */
     public Constructor<?> getConstructor(final Class<?> c, final MethodKey key) {
         Constructor<?> ctor = constructorsMap.computeIfAbsent(key, x -> {
-            final String cname = x.getMethod();
+            final String constructorName = x.getMethod();
             try {
-                Constructor<?>[] constructors = getConstructors(c, cname);
+                Constructor<?>[] constructors = getConstructors(c, constructorName);
                 if (constructors == null) {
                     return null;
                 }
@@ -311,7 +311,7 @@ public final class Introspector {
             } catch (final MethodKey.AmbiguousException xambiguous) {
                 if (logger != null  && xambiguous.isSevere() &&  logger.isInfoEnabled()) {
                     logger.info("ambiguous constructor invocation: "
-                            + cname + "."
+                            + constructorName + "."
                             + x.debugString(), xambiguous);
                 }
                 return null;

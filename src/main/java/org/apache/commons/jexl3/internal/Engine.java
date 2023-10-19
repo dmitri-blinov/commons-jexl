@@ -535,14 +535,14 @@ public class Engine extends JexlEngine {
     private void processPragmaNamespace(Map<String, Object> ns, String key, Object value) {
         if (value instanceof String) {
             // jexl.namespace.***
-            final String nsname = key.substring(PRAGMA_JEXLNS.length());
-            if (!nsname.isEmpty()) {
+            final String namespaceName = key.substring(PRAGMA_JEXLNS.length());
+            if (!namespaceName.isEmpty()) {
                 final String nsclass = value.toString();
                 final Class<?> clazz = uberspect.getClassByName(nsclass);
                 if (clazz == null) {
                     logger.warn(key + ": unable to find class " + nsclass);
                 } else {
-                    ns.put(nsname, clazz);
+                    ns.put(namespaceName, clazz);
                 }
             }
         } else {
