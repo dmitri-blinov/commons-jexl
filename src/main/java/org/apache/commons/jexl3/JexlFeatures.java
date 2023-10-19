@@ -224,7 +224,7 @@ public final class JexlFeatures {
         this.flags = f;
         this.reservedNames = r == null? Collections.emptySet() : r;
         this.nameSpaces = n == null? TEST_STR_FALSE : n;
-        setFeature(RESERVED, !reservedNames.isEmpty());
+        setFeature(RESERVED, !this.reservedNames.isEmpty());
     }
 
     @Override
