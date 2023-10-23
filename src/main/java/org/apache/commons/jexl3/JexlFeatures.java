@@ -122,7 +122,7 @@ public final class JexlFeatures {
      * The default features flag mask.
      * <p>Meant for compatibility with scripts written before 3.3.1</p>
      */
-    public static final long DEFAULT_FEATURES =
+    private static final long DEFAULT_FEATURES =
         1L << LOCAL_VAR
         | 1L << SIDE_EFFECT
         | 1L << SIDE_EFFECT_GLOBAL
@@ -146,7 +146,7 @@ public final class JexlFeatures {
      * The canonical scripting (since 3.3.1) features flag mask based on the original default.
      * <p>Adds lexical, lexical-shade and const-capture but removes comparator-names and pragma-anywhere</p>
      */
-    public static final long SCRIPT_FEATURES =
+    private static final long SCRIPT_FEATURES =
         ( DEFAULT_FEATURES
         | 1L << LEXICAL
         | 1L << LEXICAL_SHADE
@@ -158,7 +158,7 @@ public final class JexlFeatures {
     /**
      * All features.
      */
-    public static final long ALL_FEATURES = (1L << (CONST_CAPTURE + 1)) - 1L;
+    private static final long ALL_FEATURES = (1L << (CONST_CAPTURE + 1)) - 1L;
 
     /**
      * Creates an all features enabled set.
@@ -215,7 +215,7 @@ public final class JexlFeatures {
      * <p><em>try, catch, throw, finally, switch, case, default, class, instanceof, jexl, $jexl</em></p>
      * @since 3.3.1
      */
-    public static final Set<String> RESERVED_WORDS =
+    private static final Set<String> RESERVED_WORDS =
         Collections.unmodifiableSet(
             new HashSet<>((Arrays.asList(
                 "try", "catch", "throw", "finally", "switch", "case", "default", "class", "instanceof", "jexl", "$jexl"))));
@@ -357,6 +357,13 @@ public final class JexlFeatures {
      */
     public Predicate<String> namespaceTest() {
         return nameSpaces;
+    }
+
+    /**
+     * @return these features&quot;s flags
+     */
+    public long getFlags() {
+        return flags;
     }
 
     /**
