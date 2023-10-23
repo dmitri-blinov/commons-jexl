@@ -119,6 +119,12 @@ public final class JexlFeatures {
     public static final int MATCHING_NAMES = 23;
 
     /**
+     * All features.
+     * N.B. ensure this is updated if additional features are added.
+     */
+    private static final long ALL_FEATURES = (1L << (CONST_CAPTURE + 1)) - 1L;
+
+    /**
      * The default features flag mask.
      * <p>Meant for compatibility with scripts written before 3.3.1</p>
      */
@@ -154,11 +160,6 @@ public final class JexlFeatures {
         & ~(1L << COMPARATOR_NAMES)
         & ~(1L << MATCHING_NAMES)
         & ~(1L << PRAGMA_ANYWHERE);
-
-    /**
-     * All features.
-     */
-    private static final long ALL_FEATURES = (1L << (CONST_CAPTURE + 1)) - 1L;
 
     /**
      * Creates an all features enabled set.
