@@ -27,7 +27,7 @@ public class LexicalFrame extends LexicalScope {
     /**
      * The stack of values in the lexical frame.
      */
-    private Deque<Object> stack = null;
+    private Deque<Object> stack;
 
     /**
      * Lexical frame ctor.

@@ -50,7 +50,7 @@ import org.junit.runners.Parameterized;
 public class JXLTTest extends JexlTestCase {
     private static final Log LOGGER = LogFactory.getLog(JxltEngine.class);
     private final MapContext vars = new MapContext();
-    private JexlEvalContext context = null;
+    private JexlEvalContext context;
     private final JexlBuilder BUILDER;
     private final JexlEngine ENGINE;
     private final JxltEngine JXLT;
@@ -894,7 +894,7 @@ public class JXLTTest extends JexlTestCase {
 
     public static class Context311 extends MapContext
       implements JexlContext.OptionsHandle, JexlContext.ThreadLocal {
-        private JexlOptions options = null;
+        private JexlOptions options;
 
         public void setOptions(final JexlOptions o) {
             options = o;

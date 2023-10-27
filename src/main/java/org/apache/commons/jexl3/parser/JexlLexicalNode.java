@@ -29,7 +29,8 @@ public class JexlLexicalNode extends JexlNode implements JexlParser.LexicalUnit 
      */
     private static final long serialVersionUID = 1L;
 
-    private LexicalScope locals = null;
+    /** The local lexical scope, local information about let/const. */
+    private LexicalScope locals;
 
     public JexlLexicalNode(final int id) {
         super(id);

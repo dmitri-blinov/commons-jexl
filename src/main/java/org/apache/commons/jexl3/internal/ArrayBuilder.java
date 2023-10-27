@@ -55,7 +55,7 @@ public class ArrayBuilder implements JexlArithmetic.ArrayBuilder {
     protected static final Object[] EMPTY_ARRAY = new Object[0];
 
     /** The intended class array. */
-    protected Class<?> commonClass = null;
+    protected Class<?> commonClass;
     /** Whether the array stores numbers. */
     protected boolean isNumber = true;
     /** Whether we can try unboxing. */

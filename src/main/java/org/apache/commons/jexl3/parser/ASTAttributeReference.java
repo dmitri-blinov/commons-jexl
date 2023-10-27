@@ -20,7 +20,7 @@ package org.apache.commons.jexl3.parser;
  * Attribute reference.
  */
 public class ASTAttributeReference extends JexlNode {
-    private String name = null;
+    private String name;
 
     ASTAttributeReference(int id) {
         super(id);

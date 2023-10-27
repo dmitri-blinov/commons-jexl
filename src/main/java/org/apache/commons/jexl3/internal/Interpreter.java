@@ -237,13 +237,13 @@ import java.lang.reflect.Array;
  */
 public class Interpreter extends InterpreterBase {
     /** Frame height. */
-    protected int fp = 0;
+    protected int fp;
     /** Symbol values. */
     protected final Frame frame;
     /** Block micro-frames. */
-    protected LexicalFrame block = null;
+    protected LexicalFrame block;
     /** Current evaluation target. */
-    protected Object current = null;
+    protected Object current;
 
     /**
      * The thread local interpreter.
@@ -4702,7 +4702,7 @@ public class Interpreter extends InterpreterBase {
         /** The data. */
         private final Object data;
         /** Tracking whether we processed the annotation. */
-        private boolean processed = false;
+        private boolean processed;
 
         /**
          * Simple ctor.

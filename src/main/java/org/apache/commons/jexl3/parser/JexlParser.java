@@ -63,21 +63,21 @@ public abstract class JexlParser extends StringParser {
     /**
      * The associated JexlUberspect.
      */
-    protected JexlUberspect uberspect = null;
+    protected JexlUberspect uberspect;
     /**
      * The basic source info.
      */
-    protected JexlInfo info = null;
+    protected JexlInfo info;
     /**
      * The source being processed.
      */
-    protected String source = null;
+    protected String source;
     /**
      * The map of named registers aka script parameters.
      * <p>Each parameter is associated to a register and is materialized
      * as an offset in the registers array used during evaluation.</p>
      */
-    protected Scope scope = null;
+    protected Scope scope;
     /**
      * When parsing inner functions/lambda, need to stack the scope (sic).
      */
@@ -85,23 +85,23 @@ public abstract class JexlParser extends StringParser {
     /**
      * The list of pragma declarations.
      */
-    protected Map<String, Object> pragmas = null;
+    protected Map<String, Object> pragmas;
     /**
      * The list of imported classes.
      */
-    protected Map<String, Class> classes = null;
+    protected Map<String, Class> classes;
     /**
      * The known namespaces.
      */
-    protected Set<String> namespaces = null;
+    protected Set<String> namespaces;
     /**
      * Implicitly imported java packages for resolving simple class names from
      */
-    protected Set<String> implicitPackages = null;
+    protected Set<String> implicitPackages;
     /**
      * The current lexical block.
      */
-    protected LexicalUnit block = null;
+    protected LexicalUnit block;
     /**
      * Stack of lexical blocks.
      */

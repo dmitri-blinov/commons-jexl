@@ -76,32 +76,32 @@ public final class Scope {
      * Each parameter is associated to a symbol and is materialized as an offset in the stacked array used
      * during evaluation.
      */
-    private Map<String, Integer> namedVariables = null;
+    private Map<String, Integer> namedVariables;
     /**
      * The map of local captured variables to parent scope variables, ie closure.
      */
-    private Map<Integer, Integer> capturedVariables = null;
+    private Map<Integer, Integer> capturedVariables;
     /**
      * The map of variable types.
      * Each variable may be associated with specific type
      */
-    private Map<Integer, Class> variableTypes = null;
+    private Map<Integer, Class> variableTypes;
     /**
      * The set of lexically defined variables.
      */
-    private Set<Integer> lexicalVariables = null;
+    private Set<Integer> lexicalVariables;
     /**
      * The set of final variables.
      */
-    private Set<Integer> finalVariables = null;
+    private Set<Integer> finalVariables;
     /**
      * The set of non-null variables.
      */
-    private Set<Integer> requiredVariables = null;
+    private Set<Integer> requiredVariables;
     /**
      * The map of default values for local variables, ie parameters.
      */
-    private Map<Integer, Object> defaultValues = null;
+    private Map<Integer, Object> defaultValues;
     /**
      * The empty string array.
      */
