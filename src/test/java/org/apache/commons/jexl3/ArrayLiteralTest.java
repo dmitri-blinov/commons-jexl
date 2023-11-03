@@ -131,7 +131,7 @@ public class ArrayLiteralTest extends JexlTestCase {
     }
 
     @Test
-    public void notestCallingMethodsOnNewMapLiteral() throws Exception {
+    public void testNotestCallingMethodsOnNewMapLiteral() throws Exception {
         final JexlExpression e = JEXL.createExpression("size({ 'foo' : 'bar' }.values())");
         final JexlContext jc = new MapContext();
 
