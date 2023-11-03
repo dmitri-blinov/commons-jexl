@@ -2105,7 +2105,7 @@ void Arguments() #Arguments : {}
 
 void FunctionCallLookahead() #void : {}
 {
-    LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isDeclaredNamespace(getToken(1), getToken(2)) }) <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>
+    LOOKAHEAD(4, <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isNamespaceFuncall(getToken(1), getToken(2), getToken(3), getToken(4)) }) <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>
     |
     <IDENTIFIER> <LPAREN>
     |
@@ -2116,7 +2116,7 @@ void FunctionCallLookahead() #void : {}
 
 void FunctionCall() #void : {}
 {
-    LOOKAHEAD(<IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>, { isDeclaredNamespace(getToken(1), getToken(2)) }) NamespaceIdentifier() Arguments() #FunctionNode(2)
+    LOOKAHEAD(4, <IDENTIFIER> <COLON> <IDENTIFIER> <LPAREN>,  { isNamespaceFuncall(getToken(1), getToken(2), getToken(3), getToken(4)) })  NamespaceIdentifier() Arguments() #FunctionNode(2)
     |
     LOOKAHEAD(Identifier() <LPAREN>) Identifier(true) Arguments() #FunctionNode(2)
     |
