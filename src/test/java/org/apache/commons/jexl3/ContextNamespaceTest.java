@@ -141,6 +141,12 @@ public class ContextNamespaceTest extends JexlTestCase {
         public static int func(int y) { return 42 * y;}
     }
 
+    public static class Ns348s {
+        private Ns348s() {};
+
+        public static int func(int y) { return 42 * y;}
+    }
+
     public static class ContextNs348 extends MapContext implements JexlContext.NamespaceResolver {
         ContextNs348() { super(); }
 
@@ -148,6 +154,42 @@ public class ContextNamespaceTest extends JexlTestCase {
         public Object resolveNamespace(String name) {
             return "ns".equals(name)? new Ns348() : null;
         }
+    }
+
+    public static class ContextNs348Class extends MapContext implements JexlContext.NamespaceResolver {
+        ContextNs348Class() { super(); }
+
+        @Override
+        public Object resolveNamespace(String name) {
+            return "ns".equals(name)? (Ns348.class) : null;
+        }
+    }
+
+    @Test
+    public void testNamespace348Class() throws Exception {
+        JexlContext ctxt = new ContextNs348Class();
+        final JexlEngine jexl = new JexlBuilder().safe(false).create();
+        JexlScript script = jexl.createScript("ns:func(4)");
+        Object result = script.execute(ctxt);
+        Assert.assertEquals(168, result);
+    }
+
+    public static class ContextNs348s extends MapContext implements JexlContext.NamespaceResolver {
+        ContextNs348s() { super(); }
+
+        @Override
+        public Object resolveNamespace(String name) {
+            return "ns".equals(name)? (Ns348s.class) : null;
+        }
+    }
+
+    @Test
+    public void testNamespace348s() throws Exception {
+        JexlContext ctxt = new ContextNs348s();
+        final JexlEngine jexl = new JexlBuilder().safe(false).create();
+        JexlScript script = jexl.createScript("ns:func(4)");
+        Object result = script.execute(ctxt);
+        Assert.assertEquals(168, result);
     }
 
     @Test
