@@ -426,6 +426,197 @@ public class LexicalTest {
         Assert.assertEquals(0, scope.getSymbolCount());
     }
 
+    private JexlFeatures runVarLoop(final boolean flag, final String src) {
+        final VarContext vars = new VarContext();
+        final JexlOptions options = vars.getEngineOptions();
+        options.setLexical(true);
+        options.setLexicalShade(true);
+        options.setSafe(false);
+        final JexlFeatures features = new JexlFeatures();
+        if (flag) {
+            features.lexical(true).lexicalShade(true);
+        }
+        final JexlEngine jexl = new JexlBuilder().features(features).create();
+        final JexlScript script = jexl.createScript(src);
+        final List<Integer> out = new ArrayList<>(10);
+        vars.set("$out", out);
+        final Object result = script.execute(vars);
+        Assert.assertEquals(true, result);
+        Assert.assertEquals(10, out.size());
+        return features;
+    }
+
+    @Test
+    public void testCaptured0() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        final JexlScript script = jexl.createScript(
+                "var x = 10; (b->{ x + b })(32)");
+        final JexlContext jc = new MapContext();
+        final Object result = script.execute(jc);
+        Assert.assertEquals(42, result);
+    }
+
+    @Test
+    public void testAnnotation() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        final JexlScript script = jexl.createScript("@scale(13) @test var i = 42");
+        final JexlContext jc = new OptAnnotationContext();
+        final Object result = script.execute(jc);
+        Assert.assertEquals(42, result);
+    }
+
+    @Test
+    public void testCaptured1() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexical(true);
+        final JexlEngine jexl = new JexlBuilder().strict(true).features(f).create();
+        final JexlScript script = jexl.createScript(
+                "{ var x = 10; } (b->{ x + b })(32)");
+        final JexlContext jc = new MapContext();
+        jc.set("x", 11);
+        final Object result = script.execute(jc);
+        Assert.assertEquals(43, result);
+    }
+
+    @Test
+    public void testConst0a() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        final JexlScript script = jexl.createScript(
+                "{ const x = 10; x + 1 }; { let x = 20; x = 22}");
+        final JexlContext jc = new MapContext();
+        final Object result = script.execute(jc);
+        Assert.assertEquals(22, result);
+    }
+
+    @Test
+    public void testConst0b() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        final JexlScript script = jexl.createScript(
+                "{ const x = 10; }{ const x = 20; }");
+        final JexlContext jc = new MapContext();
+        final Object result = script.execute(jc);
+        Assert.assertEquals(20, result);
+    }
+
+    @Test
+    public void testConst1() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        try {
+            final JexlScript script = jexl.createScript(
+                    "const foo;  foo");
+            Assert.fail("should fail, const foo must be followed by assign.");
+        } catch (final JexlException.Parsing xparse) {
+            Assert.assertTrue(xparse.getMessage().contains("const"));
+        }
+    }
+
+    @Test
+    public void testConst2a() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        for(final String op : Arrays.asList("=", "+=", "-=", "/=", "*=", "%=", "<<=", ">>=", ">>>=", "^=", "&=", "|=")) {
+            try {
+                final JexlScript script = jexl.createScript("const foo = 42;  foo "+op+" 1;");
+                Assert.fail("should fail, const precludes assignment");
+            } catch (final JexlException.Parsing xparse) {
+                Assert.assertTrue(xparse.getMessage().contains("foo"));
+            }
+        }
+    }
+
+    @Test
+    public void testConst2b() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        for(final String op : Arrays.asList("=", "+=", "-=", "/=", "*=", "%=", "<<=", ">>=", ">>>=", "^=", "&=", "|=")) {
+            try {
+                final JexlScript script = jexl.createScript("const foo = 42;  if (true) { foo "+op+" 1; }");
+                Assert.fail("should fail, const precludes assignment");
+            } catch (final JexlException.Parsing xparse) {
+                Assert.assertTrue(xparse.getMessage().contains("foo"));
+            }
+        }
+    }
+
+    @Test
+    public void testConst2c() {
+        final JexlFeatures f = new JexlFeatures();
+        final JexlEngine jexl = new JexlBuilder().strict(true).create();
+        for(final String op : Arrays.asList("=", "+=", "-=", "/=", "*=", "%=", "<<=", ">>=", ">>>=", "^=", "&=", "|=")) {
+            try {
+                final JexlScript script = jexl.createScript("{ const foo = 42; } { let foo  = 0; foo " + op + " 1; }");
+                Assert.assertNotNull(script);
+            } catch (final JexlException.Parsing xparse) {
+                Assert.fail(xparse.toString());
+            }
+        }
+    }
+
+    @Test public void testConst3a() {
+        final JexlEngine jexl = new JexlBuilder().create();
+        final List<String> srcs = Arrays.asList(
+                "const f = ()->{ var foo = 3; foo = 5; }",
+                "const y = '42'; const f = (let y)->{ var foo = 3; foo = 5; }",
+                "const foo = '34'; const f = ()->{ var foo = 3; foo = 5; };",
+                "const bar = '34'; const f = ()->{ var f = 3; f = 5; };",
+                "const bar = '34'; const f = ()->{ var bar = 3; z ->{ bar += z; } };");
+        for(final String src: srcs) {
+            final JexlScript script = jexl.createScript(src);
+            final Object result = script.execute(null);
+            Assert.assertNotNull(src, result);
+        }
+    }
+
+    @Test public void testConst3b() {
+        final JexlEngine jexl = new JexlBuilder().create();
+        final List<String> srcs = Arrays.asList(
+                "const f = ()->{ var foo = 3; f = 5; }",
+                "const y = '42'; const f = (let z)->{ y += z; }",
+                "const foo = '34'; const f = ()->{ foo = 3; };",
+                "const bar = '34'; const f = ()->{  bar = 3; z ->{ bar += z; } };",
+                "let bar = '34'; const f = ()->{  const bar = 3; z ->{ bar += z; } };");
+        for(final String src: srcs) {
+            try {
+                final JexlScript script = jexl.createScript(src);
+                final Object result = script.execute(null);
+                Assert.fail(src);
+            } catch (final JexlException.Assignment xassign) {
+                Assert.assertNotNull(src, xassign); // debug breakpoint
+            }
+        }
+    }
+
+    @Test
+    public void testConstCaptures() {
+        final List<String> srcsFalse = Arrays.asList(
+                "const x = 0;  x = 1;",
+                "const x = 0; x *= 1;",
+                "const x = 0; var x = 1;",
+                "const x = 0; if (true) { var x = 1;}" ,
+                "const x = 0; if (true) { x = 1;}" ,
+                "const x = 0; if (true) { var f  = y -> { x = y + 1; x } }" ,
+                "const x = 0; if (true) { var f  = y -> { z -> { x = y + 1; x } } }" ,
+                "const x = 0; if (true) { if (false) { y -> { x = y + 1; x } } }" ,
+                "const x = 0; if (true) { if (false) { y -> { z -> { x = y + 1; x } } }" ,
+                ""
+        );
+        checkParse(srcsFalse, false);
+        final List<String> srcsTrue = Arrays.asList(
+            "const x = 0; if (true) { var f  = x -> x + 1;}" ,
+            "const x = 0; if (true) { var f  = y -> { var x = y + 1; x } }" ,
+            "const x = 0; if (true) { var f  = y -> { const x = y + 1; x } }" ,
+            "const x = 0; if (true) { var f  = y -> { z -> { let x = y + 1; x } } }" ,
+        "");
+        checkParse(srcsTrue, true);
+    }
+
     @Test
     public void testContextualOptions0() {
         final JexlFeatures f= new JexlFeatures();
