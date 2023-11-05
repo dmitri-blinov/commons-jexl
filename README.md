@@ -82,7 +82,7 @@ These changes are all reflected in the documentation, but the breef summary is g
 Incompatible changes
 --------------------
 + New reserved words are introduced. Those are:
-  `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `static`
+  `switch` `case` `default` `try` `catch` `finally` `throw` `synchronized` `this` `instanceof` `in` `remove` `delete` `static`
   `assert` `final` `boolean` `char` `byte` `short` `int` `long` `float` `double` `void` `class` `yield` `_`.
   You may not longer use them as the names of the variables.
 
@@ -132,6 +132,8 @@ New features
 + Java-like switch expression `switch` operator is introduced
 
 + Java-like `yield` statement is introduced
+
++ Javascript-like `delete` operator is introduced
 
 + Java-like type-cast `()` operator is introduced
 
