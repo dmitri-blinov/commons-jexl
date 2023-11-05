@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * package names as roots of import.
  * <p>This only keeps names of classes to avoid any class loading/reloading/permissions issue.</p>
  */
- class FqcnResolver implements JexlContext.ClassNameResolver {
+ final class FqcnResolver implements JexlContext.ClassNameResolver {
     /**
      * The class loader.
      */

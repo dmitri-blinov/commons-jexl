@@ -68,6 +68,7 @@ public class SoftCache<K, V> implements JexlCache<K, V> {
             }
         });
     }
+
     /**
      * The cache capacity.
      */
