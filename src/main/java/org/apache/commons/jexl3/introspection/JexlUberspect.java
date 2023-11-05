@@ -67,6 +67,17 @@ public interface JexlUberspect {
          * @return the property setter or null
          */
         JexlPropertySet getPropertySet(JexlUberspect uber, Object obj, Object identifier, Object arg);
+
+        /**
+         * Gets a property deleter.
+         *
+         * @param uber       the uberspect
+         * @param obj        the object
+         * @param identifier the property identifier
+         * @return the property deleter or null
+         */
+        JexlPropertyDelete getPropertyDelete(JexlUberspect uber, Object obj, Object identifier);
+
     }
 
     /**
@@ -110,6 +121,14 @@ public interface JexlUberspect {
                                                     final Object arg) {
             return uber.getPropertySet(Collections.singletonList(this), obj, identifier, arg);
         }
+
+        @Override
+        public final JexlPropertyDelete getPropertyDelete(final JexlUberspect uber,
+                                                    final Object obj,
+                                                    final Object identifier) {
+            return uber.getPropertyDelete(Collections.singletonList(this), obj, identifier);
+        }
+
     }
 
     /**
@@ -339,6 +358,32 @@ public interface JexlUberspect {
      * @since 3.0
      */
     JexlPropertySet getPropertySet(List<PropertyResolver> resolvers, Object obj, Object identifier, Object arg);
+
+    /**
+     * Property deleter.
+     *
+     * <p>returns a JelPropertyDelete apropos to an expression like <code>bar.woogie</code>.</p>
+     *
+     * @param obj        the object to delete the property from
+     * @param identifier property name
+     * @return a {@link JexlPropertyDelete} or null
+     * @since 3.3
+     */
+    JexlPropertyDelete getPropertyDelete(Object obj, Object identifier);
+
+    /**
+     * Property deleter.
+     * <p>
+     * Seeks a JexlPropertyDelete apropos to an expression like <code>bar.woogie</code>.</p>
+     * See {@link ResolverStrategy#apply(JexlOperator, java.lang.Object) }
+     *
+     * @param resolvers  the list of property resolvers to try
+     * @param obj        the object to delete the property from
+     * @param identifier property name
+     * @return a {@link JexlPropertyDelete} or null
+     * @since 3.0
+     */
+    JexlPropertyDelete getPropertyDelete(List<PropertyResolver> resolvers, Object obj, Object identifier);
 
     /**
      * Gets an iterator from an object.

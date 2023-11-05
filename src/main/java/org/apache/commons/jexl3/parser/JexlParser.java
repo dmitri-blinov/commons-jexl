@@ -780,7 +780,8 @@ public abstract class JexlParser extends StringParser {
             ASTIncrementGetNode.class,
             ASTDecrementGetNode.class,
             ASTGetIncrementNode.class,
-            ASTGetDecrementNode.class
+            ASTGetDecrementNode.class,
+            ASTDelete.class
         )
     );
 

@@ -48,6 +48,7 @@ import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementGetNode;
 import org.apache.commons.jexl3.parser.ASTGetDecrementNode;
+import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
@@ -987,6 +988,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
             builder.append(' ');
             builder.append(label);
         }
+        return data;
+    }
+
+    @Override
+    protected Object visit(final ASTDelete node, final Object data) {
+        builder.append("delete ");
+
+        accept(node.jjtGetChild(0), data);
+
         return data;
     }
 

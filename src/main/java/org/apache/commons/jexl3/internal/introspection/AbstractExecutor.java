@@ -20,6 +20,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
+import org.apache.commons.jexl3.introspection.JexlPropertyDelete;
 
 /**
  * Abstract class that is used to execute an arbitrary
@@ -230,6 +231,20 @@ abstract class AbstractExecutor {
          * @param theMethod the method held by this executor
          */
         protected Set(final Class<?> theClass, final java.lang.reflect.Method theMethod) {
+            super(theClass, theMethod);
+        }
+    }
+
+    /**
+     * Abstract class that is used to execute an arbitrary 'remove' method.
+     */
+    public abstract static class Delete extends AbstractExecutor implements JexlPropertyDelete {
+        /**
+         * Default and sole constructor.
+         * @param theClass the class this executor applies to
+         * @param theMethod the method held by this executor
+         */
+        protected Delete(final Class<?> theClass, final java.lang.reflect.Method theMethod) {
             super(theClass, theMethod);
         }
     }

@@ -367,6 +367,13 @@ public enum JexlOperator {
     PROPERTY_SET(".=", "propertySet", 3),
 
     /**
+     * Property delete operator as in: delete x.y
+     * <br><strong>Syntax:</strong> <code>delete x.y</code>
+     * <br><strong>Method:</strong> <code>void propertyDelete(L x, R y);</code>.
+     */
+    PROPERTY_DELETE(".^", "propertyDelete", 2),
+
+    /**
      * Field get operator as in: x.@y.
      * <br><strong>Syntax:</strong> <code>x.@y</code>
      * <br><strong>Method:</strong> <code>Object fieldGet(L x, R y);</code>.
@@ -393,6 +400,13 @@ public enum JexlOperator {
      * <br><strong>Method:</strong> <code>void arraySet(L x, R y, V z);</code>.
      */
     ARRAY_SET("[]=", "arraySet", 3),
+
+    /**
+     * Array delete operator as in: delete x[y].
+     * <br><strong>Syntax:</strong> <code>delete x[y]</code>
+     * <br><strong>Method:</strong> <code>void arrayDelete(L x, R y);</code>.
+     */
+    ARRAY_DELETE("[]^", "arrayDelete", 2),
 
     /**
      * Iterator generator as in for(var x : y).

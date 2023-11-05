@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
+import org.apache.commons.jexl3.introspection.JexlPropertyDelete;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import org.apache.commons.logging.Log;
@@ -389,6 +390,60 @@ public class Uberspect implements JexlUberspect {
                 }
             } else {
                 executor = resolver.getPropertySet(this, obj, identifier, arg);
+            }
+            if (executor != null) {
+                return executor;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(final Object obj, final Object identifier) {
+        return getPropertyDelete(null, obj, identifier);
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(
+            final List<PropertyResolver> resolvers, final Object obj, final Object identifier
+    ) {
+        final Class<?> claz = obj.getClass();
+        final Introspector is = base();
+        final List<PropertyResolver> r = resolvers == null? strategy.apply(null, obj) : resolvers;
+        JexlPropertyDelete executor = null;
+        String property = null; 
+        for (final PropertyResolver resolver : r) {
+            if (resolver instanceof JexlResolver) {
+                switch ((JexlResolver) resolver) {
+                    case MAP:
+                        // let's see if we are a map...
+                        executor = MapDeleteExecutor.discover(is, claz, identifier);
+                        break;
+                    case LIST:
+                        // let's see if this is a list or array
+                        final Integer index = AbstractExecutor.castInteger(identifier);
+                        if (index != null) {
+                            executor = ListDeleteExecutor.discover(is, claz, index);
+                        }
+                        break;
+                    case DUCK:
+                        // if that didn't work, look for get(foo)
+                        executor = DuckDeleteExecutor.discover(is, claz, identifier);
+                        if (executor == null) {
+                            if (property == null) {
+                                property = AbstractExecutor.castString(identifier);
+                            }
+                            if (property != identifier) {
+                                // look for get("foo") if we did not try yet (just above)
+                                executor = DuckDeleteExecutor.discover(is, claz, property);
+                            }
+                        }
+                        break;
+                    default:
+                        continue; // in case we add new ones in enum
+                }
+            } else {
+                executor = resolver.getPropertyDelete(this, obj, identifier);
             }
             if (executor != null) {
                 return executor;

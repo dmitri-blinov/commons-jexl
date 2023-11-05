@@ -32,6 +32,7 @@ import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
+import org.apache.commons.jexl3.introspection.JexlPropertyDelete;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.introspection.JexlUberspect.PropertyResolver;
 import org.apache.commons.jexl3.parser.ASTArrayAccess;
@@ -1191,6 +1192,65 @@ public abstract class InterpreterBase extends ParserVisitor {
                     + ", class: " + object.getClass().getName()
                     + ", property: " + attribute
                     + ", argument: " + value.getClass().getSimpleName();
+            throw new UnsupportedOperationException(error, xcause);
+        }
+        final String attrStr = attribute != null ? attribute.toString() : null;
+        unsolvableProperty(node, attrStr, true, xcause);
+    }
+
+    /**
+     * Deletes an attribute of an object.
+     *
+     * @param object    to delete the attribute from
+     * @param attribute the attribute of the object, e.g. an index (1, 0, 2) or key for a map
+     * @param node      the node that evaluated as the object
+     */
+    protected void deleteAttribute(final Object object, final Object attribute, final JexlNode node, 
+                                final JexlOperator operator) {
+        cancelCheck(node);
+
+        Object result = operators.tryOverload(node, operator, object, attribute);
+        if (result != JexlEngine.TRY_FAILED) {
+            return;
+        }
+        Exception xcause = null;
+        try {
+            // attempt to reuse last executor cached in volatile JexlNode.value
+            if (node != null && cache) {
+                final Object cached = node.jjtGetValue();
+                if (cached instanceof JexlPropertyDelete) {
+                    final JexlPropertyDelete setter = (JexlPropertyDelete) cached;
+                    final Object eval = setter.tryInvoke(object, attribute);
+                    if (!setter.tryFailed(eval)) {
+                        return;
+                    }
+                }
+            }
+            // attempt arithmetic implementation
+            result = (operator == JexlOperator.ARRAY_SET) ? arithmetic.arrayDelete(object, attribute)
+                : arithmetic.propertyDelete(object, attribute);
+            if (result != JexlEngine.TRY_FAILED) {
+                return;
+            }
+            final List<PropertyResolver> resolvers = uberspect.getResolvers(operator, object);
+            JexlPropertyDelete vs = uberspect.getPropertyDelete(resolvers, object, attribute);
+            if (vs != null) {
+                // cache executor in volatile JexlNode.value
+                vs.invoke(object);
+                if (node != null && cache && vs.isCacheable()) {
+                    node.jjtSetValue(vs);
+                }
+                return;
+            }
+        } catch (final Exception xany) {
+            xcause = xany;
+        }
+        // lets fail
+        if (node == null) {
+            // direct call
+            final String error = "unable to delete object property"
+                    + ", class: " + object.getClass().getName()
+                    + ", property: " + attribute;
             throw new UnsupportedOperationException(error, xcause);
         }
         final String attrStr = attribute != null ? attribute.toString() : null;

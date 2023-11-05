@@ -1997,6 +1997,34 @@ public class JexlArithmetic {
     }
 
     /**
+     * Property delete operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if assignment fails
+     */
+    public Object propertyDelete(Object object, Object key) throws Exception {
+        if (object instanceof JexlContext) {
+            ((JexlContext) object).set(toString(key), null);
+            return null;
+        }
+        return JexlEngine.TRY_FAILED;
+    }
+
+    /**
+     * Array delete operator
+     *
+     * @param object the object to be derefenced
+     * @param key the property key
+     * @return JexlEngine.TRY_FAILED or other result if succesful
+     * @throws Exception if assignment fails
+     */
+    public Object arrayDelete(Object object, Object key) throws Exception {
+        return propertyDelete(object, key);
+    }
+
+    /**
      * Assigns value to various types: ThreadLocal, AtomicReference etc
      *
      * @param object the object to be derefenced

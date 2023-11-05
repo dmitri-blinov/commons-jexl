@@ -347,4 +347,10 @@ public class FeatureController extends ScriptVisitor {
     protected Object visit(ASTIncrementGetNode node, Object data) {
         return controlSideEffect(node, data);
     }
+
+    @Override
+    protected Object visit(ASTDelete node, Object data) {
+        return controlSideEffect(node, data);
+    }
+
 }

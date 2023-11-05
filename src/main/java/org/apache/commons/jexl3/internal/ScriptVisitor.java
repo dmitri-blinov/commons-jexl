@@ -46,6 +46,7 @@ import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementGetNode;
 import org.apache.commons.jexl3.parser.ASTGetDecrementNode;
+import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
@@ -271,6 +272,11 @@ public class ScriptVisitor extends ParserVisitor {
 
     @Override
     protected Object visit(final ASTBreak node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTDelete node, final Object data) {
         return visitNode(node, data);
     }
 

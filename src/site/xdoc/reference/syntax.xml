@@ -386,6 +386,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Property Delete Operator</td>
+                    <td>
+                        <p>Allows to remove a value of the collection or a list by using <code>delete object.property</code> or, 
+                        <code>delete object[property]</code> e.g.
+                        <code>delete arr1[0]</code> will remove the first element of the <code>arr1</code> list.</p>
+                        <p>Property remove operators can be overloaded in <code>JexlArithmetic</code>, so that
+                           the operator behavior will differ depending on the type of the operator arguments</p>
+                    </td>
+                </tr>
+                <tr>
                     <td>Inline assignment operator</td>
                     <td>
                         <p>Allows to set a field or a property of an object, a value of a collection or of an array

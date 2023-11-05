@@ -290,6 +290,7 @@ TOKEN_MGR_DECLS : {
     | < ASSERT : "assert" > 
     | < SWITCH : "switch" > 
     | < REMOVE : "remove" >
+    | < DELETE : "delete" >
     | < RETURN : "return" >
     | < STATIC : "static" >
     | < DCASE : "default" > 
@@ -502,6 +503,7 @@ void GenericStatement() #void : {}
     | Continue()
     | Remove()
     | Break()
+    | Delete()
     | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVarStatement()
 }
 
@@ -529,6 +531,7 @@ void Statement() #void : {}
     | Continue()
     | Remove()
     | Break()
+    | Delete()
 }
 
 void StatementBranch() #void : {}
@@ -890,6 +893,14 @@ void Break() #Break :
 {
     <BREAK> [ LOOKAHEAD(<IDENTIFIER>) t = <IDENTIFIER> { if (!branchScope.breakSupported(t.image)) throwParsingException(jjtThis); jjtThis.setLabel(t.image); } ]
     { if (t == null && !branchScope.breakSupported()) { throwParsingException(jjtThis); } }
+}
+
+void Delete() #Delete :
+{
+    Token t = null;
+}
+{
+    <DELETE> DeleteExpression()
 }
 
 ASTForStatement ForStatement() :
@@ -1632,6 +1643,8 @@ void FunctionIdentifier() #Identifier :
     t=<LET> { jjtThis.setSymbol(t.image); }
     |
     t=<WHEN> { jjtThis.setSymbol(t.image); }
+    |
+    t=<DELETE> { jjtThis.setSymbol(t.image); }
 }
 
 void MethodReferenceIdentifier() #Identifier :
@@ -1644,6 +1657,8 @@ void MethodReferenceIdentifier() #Identifier :
     t=<EMPTY> { jjtThis.setSymbol(t.image); }
     |
     t=<REMOVE> { jjtThis.setSymbol(t.image); }
+    |
+    t=<DELETE> { jjtThis.setSymbol(t.image); }
     |
     t=<CLASS> { jjtThis.setSymbol(t.image); }
     |
@@ -2380,6 +2395,11 @@ void NullableExpression() #void : {}
     ( LOOKAHEAD( <NULLP> )
        <NULLP> NullableExpression() #NullpNode(2)
     )*
+}
+
+void DeleteExpression() #void : {}
+{
+    ( PrimaryExpression() ( LOOKAHEAD(2) MemberExpression() )+ ) #Reference(>1)
 }
 
 void ValueExpression() #void : {}

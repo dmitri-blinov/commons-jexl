@@ -21,6 +21,7 @@ import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
+import org.apache.commons.jexl3.introspection.JexlPropertyDelete;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 
@@ -196,6 +197,35 @@ public final class SandboxUberspect implements JexlUberspect {
                 final String actual = sandbox.write(clazz, null);
                 if (actual != JexlSandbox.NULL) {
                     return uberspect.getPropertySet(resolvers, obj, null, arg);
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(final Object obj, final Object identifier) {
+        return getPropertyDelete(null, obj, identifier);
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(final List<PropertyResolver> resolvers,
+                                                final Object obj,
+                                                final Object identifier) {
+        if (obj != null) {
+            final Class<?> clazz = obj instanceof Class<?>? (Class<?>) obj : obj.getClass();
+            if (identifier != null) {
+                final String property = identifier.toString();
+                final String actual = sandbox.write(clazz, property);
+                if (actual != null) {
+                    // no transformation, strict equality: use identifier before string conversion
+                    final Object pty = eq(actual, property) ? identifier : actual;
+                    return uberspect.getPropertyDelete(resolvers, obj, pty);
+                }
+            } else {
+                final String actual = sandbox.write(clazz, null);
+                if (actual != JexlSandbox.NULL) {
+                     return uberspect.getPropertyDelete(resolvers, obj, null);
                 }
             }
         }

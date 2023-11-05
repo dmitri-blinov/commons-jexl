@@ -57,6 +57,7 @@ import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTCurrentNode;
 import org.apache.commons.jexl3.parser.ASTDecrementGetNode;
 import org.apache.commons.jexl3.parser.ASTGetDecrementNode;
+import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
@@ -1460,6 +1461,68 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTBreak node, final Object data) {
         cancelCheck(node);
         throw new JexlException.Break(node, node.getLabel());
+    }
+
+    @Override
+    protected Object visit(final ASTDelete node, final Object data) {
+        cancelCheck(node);
+
+        // left contains the reference to remove from
+        JexlNode left = node.jjtGetChild(0);
+
+        Object object = null;
+
+        // 0: determine initial object & property:
+        final int last = left.jjtGetNumChildren() - 1;
+
+        if (!(left instanceof ASTReference)) {
+            throw new JexlException(left, "illegal assignment form 0");
+        }
+        // 1: follow children till penultimate, resolve dot/array
+        JexlNode objectNode = null;
+        StringBuilder ant = null;
+        int v = 1;
+        // start at 1 if symbol
+        main: for (int c = 0; c < last; ++c) {
+            objectNode = left.jjtGetChild(c);
+            object = objectNode.jjtAccept(this, object);
+            if (object == null) {
+                throw new JexlException(objectNode, "illegal assignment form");
+            }
+        }
+        // 2: last objectNode will perform removal in all cases
+        JexlNode propertyNode = left.jjtGetChild(last);
+        final Object property;
+
+        if (propertyNode instanceof ASTIdentifierAccess) {
+            final ASTIdentifierAccess propertyId = (ASTIdentifierAccess) propertyNode;
+            // property of an object ?
+            property = evalIdentifier(propertyId);
+        } else if (propertyNode instanceof ASTArrayAccess) {
+            // can have multiple nodes - either an expression, integer literal or reference
+            final int numChildren = propertyNode.jjtGetNumChildren() - 1;
+            for (int i = 0; i < numChildren; i++) {
+                final JexlNode nindex = propertyNode.jjtGetChild(i);
+                final Object index = nindex.jjtAccept(this, null);
+                object = getAttribute(object, index, nindex);
+            }
+            propertyNode = propertyNode.jjtGetChild(numChildren);
+            property = propertyNode.jjtAccept(this, null);
+        } else {
+            throw new JexlException(objectNode, "illegal assignment form");
+        }
+        // we may have a null property as in map[null], no check needed.
+        // we can not *have* a null object though.
+        if (object == null) {
+            // no object, we fail
+            return unsolvableProperty(objectNode, "<null>.<?>", true, null);
+        }
+
+        final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
+                                      ? JexlOperator.ARRAY_DELETE : JexlOperator.PROPERTY_DELETE;
+        deleteAttribute(object, property, propertyNode, operator);
+        return null; // 4
+
     }
 
     @Override

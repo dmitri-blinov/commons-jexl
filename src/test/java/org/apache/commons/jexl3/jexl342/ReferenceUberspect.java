@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
+import org.apache.commons.jexl3.introspection.JexlPropertyDelete;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import java.lang.ref.Reference;
@@ -72,6 +73,12 @@ public class ReferenceUberspect implements JexlUberspect {
             public JexlPropertySet getPropertySet(JexlUberspect uber, Object obj, Object identifier, Object arg) {
                 return null;
             }
+
+            @Override
+            public JexlPropertyDelete getPropertyDelete(JexlUberspect uber, Object obj, Object identifier) {
+                return null;
+            }
+
         };
         pojoStrategy = Arrays.asList(
             JexlResolver.PROPERTY,
@@ -290,6 +297,37 @@ public class ReferenceUberspect implements JexlUberspect {
             jexlSet = new OptionalNullSetter(uberspect, identifier);
         }
         return new ReferenceSetExecutor(handler, jexlSet);
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(Object obj, Object identifier) {
+        return getPropertyDelete(null, obj, identifier);
+    }
+
+    @Override
+    public JexlPropertyDelete getPropertyDelete(List<PropertyResolver> resolvers, Object ref, Object identifier) {
+        // is this is a reference of some kind?
+        ReferenceHandler handler = discoverHandler(ref);
+        if (handler == null) {
+            return uberspect.getPropertyDelete(resolvers, ref, identifier);
+        }
+        // do we have an object referenced ?
+        Object obj = handler.callGet(ref);
+        if (ref  == obj) {
+            return null;
+        }
+        // from that object, get the property setter if any
+        JexlPropertyDelete jexlDelete = null;
+        if (obj != null) {
+            jexlDelete = uberspect.getPropertyDelete(resolvers, obj, identifier);
+            if (jexlDelete == null) {
+                throw new JexlException.Property(null, Objects.toString(identifier), false, null);
+            }
+        } else {
+            // postpone resolution till not null
+            jexlDelete = new OptionalNullDeleter(uberspect, identifier);
+        }
+        return new ReferenceDeleteExecutor(handler, jexlDelete);
     }
 
     @Override
