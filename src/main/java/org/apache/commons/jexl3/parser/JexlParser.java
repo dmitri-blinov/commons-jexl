@@ -247,6 +247,16 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Disables pragma feature if pragma-anywhere feature is disabled.
+     */
+    protected void controlPragmaAnywhere() {
+        final JexlFeatures features = getFeatures();
+        if (features.supportsPragma() && !features.supportsPragmaAnywhere()) {
+            featureController.setFeatures(new JexlFeatures(featureController.getFeatures()).pragma(false));
+        }
+    }
+
+    /**
      * Gets the frame used by this parser.
      * <p>
      * Since local variables create new symbols, it is important to
@@ -527,6 +537,35 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
+     * Declares a local function.
+     * @param variable the identifier used to declare
+     * @param token      the variable name token
+     */
+    protected void declareFunction(final ASTVar variable, final Token token) {
+        final String name = token.image;
+        // function foo() ... <=> const foo = ()->...
+        if (scope == null) {
+            scope = new Scope(null);
+        }
+        final int symbol = scope.declareVariable(name);
+        variable.setSymbol(symbol, name);
+        variable.setLexical(true);
+        if (scope.isCapturedSymbol(symbol)) {
+            variable.setCaptured(true);
+        }
+        // function is const fun...
+        if (declareSymbol(symbol)) {
+            scope.addLexical(symbol);
+            block.setConstant(symbol);
+        } else {
+            if (getFeatures().isLexical()) {
+                throw new JexlException(variable, name + ": variable is already declared");
+            }
+            variable.setRedefined(true);
+        }
+    }
+
+    /**
      * Declares a local variable.
      * <p>
      * This method creates an new entry in the symbol map.
@@ -593,19 +632,21 @@ public abstract class JexlParser extends StringParser {
         if (pragmas == null) {
             pragmas = new TreeMap<>();
         }
-        // declaring a namespace
-        Predicate<String> ns = getFeatures().namespaceTest();
-        if (ns != null && key.startsWith(PRAGMA_JEXLNS)) {
-            if (!getFeatures().supportsNamespacePragma()) {
-                throwFeatureException(JexlFeatures.NS_PRAGMA, getToken(0));
-            }
-            // jexl.namespace.***
-            final String nsname = key.substring(PRAGMA_JEXLNS.length());
-            if (!nsname.isEmpty()) {
-                if (namespaces == null) {
-                    namespaces = new HashSet<>();
+        // declaring a namespace or module
+        final String[] nsprefixes = { PRAGMA_JEXLNS, PRAGMA_MODULE };
+        for(String nsprefix : nsprefixes) {
+            if (key.startsWith(nsprefix)) {
+                if (!features.supportsNamespacePragma()) {
+                    throwFeatureException(JexlFeatures.NS_PRAGMA, getToken(0));
                 }
-                namespaces.add(nsname);
+                final String nsname = key.substring(nsprefix.length());
+                if (!nsname.isEmpty()) {
+                    if (namespaces == null) {
+                        namespaces = new HashSet<>();
+                    }
+                    namespaces.add(nsname);
+                }
+                break;
             }
         } else if (PRAGMA_IMPORT.equals(key)) {
             // jexl.import, may use a set
