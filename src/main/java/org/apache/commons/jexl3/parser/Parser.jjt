@@ -2042,6 +2042,8 @@ void MapElement() #void : {}
 
 void MapEntry() : {}
 {
+    Identifier(true) <COLON> Expression()
+    |
     Expression() <COLON> Expression()
 }
 

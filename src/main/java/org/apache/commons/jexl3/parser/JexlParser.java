@@ -16,6 +16,22 @@
  */
 package org.apache.commons.jexl3.parser;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlFeatures;
@@ -29,22 +45,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Constructor;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 import java.math.BigInteger;
 import java.math.BigDecimal;
@@ -699,7 +699,7 @@ public abstract class JexlParser extends StringParser {
         final String name = ns.image;
         if (isVariable(name)) {
             // the namespace sticks to the colon as in 'ns:fun()' (vs 'ns : fun()')
-            return colon.beginColumn - 1 == ns.endColumn && isNamespace(name);
+            return colon.beginColumn - 1 == ns.endColumn && ((colon.endColumn == fun.beginColumn - 1) || isNamespace(name));
         }
         return true;
     }
