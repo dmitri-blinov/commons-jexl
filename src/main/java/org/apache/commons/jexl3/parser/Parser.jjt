@@ -783,8 +783,6 @@ void TryResource() : {}
 void TryVar() : {}
 {
     DeclareTryVar()
-    |
-    Identifier(true)
 }
 
 void CatchVar() #void : {}
