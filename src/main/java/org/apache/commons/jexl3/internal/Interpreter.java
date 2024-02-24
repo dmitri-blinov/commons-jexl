@@ -2654,12 +2654,36 @@ public class Interpreter extends InterpreterBase {
 
                 if (p instanceof ASTInlinePropertyEntry) {
 
-                   Object[] entry = (Object[]) p.jjtAccept(this, null);
+                   Object entry = p.jjtAccept(this, null);
 
-                   String name = String.valueOf(entry[0]);
-                   Object value = entry[1];
+                   if (entry instanceof Object[]) {
+                       Object[] e = (Object[]) p.jjtAccept(this, null);
 
-                   setAttribute(data, name, value, p, JexlOperator.PROPERTY_SET);
+                       String name = String.valueOf(e[0]);
+                       Object value = e[1];
+
+                       setAttribute(data, name, value, p, JexlOperator.PROPERTY_SET);
+                   } else if (entry instanceof Iterator<?>) {
+
+                       int j = 0;
+                       Iterator<?> it = (Iterator<?>) entry;
+
+                       try {
+                           while (it.hasNext()) {
+                               Object value = it.next();
+                               if (value instanceof Map.Entry<?,?>) {
+                                   Map.Entry<?,?> e = (Map.Entry<?,?>) value;
+                                   setAttribute(data, e.getKey(), e.getValue(), p, JexlOperator.PROPERTY_SET);
+
+                               } else {
+                                   setAttribute(data, j, value, p, JexlOperator.PROPERTY_SET);
+                               }
+                               j++;
+                           }
+                       } finally {
+                           closeIfSupported(it);
+                       }
+                   }
 
                 } else if (p instanceof ASTInlineFieldEntry) {
 
@@ -2795,12 +2819,27 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTInlinePropertyEntry node, final Object data) {
-        JexlNode name = node.jjtGetChild(0);
 
-        final Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, data);
-        final Object value = node.jjtGetChild(1).jjtAccept(this, data);
+        int childCount = node.jjtGetNumChildren();
+        if (childCount > 1) {
+            JexlNode name = node.jjtGetChild(0);
 
-        return new Object[] {key, value};
+            final Object key = name instanceof ASTIdentifier ? ((ASTIdentifier) name).getName() : name.jjtAccept(this, data);
+            final Object value = node.jjtGetChild(1).jjtAccept(this, data);
+
+            return new Object[] {key, value};
+        } else {
+            final Object iterableValue = node.jjtGetChild(0).jjtAccept(this, data);
+            if (iterableValue != null) {
+                 // get an iterator for the collection/array etc via the introspector.
+                 Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
+                 Iterator<?> it = forEach instanceof Iterator ? 
+                      (Iterator<?>) forEach : 
+                      uberspect.getIndexedIterator(iterableValue);
+                 return it;
+            }
+            return null;
+        }
     }
 
     @Override

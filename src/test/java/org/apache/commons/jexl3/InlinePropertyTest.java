@@ -133,6 +133,20 @@ public class InlinePropertyTest extends JexlTestCase {
     }
 
     @Test
+    public void inlinePropertyComprehension() throws Exception {
+        JexlScript e = JEXL.createScript("addr { * : m }; addr.postalCode");
+        JexlContext jc = new MapContext();
+        jc.set("addr", new Address());
+
+        HashMap m = new HashMap();
+        m.put("postalCode", "123456");
+        jc.set("m", m);
+
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", o);
+    }
+
+    @Test
     public void inlinePropertyNestedProp() throws Exception {
         JexlScript e = JEXL.createScript("addr { tags { PostalCode : '123456'}}; addr.tags.PostalCode");
         JexlContext jc = new MapContext();
@@ -164,6 +178,20 @@ public class InlinePropertyTest extends JexlTestCase {
         JexlScript e = JEXL.createScript("var i = 0; addr.lines{[i] : '123456'}; addr.lines[0]");
         JexlContext jc = new MapContext();
         jc.set("addr", new Address());
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", o);
+    }
+
+    @Test
+    public void inlinePropertyArrayComprehensions() throws Exception {
+        JexlScript e = JEXL.createScript("addr.lines{ * : al}; addr.lines[0]");
+        JexlContext jc = new MapContext();
+        jc.set("addr", new Address());
+
+        ArrayList al = new ArrayList();
+        al.add("123456");
+        jc.set("al", al);
+
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", "123456", o);
     }

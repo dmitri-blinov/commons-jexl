@@ -1600,9 +1600,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(ASTInlinePropertyEntry node, Object data) {
-        accept(node.jjtGetChild(0), data);
-        builder.append(" : ");
-        accept(node.jjtGetChild(1), data);
+        int num = node.jjtGetNumChildren();
+        if (num > 1) {
+            accept(node.jjtGetChild(0), data);
+            builder.append(" : ");
+            accept(node.jjtGetChild(1), data);
+        } else {
+            builder.append(" * : ");
+            accept(node.jjtGetChild(0), data);
+        }
         return data;
     }
 

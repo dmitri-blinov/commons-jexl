@@ -2496,6 +2496,8 @@ void InlineFieldName() #void : {}
 
 void InlinePropertyName() #void : {}
 {
+    <mult>
+    |
     Identifier()
     |
     StringLiteral()
