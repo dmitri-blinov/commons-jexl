@@ -70,7 +70,7 @@ public class ComprehensionTest extends JexlTestCase {
         Assert.assertEquals(3, ((Map) o).size());
 
         o = JEXL.createScript("var x = [3, 4, 5]; var y = {1:1, 2:2, 3:3, *:...x}").execute(jc);
-        Assert.assertEquals(5, ((Map) o).size());
+        Assert.assertEquals(4, ((Map) o).size());
     }
 
     @Test

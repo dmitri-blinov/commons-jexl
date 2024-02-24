@@ -2567,22 +2567,31 @@ public class Interpreter extends InterpreterBase {
                 Object[] entry = (Object[]) (child).jjtAccept(this, data);
                 mb.put(entry[0], entry[1]);
             } else {
-                Iterator<Object> it = (Iterator<Object>) (child).jjtAccept(this, data);
-                int j = 0;
-                if (it != null) {
-                    try {
-                        while (it.hasNext()) {
-                            Object value = it.next();
-                            if (value instanceof Map.Entry<?,?>) {
-                                Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
-                                mb.put(entry.getKey(), entry.getValue());
-                            } else {
-                                mb.put(i, value);
+
+                Object iterableValue = (child).jjtAccept(this, data);
+                if (iterableValue != null) {
+                    // get an iterator for the collection/array etc via the introspector.
+                    Object forEach = operators.tryOverload(node, JexlOperator.FOR_EACH_INDEXED, iterableValue);
+                    Iterator<?> it = forEach instanceof Iterator ? 
+                         (Iterator<?>) forEach : 
+                         uberspect.getIndexedIterator(iterableValue);
+
+                    int j = 0;
+                    if (it != null) {
+                        try {
+                            while (it.hasNext()) {
+                                Object value = it.next();
+                                if (value instanceof Map.Entry<?,?>) {
+                                    Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                                    mb.put(entry.getKey(), entry.getValue());
+                                } else {
+                                    mb.put(j, value);
+                                }
+                                j++;
                             }
-                            i++;
+                        } finally {
+                            closeIfSupported(it);
                         }
-                    } finally {
-                        closeIfSupported(it);
                     }
                 }
             }
