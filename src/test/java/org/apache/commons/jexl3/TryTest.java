@@ -189,4 +189,12 @@ public class TryTest extends JexlTestCase {
         Assert.assertEquals(42, o);
     }
 
+    @Test
+    public void testExceptionType() throws Exception {
+        JexlScript e = JEXL.createScript("try { 'asb'.getBytes('NoSuchCharacterSet'); } catch (Exception ex) {return ex}");
+        JexlContext jc = new MapContext();
+        Object o = e.execute(jc);
+        Assert.assertTrue(o instanceof java.io.UnsupportedEncodingException);
+    }
+
 }

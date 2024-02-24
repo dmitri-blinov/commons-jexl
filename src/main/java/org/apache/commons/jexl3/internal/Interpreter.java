@@ -1748,7 +1748,7 @@ public class Interpreter extends InterpreterBase {
         } catch (Throwable t) {
             boolean catched = false;
             Throwable ex = t;
-            if (t instanceof JexlException && t.getCause() instanceof ArithmeticException) {
+            if (t instanceof JexlException && t.getCause() != null) {
                 ex = t.getCause();
             }
             for (int i = 1; i < num; i++) {
@@ -1858,7 +1858,7 @@ public class Interpreter extends InterpreterBase {
         } catch (Throwable t) {
             boolean catched = false;
             Throwable ex = t;
-            if (t instanceof JexlException && t.getCause() instanceof ArithmeticException) {
+            if (t instanceof JexlException && t.getCause() != null) {
                 ex = t.getCause();
             }
             for (int i = 2; i < num; i++) {
