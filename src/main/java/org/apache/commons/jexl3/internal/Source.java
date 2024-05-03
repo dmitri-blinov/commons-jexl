@@ -25,7 +25,7 @@ import java.util.Objects;
  * <p>This is meant for caching scripts using their 'source' as key but still distinguishing
  * scripts with different features and prevent false sharing.
  */
-public final class Source {
+public final class Source implements Comparable<Source> {
     /** The hash code, pre-computed for fast op. */
     private final int hashCode;
     /** The set of features. */
@@ -52,6 +52,11 @@ public final class Source {
      */
     int length() {
         return str.length();
+    }
+
+    @Override
+    public int compareTo(Source s) {
+        return str.compareTo(s.str);
     }
 
     @Override
