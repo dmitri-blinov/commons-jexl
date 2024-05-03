@@ -173,6 +173,9 @@ public final class JexlFeatures {
         if (!Objects.equals(this.reservedNames, other.reservedNames)) {
             return false;
         }
+        if (this.nameSpaces != other.nameSpaces) {
+            return false;
+        }
         return true;
     }
 
