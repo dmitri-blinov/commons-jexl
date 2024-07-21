@@ -45,7 +45,7 @@ import java.util.Map;
  * (array of class).
  * Roughly 3x faster than string key to access the map and uses less memory.
  */
-public final class MethodKey {
+public final class MethodKey implements Comparable<MethodKey> {
     /** The initial size of the primitive conversion map. */
     private static final int PRIMITIVE_SIZE = 32;
     /** The hash code. */
@@ -75,7 +75,7 @@ public final class MethodKey {
             for (int p = 0; p < size; ++p) {
                 final Object arg = args[p];
                 // null arguments use void as Void.class as marker
-                final Class<?> parm = arg == null ? Void.class : arg.getClass();
+                final Class<?> parm = primitiveClass(arg == null ? Void.class : arg.getClass());
                 hash = (HASH * hash) + parm.hashCode();
                 this.params[p] = parm;
             }
@@ -153,6 +153,11 @@ public final class MethodKey {
             return hashCode == key.hashCode && method.equals(key.method) && Arrays.equals(params, key.params);
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(final MethodKey o) {
+        return equals(o) ? 0 : hashCode < o.hashCode ? 1 : -1;
     }
 
     @Override
