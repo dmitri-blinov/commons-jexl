@@ -2194,7 +2194,12 @@ public class JexlArithmetic {
      * @return cast value
      */
     public Object implicitCast(Class type, Object val) {
+
+        if (type == Object.class)
+            return val;
+
         type = getWrapperClass(type);
+
         if (type.isInstance(val)) {
             return val;
         } else if (type == Short.class && val instanceof Byte) {

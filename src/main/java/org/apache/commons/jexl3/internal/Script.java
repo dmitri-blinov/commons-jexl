@@ -335,8 +335,9 @@ public class Script implements JexlScript, JexlExpression {
             result = args;
         }
 
-        // Check the default parameter values
         if (result != null && params != null) {
+
+            // Check the default parameter values
             for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
                 int pos = i - curried;
                 // Check if the passed arguments list is shorter than the parameters list
@@ -354,10 +355,8 @@ public class Script implements JexlScript, JexlExpression {
                     }
                 }
             }
-        }
 
-        // Check if type-casting of all the arguments (except the vararg) is needed
-        if (result != null && params != null) {
+            // Check if type-casting of all the arguments (except the vararg) is needed
             for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
                 int pos = i - curried;
                 // Check if the passed arguments list is shorter than the parameters list
@@ -382,10 +381,8 @@ public class Script implements JexlScript, JexlExpression {
                     }
                 }
             }
-        }
 
-        // Check required argument
-        if (result != null && params != null) {
+            // Check required argument
             for (int i = curried; i < params.length; i++) {
                 int pos = i - curried;
                 // Check if the passed arguments list is shorter than the parameters list

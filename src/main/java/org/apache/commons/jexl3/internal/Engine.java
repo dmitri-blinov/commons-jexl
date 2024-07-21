@@ -980,11 +980,11 @@ public class Engine extends JexlEngine {
      * @param str expression to clean
      * @return trimmed expression ending in a semicolon
      */
-    protected String trimSource(final CharSequence str) {
+    protected static String trimSource(final CharSequence str) {
         if (str != null) {
-            int start = 0;
             int end = str.length();
             if (end > 0) {
+                int start = 0;
                 // trim front spaces
                 while (start < end && Character.isSpaceChar(str.charAt(start))) {
                     ++start;
