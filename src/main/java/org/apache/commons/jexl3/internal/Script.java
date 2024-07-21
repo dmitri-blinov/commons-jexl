@@ -133,7 +133,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return  the interpreter
      */
     protected Interpreter createInterpreter(JexlContext context, Object... args) {
-        return createInterpreter(context, createFrame(scriptArgs(args)));
+        return createInterpreter(context, createFrame(scriptArgs(args)), null);
     }
 
     /**
