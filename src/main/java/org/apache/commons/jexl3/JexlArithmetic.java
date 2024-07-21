@@ -649,6 +649,9 @@ public class JexlArithmetic {
      * for null argument(s)
      */
     public boolean isStrict(JexlOperator operator) {
+        if (!isStrict())
+            return false;
+
         if (operator != null) {
             switch (operator) {
                 case EQ:
@@ -660,11 +663,9 @@ public class JexlArithmetic {
                 case SIZE:
                 case CONTAINS:
                     return false;
-                default:
-                    return isStrict();
             }
         }
-        return isStrict();
+        return true;
     }
 
     /**
@@ -2157,7 +2158,11 @@ public class JexlArithmetic {
      * @return cast value
      */
     public Object cast(Class type, Object val) {
+        if (type == Object.class)
+            return val;
+
         type = getWrapperClass(type);
+
         if (type.isInstance(val)) {
             return val;
         } else if (type == Integer.class) {

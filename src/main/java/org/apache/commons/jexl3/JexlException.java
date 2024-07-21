@@ -1068,7 +1068,7 @@ public class JexlException extends RuntimeException {
          * @param value the yeilded value
          */
         public Yield(JexlNode node, String msg, Object value) {
-            super(node, msg, null);
+            super(node, msg, null, false);
             this.result = value;
         }
 

@@ -65,7 +65,7 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private boolean returnsInteger(final JexlMethod vm) {
+    private static boolean returnsInteger(final JexlMethod vm) {
         if (vm !=null) {
             final Class<?> rc = vm.getReturnType();
             return Integer.TYPE.equals(rc) || Integer.class.equals(rc);
@@ -78,7 +78,7 @@ public class Operators {
      * @param vm the JexlMethod (may be null)
      * @return true of false
      */
-    private boolean isArithmetic(final JexlMethod vm) {
+    private static boolean isArithmetic(final JexlMethod vm) {
         if (vm instanceof MethodExecutor) {
             final Method method = ((MethodExecutor) vm).getMethod();
             return JexlArithmetic.class.equals(method.getDeclaringClass());
@@ -94,9 +94,9 @@ public class Operators {
      * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
      */
     protected void controlNullOperands(JexlOperator operator, Object arg1) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         // only check operator if necessary
         if (arg1 == null) {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
             // check operator only once if it is not strict
             if (arithmetic.isStrict(operator)) {
                 throw new JexlArithmetic.NullOperand();
@@ -181,7 +181,6 @@ public class Operators {
      */
     protected Object tryOverload(final JexlNode node, final JexlOperator operator, final Object arg1, final Object arg2, 
         final Object arg3) {
-        final JexlArithmetic arithmetic = interpreter.arithmetic;
         controlNullOperands(operator, arg1, arg2, arg3);
         if (operators != null && operators.overloads(operator)) {
             return callOverload(node, operator, arg1, arg2, arg3);
@@ -358,7 +357,7 @@ public class Operators {
         // call base operator
         try {
             JexlMethod vm = operators.getOperator(base, args);
-            if (vm != null) {
+            if (vm != null && !isArithmetic(vm)) {
                 final JexlArithmetic arithmetic = interpreter.arithmetic;
                 Object result = vm.invoke(arithmetic, args);
                 if (result != JexlEngine.TRY_FAILED) {

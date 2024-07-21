@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public final class MethodKey {
     /** The initial size of the primitive conversion map. */
-    private static final int PRIMITIVE_SIZE = 11;
+    private static final int PRIMITIVE_SIZE = 32;
     /** The hash code. */
     private final int hashCode;
     /** The method name. */
@@ -489,7 +489,7 @@ public final class MethodKey {
         T getMostSpecific(final MethodKey key, final T[] methods) {
             final Class<?>[] args = key.getParameters();
             final Deque<T> applicables = getApplicables(methods, args);
-            if (applicables.isEmpty()) {
+            if (applicables == null) {
                 return null;
             }
 
@@ -597,7 +597,7 @@ public final class MethodKey {
          * @return MORE_SPECIFIC if c1 is more specific than c2, LESS_SPECIFIC if
          *         c1 is less specific than c2, INCOMPARABLE if they are incomparable.
          */
-         private int moreSpecific(final Class<?>[] a, final Class<?>[] c1, final Class<?>[] c2) {
+         private static int moreSpecific(final Class<?>[] a, final Class<?>[] c1, final Class<?>[] c2) {
             // compare lengths to handle comparisons where the size of the arrays
             // doesn't match, but the methods are both applicable due to the fact
             // that one is a varargs method
@@ -655,7 +655,7 @@ public final class MethodKey {
          * @param possibleVarArg true if this is the last parameter which can be a primitive array (vararg call)
          * @return true if primitive, false otherwise
          */
-        private boolean isPrimitive(final Class<?> c, final boolean possibleVarArg) {
+        private static boolean isPrimitive(final Class<?> c, final boolean possibleVarArg) {
             if (c != null) {
                 if (c.isPrimitive()) {
                     return true;
@@ -678,9 +678,11 @@ public final class MethodKey {
          *         to formal types through a method invocation conversion).
          */
         private Deque<T> getApplicables(final T[] methods, final Class<?>[] classes) {
-            final Deque<T> list = new LinkedList<>();
+            Deque<T> list = null; 
             for (final T method : methods) {
                 if (isApplicable(method, classes)) {
+                    if (list == null) 
+                        list = new LinkedList<>();
                     list.add(method);
                 }
             }
@@ -769,7 +771,7 @@ public final class MethodKey {
          *                       in the method declaration
          * @return see isMethodInvocationConvertible.
          */
-        private boolean isConvertible(final Class<?> formal, final Class<?> actual, final boolean possibleVarArg) {
+        private static boolean isConvertible(final Class<?> formal, final Class<?> actual, final boolean possibleVarArg) {
             // if we see Void.class, the argument was null
             return isInvocationConvertible(formal, actual.equals(Void.class) ? null : actual, possibleVarArg);
         }
@@ -783,7 +785,7 @@ public final class MethodKey {
          *                       in the method declaration
          * @return see isStrictMethodInvocationConvertible.
          */
-        private boolean isStrictConvertible(final Class<?> formal, final Class<?> actual,
+        private static boolean isStrictConvertible(final Class<?> formal, final Class<?> actual,
                 final boolean possibleVarArg) {
             // if we see Void.class, the argument was null
             return isStrictInvocationConvertible(formal, actual.equals(Void.class) ? null : actual, possibleVarArg);
