@@ -76,10 +76,14 @@ public final class Source implements Comparable<Source> {
             return false;
         }
         final Source other = (Source) obj;
-        if (!Objects.equals(this.features, other.features)) {
+
+        if (hashCode != other.hashCode) {
             return false;
         }
-        if (!Objects.equals(this.str, other.str)) {
+        if (!Objects.equals(str, other.str)) {
+            return false;
+        }
+        if (!Objects.equals(features, other.features)) {
             return false;
         }
         return true;

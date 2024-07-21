@@ -150,7 +150,7 @@ public final class MethodKey {
     public boolean equals(final Object obj) {
         if (obj instanceof MethodKey) {
             final MethodKey key = (MethodKey) obj;
-            return method.equals(key.method) && Arrays.equals(params, key.params);
+            return hashCode == key.hashCode && method.equals(key.method) && Arrays.equals(params, key.params);
         }
         return false;
     }
