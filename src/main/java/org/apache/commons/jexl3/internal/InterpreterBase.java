@@ -128,7 +128,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         this.operators = new Operators(this);
         // the import package facility
         Collection<String> imports = options.getImports();
-        this.fqcnSolver = imports.isEmpty()
+        this.fqcnSolver = options == jexl.options || imports.isEmpty()
                 ? engine.classNameSolver
                 : new FqcnResolver(engine.classNameSolver).importPackages(imports);
     }
