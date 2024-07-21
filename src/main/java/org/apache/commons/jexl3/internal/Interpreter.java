@@ -2657,7 +2657,7 @@ public class Interpreter extends InterpreterBase {
                    Object entry = p.jjtAccept(this, null);
 
                    if (entry instanceof Object[]) {
-                       Object[] e = (Object[]) p.jjtAccept(this, null);
+                       Object[] e = (Object[]) entry;
 
                        String name = String.valueOf(e[0]);
                        Object value = e[1];
