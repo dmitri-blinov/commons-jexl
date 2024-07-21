@@ -959,7 +959,7 @@ public class Engine extends JexlEngine {
             script = cache.get(source);
             if (script != null) {
                 final Scope f = script.getScope();
-                if ((f == null && scope == null) || (f != null && f.equals(scope))) {
+                if ((scope == null) || (f != null && f.equals(scope))) {
                     return script;
                 }
             }
