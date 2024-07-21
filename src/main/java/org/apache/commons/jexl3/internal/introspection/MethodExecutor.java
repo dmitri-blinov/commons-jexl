@@ -113,7 +113,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
     public Object tryInvoke(final String name, final Object obj, final Object... args) {
         // let's assume that invocation will fly if the declaring class is the
         // same and arguments have the same type
-        if (objectClass == obj.getClass() && key.equals(new MethodKey(name, args))) {
+        if (objectClass == obj.getClass() && getMethod().getName().equals(name) && key.equals(new MethodKey(name, args))) {
             try {
                 return invoke(obj, args);
             } catch (IllegalAccessException | IllegalArgumentException xill) {
