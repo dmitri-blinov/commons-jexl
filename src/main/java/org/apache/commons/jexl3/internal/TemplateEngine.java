@@ -16,6 +16,7 @@
  */
 package org.apache.commons.jexl3.internal;
 
+import org.apache.commons.jexl3.JexlCache;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlOptions;
@@ -43,7 +44,7 @@ import java.util.Set;
  */
 public final class TemplateEngine extends JxltEngine {
     /** The TemplateExpression cache. */
-    final SoftCache<String, TemplateExpression> cache;
+    final JexlCache<String, TemplateExpression> cache;
     /** The JEXL engine instance. */
     final Engine jexl;
     /** The logger. */
@@ -70,7 +71,7 @@ public final class TemplateEngine extends JxltEngine {
                           final char deferred) {
         this.jexl = aJexl;
         this.logger = aJexl.logger;
-        this.cache = new SoftCache<>(cacheSize);
+        this.cache = (JexlCache<String, TemplateExpression>) jexl.cacheFactory.apply(cacheSize);
         immediateChar = immediate;
         deferredChar = deferred;
         noscript = noScript;

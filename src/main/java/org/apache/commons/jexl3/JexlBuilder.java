@@ -17,16 +17,20 @@
 
 package org.apache.commons.jexl3;
 
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.function.IntFunction;
+
 import org.apache.commons.jexl3.internal.Engine;
+import org.apache.commons.jexl3.internal.SoftCache;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.logging.Log;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.nio.charset.Charset;
+
 
 /**
  * Configures and builds a JexlEngine.
@@ -135,6 +139,9 @@ public class JexlBuilder {
 
     /** The cache size. */
     private int cache = -1;
+
+    /** The cache class factory. */
+    private IntFunction<JexlCache<?, ?>> cacheFactory = SoftCache::new;
 
     /** The stack overflow limit. */
     private int stackOverflow = Integer.MAX_VALUE;
@@ -641,6 +648,24 @@ public class JexlBuilder {
      */
     public int cache() {
         return cache;
+    }
+
+    /**
+     * Sets the expression cache factory the engine will use.
+     *
+     * @param factory the function to produce a cache implementation.
+     * @return this builder
+     */
+    public JexlBuilder cacheFactory(final IntFunction<JexlCache<?, ?>> factory) {
+        this.cacheFactory = factory;
+        return this;
+    }
+
+    /**
+     * @return the cache factory
+     */
+    public IntFunction<JexlCache<?, ?>> cacheFactory() {
+        return cacheFactory;
     }
 
     /**
