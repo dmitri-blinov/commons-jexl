@@ -433,7 +433,7 @@ public class JexlArithmetic {
      * @throws ArithmeticException as an option if creation fails
      */
     public Iterable<?> createRange(final Object from, final Object to) throws ArithmeticException {
-        if (isLongPrecisionNumber(from) || isLongPrecisionNumber(to)) {
+        if (isLongPrecisionNumber(from) && isLongPrecisionNumber(to)) {
             final long lfrom = toLong(from);
             final long lto = toLong(to);
             if ((lfrom >= Integer.MIN_VALUE && lfrom <= Integer.MAX_VALUE)
@@ -441,11 +441,13 @@ public class JexlArithmetic {
                 return org.apache.commons.jexl3.internal.IntegerRange.create((int) lfrom, (int) lto);
             }
             return org.apache.commons.jexl3.internal.LongRange.create(lfrom, lto);
-        } else if (from instanceof Comparable && to instanceof Comparable) {
+        } else if ((from == null || from instanceof Comparable) && (to == null || to instanceof Comparable)) {
             return org.apache.commons.jexl3.internal.ComparableRange.create(this, (Comparable) from, (Comparable)to);
         } else {
             throw new ArithmeticException("Range coercion: "
-                + from.getClass().getName() + ".." + to.getClass().getName());
+                + (from != null ? from.getClass().getName() : "null")
+                + ".." 
+                + (to != null ? to.getClass().getName() : "null"));
 
         }
     }
@@ -1462,6 +1464,10 @@ public class JexlArithmetic {
         }
         if (val instanceof AtomicBoolean) {
             return !((AtomicBoolean) val).get();
+        }
+        if (val instanceof Range) {
+            Range r = (Range) val;
+            return createRange(r.getTo(), r.getFrom());
         }
         throw new ArithmeticException("Object negate:(" + val + ")");
     }

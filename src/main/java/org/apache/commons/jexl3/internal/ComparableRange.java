@@ -20,6 +20,7 @@ import org.apache.commons.jexl3.JexlArithmetic;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * A range of integers.
@@ -53,7 +54,7 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
         this.jexla = jexla;
         this.from = from;
         this.to = to;
-        this.ascending = from.compareTo(to) <= 0;
+        this.ascending = from != null && (to == null || from.compareTo(to) <= 0);
     }
 
     /**
@@ -88,8 +89,8 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
     public int hashCode() {
         int hash = getClass().hashCode();
         //CSOFF: MagicNumber
-        hash = 13 * hash + this.from.hashCode();
-        hash = 13 * hash + this.to.hashCode();
+        hash = 13 * hash + (from != null ? from.hashCode() : 0);
+        hash = 13 * hash + (to != null ? to.hashCode() : 0);
         //CSON: MagicNumber
         return hash;
     }
@@ -103,10 +104,10 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
             return false;
         }
         final ComparableRange other = (ComparableRange) obj;
-        if (this.from.compareTo(other.from) != 0) {
+        if (!Object.equals(from, other.from)) {
             return false;
         }
-        if (this.to.compareTo(other.to) != 0) {
+        if (!Object.equals(to, other.to)) {
             return false;
         }
         return true;
@@ -119,7 +120,7 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
     public boolean contains(final Object o) {
         if (o instanceof Comparable) {
             Comparable v = (Comparable) o;
-            return from.compareTo(v) <= 0 && to.compareTo(v) >= 0;
+            return (from == null || from.compareTo(v) <= 0) && (to == null || to.compareTo(v) >= 0);
         }
         return false;
     }
@@ -146,12 +147,12 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
 
         @Override
         public boolean hasNext() {
-            return cursor.compareTo(to) <= 0;
+            return to == null || cursor.compareTo(to) <= 0;
         }
 
         @Override
         public Comparable next() {
-            int result = cursor.compareTo(to);
+            int result = to == null ? -1 : cursor.compareTo(to);
             if (result <= 0) {
                 Comparable value = cursor;
                 cursor = (Comparable) jexla.increment(cursor);
@@ -184,13 +185,13 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
 
         @Override
         public boolean hasNext() {
-            return cursor.compareTo(from) >= 0;
+            return from == null || cursor.compareTo(from) >= 0;
         }
 
         @Override
         public Comparable next() {
 
-            int result = cursor.compareTo(from);
+            int result = from == null ? 1 : cursor.compareTo(from);
             if (result >= 0) {
                 Comparable value = cursor;
                 cursor = (Comparable) jexla.decrement(cursor);
