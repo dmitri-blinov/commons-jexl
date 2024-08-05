@@ -1433,8 +1433,9 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(final ASTReturnStatement node, final Object data) {
         cancelCheck(node);
-        final int numChildren = node.jjtGetNumChildren();
-        Object val = numChildren > 0 ? node.jjtGetChild(0).jjtAccept(this, data) : null;
+        final Object val = node.jjtGetNumChildren() == 1
+            ? node.jjtGetChild(0).jjtAccept(this, data)
+            : null;
         throw new JexlException.Return(node, null, val);
     }
 
@@ -1615,7 +1616,7 @@ public class Interpreter extends InterpreterBase {
         ASTIdentifier loopValueVariable = loopReference.jjtGetNumChildren() > 1 ? 
             (ASTIdentifier) loopReference.jjtGetChild(1) : 
             null;
-        final boolean lexical = loopVariable.isLexical() || options.isLexical() ;// && node.getSymbolCount() > 0;
+        final boolean lexical = loopVariable.isLexical() || options.isLexical();
         if (lexical) {
             // create lexical frame
             final LexicalFrame locals = new LexicalFrame(frame, block);
@@ -3613,17 +3614,17 @@ public class Interpreter extends InterpreterBase {
                                    final JexlOperator assignop, final Object data) { // CSOFF: MethodLength
         cancelCheck(node);
         // left contains the reference to assign to
-        ASTIdentifier var = null;
+        ASTIdentifier variable = null;
         Object object = null;
         Object value = right;
         int symbol = -1;
         // check var decl with assign is ok
         if (left instanceof ASTIdentifier) {
-            var = (ASTIdentifier) left;
-            symbol = var.getSymbol();
-            if (symbol >= 0 && (var.isLexical() || options.isLexical())) {
-                if (var.isShaded() && (var.isLexical() || options.isLexicalShade())) {
-                    return undefinedVariable(var, var.getName());
+            variable = (ASTIdentifier) left;
+            symbol = variable.getSymbol();
+            if (symbol >= 0 && (variable.isLexical() || options.isLexical())) {
+                if (variable.isShaded() && (variable.isLexical() || options.isLexicalShade())) {
+                    return undefinedVariable(variable, variable.getName());
                 }
             }
         }
@@ -3631,16 +3632,16 @@ public class Interpreter extends InterpreterBase {
         // 0: determine initial object & property:
         final int last = left.jjtGetNumChildren() - 1;
         // a (var?) v = ... expression
-        if (var != null) {
+        if (variable != null) {
             if (symbol >= 0) {
                 // check we are not assigning a symbol itself
                 if (last < 0) {
                     boolean isFinal = block.isVariableFinal(symbol);
-                    if (isFinal && !(var instanceof ASTVar || var instanceof ASTExtVar)) {
-                        throw new JexlException(node, "can not assign a value to the final variable: " + var.getName());
+                    if (isFinal && !(variable instanceof ASTVar || variable instanceof ASTExtVar)) {
+                        throw new JexlException(node, "can not assign a value to the final variable: " + variable.getName());
                     }
                     if (assignop != null) {
-                        final Object self = getVariable(frame, block, var);
+                        final Object self = getVariable(frame, block, variable);
                         value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
                             operators.tryAssignOverload(node, assignop, self, value);
                         if (value == JexlOperator.ASSIGN) {
@@ -3656,12 +3657,12 @@ public class Interpreter extends InterpreterBase {
                             value = arithmetic.cast(type, value);
                         }
                         if (type.isPrimitive() && value == null) {
-                            throw new JexlException(node, "not null value required for: " + var.getName());
+                            throw new JexlException(node, "not null value required for: " + variable.getName());
                         }
                     }
                     boolean isRequired = block.isVariableRequired(symbol);
                     if (isRequired && value == null) {
-                        throw new JexlException(node, "not null value required for: " + var.getName());
+                        throw new JexlException(node, "not null value required for: " + variable.getName());
                     }
 
                     frame.set(symbol, value);
@@ -3671,24 +3672,24 @@ public class Interpreter extends InterpreterBase {
                     }
                     return value; // 1
                 }
-                object = getVariable(frame, block, var);
+                object = getVariable(frame, block, variable);
                 // top level is a symbol, can not be an antish var
                 antish = false;
             } else {
                 // check we are not assigning direct global
                 if (last < 0) {
                     if (assignop != null) {
-                        final Object self = context.get(var.getName());
+                        final Object self = context.get(variable.getName());
                         value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
                             operators.tryAssignOverload(node, assignop, self, value);
                         if (value == JexlOperator.ASSIGN) {
                             return self;
                         }
                     }
-                    setContextVariable(node, var.getName(), value);
+                    setContextVariable(node, variable.getName(), value);
                     return value; // 2
                 }
-                object = context.get(var.getName());
+                object = context.get(variable.getName());
                 // top level accesses object, can not be an antish var
                 if (object != null) {
                     antish = false;
@@ -4530,15 +4531,18 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTJxltLiteral node, final Object data) {
-        TemplateEngine.TemplateExpression tp = (TemplateEngine.TemplateExpression) node.jjtGetValue();
-        if (tp == null) {
+        final Object cache = node.getExpression();
+        TemplateEngine.TemplateExpression tp;
+        if (cache instanceof TemplateEngine.TemplateExpression) {
+            tp = (TemplateEngine.TemplateExpression) cache;
+        } else {
             final TemplateEngine jxlt = jexl.jxlt();
             JexlInfo info = node.jexlInfo();
             if (this.block != null) {
                 info = new JexlNode.Info(node, info);
             }
             tp = jxlt.parseExpression(info, node.getLiteral(), frame != null ? frame.getScope() : null);
-            node.jjtSetValue(tp);
+            node.setExpression(tp);
         }
         if (tp != null) {
             return tp.evaluate(context, frame, options);

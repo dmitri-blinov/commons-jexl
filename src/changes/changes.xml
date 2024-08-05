@@ -27,6 +27,12 @@
     <body>
         <release version="3.3" date="YYYY-MM-DD">
             <!-- ADD -->
+            <action dev="henrib" type="fix" issue="JEXL-403" due-to="Xu Pengcheng" >
+                Exception while evaluating template literal used in array assignment in loop.
+            </action>
+            <action dev="henrib" type="fix" issue="JEXL-402" due-to="Xu Pengcheng">
+                Parse failed with empty return value.
+            </action>
             <action dev="Dmitri Blinov" type="add" issue="JEXL-385" due-to="Dmitri Blinov">
                 Support disabling fortran-style relational operators syntax
             </action>

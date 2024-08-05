@@ -16,29 +16,22 @@
  */
 package org.apache.commons.jexl3.parser;
 
+import org.apache.commons.jexl3.JxltEngine;
+
 public final class ASTJxltLiteral extends JexlNode {
-    /**
-     * 
-     */
+    /** Serial uid.*/
     private static final long serialVersionUID = 1L;
-    /** The actual literal value; the inherited 'value' member may host a cached template expression. */
-    private String literal = null;
+    /** The actual literal value. */
+    private String literal;
+    /** The expression (parsed). */
+    private transient JxltEngine.Expression jxltExpression = null;
 
     ASTJxltLiteral(final int id) {
         super(id);
     }
 
-    ASTJxltLiteral(final Parser p, final int id) {
-        super(p, id);
-    }
-
-    void setLiteral(final String literal) {
-        this.literal = literal;
-    }
-
-    @Override
-    public boolean isImmutable() {
-        return true;
+    public JxltEngine.Expression getExpression() {
+        return jxltExpression;
     }
 
     /**
@@ -50,12 +43,20 @@ public final class ASTJxltLiteral extends JexlNode {
     }
 
     @Override
-    public String toString() {
-        return this.literal;
+    public Object jjtAccept(final ParserVisitor visitor, final Object data) {
+        return visitor.visit(this, data);
+    }
+
+    public void setExpression(final JxltEngine.Expression e) {
+        this.jxltExpression = e;
+    }
+
+    void setLiteral(final String literal) {
+        this.literal = literal;
     }
 
     @Override
-    public Object jjtAccept(final ParserVisitor visitor, final Object data) {
-        return visitor.visit(this, data);
+    public String toString() {
+        return this.literal;
     }
 }

@@ -23,18 +23,14 @@ import org.apache.commons.jexl3.JxltEngine;
  * x.`expr`.
  */
 public class ASTIdentifierAccessJxlt extends ASTIdentifierAccess {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-    protected JxltEngine.Expression jxltExpr;
+    protected transient JxltEngine.Expression jxltExpression;
 
     ASTIdentifierAccessJxlt(final int id) {
         super(id);
     }
 
-    ASTIdentifierAccessJxlt(final Parser p, final int id) {
-        super(p, id);
+    public JxltEngine.Expression getExpression() {
+        return jxltExpression;
     }
 
     @Override
@@ -43,11 +39,7 @@ public class ASTIdentifierAccessJxlt extends ASTIdentifierAccess {
     }
 
     public void setExpression(final JxltEngine.Expression tp) {
-        jxltExpr = tp;
-    }
-
-    public JxltEngine.Expression getExpression() {
-        return jxltExpr;
+        jxltExpression = tp;
     }
 
 }
