@@ -882,7 +882,7 @@ public class JexlException extends RuntimeException {
      */
      static String methodSignature(final String name, final Object[] args) {
         if (args != null && args.length > 0) {
-            final StringBuilder strb = new StringBuilder(name);
+            final StringBuilder strb = new StringBuilder(name != null ? name : "?");
             strb.append('(');
             for (int a = 0; a < args.length; ++a) {
                 if (a > 0) {
