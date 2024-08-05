@@ -104,10 +104,10 @@ public class ComparableRange implements JexlArithmetic.Range, Iterable<Comparabl
             return false;
         }
         final ComparableRange other = (ComparableRange) obj;
-        if (!Object.equals(from, other.from)) {
+        if (!Objects.equals(from, other.from)) {
             return false;
         }
-        if (!Object.equals(to, other.to)) {
+        if (!Objects.equals(to, other.to)) {
             return false;
         }
         return true;
