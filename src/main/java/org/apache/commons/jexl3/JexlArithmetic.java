@@ -1542,8 +1542,15 @@ public class JexlArithmetic {
         if (left == null && right == null) {
             return controlNullNullOperands();
         }
-        if (left instanceof Closure && right instanceof Closure) {
-            return Closure.create((Closure) left, (Closure) right);
+        if (right instanceof Closure) {
+            if (left instanceof Closure) {
+                return Closure.create((Closure) left, (Closure) right);
+            } else if (left instanceof Object[]) {
+                return ((Closure) right).execute(null, (Object[]) left);
+            } else {
+                return ((Closure) right).execute(null, left);
+            }
+
         }
         // if either are no longer than integers use that type
         if (isIntegerPrecisionNumber(left)) {
