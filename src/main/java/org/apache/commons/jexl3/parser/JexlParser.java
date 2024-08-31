@@ -543,7 +543,7 @@ public abstract class JexlParser extends StringParser {
         // if not the first time we declare this symbol...
         if (!declareSymbol(symbol, variable.getType(), variable.isLexical(), variable.isConstant(), variable.isRequired())) {
             if (isLexicalVariable(name) || variable.isLexical() || getFeatures().isLexical()) {
-                throw new JexlException.Parsing(variable.jexlInfo(), name + ": variable is already declared").clean();
+                throw new JexlException.Parsing(variable.jexlInfo(info != null ? info.getName() : null), name + ": variable is already declared").clean();
             }
             variable.setRedefined(true);
         }

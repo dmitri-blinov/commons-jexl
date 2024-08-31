@@ -75,6 +75,16 @@ public abstract class JexlNode extends SimpleNode {
      * @return the info
      */
     public JexlInfo jexlInfo() {
+        return jexlInfo(null);
+    }
+
+    /**
+     * Gets the associated JexlInfo instance.
+     *
+     * @param name the source name
+     * @return the info
+     */
+    public JexlInfo jexlInfo(String name) {
         JexlInfo info = null;
         JexlNode node = this;
         while (node != null) {
@@ -88,7 +98,7 @@ public abstract class JexlNode extends SimpleNode {
             final int c = lc & 0xfff;
             final int l = lc >> 0xc;
             // at least an info with line/column number
-            return info != null? info.at(info.getLine() + l - 1, c) : new JexlInfo(null, l, c);
+            return info != null? info.at(info.getLine() + l - 1, c) : new JexlInfo(name, l, c);
         }
         // weird though; no jjSetFirstToken(...) ever called?
         return info;
