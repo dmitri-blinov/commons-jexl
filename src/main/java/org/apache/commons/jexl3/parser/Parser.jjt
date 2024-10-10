@@ -2217,7 +2217,7 @@ void VarParameter() #void :
            v = <IDENTIFIER> { value = resolveStaticField(v, type, v.image); }
        )
        |
-       <ELLIPSIS> { declareVarArgSupport(); } 
+       ( <ELLIPSIS> { declareVarArgSupport(); } )
     ]
 {
     declareParameter(t, type, false, constant, required, value); 
