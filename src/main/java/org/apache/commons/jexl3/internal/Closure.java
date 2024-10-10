@@ -121,12 +121,12 @@ public class Closure extends Script {
 
             if (varArgs) {
                 if (baseCurried >= script.getArgCount()) {
-                   frame = createNewVarArgFrame(sf, scriptArgs(baseCurried, args));
+                   frame = createNewVarArgFrame(sf, scriptArgs(baseCurried, args, true));
                 } else {
-                   frame = sf.assign(scriptArgs(baseCurried, args));
+                   frame = sf.assign(scriptArgs(baseCurried, args, true));
                 }
             } else {
-                frame = sf.assign(scriptArgs(args));
+                frame = sf.assign(scriptArgs(args, true));
             }
             caller = closure.caller;
             context = closure.context;
@@ -136,7 +136,7 @@ public class Closure extends Script {
             options = callerOptions != null ? callerOptions.copy() :  null;
         } else {
             caller = null;
-            frame = script.createFrame(scriptArgs(args));
+            frame = script.createFrame(scriptArgs(args, true));
             context = null;
             curried = args.length;
             chained = null;
@@ -329,12 +329,12 @@ public class Closure extends Script {
             boolean varArgs = script.isVarArgs();
             if (varArgs) {
                 if (curried >= script.getArgCount()) {
-                   local = createNewVarArgFrame(frame, scriptArgs(curried, args));
+                   local = createNewVarArgFrame(frame, scriptArgs(curried, args, false));
                 } else {
-                   local = frame.assign(scriptArgs(curried, args));
+                   local = frame.assign(scriptArgs(curried, args, false));
                 }
             } else {
-                local = frame.assign(scriptArgs(args));
+                local = frame.assign(scriptArgs(curried, args, false));
             }
         } else {
             local = script.createFrame(scriptArgs(args));

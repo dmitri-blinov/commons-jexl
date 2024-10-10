@@ -256,16 +256,27 @@ public class Script implements JexlScript, JexlExpression {
      * @return the script parameter list
      */
     protected Object[] scriptArgs(final Object[] args) {
-        return scriptArgs(0, args);
+        return scriptArgs(0, args, false);
+    }
+
+    /**
+     * Prepares arguments list with regard to type-casting and vararg option.
+     * @param args the passed arguments list
+     * @param nodefs do not process default values
+     * @return the script parameter list
+     */
+    protected Object[] scriptArgs(final Object[] args, boolean nodefs) {
+        return scriptArgs(0, args, nodefs);
     }
 
     /**
      * Prepares arguments list with regard to type-casting and vararg option.
      * @param curried the number of arguments that are already curried for the script
      * @param args the passed arguments list
+     * @param nodefs do not process default values
      * @return the script parameter list
      */
-    protected Object[] scriptArgs(final int curried, final Object[] args) {
+    protected Object[] scriptArgs(final int curried, final Object[] args, boolean nodefs) {
 
         String[] params = getParameters();
         boolean varArgs = isVarArgs();
@@ -337,21 +348,24 @@ public class Script implements JexlScript, JexlExpression {
 
         if (result != null && params != null) {
 
-            // Check the default parameter values
-            for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
-                int pos = i - curried;
-                // Check if the passed arguments list is shorter than the parameters list
-                if (pos >= result.length) {
-                    String name = params[i];
-                    int symbol = frame.getSymbol(name);
-                    Object value = frame.getVariableValue(symbol);
-                    if (value != null) {
-                        Object[] e = new Object[result.length + pos + 1];
-                        if (result.length > 0) {
-                            System.arraycopy(result, 0, e, 0, result.length);
+            if (!nodefs) {
+
+                // Check the default parameter values
+                for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
+                    int pos = i - curried;
+                    // Check if the passed arguments list is shorter than the parameters list
+                    if (pos >= result.length) {
+                        String name = params[i];
+                        int symbol = frame.getSymbol(name);
+                        Object value = frame.getVariableValue(symbol);
+                        if (value != null) {
+                            Object[] e = new Object[result.length + pos + 1];
+                            if (result.length > 0) {
+                                System.arraycopy(result, 0, e, 0, result.length);
+                            }
+                            result = e;
+                            result[pos] = value;
                         }
-                        result = e;
-                        result[pos] = value;
                     }
                 }
             }

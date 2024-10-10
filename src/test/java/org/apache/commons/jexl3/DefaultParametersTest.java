@@ -16,6 +16,8 @@
  */
 package org.apache.commons.jexl3;
 
+import org.apache.commons.jexl3.internal.Closure;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +41,22 @@ public class DefaultParametersTest extends JexlTestCase {
 
     public DefaultParametersTest() {
         super("DefaultParametersTest");
+    }
+
+    public static class CurryArithmetic extends JexlArithmetic {
+        CurryArithmetic(boolean flag) {
+            super(flag);
+        }
+
+        @Override
+        public Object arrayGet(Object object, Object key) throws Exception {
+
+            if (object instanceof Closure)
+                return ((Closure) object).curry(key);
+
+            return super.arrayGet(object, key);
+        }
+
     }
 
     @Test
@@ -147,6 +165,22 @@ public class DefaultParametersTest extends JexlTestCase {
         } catch (Exception ex) {
             // OK
         }
+    }
+
+    @Test
+    public void testCurried() throws Exception {
+        JexlEngine jexl = new JexlBuilder().arithmetic(new CurryArithmetic(false)).create();
+        JexlScript e = jexl.createScript("var x = function(var a, var b = 42) {a + b}; var y = x[2]; y(40)");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", 42, o);
+    }
+
+    @Test
+    public void testCurriedDefault() throws Exception {
+        JexlEngine jexl = new JexlBuilder().arithmetic(new CurryArithmetic(false)).create();
+        JexlScript e = jexl.createScript("var x = function(var a, var b = 42) {a + b}; var y = x[2]; y()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", 44, o);
     }
 
 }
