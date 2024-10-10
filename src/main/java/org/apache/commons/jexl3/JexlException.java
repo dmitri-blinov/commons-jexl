@@ -49,7 +49,7 @@ public class JexlException extends RuntimeException {
     private final transient JexlInfo info;
 
     /** Maximum number of characters around exception location. */
-    private static final int MAX_EXCHARLOC = 42;
+    private static final int MAX_EXCHARLOC = 1024;
 
 
     /**
