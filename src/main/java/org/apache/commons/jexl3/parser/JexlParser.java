@@ -860,7 +860,7 @@ public abstract class JexlParser extends StringParser {
      * @throws JexlException.Ambiguous in all cases
      */
     protected void throwAmbiguousException(final JexlNode node) {
-        final JexlInfo begin = node.jexlInfo();
+        final JexlInfo begin = node.jexlInfo(info != null ? info.getName() : null);
         final Token t = getToken(0);
         final JexlInfo end = info.at(t.beginLine, t.endColumn);
         final String msg = readSourceLine(source, end.getLine());
