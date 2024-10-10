@@ -84,7 +84,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * The list of imported classes.
      */
-    protected static final Map<String, Class> classes = new WeakHashMap<String, Class> ();
+    protected static final Map<String, Class> classes = Collections.synchronizedMap(new WeakHashMap<String, Class> ());
     /**
      * The known namespaces.
      */
