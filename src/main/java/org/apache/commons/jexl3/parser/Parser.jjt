@@ -285,6 +285,7 @@ TOKEN_MGR_DECLS : {
     | < CONST : "const" >
     | < FINAL : "final" >
     | < EMPTY : "empty" >
+    | < AWAIT : "await" >
     | < YIELD : "yield" >
     | < BREAK : "break" >
     | < ASSERT : "assert" > 
@@ -1457,6 +1458,8 @@ void UnaryExpressionNotPlusMinus() #void : {}
     |
     <EMPTY> UnaryExpression() #EmptyFunction(1)
     |
+    <AWAIT> UnaryExpression() #AwaitFunction(1)
+    |
     <SIZE> UnaryExpression() #SizeFunction(1)
     |
     <ELLIPSIS> EnumerationExpression()
@@ -1653,6 +1656,8 @@ void MethodReferenceIdentifier() #Identifier :
     t=<SIZE> { jjtThis.setSymbol(t.image); }
     |
     t=<EMPTY> { jjtThis.setSymbol(t.image); }
+    |
+    t=<AWAIT> { jjtThis.setSymbol(t.image); }
     |
     t=<REMOVE> { jjtThis.setSymbol(t.image); }
     |

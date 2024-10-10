@@ -37,6 +37,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Optional;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -2200,6 +2202,8 @@ public class JexlArithmetic {
             return toBigInteger(val);
         } else if (type == BigDecimal.class) {
             return toBigDecimal(val);
+        } else if (type == Future.class) {
+            return toFuture(val);
         }
         return type.cast(val);
     }
@@ -2884,6 +2888,19 @@ public class JexlArithmetic {
             return "";
         }
         return dval.toString();
+    }
+
+    /**
+     * Coerce to a Future.
+     *
+     * @param val object to be coerced.
+     * @return a Future
+     */
+    public Future toFuture(final Object val) {
+        if (val instanceof Future) {
+            return (Future) val;
+        }
+        return CompletableFuture.completedFuture(val);
     }
 
     /**

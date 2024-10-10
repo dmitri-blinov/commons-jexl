@@ -278,6 +278,8 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTEmptyFunction node, Object data);
 
+    protected abstract Object visit(ASTAwaitFunction node, Object data);
+
     protected abstract Object visit(ASTSizeFunction node, Object data);
 
     protected abstract Object visit(ASTFunctionNode node, Object data);

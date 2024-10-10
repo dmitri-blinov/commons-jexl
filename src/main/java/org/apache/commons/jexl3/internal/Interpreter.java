@@ -42,6 +42,7 @@ import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTAssignment;
 import org.apache.commons.jexl3.parser.ASTAttributeReference;
+import org.apache.commons.jexl3.parser.ASTAwaitFunction;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
@@ -208,6 +209,8 @@ import java.util.Map;
 import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 import java.lang.reflect.Array;
@@ -2954,6 +2957,19 @@ public class Interpreter extends InterpreterBase {
             return operators.empty(node, value);
         } catch(final JexlException xany) {
             return true;
+        }
+    }
+
+    @Override
+    protected Object visit(final ASTAwaitFunction node, final Object data) {
+        try {
+            final Object value = node.jjtGetChild(0).jjtAccept(this, data);
+            Future f = (Future) arithmetic.cast(Future.class, value);
+            return f != null ? f.get() : null;
+        } catch(final ExecutionException xany) {
+            throw new JexlException(node, "get", xany);
+        } catch(final InterruptedException x) {
+            throw new JexlException.Cancel(node);
         }
     }
 

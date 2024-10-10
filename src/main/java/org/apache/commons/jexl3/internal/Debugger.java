@@ -32,6 +32,7 @@ import org.apache.commons.jexl3.parser.ASTArrayOpenDimension;
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTAssignment;
 import org.apache.commons.jexl3.parser.ASTAttributeReference;
+import org.apache.commons.jexl3.parser.ASTAwaitFunction;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
@@ -914,6 +915,13 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(final ASTEmptyFunction node, final Object data) {
         builder.append("empty ");
+        accept(node.jjtGetChild(0), data);
+        return data;
+    }
+
+    @Override
+    protected Object visit(final ASTAwaitFunction node, final Object data) {
+        builder.append("await ");
         accept(node.jjtGetChild(0), data);
         return data;
     }
