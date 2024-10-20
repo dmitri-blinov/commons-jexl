@@ -162,6 +162,30 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTNRNode node, Object data);
 
+    protected abstract Object visit(ASTEQPredicate node, Object data);
+
+    protected abstract Object visit(ASTNEPredicate node, Object data);
+
+    protected abstract Object visit(ASTLTPredicate node, Object data);
+
+    protected abstract Object visit(ASTGTPredicate node, Object data);
+
+    protected abstract Object visit(ASTLEPredicate node, Object data);
+
+    protected abstract Object visit(ASTGEPredicate node, Object data);
+
+    protected abstract Object visit(ASTERPredicate node, Object data);
+
+    protected abstract Object visit(ASTNRPredicate node, Object data);
+
+    protected abstract Object visit(ASTSWPredicate node, Object data);
+
+    protected abstract Object visit(ASTNSWPredicate node, Object data);
+
+    protected abstract Object visit(ASTEWPredicate node, Object data);
+
+    protected abstract Object visit(ASTNEWPredicate node, Object data);
+
     protected abstract Object visit(ASTSWNode node, Object data);
 
     protected abstract Object visit(ASTNSWNode node, Object data);

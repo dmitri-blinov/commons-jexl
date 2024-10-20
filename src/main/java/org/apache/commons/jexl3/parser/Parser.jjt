@@ -1464,11 +1464,41 @@ void UnaryExpressionNotPlusMinus() #void : {}
     |
     <ELLIPSIS> EnumerationExpression()
     |
+    PredicateExpression()
+    |
     LOOKAHEAD(<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus()) (<LPAREN> TypeCastReference() <RPAREN> UnaryExpressionNotPlusMinus() #CastNode(2))
     |
     PostfixExpression()
     |
     LOOKAHEAD( <SWITCH> ) SwitchExpression()
+}
+
+void PredicateExpression() #void : {}
+{
+    (<eq> | <EQ>) UnaryExpression() #EQPredicate(1)
+    |
+    (<ne> | <une> | <NE>) UnaryExpression() #NEPredicate(1)
+    |
+    (<req> | <IN>) UnaryExpression() #ERPredicate(1) // equals regexp
+    |
+    (<rne> | <urne> | <nin>) UnaryExpression() #NRPredicate(1) // not equals regexp
+    |
+    (<lt> |<LT>) UnaryExpression() #LTPredicate(1)
+    |
+    (<gt> | <GT>) UnaryExpression() #GTPredicate(1)
+    |
+    (<le> | <LE>) UnaryExpression() #LEPredicate(1)
+    |
+    (<ge> | <GE>) UnaryExpression() #GEPredicate(1)
+    |
+    <seq> UnaryExpression() #SWPredicate(1) // starts with
+    |
+    <sne> UnaryExpression() #NSWPredicate(1) // not starts with
+    |
+    <eeq> UnaryExpression() #EWPredicate(1) // ends with
+    |
+    <ene> UnaryExpression() #NEWPredicate(1) // not ends with
+
 }
 
 void PostfixExpression() #void : {}
@@ -1505,9 +1535,9 @@ void EnumerationAccess() #void : {}
 void Selection() #SelectionNode : {}
 {
     <DOTB> (
-      StopCountSelection()
+      LOOKAHEAD(<lt> | <LT>) StopCountSelection()
       |
-      StartCountSelection()
+      LOOKAHEAD(<gt> | <GT>) StartCountSelection()
       |
       ExpressionLambda()
     ) <RBRACKET>

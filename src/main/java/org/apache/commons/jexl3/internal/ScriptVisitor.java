@@ -51,8 +51,11 @@ import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
+import org.apache.commons.jexl3.parser.ASTEQPredicate;
 import org.apache.commons.jexl3.parser.ASTERNode;
+import org.apache.commons.jexl3.parser.ASTERPredicate;
 import org.apache.commons.jexl3.parser.ASTEWNode;
+import org.apache.commons.jexl3.parser.ASTEWPredicate;
 import org.apache.commons.jexl3.parser.ASTElvisNode;
 import org.apache.commons.jexl3.parser.ASTEmptyFunction;
 import org.apache.commons.jexl3.parser.ASTEnumerationNode;
@@ -70,7 +73,9 @@ import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTFunctionVar;
 import org.apache.commons.jexl3.parser.ASTGENode;
+import org.apache.commons.jexl3.parser.ASTGEPredicate;
 import org.apache.commons.jexl3.parser.ASTGTNode;
+import org.apache.commons.jexl3.parser.ASTGTPredicate;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTIncrementGetNode;
@@ -97,7 +102,9 @@ import org.apache.commons.jexl3.parser.ASTISNode;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 import org.apache.commons.jexl3.parser.ASTJxltLiteral;
 import org.apache.commons.jexl3.parser.ASTLENode;
+import org.apache.commons.jexl3.parser.ASTLEPredicate;
 import org.apache.commons.jexl3.parser.ASTLTNode;
+import org.apache.commons.jexl3.parser.ASTLTPredicate;
 import org.apache.commons.jexl3.parser.ASTMapEntry;
 import org.apache.commons.jexl3.parser.ASTMapEntryLiteral;
 import org.apache.commons.jexl3.parser.ASTMapEnumerationNode;
@@ -113,11 +120,15 @@ import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
 import org.apache.commons.jexl3.parser.ASTMultiVar;
 import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
+import org.apache.commons.jexl3.parser.ASTNEPredicate;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
+import org.apache.commons.jexl3.parser.ASTNEWPredicate;
 import org.apache.commons.jexl3.parser.ASTNINode;
 import org.apache.commons.jexl3.parser.ASTNIOFNode;
 import org.apache.commons.jexl3.parser.ASTNRNode;
+import org.apache.commons.jexl3.parser.ASTNRPredicate;
 import org.apache.commons.jexl3.parser.ASTNSWNode;
+import org.apache.commons.jexl3.parser.ASTNSWPredicate;
 import org.apache.commons.jexl3.parser.ASTNotNode;
 import org.apache.commons.jexl3.parser.ASTNullAssignment;
 import org.apache.commons.jexl3.parser.ASTNullLiteral;
@@ -135,6 +146,7 @@ import org.apache.commons.jexl3.parser.ASTRegexLiteral;
 import org.apache.commons.jexl3.parser.ASTRemove;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
 import org.apache.commons.jexl3.parser.ASTSWNode;
+import org.apache.commons.jexl3.parser.ASTSWPredicate;
 import org.apache.commons.jexl3.parser.ASTSelectionNode;
 import org.apache.commons.jexl3.parser.ASTSetAddNode;
 import org.apache.commons.jexl3.parser.ASTSetAndNode;
@@ -497,7 +509,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTEQPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTNENode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTNEPredicate node, final Object data) {
         return visitNode(node, data);
     }
 
@@ -507,7 +529,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTLTPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTGTNode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTGTPredicate node, final Object data) {
         return visitNode(node, data);
     }
 
@@ -517,7 +549,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTLEPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTGENode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTGEPredicate node, final Object data) {
         return visitNode(node, data);
     }
 
@@ -527,7 +569,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTERPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTNRNode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTNRPredicate node, final Object data) {
         return visitNode(node, data);
     }
 
@@ -537,7 +589,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTSWPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTNSWNode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTNSWPredicate node, final Object data) {
         return visitNode(node, data);
     }
 
@@ -547,7 +609,17 @@ public class ScriptVisitor extends ParserVisitor {
     }
 
     @Override
+    protected Object visit(final ASTEWPredicate node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
     protected Object visit(final ASTNEWNode node, final Object data) {
+        return visitNode(node, data);
+    }
+
+    @Override
+    protected Object visit(final ASTNEWPredicate node, final Object data) {
         return visitNode(node, data);
     }
 

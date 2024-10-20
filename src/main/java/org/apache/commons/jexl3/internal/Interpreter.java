@@ -62,8 +62,11 @@ import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTDivNode;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
 import org.apache.commons.jexl3.parser.ASTEQNode;
+import org.apache.commons.jexl3.parser.ASTEQPredicate;
 import org.apache.commons.jexl3.parser.ASTERNode;
+import org.apache.commons.jexl3.parser.ASTERPredicate;
 import org.apache.commons.jexl3.parser.ASTEWNode;
+import org.apache.commons.jexl3.parser.ASTEWPredicate;
 import org.apache.commons.jexl3.parser.ASTElvisNode;
 import org.apache.commons.jexl3.parser.ASTEmptyFunction;
 import org.apache.commons.jexl3.parser.ASTEnumerationNode;
@@ -81,7 +84,9 @@ import org.apache.commons.jexl3.parser.ASTFunctionNode;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTFunctionVar;
 import org.apache.commons.jexl3.parser.ASTGENode;
+import org.apache.commons.jexl3.parser.ASTGEPredicate;
 import org.apache.commons.jexl3.parser.ASTGTNode;
+import org.apache.commons.jexl3.parser.ASTGTPredicate;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccess;
 import org.apache.commons.jexl3.parser.ASTIdentifierAccessJxlt;
@@ -110,7 +115,9 @@ import org.apache.commons.jexl3.parser.ASTJexlLambda;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 import org.apache.commons.jexl3.parser.ASTJxltLiteral;
 import org.apache.commons.jexl3.parser.ASTLENode;
+import org.apache.commons.jexl3.parser.ASTLEPredicate;
 import org.apache.commons.jexl3.parser.ASTLTNode;
+import org.apache.commons.jexl3.parser.ASTLTPredicate;
 import org.apache.commons.jexl3.parser.ASTMapEntry;
 import org.apache.commons.jexl3.parser.ASTMapEntryLiteral;
 import org.apache.commons.jexl3.parser.ASTMapEnumerationNode;
@@ -126,11 +133,15 @@ import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
 import org.apache.commons.jexl3.parser.ASTMultiVar;
 import org.apache.commons.jexl3.parser.ASTNEAssignment;
 import org.apache.commons.jexl3.parser.ASTNENode;
+import org.apache.commons.jexl3.parser.ASTNEPredicate;
 import org.apache.commons.jexl3.parser.ASTNEWNode;
+import org.apache.commons.jexl3.parser.ASTNEWPredicate;
 import org.apache.commons.jexl3.parser.ASTNINode;
 import org.apache.commons.jexl3.parser.ASTNIOFNode;
 import org.apache.commons.jexl3.parser.ASTNRNode;
+import org.apache.commons.jexl3.parser.ASTNRPredicate;
 import org.apache.commons.jexl3.parser.ASTNSWNode;
+import org.apache.commons.jexl3.parser.ASTNSWPredicate;
 import org.apache.commons.jexl3.parser.ASTNotNode;
 import org.apache.commons.jexl3.parser.ASTNullAssignment;
 import org.apache.commons.jexl3.parser.ASTNullLiteral;
@@ -148,6 +159,7 @@ import org.apache.commons.jexl3.parser.ASTRegexLiteral;
 import org.apache.commons.jexl3.parser.ASTRemove;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
 import org.apache.commons.jexl3.parser.ASTSWNode;
+import org.apache.commons.jexl3.parser.ASTSWPredicate;
 import org.apache.commons.jexl3.parser.ASTSelectionNode;
 import org.apache.commons.jexl3.parser.ASTSetAddNode;
 import org.apache.commons.jexl3.parser.ASTSetAndNode;
@@ -624,6 +636,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTEQPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.EQ, node, false, left);
+    }
+
+    @Override
     protected Object visit(final ASTNENode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -649,6 +667,12 @@ public class Interpreter extends InterpreterBase {
                 throw new JexlException(findNullOperand(node, left, right), "!= error", xrt);
             }
         }
+    }
+
+    @Override
+    protected Object visit(final ASTNEPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.EQ, node, true, left);
     }
 
     @Override
@@ -680,6 +704,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTGEPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.GTE, node, false, left);
+    }
+
+    @Override
     protected Object visit(final ASTGTNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -705,6 +735,12 @@ public class Interpreter extends InterpreterBase {
                 throw new JexlException(findNullOperand(node, left, right), "> error", xrt);
             }
         }
+    }
+
+    @Override
+    protected Object visit(final ASTGTPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.GT, node, false, left);
     }
 
     @Override
@@ -736,6 +772,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTLEPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.LTE, node, false, left);
+    }
+
+    @Override
     protected Object visit(final ASTLTNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -764,6 +806,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTLTPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.LT, node, false, left);
+    }
+
+    @Override
     protected Object visit(final ASTSWNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -775,6 +823,12 @@ public class Interpreter extends InterpreterBase {
             Object right = operand.jjtAccept(this, data);
             return operators.startsWith(node, "^=", left, right);
         }
+    }
+
+    @Override
+    protected Object visit(final ASTSWPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.STARTSWITH, node, false, left);
     }
 
     @Override
@@ -792,6 +846,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTNSWPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.STARTSWITH, node, true, left);
+    }
+
+    @Override
     protected Object visit(final ASTEWNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -803,6 +863,12 @@ public class Interpreter extends InterpreterBase {
             Object right = operand.jjtAccept(this, data);
             return operators.endsWith(node, "$=", left, right);
         }
+    }
+
+    @Override
+    protected Object visit(final ASTEWPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.ENDSWITH, node, false, left);
     }
 
     @Override
@@ -820,6 +886,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTNEWPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.ENDSWITH, node, true, left);
+    }
+
+    @Override
     protected Object visit(final ASTERNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -834,6 +906,12 @@ public class Interpreter extends InterpreterBase {
     }
 
     @Override
+    protected Object visit(final ASTERPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.CONTAINS, node, false, left);
+    }
+
+    @Override
     protected Object visit(final ASTNRNode node, final Object data) {
         final Object left = node.jjtGetChild(0).jjtAccept(this, data);
         JexlNode operand = node.jjtGetChild(1);
@@ -845,6 +923,12 @@ public class Interpreter extends InterpreterBase {
             Object right = operand.jjtAccept(this, data);
             return !operators.contains(node, "!~", right, left);
         }
+    }
+
+    @Override
+    protected Object visit(final ASTNRPredicate node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        return createPredicate(JexlOperator.CONTAINS, node, true, left);
     }
 
     @Override
@@ -5141,6 +5225,10 @@ public class Interpreter extends InterpreterBase {
             }
         }
         return result;
+    }
+
+    protected Object createPredicate(JexlOperator operator, JexlNode node, boolean negate, Object operand) {
+        return RelationalPredicate.create(arithmetic, operators, operator, node, negate, operand);
     }
 
 }
