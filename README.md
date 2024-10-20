@@ -183,6 +183,8 @@ New features
 
 + New set operators *any* `?()` and *all* `??()` that can be used in conjunction with relational operators are introduced
 
++ New predicates operators like (>42) or (<0) are introduced
+
 Enhancements
 ------------
 + Java-like labelled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used.
