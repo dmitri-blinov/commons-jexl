@@ -38,59 +38,88 @@ public class RelationalPredicate implements Predicate<Object> {
     protected final JexlOperator operator;
     /** The relational operator negate flag. */
     protected final boolean negated;
-    /** The operand. */
-    protected final Object operand;
+    /** The compare with any of operands succeeds flag. */
+    protected final boolean any;
+    /** The operands. */
+    protected final Object[] operands;
 
-    protected RelationalPredicate(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, Object operand) {
+    protected RelationalPredicate(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
         this.arithmetic = arithmetic;
         this.operators = operators;
         this.node = node;
         this.operator = operator;
         this.negated = negate;
-        this.operand = operand;
+        this.any = any;
+        this.operands = operands;
     }
 
     public JexlOperator getOperator() {
         return operator;
     }
 
+    public Object[] getOperands() {
+        return operands;
+    }
+
     public Object getOperand() {
-        return operand;
+        return operands != null && operands.length > 0 ? operands[0] : null;
     }
 
     public boolean isNegated() {
         return negated;
     }
 
-    @Override
-    public boolean test(Object t) {
-
-        switch(operator) {
-            case EQ:
-                return negated ? !operators.equals(node, "!=", t, operand) : operators.equals(node, "==", t, operand);
-            case CONTAINS:
-                return negated ? !operators.contains(node, "!~", operand, t) : operators.contains(node, "=~", operand, t);
-            case LT:
-                return negated ? !operators.lessThan(node, t, operand) : operators.lessThan(node, t, operand);
-            case LTE:
-                return negated ? !operators.lessThanOrEqual(node, t, operand) : operators.lessThanOrEqual(node, t, operand);
-            case GT:
-                return negated ? !operators.greaterThan(node, t, operand) : operators.greaterThan(node, t, operand);
-            case GTE:
-                return negated ? !operators.greaterThanOrEqual(node, t, operand) : operators.greaterThanOrEqual(node, t, operand);
-            case STARTSWITH:
-                return negated ? !operators.startsWith(node, "^!", t, operand) : operators.startsWith(node, "^=", t, operand);
-            case ENDSWITH:
-                return negated ? !operators.endsWith(node, "$!", t, operand) : operators.endsWith(node, "$=", t, operand);
-            default:
-        }
-
-        return false;
+    public boolean isAny() {
+        return any;
     }
 
     @Override
+    public boolean test(Object t) {
+
+        Boolean ok = false;
+
+        for (Object operand : operands) {
+
+           switch(operator) {
+               case EQ:
+                   ok = negated ? !operators.equals(node, "!=", t, operand) : operators.equals(node, "==", t, operand);
+                   break;
+               case CONTAINS:
+                   ok = negated ? !operators.contains(node, "!~", operand, t) : operators.contains(node, "=~", operand, t);
+                   break;
+               case LT:
+                   ok = negated ? !operators.lessThan(node, t, operand) : operators.lessThan(node, t, operand);
+                   break;
+               case LTE:
+                   ok = negated ? !operators.lessThanOrEqual(node, t, operand) : operators.lessThanOrEqual(node, t, operand);
+                   break;
+               case GT:
+                   ok = negated ? !operators.greaterThan(node, t, operand) : operators.greaterThan(node, t, operand);
+                   break;
+               case GTE:
+                   ok = negated ? !operators.greaterThanOrEqual(node, t, operand) : operators.greaterThanOrEqual(node, t, operand);
+                   break;
+               case STARTSWITH:
+                   ok = negated ? !operators.startsWith(node, "^!", t, operand) : operators.startsWith(node, "^=", t, operand);
+                   break;
+               case ENDSWITH:
+                   ok = negated ? !operators.endsWith(node, "$!", t, operand) : operators.endsWith(node, "$=", t, operand);
+                   break;
+               default:
+           }
+
+           if (ok && any || !ok && !any) {
+               return ok;
+           }
+        }
+
+        return ok;
+    }
+
+
+    @Override
     public Predicate<Object> negate() {
-        return create(arithmetic, operators, operator, node, !negated, operand);
+        return create(arithmetic, operators, operator, node, !negated, !any, operands);
     }
 
     @Override
@@ -103,8 +132,8 @@ public class RelationalPredicate implements Predicate<Object> {
         return new OrPredicate(this, t);
     }
 
-    static Predicate<Object> create(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, Object operand) {
-        return new RelationalPredicate(arithmetic, operators, operator, node, negate, operand);
+    static Predicate<Object> create(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
+        return new RelationalPredicate(arithmetic, operators, operator, node, negate, any, operands);
     }
 
     public static class NotPredicate implements Predicate<Object> {

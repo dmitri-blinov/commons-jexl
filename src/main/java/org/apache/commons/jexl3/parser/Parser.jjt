@@ -1475,29 +1475,29 @@ void UnaryExpressionNotPlusMinus() #void : {}
 
 void PredicateExpression() #void : {}
 {
-    (<eq> | <EQ>) UnaryExpression() #EQPredicate(1)
+    (<eq> | <EQ>) RelationalExpressionOperand() #EQPredicate(1)
     |
-    (<ne> | <une> | <NE>) UnaryExpression() #NEPredicate(1)
+    (<ne> | <une> | <NE>) RelationalExpressionOperand() #NEPredicate(1)
     |
-    (<req> | <IN>) UnaryExpression() #ERPredicate(1) // equals regexp
+    (<req> | <IN>) RelationalExpressionOperand() #ERPredicate(1) // equals regexp
     |
-    (<rne> | <urne> | <nin>) UnaryExpression() #NRPredicate(1) // not equals regexp
+    (<rne> | <urne> | <nin>) RelationalExpressionOperand() #NRPredicate(1) // not equals regexp
     |
-    (<lt> |<LT>) UnaryExpression() #LTPredicate(1)
+    (<lt> |<LT>) RelationalExpressionOperand() #LTPredicate(1)
     |
-    (<gt> | <GT>) UnaryExpression() #GTPredicate(1)
+    (<gt> | <GT>) RelationalExpressionOperand() #GTPredicate(1)
     |
-    (<le> | <LE>) UnaryExpression() #LEPredicate(1)
+    (<le> | <LE>) RelationalExpressionOperand() #LEPredicate(1)
     |
-    (<ge> | <GE>) UnaryExpression() #GEPredicate(1)
+    (<ge> | <GE>) RelationalExpressionOperand() #GEPredicate(1)
     |
-    <seq> UnaryExpression() #SWPredicate(1) // starts with
+    <seq> RelationalExpressionOperand() #SWPredicate(1) // starts with
     |
-    <sne> UnaryExpression() #NSWPredicate(1) // not starts with
+    <sne> RelationalExpressionOperand() #NSWPredicate(1) // not starts with
     |
-    <eeq> UnaryExpression() #EWPredicate(1) // ends with
+    <eeq> RelationalExpressionOperand() #EWPredicate(1) // ends with
     |
-    <ene> UnaryExpression() #NEWPredicate(1) // not ends with
+    <ene> RelationalExpressionOperand() #NEWPredicate(1) // not ends with
 
 }
 

@@ -623,8 +623,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTEQPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.EQ, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.EQ, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.EQ, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -643,8 +648,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTNEPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.EQ, node, true, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.EQ, node, true, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.EQ, node, true, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -663,8 +673,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTGEPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.GTE, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.GTE, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.GTE, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -683,8 +698,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTGTPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.GT, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.GT, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.GT, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -703,8 +723,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTLEPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.LTE, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.LTE, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.LTE, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -723,8 +748,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTLTPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.LT, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.LT, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.LT, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -743,8 +773,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTSWPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.STARTSWITH, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.STARTSWITH, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.STARTSWITH, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -763,8 +798,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTNSWPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.STARTSWITH, node, true, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.STARTSWITH, node, true, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.STARTSWITH, node, true, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -783,8 +823,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTEWPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.ENDSWITH, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.ENDSWITH, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.ENDSWITH, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -803,8 +848,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTNEWPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.ENDSWITH, node, true, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.ENDSWITH, node, true, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.ENDSWITH, node, true, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -823,8 +873,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTERPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.CONTAINS, node, false, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.CONTAINS, node, false, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.CONTAINS, node, false, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -843,8 +898,13 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTNRPredicate node, final Object data) {
-        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
-        return createPredicate(JexlOperator.CONTAINS, node, true, left);
+        final JexlNode right = node.jjtGetChild(0);
+        if (right instanceof ASTSetOperand) {
+            ASTSetOperand operand = (ASTSetOperand) right;
+            return createPredicate(JexlOperator.CONTAINS, node, true, operand.isAny(), (Object[]) right.jjtAccept(this, data));
+        } else {
+            return createPredicate(JexlOperator.CONTAINS, node, true, true, right.jjtAccept(this, data));
+        }
     }
 
     @Override
@@ -2507,7 +2567,32 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTSetOperand node, final Object data) {
-        return null;
+
+        ArrayList<Object> result = new ArrayList<> ();
+
+        int numChildren = node.jjtGetNumChildren();
+        for (int i = 0; i < numChildren; i++) {
+            cancelCheck(node);
+            JexlNode child = node.jjtGetChild(i);
+            if (child instanceof ASTEnumerationNode || child instanceof ASTEnumerationReference) {
+                Iterator<?> it = (Iterator<?>) child.jjtAccept(this, data);
+                if (it != null) {
+                    try {
+                        while (it.hasNext()) {
+                            Object right = it.next();
+                            result.add(right);
+                        }
+                    } finally {
+                        closeIfSupported(it);
+                    }
+                }
+            } else {
+                Object right = child.jjtAccept(this, data);
+                result.add(right);
+            }
+        }
+
+        return result.toArray();
     }
 
     @Override
@@ -5143,8 +5228,8 @@ public class Interpreter extends InterpreterBase {
         return result;
     }
 
-    protected Object createPredicate(JexlOperator operator, JexlNode node, boolean negate, Object operand) {
-        return RelationalPredicate.create(arithmetic, operators, operator, node, negate, operand);
+    protected Object createPredicate(JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
+        return RelationalPredicate.create(arithmetic, operators, operator, node, negate, any, operands);
     }
 
 }

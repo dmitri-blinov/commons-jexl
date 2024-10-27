@@ -42,9 +42,27 @@ public class PredicateTest extends JexlTestCase {
     }
 
     @Test
+    public void testEqualsSetAnyPredicate() throws Exception {
+        JexlContext jc = new MapContext();
+        Object o = JEXL.createScript("var x = (==?(42,43))").execute(jc);
+        Assert.assertTrue(o instanceof Predicate<?>);
+        Assert.assertTrue(((Predicate<Object>) o).test(42));
+        Assert.assertFalse(((Predicate<Object>) o).test(41));
+    }
+
+    @Test
     public void testNotEqualsPredicate() throws Exception {
         JexlContext jc = new MapContext();
         Object o = JEXL.createScript("var x = (!=42)").execute(jc);
+        Assert.assertTrue(o instanceof Predicate<?>);
+        Assert.assertFalse(((Predicate<Object>) o).test(42));
+        Assert.assertTrue(((Predicate<Object>) o).test(41));
+    }
+
+    @Test
+    public void testNotEqualsSetAllPredicate() throws Exception {
+        JexlContext jc = new MapContext();
+        Object o = JEXL.createScript("var x = (!=??(42,43))").execute(jc);
         Assert.assertTrue(o instanceof Predicate<?>);
         Assert.assertFalse(((Predicate<Object>) o).test(42));
         Assert.assertTrue(((Predicate<Object>) o).test(41));
