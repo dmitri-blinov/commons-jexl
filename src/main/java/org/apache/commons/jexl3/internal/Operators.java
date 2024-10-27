@@ -590,6 +590,27 @@ public class Operators {
     }
 
     /**
+     * The 'equals' operator implementation.
+     * @param node     the node
+     * @param op       the calling operator, == or !=
+     * @param left     the left operand
+     * @param right    the right operand
+     * @return true if left equals right, false otherwise
+     */
+    protected boolean equals(final JexlNode node, final String op, final Object left, final Object right) {
+        try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
+            // try operator overload
+            Object result = tryOverload(node, JexlOperator.EQ, left, right);
+            return result != JexlEngine.TRY_FAILED
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.equals(left, right);
+        } catch (ArithmeticException xrt) {
+            throw new JexlException(interpreter.findNullOperand(node, left, right), op + " error", xrt);
+        }
+    }
+
+    /**
      * Check for emptyness of various types: Collection, Array, Map, String, and anything that has a boolean isEmpty()
      * method.
      * <p>Note that the result may not be a boolean.
