@@ -71,13 +71,13 @@ public class RelationalPredicate implements Predicate<Object> {
             case CONTAINS:
                 return negated ? !operators.contains(node, "!~", operand, t) : operators.contains(node, "=~", operand, t);
             case LT:
-                return negated ? !arithmetic.lessThan(t, operand) : arithmetic.lessThan(t, operand);
+                return negated ? !operators.lessThan(node, t, operand) : operators.lessThan(node, t, operand);
             case LTE:
-                return negated ? !arithmetic.lessThanOrEqual(t, operand) : arithmetic.lessThanOrEqual(t, operand);
+                return negated ? !operators.lessThanOrEqual(node, t, operand) : operators.lessThanOrEqual(node, t, operand);
             case GT:
-                return negated ? !arithmetic.greaterThan(t, operand) : arithmetic.greaterThan(t, operand);
+                return negated ? !operators.greaterThan(node, t, operand) : operators.greaterThan(node, t, operand);
             case GTE:
-                return negated ? !arithmetic.greaterThanOrEqual(t, operand) : arithmetic.greaterThanOrEqual(t, operand);
+                return negated ? !operators.greaterThanOrEqual(node, t, operand) : operators.greaterThanOrEqual(node, t, operand);
             case STARTSWITH:
                 return negated ? !operators.startsWith(node, "^!", t, operand) : operators.startsWith(node, "^=", t, operand);
             case ENDSWITH:
