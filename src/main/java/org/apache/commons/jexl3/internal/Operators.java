@@ -510,6 +510,86 @@ public class Operators {
     }
 
     /**
+     * The 'greaterThanOrEqual' operator implementation.
+     * @param node     the node
+     * @param left     the left operand
+     * @param right    the right operand
+     * @return true if left greater or equlas right, false otherwise
+     */
+    protected boolean greaterThanOrEqual(final JexlNode node, final Object left, final Object right) {
+        try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
+            // try operator overload
+            Object result = tryOverload(node, JexlOperator.GTE, left, right);
+            return result != JexlEngine.TRY_FAILED
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.greaterThanOrEqual(left, right);
+        } catch (ArithmeticException xrt) {
+            throw new JexlException(interpreter.findNullOperand(node, left, right), ">= error", xrt);
+        }
+    }
+
+    /**
+     * The 'greaterThan' operator implementation.
+     * @param node     the node
+     * @param left     the left operand
+     * @param right    the right operand
+     * @return true if left greater right, false otherwise
+     */
+    protected boolean greaterThan(final JexlNode node, final Object left, final Object right) {
+        try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
+            // try operator overload
+            Object result = tryOverload(node, JexlOperator.GT, left, right);
+            return result != JexlEngine.TRY_FAILED
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.greaterThan(left, right);
+        } catch (ArithmeticException xrt) {
+            throw new JexlException(interpreter.findNullOperand(node, left, right), "> error", xrt);
+        }
+    }
+
+    /**
+     * The 'lessThanOrEqual' operator implementation.
+     * @param node     the node
+     * @param left     the left operand
+     * @param right    the right operand
+     * @return true if left less or equlas right, false otherwise
+     */
+    protected boolean lessThanOrEqual(final JexlNode node, final Object left, final Object right) {
+        try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
+            // try operator overload
+            Object result = tryOverload(node, JexlOperator.LTE, left, right);
+            return result != JexlEngine.TRY_FAILED
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.lessThanOrEqual(left, right);
+        } catch (ArithmeticException xrt) {
+            throw new JexlException(interpreter.findNullOperand(node, left, right), "<= error", xrt);
+        }
+    }
+
+    /**
+     * The 'lessThan' operator implementation.
+     * @param node     the node
+     * @param left     the left operand
+     * @param right    the right operand
+     * @return true if left greater right, false otherwise
+     */
+    protected boolean lessThan(final JexlNode node, final Object left, final Object right) {
+        try {
+            final JexlArithmetic arithmetic = interpreter.arithmetic;
+            // try operator overload
+            Object result = tryOverload(node, JexlOperator.LT, left, right);
+            return result != JexlEngine.TRY_FAILED
+                   ? arithmetic.toBoolean(result)
+                   : arithmetic.lessThan(left, right);
+        } catch (ArithmeticException xrt) {
+            throw new JexlException(interpreter.findNullOperand(node, left, right), "< error", xrt);
+        }
+    }
+
+    /**
      * Check for emptyness of various types: Collection, Array, Map, String, and anything that has a boolean isEmpty()
      * method.
      * <p>Note that the result may not be a boolean.

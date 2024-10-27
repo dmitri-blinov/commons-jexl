@@ -681,25 +681,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                try {
-                    Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
-                    return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result)
-                           : arithmetic.greaterThanOrEqual(left, right);
-                } catch (ArithmeticException xrt) {
-                    throw new JexlException(findNullOperand(node, left, right), ">= error", xrt);
-                }
+                return operators.greaterThanOrEqual(node, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            try {
-                Object result = operators.tryOverload(node, JexlOperator.GTE, left, right);
-                return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result) 
-                       : arithmetic.greaterThanOrEqual(left, right);
-            } catch (ArithmeticException xrt) {
-                throw new JexlException(findNullOperand(node, left, right), ">= error", xrt);
-            }
+            return operators.greaterThanOrEqual(node, left, right);
         }
     }
 
@@ -715,25 +701,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                try {
-                    Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
-                    return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result)
-                           : arithmetic.greaterThan(left, right);
-                } catch (ArithmeticException xrt) {
-                    throw new JexlException(findNullOperand(node, left, right), "> error", xrt);
-                }
+                return operators.greaterThan(node, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            try {
-                Object result = operators.tryOverload(node, JexlOperator.GT, left, right);
-                return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result)
-                       : arithmetic.greaterThan(left, right);
-            } catch (ArithmeticException xrt) {
-                throw new JexlException(findNullOperand(node, left, right), "> error", xrt);
-            }
+            return operators.greaterThan(node, left, right);
         }
     }
 
@@ -749,25 +721,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                try {
-                    Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
-                    return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result)
-                           : arithmetic.lessThanOrEqual(left, right);
-                } catch (ArithmeticException xrt) {
-                    throw new JexlException(findNullOperand(node, left, right), "<= error", xrt);
-                }
+                return operators.lessThanOrEqual(node, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            try {
-                Object result = operators.tryOverload(node, JexlOperator.LTE, left, right);
-                return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result)
-                       : arithmetic.lessThanOrEqual(left, right);
-            } catch (ArithmeticException xrt) {
-                throw new JexlException(findNullOperand(node, left, right), "<= error", xrt);
-            }
+            return operators.lessThanOrEqual(node, left, right);
         }
     }
 
@@ -783,25 +741,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                try {
-                    Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
-                    return result != JexlEngine.TRY_FAILED
-                           ? arithmetic.toBoolean(result)
-                           : arithmetic.lessThan(left, right);
-                } catch (ArithmeticException xrt) {
-                    throw new JexlException(findNullOperand(node, left, right), "< error", xrt);
-                }
+                return operators.lessThan(node, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            try {
-                Object result = operators.tryOverload(node, JexlOperator.LT, left, right);
-                return result != JexlEngine.TRY_FAILED
-                       ? arithmetic.toBoolean(result)
-                       : arithmetic.lessThan(left, right);
-            } catch (ArithmeticException xrt) {
-                throw new JexlException(findNullOperand(node, left, right), "< error", xrt);
-            }
+            return operators.lessThan(node, left, right);
         }
     }
 
