@@ -67,7 +67,7 @@ public class RelationalPredicate implements Predicate<Object> {
 
         switch(operator) {
             case EQ:
-                return negated ? !arithmetic.equals(t, operand) : arithmetic.equals(t, operand);
+                return negated ? !operators.equals(node, "!=", t, operand) : operators.equals(node, "==", t, operand);
             case CONTAINS:
                 return negated ? !operators.contains(node, "!~", operand, t) : operators.contains(node, "=~", operand, t);
             case LT:
