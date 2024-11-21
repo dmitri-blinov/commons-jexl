@@ -920,6 +920,13 @@
                     </td>
                 </tr>
                 <tr>
+                    <td>Bitwise <code>diff</code></td>
+                    <td>
+                        The <code>\</code> operator is equivalent of 'a' <code>&amp;</code> <code>~</code> 'b', e.g.
+                        <code>33 \ 4</code>, 0010 0001 \ 0000 0101 = 0010 0000 = 36.
+                    </td>
+                </tr>
+                <tr>
                     <td>Bitwise <code>xor</code></td>
                     <td>
                         The usual <code>^</code> operator is used, e.g.
@@ -1368,6 +1375,7 @@
                             <li>&amp;=</li>
                             <li>|=</li>
                             <li>^=</li>
+                            <li>\\=</li>
                             <li>&lt;&lt;=</li>
                             <li>&gt;&gt;=</li>
                             <li>&gt;&gt;&gt;=</li>

@@ -780,6 +780,7 @@ public abstract class JexlParser extends StringParser {
             ASTSetModNode.class,
             ASTSetAndNode.class,
             ASTSetOrNode.class,
+            ASTSetDiffNode.class,
             ASTSetXorNode.class,
             ASTSetShiftLeftNode.class,
             ASTSetShiftRightNode.class,

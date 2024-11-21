@@ -108,8 +108,18 @@ class OperatorController extends ScriptVisitor {
     }
 
     @Override
+    protected JexlOperator visit(final ASTBitwiseDiffNode node, final Object data) {
+        return JexlOperator.DIFF;
+    }
+
+    @Override
     protected JexlOperator visit(final ASTSetOrNode node, final Object data) {
         return JexlOperator.SELF_OR;
+    }
+
+    @Override
+    protected JexlOperator visit(final ASTSetDiffNode node, final Object data) {
+        return JexlOperator.SELF_DIFF;
     }
 
     @Override
@@ -119,7 +129,7 @@ class OperatorController extends ScriptVisitor {
 
     @Override
     protected JexlOperator visit(final ASTSetXorNode node, final Object data) {
-        return JexlOperator.SELF_OR;
+        return JexlOperator.SELF_XOR;
     }
 
     @Override

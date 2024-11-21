@@ -46,6 +46,7 @@ import org.apache.commons.jexl3.parser.ASTAwaitFunction;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
+import org.apache.commons.jexl3.parser.ASTBitwiseDiffNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBooleanLiteral;
@@ -169,6 +170,7 @@ import org.apache.commons.jexl3.parser.ASTSetModNode;
 import org.apache.commons.jexl3.parser.ASTSetMultNode;
 import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
+import org.apache.commons.jexl3.parser.ASTSetDiffNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
 import org.apache.commons.jexl3.parser.ASTSetShiftLeftNode;
 import org.apache.commons.jexl3.parser.ASTSetShiftRightNode;
@@ -537,6 +539,18 @@ public class Interpreter extends InterpreterBase {
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.or(left, right);
         } catch (final ArithmeticException xrt) {
             throw new JexlException(findNullOperand(node, left, right), "| error", xrt);
+        }
+    }
+
+    @Override
+    protected Object visit(final ASTBitwiseDiffNode node, final Object data) {
+        final Object left = node.jjtGetChild(0).jjtAccept(this, data);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        try {
+            final Object result = operators.tryOverload(node, JexlOperator.DIFF, left, right);
+            return result != JexlEngine.TRY_FAILED ? result : arithmetic.diff(left, right);
+        } catch (final ArithmeticException xrt) {
+            throw new JexlException(findNullOperand(node, left, right), "\\ error", xrt);
         }
     }
 
@@ -3644,6 +3658,13 @@ public class Interpreter extends InterpreterBase {
         final JexlNode left = node.jjtGetChild(0);
         final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         return executeAssign(node, left, right, JexlOperator.SELF_OR, data);
+    }
+
+    @Override
+    protected Object visit(final ASTSetDiffNode node, Object data) {
+        final JexlNode left = node.jjtGetChild(0);
+        final Object right = node.jjtGetChild(1).jjtAccept(this, data);
+        return executeAssign(node, left, right, JexlOperator.SELF_DIFF, data);
     }
 
     @Override

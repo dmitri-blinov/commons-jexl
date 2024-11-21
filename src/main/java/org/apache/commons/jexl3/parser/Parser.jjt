@@ -226,6 +226,7 @@ TOKEN_MGR_DECLS : {
     | < mod_assign : "%=" >
     | < and_assign : "&=" >
     | < or_assign : "|=" >
+    | < diff_assign : "\\=" >
     | < xor_assign : "^=" >
     | < null_assign : "?=" >
     | < ne_assign : ":=" >
@@ -240,6 +241,7 @@ TOKEN_MGR_DECLS : {
     | < unot : "\u00AC" >
     | < and : "&" >
     | < or : "|" >
+    | < diff : "\\" >
     | < range : ".." | "\u2025" >
     | < lshift : "<<" >
     | < rshift : ">>" >
@@ -1257,6 +1259,8 @@ void AssignmentExpression() #void : {}
       |
       <or_assign> Expression() #SetOrNode(2)
       |
+      <diff_assign> Expression() #SetDiffNode(2)
+      |
       <xor_assign> Expression() #SetXorNode(2)
       |
       <minus_assign> Expression() #SetSubNode(2)
@@ -1312,9 +1316,17 @@ void ConditionalAndExpression() #void : {}
 
 void InclusiveOrExpression() #void : {}
 {
+    DifferenceExpression()
+    ( LOOKAHEAD(2) (
+       <or> DifferenceExpression() #BitwiseOrNode(2)
+    ) )*
+}
+
+void DifferenceExpression() #void : {}
+{
     ExclusiveOrExpression()
     ( LOOKAHEAD(2) (
-       <or> ExclusiveOrExpression() #BitwiseOrNode(2)
+       <diff> ExclusiveOrExpression() #BitwiseDiffNode(2)
     ) )*
 }
 

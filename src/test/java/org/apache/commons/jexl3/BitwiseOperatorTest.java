@@ -153,6 +153,11 @@ public class BitwiseOperatorTest extends JexlTestCase {
     }
 
     @Test
+    public void testDiffSimple() throws Exception {
+        asserter.assertExpression("1 \\ 3", new Long(1 & ~3));
+    }
+
+    @Test
     public void testXorVariableNumberCoercion() throws Exception {
         asserter.setVariable("x", new Integer(1));
         asserter.setVariable("y", new Short((short) 3));

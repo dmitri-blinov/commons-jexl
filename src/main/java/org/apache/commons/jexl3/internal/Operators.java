@@ -276,6 +276,8 @@ public class Operators {
                     return arithmetic.selfAnd(arg1, arg2);
                 case SELF_OR:
                     return arithmetic.selfOr(arg1, arg2);
+                case SELF_DIFF:
+                    return arithmetic.selfDiff(arg1, arg2);
                 case SELF_XOR:
                     return arithmetic.selfXor(arg1, arg2);
                 case SELF_SHIFTLEFT:

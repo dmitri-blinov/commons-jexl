@@ -2109,6 +2109,19 @@ public class JexlArithmetic {
     }
 
     /**
+     * Performs a bitwise diff.
+     *
+     * @param left  the left operand
+     * @param right the right operator
+     * @return left \ right
+     */
+    public Object diff(final Object left, final Object right) {
+        final long l = toLong(left);
+        final long r = toLong(right);
+        return l & ~r;
+    }
+
+    /**
      * Default self assign implementation for bitwise or.
      *
      * @param left  left argument
@@ -2117,6 +2130,17 @@ public class JexlArithmetic {
      */
     public Object selfOr(Object left, Object right) {
         return or(left, right);
+    }
+
+    /**
+     * Default self assign implementation for bitwise difference.
+     *
+     * @param left  left argument
+     * @param right  right argument
+     * @return left \ right.
+     */
+    public Object selfDiff(Object left, Object right) {
+        return diff(left, right);
     }
 
     /**

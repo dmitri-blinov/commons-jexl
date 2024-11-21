@@ -138,6 +138,8 @@ public abstract class ParserVisitor {
 
     protected abstract Object visit(ASTBitwiseOrNode node, Object data);
 
+    protected abstract Object visit(ASTBitwiseDiffNode node, Object data);
+
     protected abstract Object visit(ASTBitwiseXorNode node, Object data);
 
     protected abstract Object visit(ASTBitwiseAndNode node, Object data);
@@ -361,6 +363,8 @@ public abstract class ParserVisitor {
     protected abstract Object visit(ASTSetAndNode node, Object data);
 
     protected abstract Object visit(ASTSetOrNode node, Object data);
+
+    protected abstract Object visit(ASTSetDiffNode node, Object data);
 
     protected abstract Object visit(ASTSetXorNode node, Object data);
 

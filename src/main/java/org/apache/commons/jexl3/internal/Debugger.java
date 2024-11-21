@@ -36,6 +36,7 @@ import org.apache.commons.jexl3.parser.ASTAwaitFunction;
 import org.apache.commons.jexl3.parser.ASTBitwiseAndNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseComplNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseOrNode;
+import org.apache.commons.jexl3.parser.ASTBitwiseDiffNode;
 import org.apache.commons.jexl3.parser.ASTBitwiseXorNode;
 import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBooleanLiteral;
@@ -158,6 +159,7 @@ import org.apache.commons.jexl3.parser.ASTSetModNode;
 import org.apache.commons.jexl3.parser.ASTSetMultNode;
 import org.apache.commons.jexl3.parser.ASTSetOperand;
 import org.apache.commons.jexl3.parser.ASTSetOrNode;
+import org.apache.commons.jexl3.parser.ASTSetDiffNode;
 import org.apache.commons.jexl3.parser.ASTSetSubNode;
 import org.apache.commons.jexl3.parser.ASTSetShiftLeftNode;
 import org.apache.commons.jexl3.parser.ASTSetShiftRightNode;
@@ -878,8 +880,14 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
 
     @Override
     protected Object visit(final ASTBitwiseOrNode node, final Object data) {
-        final boolean paren = node.jjtGetParent() instanceof ASTBitwiseAndNode;
+        final boolean paren = node.jjtGetParent() instanceof ASTBitwiseDiffNode;
         return infixChildren(node, " | ", paren, data);
+    }
+
+    @Override
+    protected Object visit(final ASTBitwiseDiffNode node, final Object data) {
+        final boolean paren = node.jjtGetParent() instanceof ASTBitwiseXorNode;
+        return infixChildren(node, " \\ ", paren, data);
     }
 
     @Override
@@ -2450,6 +2458,11 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(final ASTSetOrNode node, final Object data) {
         return infixChildren(node, " |= ", false, data);
+    }
+
+    @Override
+    protected Object visit(final ASTSetDiffNode node, final Object data) {
+        return infixChildren(node, " \\= ", false, data);
     }
 
     @Override

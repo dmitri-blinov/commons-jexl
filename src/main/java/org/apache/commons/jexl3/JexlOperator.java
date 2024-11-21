@@ -97,6 +97,14 @@ public enum JexlOperator {
     OR("|", "or", 2),
 
     /**
+     * Bitwise-difference operator.
+     * <br><strong>Syntax:</strong> <code>x \ y</code>
+     * <br><strong>Method:</strong> <code>T diff(L x, R y);</code>.
+     * @see JexlArithmetic#or
+     */
+    DIFF("\\", "diff", 2),
+
+    /**
      * Bitwise-xor operator.
      * <br><strong>Syntax:</strong> <code>x ^ y</code>
      * <br><strong>Method:</strong> <code>T xor(L x, R y);</code>.
@@ -288,6 +296,13 @@ public enum JexlOperator {
      * <br><strong>Method:</strong> <code>T selfOr(L x, R y);</code>.
      */
     SELF_OR("|=", "selfOr", OR),
+
+    /**
+     * Self-diff operator.
+     * <br><strong>Syntax:</strong> <code>x \= y</code>
+     * <br><strong>Method:</strong> <code>T selfDiff(L x, R y);</code>.
+     */
+    SELF_DIFF("\\=", "selfDiff", DIFF),
 
     /**
      * Self-xor operator.
