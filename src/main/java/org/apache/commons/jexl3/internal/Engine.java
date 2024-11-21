@@ -138,6 +138,10 @@ public class Engine extends JexlEngine {
      */
     protected final boolean debug;
     /**
+     * The set of initial settings, for teardown.
+     */
+    protected final JexlBuilder conf;
+    /**
      * The set of default script parsing features.
      */
     protected final JexlFeatures scriptFeatures;
@@ -191,11 +195,19 @@ public class Engine extends JexlEngine {
     }
 
     /**
+     * Creates an engine copy.
+     */
+    public Engine(Engine e) {
+        this(e.conf);
+    }
+
+    /**
      * Creates a JEXL engine using the provided {@link JexlBuilder}.
      * @param conf the builder
      */
     public Engine(final JexlBuilder conf) {
         // options:
+        this.conf = conf;
         this.options = conf.options().copy();
         this.strict = options.isStrict();
         this.safe = options.isSafe();

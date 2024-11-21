@@ -39,14 +39,15 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.Set;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
 import java.math.BigInteger;
 import java.math.BigDecimal;
-import java.util.function.Predicate;
 
 import static org.apache.commons.jexl3.parser.ParserConstants.EOF;
 import static org.apache.commons.jexl3.parser.ParserConstants.SEMICOL;
@@ -84,7 +85,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * The list of imported classes.
      */
-    protected static final Map<String, Class> classes = Collections.synchronizedMap(new WeakHashMap<String, Class> ());
+    protected Map<String, Class> classes = null;
     /**
      * The known namespaces.
      */
@@ -168,6 +169,7 @@ public abstract class JexlParser extends StringParser {
         scopes.clear();
         pragmas = null;
         implicitPackages = null;
+        classes = null;
         branchScope = null;
         branchScopes.clear();
         namespaces = null;
@@ -992,6 +994,9 @@ public abstract class JexlParser extends StringParser {
 
         if (Character.isLowerCase(name.charAt(0)) && name.indexOf(".") == -1)
             return null;
+
+        if (classes == null)
+            classes = new ConcurrentHashMap<String, Class> ();
         Class result = classes.computeIfAbsent(name, x -> forName(x));
         return result != NOT_A_CLASS ? result : null;
     }

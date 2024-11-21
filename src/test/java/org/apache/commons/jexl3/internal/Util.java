@@ -41,7 +41,7 @@ public class Util {
         if (jexl == null || jexl.cache == null) {
             return;
         }
-        final Engine jdbg = new Engine();
+        final Engine jdbg = new Engine(jexl);
         jdbg.parser.allowRegisters(true);
         final Debugger dbg = new Debugger();
         // iterate over all expression in
