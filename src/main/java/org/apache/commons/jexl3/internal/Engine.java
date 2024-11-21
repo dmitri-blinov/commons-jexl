@@ -981,7 +981,7 @@ public class Engine extends JexlEngine {
         if (parsing.compareAndSet(false, true)) {
             try {
                 // lets parse
-                script = parser.parse(ninfo, features, options, src, scope);
+                script = parser.parse(ninfo, features, options, uberspect, src, scope);
             } finally {
                 // no longer in use
                 parsing.set(false);
@@ -989,7 +989,7 @@ public class Engine extends JexlEngine {
         } else {
             // ...otherwise parser was in use, create a new temporary one
             final Parser lparser = new Parser(new StringProvider(";"));
-            script = lparser.parse(ninfo, features, options, src, scope);
+            script = lparser.parse(ninfo, features, options, uberspect, src, scope);
         }
         if (source != null) {
             cache.put(source, script);

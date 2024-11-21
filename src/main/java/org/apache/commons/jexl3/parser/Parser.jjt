@@ -49,13 +49,15 @@ import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.internal.Scope;
+import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 public final class Parser extends JexlParser
 {
-    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, JexlOptions jexlOptions, String jexlSrc, Scope jexlScope) {
+    public ASTJexlScript parse(JexlInfo jexlInfo, JexlFeatures jexlFeatures, JexlOptions jexlOptions, JexlUberspect jexlUberspect, String jexlSrc, Scope jexlScope) {
         JexlFeatures previous = getFeatures();
         try {
             setFeatures(jexlFeatures);
+            uberspect = jexlUberspect;
             // lets do the 'Unique Init' in here to be safe - it's a pain to remember
             info = jexlInfo != null? jexlInfo : new JexlInfo();
             source = jexlSrc;

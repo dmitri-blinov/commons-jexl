@@ -23,16 +23,16 @@ import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.internal.Scope;
 import org.apache.commons.jexl3.internal.LexicalScope;
+import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Constructor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -60,6 +60,10 @@ public abstract class JexlParser extends StringParser {
      * The associated controller.
      */
     protected final FeatureController featureController = new FeatureController(JexlEngine.DEFAULT_FEATURES);
+    /**
+     * The associated JexlUberspect.
+     */
+    protected JexlUberspect uberspect = null;
     /**
      * The basic source info.
      */
@@ -163,6 +167,7 @@ public abstract class JexlParser extends StringParser {
      * @param features the feature set to restore if any
      */
     protected void cleanup(final JexlFeatures features) {
+        uberspect = null;
         info = null;
         source = null;
         scope = null;
@@ -1041,19 +1046,14 @@ public abstract class JexlParser extends StringParser {
         if (name.indexOf(".") == -1) {
             for (String prefix : implicitPackages) {
                 String className = prefix + "." + name;
-                try {
-                    return Class.forName(className);
-                } catch (ClassNotFoundException ex) {
-                    // Maybe
-                }
+                Class result = uberspect.getClassByName(className);
+                if (result != null)
+                    return result;
             }
             return NOT_A_CLASS;
         }
-        try {
-            return Class.forName(name);
-        } catch (ClassNotFoundException ex) {
-            return NOT_A_CLASS;
-        }
+        Class result = uberspect.getClassByName(name);
+        return result != null ? result : NOT_A_CLASS;
     }
 
     /**
