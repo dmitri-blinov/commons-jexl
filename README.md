@@ -185,6 +185,8 @@ New features
 
 + New predicates operators like (>42) or (<0) are introduced
 
++ New bitwise difference operator ` \ ` is introduced
+
 Enhancements
 ------------
 + Java-like labelled blocks and statements like `switch`, `for`, `while`, `do`, `if`, `try`, `synchronized` can be used.
