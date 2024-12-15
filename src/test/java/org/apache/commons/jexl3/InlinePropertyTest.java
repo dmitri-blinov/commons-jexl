@@ -289,4 +289,14 @@ public class InlinePropertyTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", "123456", o);
     }
 
+    @Test
+    public void inlineBlock() throws Exception {
+        JexlScript e = JEXL.createScript("addr { { @.PostalCode += '456'; } }; addr.PostalCode");
+        JexlContext jc = new MapContext();
+        Address addr = new Address("123");
+        jc.set("addr", addr);
+        Object o = e.execute(jc);
+        Assert.assertEquals("Result is not as expected", "123456", o);
+    }
+
 }

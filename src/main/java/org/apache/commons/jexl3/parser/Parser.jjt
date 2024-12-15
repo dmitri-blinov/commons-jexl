@@ -2485,7 +2485,10 @@ void MemberAccess() #void : {}
     |
     LOOKAHEAD(<DOT> | <QDOT>) IdentifierAccess()
     |
+    LOOKAHEAD(<LCURLY> <LCURLY>) InlinePropertyBlockAssignment()
+    |
     LOOKAHEAD(<LCURLY>) InlinePropertyAssignment()
+
 }
 
 void MethodReference() : {}
@@ -2493,9 +2496,18 @@ void MethodReference() : {}
     <DCOLON> MethodReferenceIdentifier()
 }
 
+void InlinePropertyBlockAssignment() #InlinePropertyAssignment : {}
+{
+    <LCURLY> 
+       Block()
+    <RCURLY>
+}
+
 void InlinePropertyAssignment() : {}
 {
-    <LCURLY> [ InlinePropertyBlock() ( <COMMA> InlinePropertyBlock() )* ] <RCURLY>
+    <LCURLY> 
+       [ InlinePropertyBlock() ( <COMMA> InlinePropertyBlock() )* ]
+    <RCURLY>
 }
 
 void InlineMemberAccess() #void : {}

@@ -2900,9 +2900,14 @@ public class Interpreter extends InterpreterBase {
                       setAttribute(data, key, right, p, JexlOperator.ARRAY_SET);
                    }
 
+                } else if (p instanceof ASTBlock) {
+
+                   // ASTBlock
+                   p.jjtAccept(this, null);
+
                 } else {
 
-                   // ASTReference
+                   // ASTReference 
                    p.jjtAccept(this, data);
                 }
             }
