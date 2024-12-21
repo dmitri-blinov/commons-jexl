@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * A JxltEngine implementation.
@@ -335,8 +336,13 @@ public final class TemplateEngine extends JxltEngine {
         }
 
         @Override
-        public final Object evaluate(final JexlContext context) {
-            return evaluate(context, null, null);
+        public Object evaluate(final JexlContext context) {
+            return evaluate(context, null, null, null);
+        }
+
+        @Override
+        public Object evaluate(final JexlContext context, final UnaryOperator<Object> oper) {
+            return evaluate(context, null, null, oper);
         }
 
         /**
@@ -352,10 +358,24 @@ public final class TemplateEngine extends JxltEngine {
          * Evaluates this expression.
          * @param frame the frame storing parameters and local variables
          * @param context the context storing global variables
+         * @param option the evaluation options
          * @return the expression value
          * @throws JexlException
          */
         protected final Object evaluate( final JexlContext context, final Frame frame, final JexlOptions options) {
+            return evaluate(context, frame, options, null);
+        }
+
+        /**
+         * Evaluates this expression.
+         * @param frame the frame storing parameters and local variables
+         * @param context the context storing global variables
+         * @param option the evaluation options
+         * @param oper the formatting operator
+         * @return the expression value
+         * @throws JexlException
+         */
+        protected final Object evaluate( final JexlContext context, final Frame frame, final JexlOptions options, final UnaryOperator<Object> oper) {
             try {
                 final TemplateInterpreter.Arguments args = new TemplateInterpreter
                         .Arguments(jexl)
@@ -363,7 +383,7 @@ public final class TemplateEngine extends JxltEngine {
                         .options(options != null? options : options(context))
                         .frame(frame);
                 final Interpreter interpreter = jexl.createTemplateInterpreter(args);
-                return evaluate(interpreter);
+                return evaluate(interpreter, oper);
             } catch (final JexlException xjexl) {
                 final JexlException xuel = createException(xjexl.getInfo(), "evaluate", this, xjexl);
                 if (jexl.isSilent()) {
@@ -382,7 +402,19 @@ public final class TemplateEngine extends JxltEngine {
          * @return the result of interpretation
          * @throws JexlException (only for nested and composite)
          */
-        protected abstract Object evaluate(Interpreter interpreter);
+        protected Object evaluate(Interpreter interpreter) {
+            return evaluate(interpreter, null);
+        }
+
+
+        /**
+         * Interprets a sub-expression.
+         * @param interpreter a JEXL interpreter
+         * @param oper the formatting operator
+         * @return the result of interpretation
+         * @throws JexlException (only for nested and composite)
+         */
+        protected abstract Object evaluate(Interpreter interpreter, UnaryOperator<Object> oper);
 
     }
 
@@ -424,7 +456,7 @@ public final class TemplateEngine extends JxltEngine {
         }
 
         @Override
-        protected Object evaluate(final Interpreter interpreter) {
+        protected Object evaluate(final Interpreter interpreter, final UnaryOperator<Object> oper) {
             return value;
         }
     }
@@ -463,8 +495,9 @@ public final class TemplateEngine extends JxltEngine {
         }
 
         @Override
-        protected Object evaluate(final Interpreter interpreter) {
-            return interpreter.interpret(node);
+        protected Object evaluate(final Interpreter interpreter, final UnaryOperator<Object> oper) {
+            Object result = interpreter.interpret(node);
+            return oper != null ? oper.apply(result) : result;
         }
 
         @Override
@@ -505,7 +538,7 @@ public final class TemplateEngine extends JxltEngine {
         @Override
         protected TemplateExpression prepare(final Interpreter interpreter) {
             // evaluate immediate as constant
-            final Object value = evaluate(interpreter);
+            final Object value = evaluate(interpreter, null);
             return value != null ? new ConstantExpression(value, source) : null;
         }
     }
@@ -586,8 +619,8 @@ public final class TemplateEngine extends JxltEngine {
         }
 
         @Override
-        protected Object evaluate(final Interpreter interpreter) {
-            return prepare(interpreter).evaluate(interpreter);
+        protected Object evaluate(final Interpreter interpreter, final UnaryOperator<Object> oper) {
+            return prepare(interpreter).evaluate(interpreter, oper);
         }
     }
 
@@ -674,12 +707,12 @@ public final class TemplateEngine extends JxltEngine {
         }
 
         @Override
-        protected Object evaluate(final Interpreter interpreter) {
+        protected Object evaluate(final Interpreter interpreter, final UnaryOperator<Object> oper) {
             Object value;
             // common case: evaluate all expressions & concatenate them as a string
             final StringBuilder strb = new StringBuilder();
             for (final TemplateExpression expr : exprs) {
-                value = expr.evaluate(interpreter);
+                value = expr.evaluate(interpreter, oper);
                 if (value != null) {
                     strb.append(value.toString());
                 }
@@ -689,6 +722,71 @@ public final class TemplateEngine extends JxltEngine {
         }
     }
 
+    /** A formatted expression*/
+    public static class FormattedExpression implements Expression {
+
+        /** The wrapped source */
+        protected final Expression source;
+
+        /** The formatter */
+        protected final UnaryOperator<Object> oper;
+
+        /**
+         * Creates a formatted expression.
+         * @param oper   the formatter
+         * @param source the source unified expression if any
+         */
+        public FormattedExpression(final UnaryOperator<Object> oper, final Expression source) {
+            this.source = source;
+            this.oper = oper;
+        }
+
+        @Override
+        public final Expression prepare(final JexlContext context) {
+            return source.prepare(context);
+        }
+
+        @Override
+        public Object evaluate(final JexlContext context) {
+            return source.evaluate(context, oper);
+        }
+
+        @Override
+        public Object evaluate(final JexlContext context, UnaryOperator<Object> oper) {
+            return source.evaluate(context, oper);
+        }
+
+        @Override
+        public StringBuilder asString(final StringBuilder strb) {
+            source.asString(strb);
+            return strb;
+        }
+
+        @Override
+        public String asString() {
+            return source.asString();
+        }
+
+        @Override
+        public boolean isImmediate() {
+            return source.isImmediate();
+        }
+
+        @Override
+        public final boolean isDeferred() {
+            return source.isDeferred();
+        }
+
+        @Override
+        public final Expression getSource() {
+            return source;
+        }
+
+        @Override
+        public Set<List<String>> getVariables() {
+            return source.getVariables();
+        }
+    }
 
     @Override
     public JxltEngine.Expression createExpression(JexlInfo jexlInfo, final String expression) {

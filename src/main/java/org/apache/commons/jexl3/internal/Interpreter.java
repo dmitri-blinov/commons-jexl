@@ -4672,7 +4672,7 @@ public class Interpreter extends InterpreterBase {
             node.setExpression(tp);
         }
         if (tp != null) {
-            return tp.evaluate(context, frame, options);
+            return tp.isDeferred() ? tp.prepare(context, frame, options) : tp.evaluate(context, frame, options);
         }
         return null;
     }

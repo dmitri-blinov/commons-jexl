@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 /**
  * A simple "JeXL Template" engine.
@@ -136,6 +137,20 @@ public abstract class JxltEngine {
          * is not silent
          */
         Object evaluate(JexlContext context);
+
+        /**
+         * Evaluates this expression using formatting operator.
+         *
+         * <p>If the underlying JEXL engine is silent, errors will be logged through its logger as warning.</p>
+         *
+         * @param context the variable context
+         * @param oper the formatting operator
+         * @return the result of this expression evaluation or null if an error occurs and the {@link JexlEngine} is
+         * running in silent mode
+         * @throws Exception if an error occurs and the {@link JexlEngine}
+         * is not silent
+         */
+        Object evaluate(JexlContext context, UnaryOperator<Object> oper);
 
         /**
          * Retrieves this expression's source expression.

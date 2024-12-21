@@ -18,6 +18,7 @@ package org.apache.commons.jexl3;
 
 import org.apache.commons.jexl3.internal.Debugger;
 import org.apache.commons.jexl3.internal.TemplateDebugger;
+import org.apache.commons.jexl3.internal.TemplateEngine;
 import org.apache.commons.jexl3.internal.TemplateInterpreter;
 import org.apache.commons.jexl3.internal.introspection.Permissions;
 import org.apache.commons.jexl3.internal.introspection.Uberspect;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,16 +62,15 @@ public class JXLTTest extends JexlTestCase {
         JXLT = ENGINE.createJxltEngine();
     }
 
-
-   @Parameterized.Parameters
-   public static List<JexlBuilder> engines() {
-       final JexlFeatures f = new JexlFeatures();
-       f.lexical(true).lexicalShade(true);
-      return Arrays.<JexlBuilder>asList(
-              new JexlBuilder().silent(false).lexical(true).lexicalShade(true).cache(128).strict(true),
-              new JexlBuilder().features(f).silent(false).cache(128).strict(true),
-              new JexlBuilder().silent(false).cache(128).strict(true));
-   }
+    @Parameterized.Parameters
+    public static List<JexlBuilder> engines() {
+        final JexlFeatures f = new JexlFeatures();
+        f.lexical(true).lexicalShade(true);
+       return Arrays.<JexlBuilder>asList(
+               new JexlBuilder().silent(false).lexical(true).lexicalShade(true).cache(128).strict(true),
+               new JexlBuilder().features(f).silent(false).cache(128).strict(true),
+               new JexlBuilder().silent(false).cache(128).strict(true));
+    }
 
     @Before
     @Override
@@ -783,6 +784,54 @@ public class JXLTTest extends JexlTestCase {
         Assert.assertEquals(expr, "Hello \nHenrib", value);
         value = ENGINE.createScript(expr).execute(context, "Dimitri");
         Assert.assertEquals(expr, "Hello \nDimitri", value);
+    }
+
+    @Test
+    public void testInterpolationDeferred() throws Exception {
+        final String expr =  "`Hello \n#{user}`";
+        final JexlScript script = ENGINE.createScript(expr);
+        context.set("user", "Dimitri");
+        Object value = script.execute(context);
+        Assert.assertTrue(value instanceof JxltEngine.Expression);
+    }
+
+    public static class CallContext extends MapContext {
+
+           public Object call(JxltEngine.Expression e) {
+               return e.evaluate(this);
+           }
+    }
+
+    public static class TemplateArithmetic extends JexlArithmetic {
+        TemplateArithmetic(boolean flag) {
+            super(flag);
+        }
+
+        public Object shiftRight(JxltEngine.Expression e, UnaryOperator<Object> oper) {
+            return new TemplateEngine.FormattedExpression(oper, e);
+        }
+
+    }
+
+    @Test
+    public void testInterpolationDeferredOverload() throws Exception {
+        final String expr =  "var s = `Hello \n#{user}`; s()";
+        final JexlScript script = ENGINE.createScript(expr);
+        JexlContext context = new CallContext();
+        context.set("user", "Dimitri");
+        Object value = script.execute(context);
+        Assert.assertEquals(expr, "Hello \nDimitri", value);
+    }
+
+    @Test
+    public void testInterpolationDeferredFormatted() throws Exception {
+        final String expr =  "var s = `Hello \n#{user}`; var x = s >> (a) -> { '[' + a + ']'}; x()";
+        final JexlEngine jexl = new JexlBuilder().cache(512).arithmetic(new TemplateArithmetic(false)).create();
+        final JexlScript script = jexl.createScript(expr);
+        JexlContext context = new CallContext();
+        context.set("user", "Dimitri");
+        Object value = script.execute(context);
+        Assert.assertEquals(expr, "Hello \n[Dimitri]", value);
     }
 
     @Test
