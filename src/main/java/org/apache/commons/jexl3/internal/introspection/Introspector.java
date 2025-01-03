@@ -212,6 +212,21 @@ public final class Introspector {
     }
 
     /**
+     * Check if method name has ambiguous overloads.
+     *
+     * @param c          the class
+     * @param methodName the method name
+     * @return true if the method in question has more than one signature.
+     */
+    boolean isMethodAmbiguous(final Class<?> c, final String methodname) {
+        if (c == null) {
+            return false;
+        }
+        final ClassMap classMap = getMap(c);
+        return classMap.isMethodAmbiguous(methodname);
+    }
+
+    /**
      * Gets the array of accessible method known for a given class.
      * @param c          the class
      * @param methodName the method name

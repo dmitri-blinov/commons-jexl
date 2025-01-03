@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -81,11 +82,15 @@ final class ClassMap {
      * </p>
      * Uses ConcurrentMap since 3.0, marginally faster than 2.1 under contention.
      */
-    private final Map<MethodKey, Method> byKey ;
+    private final Map<MethodKey, Method> byKey;
     /**
      * Keep track of all methods with the same name; this is not modified after creation.
      */
     private final Map<String, Method[]> byName;
+    /**
+     * Keep track of all ambiguous methods with the same key
+     */
+    private final Set<String> ambiguous;
     /**
      * Cache of fields.
      */
@@ -130,6 +135,7 @@ final class ClassMap {
             }
         });
         this.byName = Collections.emptyMap();
+        this.ambiguous = Collections.emptySet();
         this.fieldCache = Collections.emptyMap();
         // Property getters
         this.propertyGetters = Collections.emptyMap();
@@ -149,6 +155,7 @@ final class ClassMap {
     ClassMap(final Class<?> aClass, final JexlPermissions permissions, final Log log) {
         this.byKey = new ConcurrentHashMap<>();
         this.byName = new HashMap<>();
+        this.ambiguous = new HashSet<>();
         this.aClass = aClass;
 
         // eagerly cache methods
@@ -179,6 +186,16 @@ final class ClassMap {
      */
     Field getField(final String fname) {
         return fieldCache.get(fname);
+    }
+
+    /**
+     * Check if method name has ambiguous overloads.
+     *
+     * @param methodName the method name
+     * @return true if the method in question has more than one signature.
+     */
+    boolean isMethodAmbiguous(final String methodname) {
+        return ambiguous.contains(methodname);
     }
 
     /**
@@ -506,9 +523,12 @@ final class ClassMap {
                 // add method to byKey cache; do not override
                 final MethodKey key = new MethodKey(mi);
                 final Method pmi = cache.byKey.putIfAbsent(key, permissions.allow(mi) ? mi : CACHE_MISS);
-                if (pmi != null && pmi != CACHE_MISS && log.isDebugEnabled() && !key.equals(new MethodKey(pmi))) {
-                    // foo(int) and foo(Integer) have the same signature for JEXL
-                    log.debug("Method " + pmi + " is already registered, key: " + key.debugString());
+                if (pmi != null && pmi != CACHE_MISS) {
+                    cache.ambiguous.add(mi.getName());
+                    if (log.isDebugEnabled() && !key.equals(new MethodKey(pmi))) {
+                        // foo(int) and foo(Integer) have the same signature for JEXL
+                        log.debug("Method " + pmi + " is already registered, key: " + key.debugString());
+                    }
                 }
             }
         } catch (final SecurityException se) {

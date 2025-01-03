@@ -225,6 +225,18 @@ public class Uberspect implements JexlUberspect {
     }
 
     /**
+     * Check if method name has ambiguous overloads.
+     *
+     * @param c          the class
+     * @param methodName the method name
+     * @return true if the method in question has more than one signature.
+     */
+    boolean isMethodAmbiguous(final Class<?> c, final String methodname) {
+        return base().isMethodAmbiguous(c, methodname);
+    }
+
+
+    /**
      * Gets all the methods with a given name from this map.
      * @param c          the class
      * @param methodName the seeked methods name
@@ -240,8 +252,8 @@ public class Uberspect implements JexlUberspect {
     }
 
     @Override
-    public JexlMethod[] getMethods(final Object obj, final String method) {
-        return MethodExecutor.discover(base(), obj, method);
+    public JexlMethod[] getMethods(final Object obj, final String method, boolean unambiguous) {
+        return MethodExecutor.discover(base(), obj, method, unambiguous);
     }
 
     @Override

@@ -231,8 +231,8 @@ public class ReferenceUberspect implements JexlUberspect {
     }
 
     @Override
-    public JexlMethod[] getMethods(final Object obj, final String method) {
-        return uberspect.getMethods(obj, method);
+    public JexlMethod[] getMethods(final Object obj, final String method, boolean unambiguous) {
+        return uberspect.getMethods(obj, method, unambiguous);
     }
 
     @Override

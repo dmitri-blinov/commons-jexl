@@ -96,7 +96,7 @@ public class MethodReference {
     protected static MethodReference create(Interpreter theCaller, Object target, String methodName) {
         final JexlUberspect uberspect = theCaller.uberspect;
         Class<?> c = target instanceof Class<?> ? (Class<?>) target : target.getClass();
-        JexlMethod[] methods = "new".equals(methodName) ? uberspect.getConstructors(c) : uberspect.getMethods(target, methodName);
+        JexlMethod[] methods = "new".equals(methodName) ? uberspect.getConstructors(c) : uberspect.getMethods(target, methodName, false);
         if (methods == null || methods.length == 0) {
             return null;
         }

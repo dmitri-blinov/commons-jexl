@@ -302,10 +302,11 @@ public interface JexlUberspect {
      * 
      * @param obj    the object
      * @param method the method name
+     * @param unambiguous the unambiguous methods only
      * @return a {@link JexlMethod} array
      * @since 3.2
      */
-    JexlMethod[] getMethods(Object obj, String method);
+    JexlMethod[] getMethods(Object obj, String method, boolean unambiguous);
 
     /**
      * Property getter.

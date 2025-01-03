@@ -17,15 +17,21 @@
 package org.apache.commons.jexl3.internal.introspection;
 
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlException;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import org.apache.commons.jexl3.JexlException;
+
+import java.util.ArrayList;
 
 /**
  * Specialized executor to invoke a method on an object.
  * @since 2.0
  */
 public final class MethodExecutor extends AbstractExecutor.Method {
+
+    private final static MethodExecutor[] EMPTY_ARRAY = new MethodExecutor[0];
+
     /** If this method is a vararg method, vaStart is the last argument index. */
     private final int vaStart;
     /** If this method is a vararg method, vaClass is the component type of the vararg array. */
@@ -64,7 +70,7 @@ public final class MethodExecutor extends AbstractExecutor.Method {
      * @param method the name of the method to find
      * @return an array of executors or null
      */
-    public static MethodExecutor[] discover(Introspector is, Object obj, String method) {
+    public static MethodExecutor[] discover(Introspector is, Object obj, String method, boolean unambiguous) {
         final Class<?> clazz = obj.getClass();
         java.lang.reflect.Method[] methods = is.getMethods(clazz, method);
         if ((methods == null || methods.length == 0) && obj instanceof Class<?>) {
@@ -73,12 +79,13 @@ public final class MethodExecutor extends AbstractExecutor.Method {
         if (methods == null || methods.length == 0) {
             return null;
         }
-        MethodExecutor[] result = new MethodExecutor[methods.length];
+        ArrayList<MethodExecutor> result = new ArrayList<MethodExecutor>();
         for (int i = 0; i < methods.length; i++) {
             java.lang.reflect.Method m = methods[i];
-            result[i] = new MethodExecutor(clazz, m, new MethodKey(m));
+            if (!unambiguous || !is.isMethodAmbiguous(clazz, method))
+                result.add(new MethodExecutor(clazz, m, new MethodKey(m)));
         }
-        return result;
+        return result.toArray(EMPTY_ARRAY);
     }
 
     /**

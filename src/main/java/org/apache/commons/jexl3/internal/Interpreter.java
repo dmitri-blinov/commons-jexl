@@ -4150,8 +4150,6 @@ public class Interpreter extends InterpreterBase {
      */
     protected Object call(final JexlNode node, final Object target, final Object funcNode, final ASTArguments argNode) {
         cancelCheck(node);
-        // evaluate the arguments
-        final Object[] argv = visit(argNode, null);
         final String methodName;
         boolean cacheable = cache;
         boolean isavar = false;
@@ -4191,10 +4189,13 @@ public class Interpreter extends InterpreterBase {
             return null;
         }
 
+        // evaluate the arguments
+        final Object[] argv = visit(argNode, null);
+
         // solving the call site
         final CallDispatcher call = new CallDispatcher(node, cacheable);
         try {
-            // do we have a  cached version method/function name ?
+            // do we have a cached version method/function name ?
             final Object eval = call.tryEval(target, methodName, argv);
             if (JexlEngine.TRY_FAILED != eval) {
                 return eval;
@@ -4294,8 +4295,9 @@ public class Interpreter extends InterpreterBase {
                     }
                 }
                 // if we did not find an exact method by name and we haven't tried yet,
-                // attempt to narrow the parameters and if this succeeds, try again in next loop
-                if (!narrow && arithmetic.narrowArguments(argv)) {
+                // attempt to narrow the parameters and try again in next loop
+                if (!narrow) {
+                    arithmetic.narrowArguments(argv);
                     narrow = true;
                     // continue;
                 } else {

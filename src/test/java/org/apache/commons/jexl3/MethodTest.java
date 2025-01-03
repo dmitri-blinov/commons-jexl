@@ -18,9 +18,12 @@ package org.apache.commons.jexl3;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.jexl3.junit.Asserter;
 import java.util.Arrays;
 import java.util.Date;
+
+import java.math.BigDecimal;
+
+import org.apache.commons.jexl3.junit.Asserter;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
 import org.apache.commons.jexl3.introspection.JexlPropertySet;
@@ -317,6 +320,20 @@ public class MethodTest extends JexlTestCase {
             Assert.assertEquals("over(String, String[])", xinvoke.getMethodSignature());
         }
     }
+
+    @Test
+    public void testInvokeWithCast() throws Exception {
+        final Functor func = new Functor();
+        final JexlContext ctxt = new MapContext();
+        ctxt.set("func", func);
+        Object result;
+        final JexlScript method = JEXL.createScript("(x) -> func.PLUS20(x)");
+        result = method.execute(ctxt, 22);
+        Assert.assertEquals(42, result);
+        result = method.execute(ctxt, "22");
+        Assert.assertEquals(42, result);
+    }
+
 
     @Test
     public void testTryFailed() throws Exception {

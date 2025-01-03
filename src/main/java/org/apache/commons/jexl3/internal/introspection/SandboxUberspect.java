@@ -117,12 +117,12 @@ public final class SandboxUberspect implements JexlUberspect {
     }
 
     @Override
-    public JexlMethod[] getMethods(final Object obj, final String method) {
+    public JexlMethod[] getMethods(final Object obj, final String method, boolean unambiguous) {
         if (obj != null && method != null) {
             String objClassName = (obj instanceof Class) ? ((Class<?>)obj).getName() : obj.getClass().getName();
             String actual = sandbox.execute(objClassName, method);
             if (actual != null) {
-                return uberspect.getMethods(obj, actual);
+                return uberspect.getMethods(obj, actual, unambiguous);
             }
         }
         return null;

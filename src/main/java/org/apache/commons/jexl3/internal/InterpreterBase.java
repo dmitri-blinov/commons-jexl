@@ -957,6 +957,33 @@ public abstract class InterpreterBase extends ParserVisitor {
                     funcall = new Funcall(vm, narrow);
                 }
                 return true;
+            } else if (narrow) {
+
+                JexlMethod[] vms = uberspect.getMethods(ntarget, mname, true);
+
+                if (vms != null && vms.length == 1) {
+
+                    Class<?>[] params = vms[0].getParameterTypes();
+                    if (params.length == arguments.length) {
+                        try {
+                            Object[] vargs = new Object[arguments.length];
+                            for (int i = 0; i < arguments.length; i++) {
+                                vargs[i] = arithmetic.cast(params[i], arguments[i]);
+                            }
+
+                            // Successfully managed to cast all arguments
+                            vm = vms[0];
+                            argv = vargs;
+                            target = ntarget;
+
+                            // Never cache
+                            return true;
+
+                        } catch (ClassCastException e) {
+                            // Can not be cast, skip
+                        }
+                    }
+                }
             }
             return false;
         }
