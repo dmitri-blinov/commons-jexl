@@ -860,7 +860,7 @@ public class JexlArithmetic {
             } catch (final ArithmeticException xa) {
                 // ignore, no exact value possible
             }
-        } else if (isFloatingPoint(original)) {
+        } else if (original instanceof Double) {
             double value = original.doubleValue();
             if (narrowAccept(narrow, Float.class)
                     && value <= Float.MAX_VALUE
