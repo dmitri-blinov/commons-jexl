@@ -2204,7 +2204,13 @@ public class JexlArithmetic {
 
         if (type.isInstance(val)) {
             return val;
-        } else if (type == Integer.class) {
+        } 
+
+        if (val instanceof Optional) {
+            return cast(type, ((Optional) val).get());
+        }
+
+        if (type == Integer.class) {
             return toInteger(val);
         } else if (type == Long.class) {
             return toLong(val);
