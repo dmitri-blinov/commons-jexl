@@ -2342,28 +2342,6 @@ void IdentifierAccess() #void :
         |
         t=<CLASS> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
         |
-        t=<_AND> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<_OR> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<REMOVE> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<DELETE> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<YIELD> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<LET> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<AWAIT> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<SIZE> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<EMPTY> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<FUNCTION> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
-        t=<VAR> { jjtThis.setIdentifier(t.image); } #IdentifierAccess
-        |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccess
         |
         t=<JXLT_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessJxlt
@@ -2375,28 +2353,6 @@ void IdentifierAccess() #void :
         t=<NEW> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
         |
         t=<CLASS> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<_AND> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<_OR> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<REMOVE> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<DELETE> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<YIELD> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<LET> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<AWAIT> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<SIZE> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<EMPTY> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<FUNCTION> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
-        |
-        t=<VAR> { jjtThis.setIdentifier(t.image); } #IdentifierAccessSafe
         |
         t=<STRING_LITERAL> { jjtThis.setIdentifier(Parser.buildString(t.image, true)); } #IdentifierAccessSafe
         |
