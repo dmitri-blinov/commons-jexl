@@ -351,10 +351,12 @@ public class Script implements JexlScript, JexlExpression {
             if (!nodefs) {
 
                 // Check the default parameter values
+                int passed = result.length;
+
                 for (int i = curried; i < params.length - (varArgs ? 1 : 0); i++) {
                     int pos = i - curried;
                     // Check if the passed arguments list is shorter than the parameters list
-                    if (pos >= result.length) {
+                    if (pos >= passed) {
                         String name = params[i];
                         int symbol = frame.getSymbol(name);
                         Object value = frame.getVariableValue(symbol);

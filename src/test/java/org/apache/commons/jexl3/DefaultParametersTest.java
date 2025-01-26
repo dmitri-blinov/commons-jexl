@@ -183,4 +183,12 @@ public class DefaultParametersTest extends JexlTestCase {
         Assert.assertEquals("Result is not as expected", 44, o);
     }
 
+    @Test
+    public void testBug() throws Exception {
+        JexlScript e = JEXL.createScript("var x = function(int a = 12,int b = 20,int c = 2, int d = 5, int e = 10) {c}; x()");
+        Object o = e.execute(null);
+        Assert.assertEquals("Result is not as expected", 2, o);
+    }
+
+
 }
