@@ -2009,7 +2009,7 @@ void EmptyListLiteral() #ArrayLiteral : {}
 void ArrayLiteral() : {}
 {
     <LBRACKET>
-        Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setExtended(); } ]
+        Expression() (LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [LOOKAHEAD(2) <COMMA> [ <ELLIPSIS> { jjtThis.setExtended(); } ] ]
     <RBRACKET>
 }
 
@@ -2029,7 +2029,7 @@ void EmptyMapLiteral() #MapLiteral : {}
 void MapLiteral() : {}
 {
     <LCURLY>
-        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ]
+        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] ]
     <RCURLY>
 }
 
@@ -2064,7 +2064,7 @@ void ImmutableMapLiteral() #MapLiteral :
 }
 {
     <HCURLY>
-        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ]
+        MapElement() (LOOKAHEAD(<COMMA> MapElement()) <COMMA> MapElement() )* [LOOKAHEAD(2) <COMMA> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] ]
     <RCURLY>
 }
 
@@ -2075,7 +2075,7 @@ void EmptySetLiteral() #SetLiteral : {}
 
 void SetLiteral() : {}
 {
-    <LCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> <ELLIPSIS> <RCURLY>) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
+    <LCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> [ <ELLIPSIS> ] <RCURLY>) <COMMA> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] ] <RCURLY>
 }
 
 void ImmutableEmptySetLiteral() #SetLiteral :
@@ -2091,7 +2091,7 @@ void ImmutableSetLiteral() #SetLiteral :
     jjtThis.setImmutable();
 }
 {
-    <HCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> <ELLIPSIS> <RCURLY>) <COMMA> <ELLIPSIS> { jjtThis.setOrdered(); } ] <RCURLY>
+    <HCURLY> Expression() ( LOOKAHEAD(<COMMA> Expression()) <COMMA> Expression() )* [ LOOKAHEAD(<COMMA> [ <ELLIPSIS> ] <RCURLY>) <COMMA> [ <ELLIPSIS> { jjtThis.setOrdered(); } ] ] <RCURLY>
 }
 
 /***************************************
