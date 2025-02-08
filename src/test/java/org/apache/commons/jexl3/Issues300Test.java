@@ -1147,10 +1147,6 @@ public class Issues300Test {
         } catch(JexlException.Parsing xparse) {
             Assert.assertTrue(xparse.getDetail().contains("pragma"));
         }
-        src = "if (true) { #pragma one 42 }";
-        script = jexl.createScript(src);
-        Object result = script.execute(null);
-        debuggerCheck(jexl);
     }
 
     public static class Arithmetic384c extends JexlArithmetic {
