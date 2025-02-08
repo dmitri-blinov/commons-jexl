@@ -395,10 +395,6 @@ public class Closure extends Script {
                 other.frame.nocycleStack(other));
     }
 
-    @Override
-    public String[] getUnboundParameters() {
-        return frame.getUnboundParameters();
-    }
 
     /**
      * Enable lambda recursion.
