@@ -56,7 +56,7 @@ public class OptionalTest {
             JexlContext context = JexlEngine.getThreadContext();
             return c.stream().map(a->s.execute(context, a));
         }
-        public Object reduce(Stream<Object> stream, JexlScript script) {
+        public Object reduce1(Stream<Object> stream, JexlScript script) {
             Object reduced = stream.reduce((identity, element)->{
                 JexlContext context = JexlEngine.getThreadContext();
                 return script.execute(context, identity, element);
@@ -69,7 +69,7 @@ public class OptionalTest {
 
     @Test
     public void testStream0() {
-        String src = "$0.map(x -> x * x).reduce((a, x) -> a + x)";
+        String src = "$0.map(x -> x * x).reduce1((a, x) -> a + x)";
         JexlBuilder builder = new JexlBuilder();
         JexlUberspect uber = builder.create().getUberspect();
         JexlArithmetic jexla = new OptionalArithmetic(true);
@@ -83,7 +83,7 @@ public class OptionalTest {
 
     @Test
     public void testStream1() {
-        String src = "$0.map(x -> x * x).reduce((a, x) -> a + x)";
+        String src = "$0.map(x -> x * x).reduce1((a, x) -> a + x)";
         JexlEngine jexl = new JexlBuilder().safe(false).create();
         JexlInfo info = new JexlInfo("testStream", 1, 1);
         MapContext context = new StreamContext();
