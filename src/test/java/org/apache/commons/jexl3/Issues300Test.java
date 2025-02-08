@@ -18,6 +18,7 @@ package org.apache.commons.jexl3;
 
 import org.apache.commons.jexl3.internal.Engine32;
 import org.apache.commons.jexl3.internal.OptionsContext;
+import static org.apache.commons.jexl3.internal.Util.debuggerCheck;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.junit.Assert;
 import org.junit.Test;
