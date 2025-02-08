@@ -89,8 +89,8 @@ public class PermissionsParser {
         if (srcs == null || srcs.length == 0) {
             return Permissions.UNRESTRICTED;
         }
-        packages = new ConcurrentHashMap<>();
-        wildcards = new LinkedHashSet<>();
+        this.packages = packages;
+        this.wildcards = wildcards;
         for(String src : srcs) {
             this.src = src;
             this.size = src.length();
