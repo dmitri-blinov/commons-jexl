@@ -2525,9 +2525,15 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
     @Override
     protected Object visit(ASTMapProjectionNode node, Object data) {
         builder.append(".{");
-        accept(node.jjtGetChild(0), data);
-        builder.append(':');
-        accept(node.jjtGetChild(1), data);
+        int num = node.jjtGetNumChildren();
+        for (int i = 0; i < num; i += 2) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            accept(node.jjtGetChild(i), data);
+            builder.append(':');
+            accept(node.jjtGetChild(i+1), data);
+        }
         builder.append('}');
         return data;
     }

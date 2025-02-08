@@ -1578,7 +1578,7 @@ void ArrayProjection() #ProjectionNode : {}
 
 void MapProjection() #MapProjectionNode : {}
 {
-    <DOTC> ProjectionExpression() <COLON> ProjectionExpression() <RCURLY>
+    <DOTC> ProjectionExpression() <COLON> ProjectionExpression() ( LOOKAHEAD(2) <COMMA> ProjectionExpression() <COLON> ProjectionExpression() )* <RCURLY>
 }
 
 void ProjectionExpression() #void : {}

@@ -215,6 +215,7 @@ import org.apache.commons.jexl3.parser.JexlNode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
@@ -4970,9 +4971,21 @@ public class Interpreter extends InterpreterBase {
             cancelCheck(node);
             Object data = itemsIterator.next();
             i += 1;
-            Object key = evaluateProjection(0, data);
-            Object value = evaluateProjection(1, data);
-            return new AbstractMap.SimpleImmutableEntry<Object,Object> (key, value);
+
+            int numChildren = node.jjtGetNumChildren();
+            if (numChildren > 2) {
+                LinkedHashMap<Object, Object> result = new LinkedHashMap();
+                for (int j = 0; j < numChildren; j +=2 ) {
+                   Object key = evaluateProjection(j, data);
+                   Object value = evaluateProjection(j + 1, data);
+                   result.put(key, value);
+                }
+                return result;
+            } else {
+                Object key = evaluateProjection(0, data);
+                Object value = evaluateProjection(1, data);
+                return new AbstractMap.SimpleImmutableEntry<Object,Object> (key, value);
+           }
         }
     }
 

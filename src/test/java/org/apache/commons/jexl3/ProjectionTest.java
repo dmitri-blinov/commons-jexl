@@ -101,6 +101,17 @@ public class ProjectionTest extends JexlTestCase {
     }
 
     @Test
+    public void testMapProjection4() throws Exception {
+        JexlScript e = JEXL.createScript("var s = {:}; for (var i : ...m.{'key' : @.key, 'value' : @.value}) s.put(i.key,i.value); s");
+        JexlContext jc = new MapContext();
+        jc.set("m", testMap);
+
+        Object o = e.execute(jc);
+        Assert.assertTrue(((Map)o).containsKey("foo"));
+        Assert.assertTrue(((Map)o).containsValue("food"));
+    }
+
+    @Test
     public void testLambdaMapProjection() throws Exception {
         JexlScript e = JEXL.createScript("var s = {}; for (var i : ...m.{(index, entry) -> {entry.value}}) s.add(i); s");
         JexlContext jc = new MapContext();
