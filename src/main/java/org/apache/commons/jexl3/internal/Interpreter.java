@@ -3796,7 +3796,7 @@ public class Interpreter extends InterpreterBase {
                     frame.set(symbol, value);
                     // make the closure accessible to itself, ie capture the currently set variable after frame creation
                     if (value instanceof Closure) {
-                          ((Closure) value).setCaptured(symbol, value);
+                          ((Closure) value).captureSelfIfRecursive(frame, symbol);
                     }
                     return value; // 1
                 }

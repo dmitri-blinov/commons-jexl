@@ -609,4 +609,8 @@ public final class Scope {
         } 
         return EMPTY_STRS;
     }
+
+    Scope getParent() {
+        return parent;
+    }
 }

@@ -393,22 +393,23 @@ public class Closure extends Script {
     }
 
     /**
-     * Sets the captured index of a given symbol, ie the target index of a parent
-     * captured symbol in this closure's frame.
-     * <p>This is meant to allow a locally defined function to "see" and call
-     * itself as a local (captured) variable;
-     * in other words, this allows recursive call of a function.
+     * Enable lambda recursion.
+     * <p>Assign this lambda in its own frame if the symbol it is assigned to in its definition scope
+     * is captured in its body.</p>
+     * <p>This done allow a locally defined function to "see" and call  itself as a local (captured) variable.</p>
+     * Typical case is: <code>const f = (x)->x <= 0? 1 : x*f(x-1)</code>. Since assignment of f occurs after
+     * the lambda creation, we need to patch the lambda frame to expose itself through the captured symbol.
+     * @param parentFrame the parent calling frame
      * @param symbol the symbol index (in the caller of this closure)
-     * @param value the value to set in the local frame
      */
-    public void setCaptured(int symbol, Object value) {
+    void captureSelfIfRecursive(final Frame parentFrame, final int symbol) {
         if (script instanceof ASTJexlLambda) {
-            ASTJexlLambda lambda = (ASTJexlLambda) script;
-            Scope scope = lambda.getScope();
-            if (scope != null) {
-                Integer reg = scope.getCaptured(symbol);
+            Scope parentScope = parentFrame != null ? parentFrame.getScope() : null;
+            Scope localScope = frame != null ? frame.getScope() : null;
+            if (parentScope != null  && localScope != null && parentScope == localScope.getParent()) {
+                final Integer reg = localScope.getCaptured(symbol);
                 if (reg != null) {
-                    frame.set(reg, value);
+                    frame.set(reg, this);
                 }
             }
         }
