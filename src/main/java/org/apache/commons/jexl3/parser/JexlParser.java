@@ -849,38 +849,6 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
-     * Checks whether a symbol has been declared as a const in the current stack of lexical units.
-     * @param symbol the symbol
-     * @return true if constant, false otherwise
-     */
-    private boolean isConstant(int symbol) {
-        if (symbol >= 0) {
-            if (block != null && block.isConstant(symbol)) {
-                return true;
-            }
-            Scope blockScope = blockScopes.get(block);
-            int lexical = symbol;
-            for (LexicalUnit unit : blocks) {
-                Scope unitScope = blockScopes.get(unit);
-                // follow through potential capture
-                if (blockScope != unitScope) {
-                    int declared = blockScope.getCaptureDeclaration(lexical);
-                    if (declared >= 0) {
-                        lexical = declared;
-                    }
-                    if (unitScope != null) {
-                        blockScope = unitScope;
-                    }
-                }
-                if (unit.isConstant(lexical)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Check fat vs thin arrow syntax feature.
      * @param token the arrow token
      */
