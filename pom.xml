@@ -97,19 +97,6 @@
         <commons.releaseManagerKey>4E066E0459CD109B</commons.releaseManagerKey>
     </properties>
 
-    <!-- Checkstyle 10 is incompatible with jdk 8, keep 9.3 -->
-    <profiles>
-        <profile>
-            <id>jdk8-plugin-fix-version</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <checkstyle.version>9.3</checkstyle.version>
-            </properties>
-        </profile>
-    </profiles>
-
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/commons-jexl.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/commons-jexl.git</developerConnection>
