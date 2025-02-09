@@ -17,9 +17,8 @@
 
 package org.apache.commons.jexl3;
 
-import org.apache.commons.jexl3.introspection.JexlMethod;
-import org.apache.commons.jexl3.internal.Closure;
-import org.apache.commons.jexl3.internal.introspection.IndexedType;
+import static java.lang.StrictMath.floor;
+import static org.apache.commons.jexl3.JexlOperator.EQ;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Array;
@@ -44,7 +43,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static java.lang.StrictMath.floor;
+import org.apache.commons.jexl3.introspection.JexlMethod;
+import org.apache.commons.jexl3.internal.Closure;
+import org.apache.commons.jexl3.internal.introspection.IndexedType;
 
 /**
  * Perform arithmetic, implements JexlOperator methods.
@@ -402,6 +403,19 @@ public class JexlArithmetic {
          * @return the reverse indicator
          */
         boolean isReverse();
+    }
+
+    /** Marker class for coercion operand exceptions. */
+    public static class CoercionException extends ArithmeticException {
+        private static final long serialVersionUID = 202402081150L;
+
+        /**
+         * Simple ctor.
+         * @param msg the exception message
+         */
+        public CoercionException(final String msg) {
+            super(msg);
+        }
     }
 
     /**
@@ -2363,57 +2377,70 @@ public class JexlArithmetic {
     private int doCompare(final Object left, final Object right, final JexlOperator operator) {
         final boolean strictCast = isStrict(operator);
         if (left != null && right != null) {
-            if (left instanceof BigDecimal || right instanceof BigDecimal) {
-                final BigDecimal l = toBigDecimal(left);
-                final BigDecimal r = toBigDecimal(right);
-                return l.compareTo(r);
-            }
-            if (left instanceof BigInteger || right instanceof BigInteger) {
-                try {
-                    final BigInteger l = toBigInteger(left);
-                    final BigInteger r = toBigInteger(right);
+            try {
+                if (left instanceof BigDecimal || right instanceof BigDecimal) {
+                    final BigDecimal l = toBigDecimal(strictCast, left);
+                    final BigDecimal r = toBigDecimal(strictCast, right);
                     return l.compareTo(r);
-                } catch(ArithmeticException xconvert) {
-                    // ignore it, continue in sequence
                 }
-            }
-            if (isFloatingPoint(left) || isFloatingPoint(right)) {
-                final double lhs = toDouble(left);
-                final double rhs = toDouble(right);
-                if (Double.isNaN(lhs)) {
-                    if (Double.isNaN(rhs)) {
-                        return 0;
+                if (left instanceof BigInteger || right instanceof BigInteger) {
+                    final BigInteger l = toBigInteger(strictCast, left);
+                    final BigInteger r = toBigInteger(strictCast, right);
+                    return l.compareTo(r);
+                }
+                if (isFloatingPoint(left) || isFloatingPoint(right)) {
+                    final double lhs = toDouble(strictCast, left);
+                    final double rhs = toDouble(strictCast, right);
+                    if (Double.isNaN(lhs)) {
+                        if (Double.isNaN(rhs)) {
+                            return 0;
+                        }
+                        return -1;
                     }
-                    return -1;
+                    if (Double.isNaN(rhs)) {
+                        // lhs is not NaN
+                        return +1;
+                    }
+                    return Double.compare(lhs, rhs);
                 }
-                if (Double.isNaN(rhs)) {
-                    // lhs is not NaN
-                    return +1;
-                }
-                return Double.compare(lhs, rhs);
-            }
-            if (isNumberable(left) || isNumberable(right)) {
-                try {
-                    final long lhs = toLong(left);
-                    final long rhs = toLong(right);
+                if (isNumberable(left) || isNumberable(right)) {
+                    final long lhs = toLong(strictCast, left);
+                    final long rhs = toLong(strictCast, right);
                     return Long.compare(lhs, rhs);
-                } catch(ArithmeticException xconvert) {
-                    // ignore it, continue in sequence
                 }
+                if (left instanceof String || right instanceof String) {
+                    return toString(left).compareTo(toString(right));
+                }
+            } catch (final CoercionException ignore) {
+                // ignore it, continue in sequence
             }
-            if (left instanceof String || right instanceof String) {
-                return toString(left).compareTo(toString(right));
-            }
-            if ("==".equals(operator)) {
+
+            if (EQ == operator) {
                 return left.equals(right) ? 0 : -1;
             }
+
             if (left instanceof Comparable<?>) {
                 @SuppressWarnings("unchecked") // OK because of instanceof check above
                 final Comparable<Object> comparable = (Comparable<Object>) left;
-                return comparable.compareTo(right);
+                try {
+                    return comparable.compareTo(right);
+                } catch (final ClassCastException castException) {
+                    // ignore it, continue in sequence
+                }
+            }
+            if (right instanceof Comparable<?>) {
+                @SuppressWarnings("unchecked") // OK because of instanceof check above
+                final Comparable<Object> comparable = (Comparable<Object>) right;
+                try {
+                    return -Integer.signum(comparable.compareTo(left));
+                } catch (final ClassCastException castException) {
+                    // ignore it, continue in sequence
+                }
             }
         }
-        throw new ArithmeticException("Object comparison:(" + left + " " + operator + " " + right + ")");
+        throw new ArithmeticException("Object comparison:(" + left +
+                " " + operator.getOperatorSymbol()
+                + " " + right + ")");
     }
 
     /**
@@ -2430,10 +2457,11 @@ public class JexlArithmetic {
         if (left == null || right == null) {
             return false;
         }
+        final boolean strictCast = isStrict(EQ);
         if (left instanceof Boolean || right instanceof Boolean) {
-            return toBoolean(left) == toBoolean(right);
+            return toBoolean(left) == toBoolean(strictCast, right);
         }
-        return compare(left, right, "==") == 0;
+        return compare(left, right, EQ) == 0;
     }
 
     /**
@@ -2447,7 +2475,7 @@ public class JexlArithmetic {
         if ((left == right) || (left == null) || (right == null)) {
             return false;
         }
-        return compare(left, right, "<") < 0;
+        return compare(left, right, JexlOperator.LT) < 0;
 
     }
 
@@ -2462,7 +2490,7 @@ public class JexlArithmetic {
         if ((left == right) || left == null || right == null) {
             return false;
         }
-        return compare(left, right, ">") > 0;
+        return compare(left, right, JexlOperator.GT) > 0;
     }
 
     /**
@@ -2479,7 +2507,7 @@ public class JexlArithmetic {
         if (left == null || right == null) {
             return false;
         }
-        return compare(left, right, "<=") <= 0;
+        return compare(left, right, JexlOperator.LTE) <= 0;
     }
 
     /**
@@ -2496,7 +2524,7 @@ public class JexlArithmetic {
         if (left == null || right == null) {
             return false;
         }
-        return compare(left, right, ">=") >= 0;
+        return compare(left, right, JexlOperator.GTE) >= 0;
     }
 
     /**
@@ -2641,8 +2669,7 @@ public class JexlArithmetic {
         if (val instanceof Character) {
             return ((Character) val);
         }
-
-        throw new ArithmeticException("Integer coercion: "
+        throw new CoercionException("Integer coercion: "
                 + val.getClass().getName() + ":(" + val + ")");
     }
 
@@ -2678,7 +2705,7 @@ public class JexlArithmetic {
         if (val instanceof Character) {
             return ((Character) val);
         }
-        throw new ArithmeticException("Long coercion: "
+        throw new CoercionException("Long coercion: "
                 + val.getClass().getName() + ":(" + val + ")");
     }
 
@@ -2716,7 +2743,7 @@ public class JexlArithmetic {
         if (d == f) {
             return (long) d;
         }
-        throw new ArithmeticException("Long coercion: ("+ arg +")");
+        throw new CoercionException("Long coercion: ("+ arg +")");
     }
 
     /**
@@ -2732,7 +2759,7 @@ public class JexlArithmetic {
         if ((long) i == l) {
             return i;
         }
-        throw new ArithmeticException("Int coercion: ("+ arg +")");
+        throw new CoercionException("Int coercion: ("+ arg +")");
     }
 
     /**
@@ -2796,7 +2823,7 @@ public class JexlArithmetic {
             final int i = ((Character) val);
             return BigInteger.valueOf(i);
         }
-        throw new ArithmeticException("BigInteger coercion: "
+        throw new CoercionException("BigInteger coercion: "
                 + val.getClass().getName() + ":(" + val + ")");
     }
 
@@ -2842,7 +2869,7 @@ public class JexlArithmetic {
             final int i = ((Character) val);
             return new BigDecimal(i);
         }
-        throw new ArithmeticException("BigDecimal coercion: "
+        throw new CoercionException("BigDecimal coercion: "
                 + val.getClass().getName() + ":(" + val + ")");
     }
 
@@ -2880,7 +2907,7 @@ public class JexlArithmetic {
             final int i = ((Character) val);
             return i;
         }
-        throw new ArithmeticException("Double coercion: "
+        throw new CoercionException("Double coercion: "
                 + val.getClass().getName() + ":(" + val + ")");
     }
 
