@@ -168,7 +168,7 @@ TOKEN_MGR_DECLS : {
     | < _OR: "or" >
 }
 
-<*> MORE : {
+<DEFAULT, QUALIFIED, DOT_ID> MORE : {
     "!" { if (matchingNames) {SwitchTo(NOTIN);} else {SwitchTo(WHATNOT);} } 
 }
 
