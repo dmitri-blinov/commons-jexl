@@ -19,8 +19,10 @@ package org.apache.commons.jexl3.parser;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -537,35 +539,6 @@ public abstract class JexlParser extends StringParser {
     }
 
     /**
-     * Declares a local function.
-     * @param variable the identifier used to declare
-     * @param token      the variable name token
-     */
-    protected void declareFunction(final ASTVar variable, final Token token) {
-        final String name = token.image;
-        // function foo() ... <=> const foo = ()->...
-        if (scope == null) {
-            scope = new Scope(null);
-        }
-        final int symbol = scope.declareVariable(name);
-        variable.setSymbol(symbol, name);
-        variable.setLexical(true);
-        if (scope.isCapturedSymbol(symbol)) {
-            variable.setCaptured(true);
-        }
-        // function is const fun...
-        if (declareSymbol(symbol)) {
-            scope.addLexical(symbol);
-            block.setConstant(symbol);
-        } else {
-            if (getFeatures().isLexical()) {
-                throw new JexlException(variable, name + ": variable is already declared");
-            }
-            variable.setRedefined(true);
-        }
-    }
-
-    /**
      * Declares a local variable.
      * <p>
      * This method creates an new entry in the symbol map.
@@ -636,7 +609,7 @@ public abstract class JexlParser extends StringParser {
         final String[] nsprefixes = { PRAGMA_JEXLNS, PRAGMA_MODULE };
         for(String nsprefix : nsprefixes) {
             if (key.startsWith(nsprefix)) {
-                if (!features.supportsNamespacePragma()) {
+                if (!getFeatures().supportsNamespacePragma()) {
                     throwFeatureException(JexlFeatures.NS_PRAGMA, getToken(0));
                 }
                 final String nsname = key.substring(nsprefix.length());
@@ -648,7 +621,9 @@ public abstract class JexlParser extends StringParser {
                 }
                 break;
             }
-        } else if (PRAGMA_IMPORT.equals(key)) {
+        }
+
+        if (PRAGMA_IMPORT.equals(key)) {
             // jexl.import, may use a set
             Set<?> values = value instanceof Set<?>
                     ? (Set<?>) value

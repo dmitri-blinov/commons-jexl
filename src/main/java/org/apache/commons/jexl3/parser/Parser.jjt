@@ -2042,7 +2042,7 @@ void MapElement() #void : {}
 
 void MapEntry() : {}
 {
-    Identifier(true) <COLON> Expression()
+    LOOKAHEAD(<IDENTIFIER> <COLON>) Identifier(true) <COLON> Expression()
     |
     Expression() <COLON> Expression()
 }
