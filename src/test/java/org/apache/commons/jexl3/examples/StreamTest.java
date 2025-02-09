@@ -64,7 +64,7 @@ public class StreamTest {
          * @param mapper the lambda to use as mapper
          * @return the mapped stream
          */
-        public Stream<?> map(final Stream<?> stream, final JexlScript mapper) {
+        public Stream<?> map1(final Stream<?> stream, final JexlScript mapper) {
             return stream.map( x -> mapper.execute(this, x));
         }
 
@@ -74,7 +74,7 @@ public class StreamTest {
          * @param filter the lambda to use as filter
          * @return the filtered stream
          */
-        public Stream<?> filter(final Stream<?> stream, final JexlScript filter) {
+        public Stream<?> filter1(final Stream<?> stream, final JexlScript filter) {
             return stream.filter(x -> x != null && TRUE.equals(filter.execute(this, x)));
         }
     }
@@ -101,7 +101,7 @@ public class StreamTest {
         final JexlScript mapper = jexl.createScript("uri.scheme =^ 'http'? `https://${uri.host}` : null", "uri");
         // using the bang-bang / !! - JScript like -  is the way to coerce to boolean in the filter
         final JexlScript transform = jexl.createScript(
-                "list.stream().map(mapper).filter(x -> !!x).collect(Collectors.toList())", "list");
+                "list.stream().map1(mapper).filter1(x -> !!x).collect(Collectors.toList())", "list");
 
         // Execute scripts:
         final JexlContext sctxt = new StreamContext();
