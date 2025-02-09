@@ -628,6 +628,49 @@ public final class JexlFeatures {
     }
 
     /**
+     * Sets whether lambda captured-variables are constant or mutable.
+     * <p>
+     * When disabled, lambda-captured variables are implicitly converted to read-write local variable (let),
+     * when enabled, those are implicitly converted to read-only local variables (const).
+     * </p>
+     * @param flag true to enable, false to disable
+     * @return this features instance
+     */
+    public JexlFeatures constCapture(final boolean flag) {
+        setFeature(CONST_CAPTURE, flag);
+        return this;
+    }
+
+    /**
+     * Does the engine support lambda captured-variables as const?
+     * @return true if lambda captured-variables are const, false otherwise
+     */
+    public boolean supportsConstCapture() {
+        return getFeature(CONST_CAPTURE);
+    }
+
+    /**
+     * Sets whether pragma constructs can appear anywhere in the code.
+     *
+     * @param flag true to enable, false to disable
+     * @return this features instance
+     * @since 3.3
+     */
+    public JexlFeatures pragmaAnywhere(final boolean flag) {
+        setFeature(PRAGMA_ANYWHERE, flag);
+        return this;
+    }
+
+    /**
+     * Can pragma constructs appear anywhere in the code?
+     * @return true if pragma constructs can appear anywhere in the code, false otherwise
+     * @since 3.3
+     */
+    public boolean supportsPragmaAnywhere() {
+        return getFeature(PRAGMA_ANYWHERE);
+    }
+
+    /**
      * Sets whether pragma constructs are enabled.
      * <p>
      * When disabled, parsing a script/expression using syntactic pragma constructs (#pragma)
