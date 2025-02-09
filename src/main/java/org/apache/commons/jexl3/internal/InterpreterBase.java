@@ -962,7 +962,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 return true;
             } else if (narrow) {
 
-                JexlMethod[] vms = uberspect.getMethods(ntarget, mname, true);
+                JexlMethod[] vms = uberspect.getMethods(ntarget, methodName, true);
 
                 if (vms != null && vms.length == 1) {
 
