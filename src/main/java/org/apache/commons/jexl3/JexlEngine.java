@@ -21,12 +21,15 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.MathContext;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.Objects;
+
+import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 /**
  * Creates and evaluates JexlExpression and JexlScript objects.
@@ -176,6 +179,9 @@ public abstract class JexlEngine {
      * An empty/static/non-mutable JexlContext singleton used instead of null context.
      */
     public static final JexlContext EMPTY_CONTEXT = new EmptyContext();
+
+    /** Default constructor */
+    public JexlEngine() {} // Keep Javadoc happy
 
     /**
      * The empty context class, public for instrospection.
@@ -652,11 +658,8 @@ public abstract class JexlEngine {
      * @return the source
      */
     protected String readSource(final File file) {
-        if (file == null) {
-            throw new NullPointerException("source file is null");
-        }
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                getCharset()))) {
+        Objects.requireNonNull(file, "file");
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), getCharset())) {
             return toString(reader);
         } catch (final IOException xio) {
             throw new JexlException(createInfo(file.getName(), file.toString(), 1, 1), "could not read source File", xio);
