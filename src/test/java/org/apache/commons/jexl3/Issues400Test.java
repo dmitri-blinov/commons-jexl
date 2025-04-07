@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,8 +43,6 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 import org.apache.commons.jexl3.parser.ASTJexlScript;
 import org.apache.commons.jexl3.parser.JexlScriptParser;
 import org.apache.commons.jexl3.parser.Parser;
-import org.apache.commons.jexl3.parser.ParserTokenManager;
-import org.apache.commons.jexl3.parser.Provider;
 import org.apache.commons.jexl3.parser.StringProvider;
 
 
