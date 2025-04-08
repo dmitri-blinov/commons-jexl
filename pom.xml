@@ -60,15 +60,16 @@
         <commons.spotbugs.version>4.7.3.0</commons.spotbugs.version>
         <commons.junit.version>5.9.1</commons.junit.version>
 
-        <!-- override of Jacoco properties defined in CP52 -->
-        <commons.jacoco.version>0.8.8</commons.jacoco.version>
-        <commons.jacoco.classRatio>0.95</commons.jacoco.classRatio>
-        <commons.jacoco.instructionRatio>0.85</commons.jacoco.instructionRatio>
-        <commons.jacoco.methodRatio>0.85</commons.jacoco.methodRatio>
-        <commons.jacoco.branchRatio>0.75</commons.jacoco.branchRatio>
-        <commons.jacoco.complexityRatio>0.70</commons.jacoco.complexityRatio>
-        <commons.jacoco.lineRatio>0.85</commons.jacoco.lineRatio>
-        <commons.jacoco.haltOnFailure>false</commons.jacoco.haltOnFailure>
+        <spotbugs.version>4.9.3.0</spotbugs.version>
+        <!-- JaCoCo: Don't make code coverage worse than: -->
+        <commons.jacoco.version>0.8.13</commons.jacoco.version>
+        <commons.jacoco.haltOnFailure>true</commons.jacoco.haltOnFailure>
+        <commons.jacoco.classRatio>0.96</commons.jacoco.classRatio>
+        <commons.jacoco.instructionRatio>0.89</commons.jacoco.instructionRatio>
+        <commons.jacoco.methodRatio>0.89</commons.jacoco.methodRatio>
+        <commons.jacoco.branchRatio>0.80</commons.jacoco.branchRatio>
+        <commons.jacoco.lineRatio>0.89</commons.jacoco.lineRatio>
+        <commons.jacoco.complexityRatio>0.75</commons.jacoco.complexityRatio>
         <!--
           Encoding of Java source files: ensures that the compiler and
           the javadoc generator use the right encoding. Subprojects may
@@ -251,7 +252,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>${commons.spotbugs.version}</version>
+                <version>${spotbugs.version}</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>High</threshold>

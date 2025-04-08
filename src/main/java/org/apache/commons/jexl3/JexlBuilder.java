@@ -282,8 +282,20 @@ public class JexlBuilder {
     }
 
     /**
+     * Sets the Jexl script parser factory the engine will use.
+     *
+     * @param factory the function to produce a cache.
+     * @return this builder
+     */
+    public JexlBuilder cacheFactory(final IntFunction<JexlCache<?, ?>> factory) {
+        this.cacheFactory = factory;
+        return this;
+    }
+
+    /**
      * Gets the Jexl script parser factory the engine will use.
      * @return the cache factory
+     * @since 3.4.1
      */
     public Supplier<JexlScriptParser> parserFactory() {
         return this.parserFactory;
@@ -294,6 +306,7 @@ public class JexlBuilder {
      *
      * @param factory the function to produce a cache.
      * @return this builder
+     * @since 3.4.1
      */
     public JexlBuilder parserFactory(final Supplier<JexlScriptParser> factory) {
         this.parserFactory = factory;
@@ -672,17 +685,6 @@ public class JexlBuilder {
      */
     public int cache() {
         return cache;
-    }
-
-    /**
-     * Sets the expression cache factory the engine will use.
-     *
-     * @param factory the function to produce a cache implementation.
-     * @return this builder
-     */
-    public JexlBuilder cacheFactory(final IntFunction<JexlCache<?, ?>> factory) {
-        this.cacheFactory = factory;
-        return this;
     }
 
     /**
