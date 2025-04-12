@@ -365,16 +365,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-                <version>2.12.1</version>
-                <configuration>
-                    <issueLinkTemplatePerSystem>
-                        <default>%URL%/%ISSUE%</default>
-                    </issueLinkTemplatePerSystem>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>${checkstyle.plugin.version}</version>
                 <configuration>
