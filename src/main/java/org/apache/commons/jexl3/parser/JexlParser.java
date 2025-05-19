@@ -22,6 +22,7 @@ import java.io.StringReader;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
@@ -99,7 +100,7 @@ public abstract class JexlParser extends StringParser {
     /**
      * Implicitly imported java packages for resolving simple class names from
      */
-    protected Set<String> implicitPackages;
+    protected Collection<String> implicitPackages;
     /**
      * The current lexical block.
      */
@@ -175,8 +176,6 @@ public abstract class JexlParser extends StringParser {
         scope = null;
         scopes.clear();
         pragmas = null;
-        implicitPackages = null;
-        classes = null;
         branchScope = null;
         branchScopes.clear();
         namespaces = null;
@@ -632,10 +631,13 @@ public abstract class JexlParser extends StringParser {
                 if (o instanceof String) {
                     if (implicitPackages == null) {
                         implicitPackages = new LinkedHashSet<>();
+                    } else {
+                        implicitPackages = new LinkedHashSet<>(implicitPackages);
                     }
                     implicitPackages.add(o.toString());
                 }
             }
+            classes = null;
         }
 
         // merge new value into a set created on the fly if key is already mapped

@@ -62,7 +62,10 @@ public final class Parser extends JexlParser
             info = jexlInfo != null? jexlInfo : new JexlInfo();
             source = jexlSrc;
             pragmas = null;
-            implicitPackages = new LinkedHashSet(jexlOptions.getImports());
+            if (implicitPackages != jexlOptions.getImports()) {
+                implicitPackages = jexlOptions.getImports();
+                classes = null;
+            }
             scope = jexlScope;
             branchScope = new BranchScope();
             token_source.comparatorNames = jexlFeatures.supportsComparatorNames();
@@ -766,6 +769,7 @@ void GenericStatement() #void : {}
     | LOOKAHEAD(FunctionStatementLookahead()) FunctionStatement()
     | LOOKAHEAD(LabelledStatementLookahead()) LabelledStatement()
     | LOOKAHEAD(DeclareLocalVar()) VarStatement()
+    | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVarStatement()
     | LOOKAHEAD(SwitchStatementLookahead()) SwitchStatement()
     | LOOKAHEAD(Expression()) ExpressionStatement()
     | Block()
@@ -779,14 +783,13 @@ void GenericStatement() #void : {}
     | ThrowStatement()
     | AssertStatement()
     | SynchronizedStatement()
-    | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
     | ReturnStatement()
     | YieldStatement()
     | Continue()
     | Remove()
     | Break()
     | Delete()
-    | LOOKAHEAD(<VAR> <LPAREN> | <FINAL> <VAR> <LPAREN>) MultipleVarStatement()
+    | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
 }
 
 void Statement() #void : {}
@@ -807,13 +810,13 @@ void Statement() #void : {}
     | ThrowStatement()
     | AssertStatement()
     | SynchronizedStatement()
-    | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
     | ReturnStatement()
     | YieldStatement()
     | Continue()
     | Remove()
     | Break()
     | Delete()
+    | LOOKAHEAD(MultipleIdentifier() <assign>) MultipleAssignmentStatement()
 }
 
 void StatementBranch() #void : {}
@@ -1953,6 +1956,16 @@ void NamespaceIdentifier()  #NamespaceIdentifier :
     ns=<IDENTIFIER> <COLON> id=<IDENTIFIER> { jjtThis.setNamespace(ns.image, id.image); }
 }
 
+void ReservedIdentifier() #Identifier :
+{
+    Token t;
+}
+{
+    t=<CONST> { jjtThis.setSymbol(t.image); }
+    |
+    t=<VAR> { jjtThis.setSymbol(t.image); }
+}
+
 void FunctionIdentifier() #Identifier :
 {
     Token t;
@@ -2711,6 +2724,8 @@ void PrimaryExpression() #void : {}
     LOOKAHEAD( ClassLiteral() ) ClassLiteral()
     |
     LOOKAHEAD( StaticTypeReference() <DOT> ) StaticTypeReference()
+    |
+    LOOKAHEAD( ReservedIdentifier() ) ReservedIdentifier()
     |
     Identifier(true)
 }
