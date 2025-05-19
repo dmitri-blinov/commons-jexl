@@ -1919,7 +1919,20 @@ void SwitchCaseLabel() : {}
     |
     LOOKAHEAD(DeclareSwitchCaseVar()) DeclareSwitchCaseVar() [ <WHEN> ConditionalExpression() ] 
     |
-    (SwitchCaseLiteral() | Identifier()) (<COMMA> (SwitchCaseLiteral() | Identifier()))*
+    (SwitchCaseExpression() | Identifier()) (<COMMA> (SwitchCaseExpression() | Identifier()))*
+}
+
+void SwitchCaseExpression() #void : {}
+{
+    <minus> SwitchCaseLiteral() #UnaryMinusNode(1)
+    |
+    <unary_minus> SwitchCaseLiteral() #UnaryMinusNode(1)
+    |
+    <plus> SwitchCaseLiteral() #UnaryPlusNode(1)
+    |
+    <tilda> SwitchCaseLiteral() #BitwiseComplNode(1)
+    |
+    SwitchCaseLiteral()
 }
 
 void SwitchCaseLiteral() #void : {}

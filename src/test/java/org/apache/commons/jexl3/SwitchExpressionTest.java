@@ -44,7 +44,7 @@ public class SwitchExpressionTest extends JexlTestCase {
         Object o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 42, o);
 
-        e = JEXL.createScript("var e = switch (1) {case 1 -> 42; case 2 -> 0; default -> -1}");
+        e = JEXL.createScript("var e = switch (1) {case 1 -> 42; case -1 -> 43; case 2 -> 0; default -> -1}");
         o = e.execute(jc);
         Assert.assertEquals("Result is not as expected", 42, o);
 
