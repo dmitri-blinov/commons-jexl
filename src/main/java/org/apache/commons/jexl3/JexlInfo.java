@@ -115,7 +115,7 @@ public class JexlInfo {
             }
         }
         this.name = se != null ? se.getClassName() + "." + se.getMethodName() + ":" + se.getLineNumber() : "?";
-        this.path = pkgname;
+        this.path = null;
         this.line = 1;
         this.column = 1;
     }

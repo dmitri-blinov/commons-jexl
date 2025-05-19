@@ -632,7 +632,7 @@ public abstract class JexlEngine {
                 getCharset()))) {
             return toString(reader);
         } catch (final IOException xio) {
-            throw new JexlException(createInfo(file.getName(), file.getPath(), 1, 1), "could not read source File", xio);
+            throw new JexlException(createInfo(file.toString(), null, 1, 1), "could not read source File", xio);
         }
     }
 
@@ -649,7 +649,7 @@ public abstract class JexlEngine {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), getCharset()))) {
             return toString(reader);
         } catch (final IOException xio) {
-            throw new JexlException(createInfo(url.getFile(), url.getPath(), 1, 1), "could not read source URL", xio);
+            throw new JexlException(createInfo(url.toString(), null, 1, 1), "could not read source URL", xio);
         }
     }
 }
