@@ -135,6 +135,23 @@ public class Issues300Test {
     }
 
     @Test
+    public void test304a() {
+        final JexlEngine jexlEngine = new JexlBuilder().strict(false).create();
+        JexlExpression e304 = jexlEngine.createExpression("var.overview.limit");
+
+        final Map<String, Object> map3 = new HashMap<>();
+        map3.put("limit", "4711");
+        final Map<String, Object> map2 = new HashMap<>();
+        map2.put("overview", map3);
+        final Map<String, Object> map = new HashMap<>();
+        map.put("var", map2);
+
+        final JexlContext context = new MapContext(map);
+        Object value = e304.evaluate(context);
+        assertEquals("4711", value); // fails
+    }
+
+    @Test
     public void test305() {
         final JexlEngine jexl = new JexlBuilder().create();
         JexlScript e;
