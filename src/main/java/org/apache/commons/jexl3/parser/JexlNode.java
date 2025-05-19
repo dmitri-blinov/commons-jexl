@@ -75,16 +75,17 @@ public abstract class JexlNode extends SimpleNode {
      * @return the info
      */
     public JexlInfo jexlInfo() {
-        return jexlInfo(null);
+        return jexlInfo(null, null);
     }
 
     /**
      * Gets the associated JexlInfo instance.
      *
      * @param name the source name
+     * @param name the source path
      * @return the info
      */
-    public JexlInfo jexlInfo(String name) {
+    public JexlInfo jexlInfo(String name, String path) {
         JexlInfo info = null;
         JexlNode node = this;
         while (node != null) {
@@ -98,7 +99,7 @@ public abstract class JexlNode extends SimpleNode {
             final int c = lc & 0xfff;
             final int l = lc >> 0xc;
             // at least an info with line/column number
-            return info != null? info.at(info.getLine() + l - 1, c) : new JexlInfo(name, l, c);
+            return info != null? info.at(info.getLine() + l - 1, c) : new JexlInfo(name, path, l, c);
         }
         // weird though; no jjSetFirstToken(...) ever called?
         return info;
@@ -317,7 +318,7 @@ public abstract class JexlNode extends SimpleNode {
          * @param info the
          */
         public Info(final JexlNode jnode, final JexlInfo info) {
-            this(jnode, info.getName(), info.getLine(), info.getColumn());
+            this(jnode, info.getName(), info.getPath(), info.getLine(), info.getColumn());
         }
 
         /**
@@ -327,8 +328,8 @@ public abstract class JexlNode extends SimpleNode {
          * @param l the line
          * @param c the column
          */
-        private Info(final JexlNode jnode, final String name, final int l, final int c) {
-            super(name, l, c);
+        private Info(final JexlNode jnode, final String name, final String p, final int l, final int c) {
+            super(name, p, l, c);
             node = jnode;
         }
 
@@ -341,7 +342,7 @@ public abstract class JexlNode extends SimpleNode {
 
         @Override
         public JexlInfo at(final int l, final int c) {
-            return new Info(node, getName(), l, c);
+            return new Info(node, getName(), getPath(), l, c);
         }
 
         @Override

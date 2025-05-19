@@ -34,6 +34,9 @@ public class JexlInfo {
     /** name. */
     private final String name;
 
+    /** path. */
+    private final String path;
+
     /**
      * @return the detailed information in case of an error
      */
@@ -71,7 +74,20 @@ public class JexlInfo {
      * @param c column number
      */
     public JexlInfo(final String source, final int l, final int c) {
+        this(source, null, l, c);
+    }
+
+    /**
+     * Create info.
+     *
+     * @param source source name
+     * @param p source path
+     * @param l line number
+     * @param c column number
+     */
+    public JexlInfo(final String source, final String p, final int l, final int c) {
         name = source;
+        path = p;
         line = l <= 0? 1: l;
         column = c <= 0? 1 : c;
     }
@@ -99,6 +115,7 @@ public class JexlInfo {
             }
         }
         this.name = se != null ? se.getClassName() + "." + se.getMethodName() + ":" + se.getLineNumber() : "?";
+        this.path = pkgname;
         this.line = 1;
         this.column = 1;
     }
@@ -111,7 +128,7 @@ public class JexlInfo {
      * @return a new info instance
      */
     public JexlInfo at(final int l, final int c) {
-        return new JexlInfo(name, l, c);
+        return new JexlInfo(name, path, l, c);
     }
 
     /**
@@ -120,7 +137,7 @@ public class JexlInfo {
      * @param copy the instance to copy
      */
     protected JexlInfo(final JexlInfo copy) {
-        this(copy.getName(), copy.getLine(), copy.getColumn());
+        this(copy.getName(), copy.getPath(), copy.getLine(), copy.getColumn());
     }
 
     /**
@@ -130,7 +147,10 @@ public class JexlInfo {
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(name != null? name : "");
+        final StringBuilder sb = new StringBuilder();
+        if (name != null) {
+            sb.append(name);
+        }
         sb.append("@");
         sb.append(line);
         sb.append(":");
@@ -155,6 +175,15 @@ public class JexlInfo {
      */
     public final String getName() {
         return name;
+    }
+
+    /**
+     * Gets the file/script/url path.
+     *
+     * @return template path
+     */
+    public final String getPath() {
+        return path;
     }
 
     /**

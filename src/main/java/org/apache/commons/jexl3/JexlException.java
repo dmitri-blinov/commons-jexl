@@ -225,9 +225,9 @@ public class JexlException extends RuntimeException {
             return info;
         }
         if (info == null) {
-            return new JexlInfo("", cause.getLine(), cause.getColumn());
+            return new JexlInfo("", "", cause.getLine(), cause.getColumn());
         }
-        return new JexlInfo(info.getName(), cause.getLine(), cause.getColumn());
+        return info.at(cause.getLine(), cause.getColumn());
     }
 
     /**

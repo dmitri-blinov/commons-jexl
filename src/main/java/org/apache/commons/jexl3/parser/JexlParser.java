@@ -566,7 +566,7 @@ public abstract class JexlParser extends StringParser {
         // if not the first time we declare this symbol...
         if (!declareSymbol(symbol, variable.getType(), variable.isLexical(), variable.isConstant(), variable.isRequired())) {
             if (isLexicalVariable(name) || variable.isLexical() || getFeatures().isLexical()) {
-                throw new JexlException.Parsing(variable.jexlInfo(info != null ? info.getName() : null), name + ": variable is already declared").clean();
+                throw new JexlException.Parsing(variable.jexlInfo(info != null ? info.getName() : null, info != null ? info.getPath() : null), name + ": variable is already declared").clean();
             }
             variable.setRedefined(true);
         }
@@ -924,7 +924,7 @@ public abstract class JexlParser extends StringParser {
      * @throws JexlException.Ambiguous in all cases
      */
     protected void throwAmbiguousException(final JexlNode node) {
-        final JexlInfo begin = node.jexlInfo(info != null ? info.getName() : null);
+        final JexlInfo begin = node.jexlInfo(info != null ? info.getName() : null, info != null ? info.getPath() : null);
         final Token t = getToken(0);
         final JexlInfo end = info.at(t.beginLine, t.endColumn);
         final String msg = readSourceLine(source, end.getLine());
