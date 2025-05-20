@@ -56,6 +56,8 @@ public class TemplateInterpreter extends Interpreter {
         JexlOptions options;
         /** The context. */
         JexlContext jcontext;
+        /** The info. */
+        JexlInfo info;
         /** The frame. */
         Frame jframe;
         /** The expressions. */
@@ -86,6 +88,15 @@ public class TemplateInterpreter extends Interpreter {
          */
         Arguments context(final JexlContext j) {
             this.jcontext = j;
+            return this;
+        }
+        /**
+         * Sets the info.
+         * @param i the info
+         * @return this instance
+         */
+        Arguments info(final JexlInfo i) {
+            this.info = i;
             return this;
         }
         /**
@@ -122,7 +133,7 @@ public class TemplateInterpreter extends Interpreter {
      * @param args the template interpreter arguments
      */
     protected TemplateInterpreter(final Arguments args) {
-        super(args.jexl, args.options, args.jcontext, args.jframe);
+        super(args.jexl, args.options, args.jcontext, args.info, args.jframe);
         exprs = args.expressions;
         writer = args.out;
         block = new LexicalFrame(frame, null);
@@ -149,7 +160,7 @@ public class TemplateInterpreter extends Interpreter {
         }
         TemplateEngine.TemplateExpression expr = exprs[e];
         if (expr.isDeferred()) {
-            expr = expr.prepare(context, frame, options);
+            expr = expr.prepare(context, frame, options, info);
         }
         if (expr instanceof TemplateEngine.CompositeExpression) {
             printComposite((TemplateEngine.CompositeExpression) expr);

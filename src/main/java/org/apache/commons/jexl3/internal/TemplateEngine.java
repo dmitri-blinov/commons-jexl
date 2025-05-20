@@ -298,20 +298,22 @@ public final class TemplateEngine extends JxltEngine {
 
         @Override
         public final TemplateExpression prepare(final JexlContext context) {
-                return prepare(context, null, null);
+                return prepare(context, null, null, getInfo());
         }
 
         /**
          * Prepares this expression.
-         * @param frame the frame storing parameters and local variables
-         * @param context the context storing global variables
+         * @param context  the context storing global variables
+         * @param frame    the frame storing parameters and local variables
+         * @param opts     the evaluation options, flags modifying evaluation behavior
+         * @param info     the script info
          * @return the expression value
          * @throws JexlException
          */
-        protected final TemplateExpression prepare(final JexlContext context, final Frame frame, final JexlOptions opts) {
+        protected final TemplateExpression prepare(final JexlContext context, final Frame frame, final JexlOptions opts, final JexlInfo info) {
             try {
                 final JexlOptions interOptions = opts != null? opts : jexl.evalOptions(context);
-                final Interpreter interpreter = jexl.createInterpreter(context, frame, interOptions);
+                final Interpreter interpreter = jexl.createInterpreter(context, frame, interOptions, info);
                 return prepare(interpreter);
             } catch (final JexlException xjexl) {
                 final JexlException xuel = createException(xjexl.getInfo(), "prepare", this, xjexl);

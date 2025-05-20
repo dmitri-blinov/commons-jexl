@@ -254,25 +254,27 @@ public class Interpreter extends InterpreterBase {
     /**
      * Creates an interpreter.
      * @param engine   the engine creating this interpreter
-     * @param aContext the evaluation context, global variables, methods and functions
      * @param opts     the evaluation options, flags modifying evaluation behavior
+     * @param aContext the evaluation context, global variables, methods and functions
+     * @param info     the script info
      * @param eFrame   the evaluation frame, arguments and local variables
      */
-    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame) {
-        this(engine, opts, aContext, eFrame, null);
+    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final JexlInfo info, final Frame eFrame) {
+        this(engine, opts, aContext, info, eFrame, null);
     }
 
     /**
      * Creates an interpreter.
      * @param engine   the engine creating this interpreter
-     * @param aContext the evaluation context, global variables, methods and functions
      * @param opts     the evaluation options, flags modifying evaluation behavior
+     * @param aContext the evaluation context, global variables, methods and functions
+     * @param info     the script info
      * @param eFrame   the evaluation frame, arguments and local variables
      * @param current  the current evaluation object
      */
-    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final Frame eFrame, 
+    protected Interpreter(final Engine engine, final JexlOptions opts, final JexlContext aContext, final JexlInfo info, final Frame eFrame, 
                           final Object current) {
-        super(engine, opts, aContext);
+        super(engine, opts, aContext, info);
         this.frame = eFrame;
         this.current = current;
     }
@@ -346,7 +348,7 @@ public class Interpreter extends InterpreterBase {
                     result = arithmetic.cast(type, result);
                 }
                 if (type.isPrimitive() && result == null) {
-                    throw new JexlException(node, "not null return value required");
+                    throw createException(node, "not null return value required");
                 }
             }
             return arithmetic.controlReturn(result);
@@ -426,7 +428,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.ADD, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.add(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "+ error", xrt);
+            throw createException(findNullOperand(node, left, right), "+ error", xrt);
         }
     }
 
@@ -438,7 +440,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.SUBTRACT, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.subtract(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "- error", xrt);
+            throw createException(findNullOperand(node, left, right), "- error", xrt);
         }
     }
 
@@ -450,7 +452,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.MULTIPLY, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.multiply(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "* error", xrt);
+            throw createException(findNullOperand(node, left, right), "* error", xrt);
         }
     }
 
@@ -465,7 +467,7 @@ public class Interpreter extends InterpreterBase {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            throw new JexlException(findNullOperand(node, left, right), "/ error", xrt);
+            throw createException(findNullOperand(node, left, right), "/ error", xrt);
         }
     }
 
@@ -480,7 +482,7 @@ public class Interpreter extends InterpreterBase {
             if (!arithmetic.isStrict()) {
                 return 0.0d;
             }
-            throw new JexlException(findNullOperand(node, left, right), "% error", xrt);
+            throw createException(findNullOperand(node, left, right), "% error", xrt);
         }
     }
 
@@ -492,7 +494,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.SHIFTLEFT, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.shiftLeft(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "<< error", xrt);
+            throw createException(findNullOperand(node, left, right), "<< error", xrt);
         }
     }
 
@@ -504,7 +506,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.SHIFTRIGHT, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.shiftRight(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), ">> error", xrt);
+            throw createException(findNullOperand(node, left, right), ">> error", xrt);
         }
     }
 
@@ -516,7 +518,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.SHIFTRIGHTU, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.shiftRightUnsigned(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), ">> error", xrt);
+            throw createException(findNullOperand(node, left, right), ">> error", xrt);
         }
     }
 
@@ -528,7 +530,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.AND, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.and(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "& error", xrt);
+            throw createException(findNullOperand(node, left, right), "& error", xrt);
         }
     }
 
@@ -540,7 +542,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.OR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.or(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "| error", xrt);
+            throw createException(findNullOperand(node, left, right), "| error", xrt);
         }
     }
 
@@ -552,7 +554,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.DIFF, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.diff(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "\\ error", xrt);
+            throw createException(findNullOperand(node, left, right), "\\ error", xrt);
         }
     }
 
@@ -564,7 +566,7 @@ public class Interpreter extends InterpreterBase {
             final Object result = operators.tryOverload(node, JexlOperator.XOR, left, right);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.xor(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), "^ error", xrt);
+            throw createException(findNullOperand(node, left, right), "^ error", xrt);
         }
     }
 
@@ -970,7 +972,7 @@ public class Interpreter extends InterpreterBase {
         try {
             return arithmetic.createRange(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(findNullOperand(node, left, right), ".. error", xrt);
+            throw createException(findNullOperand(node, left, right), ".. error", xrt);
         }
     }
 
@@ -999,7 +1001,7 @@ public class Interpreter extends InterpreterBase {
             }
             return number;
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(valNode, "- error", xrt);
+            throw createException(valNode, "- error", xrt);
         }
     }
 
@@ -1025,7 +1027,7 @@ public class Interpreter extends InterpreterBase {
             }
             return number;
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(valNode, "- error", xrt);
+            throw createException(valNode, "- error", xrt);
         }
     }
 
@@ -1034,7 +1036,7 @@ public class Interpreter extends InterpreterBase {
         final Object val = node.jjtGetChild(0).jjtAccept(this, data);
         if (val == null) {
             if (isStrictEngine()) {
-                throw new JexlException(node, "Null dereference", null);
+                throw createException(node, "Null dereference", null);
             } else {
                 return null;
             }
@@ -1221,7 +1223,7 @@ public class Interpreter extends InterpreterBase {
                     }
                     object = context.get(ant.toString());
                 } else {
-                    throw new JexlException(objectNode, "illegal address");
+                    throw createException(objectNode, "illegal address");
                 }
             }
             // 2: last objectNode will perform assignement in all cases
@@ -1253,7 +1255,7 @@ public class Interpreter extends InterpreterBase {
                 Object property = propertyNode.jjtAccept(this, null);
                 return new ArrayPointer(propertyNode, object, property);
             } else {
-                throw new JexlException(objectNode, "illegal pointer form");
+                throw createException(objectNode, "illegal pointer form");
             }
         }
     }
@@ -1265,7 +1267,7 @@ public class Interpreter extends InterpreterBase {
             Object result = operators.tryOverload(node, JexlOperator.COMPLEMENT, arg);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.complement(arg);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "~ error", xrt);
+            throw createException(node, "~ error", xrt);
         }
     }
 
@@ -1276,7 +1278,7 @@ public class Interpreter extends InterpreterBase {
             Object result = operators.tryOverload(node, JexlOperator.NOT, val);
             return result != JexlEngine.TRY_FAILED ? result : arithmetic.not(val);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "! error", xrt);
+            throw createException(node, "! error", xrt);
         }
     }
 
@@ -1295,7 +1297,7 @@ public class Interpreter extends InterpreterBase {
         try {
             return arithmetic.cast(c, val);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(node, "cast error", xrt);
+            throw createException(node, "cast error", xrt);
         }
     }
 
@@ -1348,7 +1350,7 @@ public class Interpreter extends InterpreterBase {
             // Execution block is the first child
             this.node = script.jjtGetChild(0);
             Frame scope = script.createFrame(frame);
-            generator = jexl.createResumableInterpreter(context, scope, options);
+            generator = jexl.createResumableInterpreter(context, scope, options, info);
             i = -1;
         }
 
@@ -1465,7 +1467,7 @@ public class Interpreter extends InterpreterBase {
             // break
             return null;
         } catch (ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(0), "if error", xrt);
+            throw createException(node.jjtGetChild(0), "if error", xrt);
         }
     }
 
@@ -1515,32 +1517,32 @@ public class Interpreter extends InterpreterBase {
         final Object val = node.jjtGetNumChildren() == 1
             ? node.jjtGetChild(0).jjtAccept(this, data)
             : null;
-        throw new JexlException.Return(node, null, val);
+        throw new JexlException.Return(detailedInfo(node), null, val);
     }
 
     @Override
     protected Object visit(final ASTYieldStatement node, final Object data) {
         cancelCheck(node);
         Object val = node.jjtGetChild(0).jjtAccept(this, data);
-        throw new JexlException.Yield(node, null, val);
+        throw new JexlException.Yield(detailedInfo(node), null, val);
     }
 
     @Override
     protected Object visit(final ASTContinue node, final Object data) {
         cancelCheck(node);
-        throw new JexlException.Continue(node, node.getLabel());
+        throw new JexlException.Continue(detailedInfo(node), node.getLabel());
     }
 
     @Override
     protected Object visit(final ASTRemove node, final Object data) {
         cancelCheck(node);
-        throw new JexlException.Remove(node, node.getLabel());
+        throw new JexlException.Remove(detailedInfo(node), node.getLabel());
     }
 
     @Override
     protected Object visit(final ASTBreak node, final Object data) {
         cancelCheck(node);
-        throw new JexlException.Break(node, node.getLabel());
+        throw new JexlException.Break(detailedInfo(node), node.getLabel());
     }
 
     @Override
@@ -1556,7 +1558,7 @@ public class Interpreter extends InterpreterBase {
         final int last = left.jjtGetNumChildren() - 1;
 
         if (!(left instanceof ASTReference)) {
-            throw new JexlException(left, "illegal assignment form 0");
+            throw createException(left, "illegal assignment form 0");
         }
         // 1: follow children till penultimate, resolve dot/array
         JexlNode objectNode = null;
@@ -1567,7 +1569,7 @@ public class Interpreter extends InterpreterBase {
             objectNode = left.jjtGetChild(c);
             object = objectNode.jjtAccept(this, object);
             if (object == null) {
-                throw new JexlException(objectNode, "illegal assignment form");
+                throw createException(objectNode, "illegal assignment form");
             }
         }
         // 2: last objectNode will perform removal in all cases
@@ -1589,7 +1591,7 @@ public class Interpreter extends InterpreterBase {
             propertyNode = propertyNode.jjtGetChild(numChildren);
             property = propertyNode.jjtAccept(this, null);
         } else {
-            throw new JexlException(objectNode, "illegal assignment form");
+            throw createException(objectNode, "illegal assignment form");
         }
         // we may have a null property as in map[null], no check needed.
         // we can not *have* a null object though.
@@ -2229,7 +2231,7 @@ public class Interpreter extends InterpreterBase {
                                         }
                                         matched = arithmetic.toBoolean(caseMatched);
                                     } catch (ArithmeticException xrt) {
-                                        throw new JexlException(node, "== error", xrt);
+                                        throw createException(node, "== error", xrt);
                                     }
                                     if (matched) {
                                         start = i;
@@ -2364,7 +2366,7 @@ public class Interpreter extends InterpreterBase {
                                     }
                                     matched = arithmetic.toBoolean(caseMatched);
                                 } catch (ArithmeticException xrt) {
-                                    throw new JexlException(node, "== error", xrt);
+                                    throw createException(node, "== error", xrt);
                                 }
                                 if (matched) {
                                     return child.jjtAccept(this, data);
@@ -2432,7 +2434,7 @@ public class Interpreter extends InterpreterBase {
                 return Boolean.FALSE;
             }
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(0), "boolean coercion error", xrt);
+            throw createException(node.jjtGetChild(0), "boolean coercion error", xrt);
         }
         final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
@@ -2441,7 +2443,7 @@ public class Interpreter extends InterpreterBase {
                 return Boolean.FALSE;
             }
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(1), "boolean coercion error", xrt);
+            throw createException(node.jjtGetChild(1), "boolean coercion error", xrt);
         }
         return Boolean.TRUE;
     }
@@ -2455,7 +2457,7 @@ public class Interpreter extends InterpreterBase {
                 return Boolean.TRUE;
             }
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(0), "boolean coercion error", xrt);
+            throw createException(node.jjtGetChild(0), "boolean coercion error", xrt);
         }
         final Object right = node.jjtGetChild(1).jjtAccept(this, data);
         try {
@@ -2464,7 +2466,7 @@ public class Interpreter extends InterpreterBase {
                 return Boolean.TRUE;
             }
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(1), "boolean coercion error", xrt);
+            throw createException(node.jjtGetChild(1), "boolean coercion error", xrt);
         }
         return Boolean.FALSE;
     }
@@ -3073,9 +3075,9 @@ public class Interpreter extends InterpreterBase {
             Future f = (Future) arithmetic.cast(Future.class, value);
             return f != null ? f.get() : null;
         } catch(final ExecutionException xany) {
-            throw new JexlException(node, "get", xany);
+            throw createException(node, "get", xany);
         } catch(final InterruptedException x) {
-            throw new JexlException.Cancel(node);
+            throw new JexlException.Cancel(detailedInfo(node));
         }
     }
 
@@ -3157,7 +3159,7 @@ public class Interpreter extends InterpreterBase {
         // if we have a var, we have a scope thus a frame
         boolean isFinal = block.isVariableFinal(symbol);
         if (isFinal) {
-            throw new JexlException(node, "can not redefine a final variable: " + node.getName());
+            throw createException(node, "can not redefine a final variable: " + node.getName());
         }
         // Adjust frame variable modifiers
         block.setModifiers(symbol, node.getType(), node.isLexical(), node.isConstant(), node.isRequired());
@@ -3767,7 +3769,7 @@ public class Interpreter extends InterpreterBase {
                 if (last < 0) {
                     boolean isFinal = block.isVariableFinal(symbol);
                     if (isFinal && !(variable instanceof ASTVar || variable instanceof ASTExtVar)) {
-                        throw new JexlException(node, "can not assign a value to the final variable: " + variable.getName());
+                        throw createException(node, "can not assign a value to the final variable: " + variable.getName());
                     }
                     if (assignop != null) {
                         final Object self = getVariable(frame, block, variable);
@@ -3786,12 +3788,12 @@ public class Interpreter extends InterpreterBase {
                             value = arithmetic.cast(type, value);
                         }
                         if (type.isPrimitive() && value == null) {
-                            throw new JexlException(node, "not null value required for: " + variable.getName());
+                            throw createException(node, "not null value required for: " + variable.getName());
                         }
                     }
                     boolean isRequired = block.isVariableRequired(symbol);
                     if (isRequired && value == null) {
-                        throw new JexlException(node, "not null value required for: " + variable.getName());
+                        throw createException(node, "not null value required for: " + variable.getName());
                     }
 
                     frame.set(symbol, value);
@@ -3828,21 +3830,21 @@ public class Interpreter extends InterpreterBase {
             if (assignop == null) {
                 Object self = left.jjtGetChild(0).jjtAccept(this, data);
                 if (self == null) {
-                    throw new JexlException(left, "illegal assignment form *0");
+                    throw createException(left, "illegal assignment form *0");
                 }
                 if (self instanceof SetPointer) {
                     ((SetPointer) self).set(right);
                 } else {
                     Object result = operators.indirectAssign(node, self, right);
                     if (result == JexlEngine.TRY_FAILED) {
-                        throw new JexlException(left, "illegal dereferenced assignment");
+                        throw createException(left, "illegal dereferenced assignment");
                     }
                 }
                 return right;
             } else {
                 Object self = left.jjtAccept(this, data);
                 if (self == null) {
-                    throw new JexlException(left, "illegal assignment form *0");
+                    throw createException(left, "illegal assignment form *0");
                 }
                 Object result = operators.tryAssignOverload(node, assignop, self, right);
                 if (result == JexlOperator.ASSIGN) {
@@ -3850,21 +3852,21 @@ public class Interpreter extends InterpreterBase {
                 } else if (result != JexlEngine.TRY_FAILED) {
                     self = left.jjtGetChild(0).jjtAccept(this, data);
                     if (self == null) {
-                        throw new JexlException(left, "illegal assignment form *0");
+                        throw createException(left, "illegal assignment form *0");
                     }
                     if (self instanceof SetPointer) {
                         ((SetPointer) self).set(result);
                     } else {
                         result = operators.indirectAssign(node, self, result);
                         if (result == JexlEngine.TRY_FAILED) {
-                            throw new JexlException(left, "illegal dereferenced assignment");
+                            throw createException(left, "illegal dereferenced assignment");
                         }
                     }
                 }
                 return right;
             }
         } else if (!(left instanceof ASTReference)) {
-            throw new JexlException(left, "illegal assignment form 0");
+            throw createException(left, "illegal assignment form 0");
         }
         // 1: follow children till penultimate, resolve dot/array
         JexlNode objectNode = null;
@@ -3910,7 +3912,7 @@ public class Interpreter extends InterpreterBase {
                 // solve antish
                 object = context.get(ant.toString());
             } else {
-                throw new JexlException(objectNode, "illegal assignment form");
+                throw createException(objectNode, "illegal assignment form");
             }
         }
         // 2: last objectNode will perform assignement in all cases
@@ -3952,7 +3954,7 @@ public class Interpreter extends InterpreterBase {
             propertyNode = propertyNode.jjtGetChild(numChildren);
             property = propertyNode.jjtAccept(this, null);
         } else {
-            throw new JexlException(objectNode, "illegal assignment form");
+            throw createException(objectNode, "illegal assignment form");
         }
         // we may have a null property as in map[null], no check needed.
         // we can not *have* a null object though.
@@ -4016,10 +4018,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTInnerConstructorNode node, Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
-
+        cancelCheck(node);
         String enclosingClass = data == null ? null : data.getClass().getCanonicalName();
         if (enclosingClass == null) {
             String tstr = data != null ? data.toString() : "?";
@@ -4323,9 +4322,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTConstructorNode node, final Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Object target = node.jjtGetChild(0).jjtAccept(this, data);
         // get the ctor args
@@ -4399,9 +4396,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTQualifiedConstructorNode node, final Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         // get the ctor args
@@ -4470,9 +4465,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTArrayConstructorNode node, Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         // get the dimensions
@@ -4496,9 +4489,7 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTInitializedArrayConstructorNode node, final Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         // get the length of the array
@@ -4569,13 +4560,11 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTInitializedCollectionConstructorNode node, final Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         if (!Collection.class.isAssignableFrom(target)) {
-            throw new JexlException(node, "Not a Collection", null);
+            throw createException(node, "Not a Collection", null);
         }
         try {
             JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
@@ -4612,13 +4601,11 @@ public class Interpreter extends InterpreterBase {
 
     @Override
     protected Object visit(final ASTInitializedMapConstructorNode node, final Object data) {
-        if (isCancelled()) {
-            throw new JexlException.Cancel(node);
-        }
+        cancelCheck(node);
         // first child is class or class name
         final Class target = (Class) node.jjtGetChild(0).jjtAccept(this, data);
         if (!Map.class.isAssignableFrom(target)) {
-            throw new JexlException(node, "Not a Map", null);
+            throw createException(node, "Not a Map", null);
         }
         try {
             JexlMethod ctor = uberspect.getConstructor(target, EMPTY_PARAMS);
@@ -4641,7 +4628,7 @@ public class Interpreter extends InterpreterBase {
                                         Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
                                         result.put(entry.getKey(), entry.getValue());
                                     } else {
-                                        throw new JexlException(node, "Not a Map.Entry", null);
+                                        throw createException(node, "Not a Map.Entry", null);
                                     }
                                 }
                             } finally {
@@ -4652,10 +4639,10 @@ public class Interpreter extends InterpreterBase {
                 }
                 return result;
             }
-			final String tstr = Objects.toString(target, "?");
+            final String tstr = Objects.toString(target, "?");
             return unsolvableMethod(node, tstr, EMPTY_PARAMS);
         } catch (final Exception xany) {
-			final String tstr = Objects.toString(target, "?");
+            final String tstr = Objects.toString(target, "?");
             throw invocationException(node, tstr, xany);
         }
     }
@@ -4664,19 +4651,21 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTJxltLiteral node, final Object data) {
         final Object cache = node.getExpression();
         TemplateEngine.TemplateExpression tp;
+
+        JexlInfo info = node.jexlInfo();
+        if (this.block != null) {
+            info = new JexlNode.Info(node, info);
+        }
+
         if (cache instanceof TemplateEngine.TemplateExpression) {
             tp = (TemplateEngine.TemplateExpression) cache;
         } else {
             final TemplateEngine jxlt = jexl.jxlt();
-            JexlInfo info = node.jexlInfo();
-            if (this.block != null) {
-                info = new JexlNode.Info(node, info);
-            }
             tp = jxlt.parseExpression(info, node.getLiteral(), frame != null ? frame.getScope() : null);
             node.setExpression(tp);
         }
         if (tp != null) {
-            return tp.isDeferred() ? tp.prepare(context, frame, options) : tp.evaluate(context, frame, options);
+            return tp.isDeferred() ? tp.prepare(context, frame, options, info) : tp.evaluate(context, frame, options);
         }
         return null;
     }

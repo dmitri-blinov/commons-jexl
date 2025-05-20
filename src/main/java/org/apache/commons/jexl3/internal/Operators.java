@@ -408,12 +408,12 @@ public class Operators {
                     }
                 }
             } catch (final Exception e) {
-                throw new JexlException(node, operator + " error", e);
+                throw interpreter.createException(node, operator + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, operator + " error", xrt);
+            throw interpreter.createException(node, operator + " error", xrt);
         }
     }
 
@@ -453,12 +453,12 @@ public class Operators {
                     }
                 }
             } catch (final Exception e) {
-                throw new JexlException(node, operator + " error", e);
+                throw interpreter.createException(node, operator + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, operator + " error", xrt);
+            throw interpreter.createException(node, operator + " error", xrt);
         }
     }
 
@@ -502,12 +502,12 @@ public class Operators {
                     }
                 }
             } catch (final Exception e) {
-                throw new JexlException(node, op + " error", e);
+                throw interpreter.createException(node, op + " error", e);
             }
             // defaults to equal
             return arithmetic.equals(left, right);
         } catch (final ArithmeticException xrt) {
-            throw new JexlException(node, op + " error", xrt);
+            throw interpreter.createException(node, op + " error", xrt);
         }
     }
 
@@ -527,7 +527,7 @@ public class Operators {
                    ? arithmetic.toBoolean(result)
                    : arithmetic.greaterThanOrEqual(left, right);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(interpreter.findNullOperand(node, left, right), ">= error", xrt);
+            throw interpreter.createException(interpreter.findNullOperand(node, left, right), ">= error", xrt);
         }
     }
 
@@ -547,7 +547,7 @@ public class Operators {
                    ? arithmetic.toBoolean(result)
                    : arithmetic.greaterThan(left, right);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(interpreter.findNullOperand(node, left, right), "> error", xrt);
+            throw interpreter.createException(interpreter.findNullOperand(node, left, right), "> error", xrt);
         }
     }
 
@@ -567,7 +567,7 @@ public class Operators {
                    ? arithmetic.toBoolean(result)
                    : arithmetic.lessThanOrEqual(left, right);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(interpreter.findNullOperand(node, left, right), "<= error", xrt);
+            throw interpreter.createException(interpreter.findNullOperand(node, left, right), "<= error", xrt);
         }
     }
 
@@ -587,7 +587,7 @@ public class Operators {
                    ? arithmetic.toBoolean(result)
                    : arithmetic.lessThan(left, right);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(interpreter.findNullOperand(node, left, right), "< error", xrt);
+            throw interpreter.createException(interpreter.findNullOperand(node, left, right), "< error", xrt);
         }
     }
 
@@ -608,7 +608,7 @@ public class Operators {
                    ? arithmetic.toBoolean(result)
                    : arithmetic.equals(left, right);
         } catch (ArithmeticException xrt) {
-            throw new JexlException(interpreter.findNullOperand(node, left, right), op + " error", xrt);
+            throw interpreter.createException(interpreter.findNullOperand(node, left, right), op + " error", xrt);
         }
     }
 

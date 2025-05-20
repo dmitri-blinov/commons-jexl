@@ -130,7 +130,7 @@ public class OptionalTest {
             Assert.fail("should have thrown");
         } catch(JexlException.Method xmethod) {
             Assert.assertEquals("size", xmethod.getDetail());
-            Assert.assertEquals("test352@62:11 unsolvable function/method 'size'", xmethod.getMessage());
+            Assert.assertEquals("test352@1:11![10..19]: 'thing.name.'size'()' unsolvable function/method 'size'", xmethod.getMessage());
         }
 
         try {

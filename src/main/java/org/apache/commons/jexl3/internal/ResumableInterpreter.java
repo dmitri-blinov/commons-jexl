@@ -20,6 +20,7 @@ package org.apache.commons.jexl3.internal;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.JexlOptions;
 
@@ -114,12 +115,13 @@ public class ResumableInterpreter extends Interpreter {
     /**
      * Creates an interpreter.
      * @param engine   the engine creating this interpreter
-     * @param aContext the evaluation context, global variables, methods and functions
      * @param opts     the evaluation options, flags modifying evaluation behavior
+     * @param aContext the evaluation context, global variables, methods and functions
+     * @param info     the script info
      * @param eFrame   the evaluation frame, arguments and local variables
      */
-    protected ResumableInterpreter(Engine engine, JexlOptions opts, JexlContext aContext, Frame eFrame) {
-        super(engine, opts, aContext, eFrame);
+    protected ResumableInterpreter(Engine engine, JexlOptions opts, JexlContext aContext, final JexlInfo info, Frame eFrame) {
+        super(engine, opts, aContext, info, eFrame);
         state = new HashMap<JexlNode,InterpreterState> ();
     }
 
@@ -268,7 +270,7 @@ public class ResumableInterpreter extends Interpreter {
             // break
             return null;
         } catch (ArithmeticException xrt) {
-            throw new JexlException(node.jjtGetChild(0), "if error", xrt);
+            throw createException(node.jjtGetChild(0), "if error", xrt);
         } finally {
             if (!suspended) {
                 state.remove(node);
@@ -763,7 +765,7 @@ public class ResumableInterpreter extends Interpreter {
                                 }
                                 matched = arithmetic.toBoolean(caseMatched);
                             } catch (ArithmeticException xrt) {
-                                throw new JexlException(node, "== error", xrt);
+                                throw createException(node, "== error", xrt);
                             }
                             if (matched) {
                                 start = i;

@@ -28,6 +28,7 @@ import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlException.VariableIssue;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.introspection.JexlMethod;
@@ -76,6 +77,8 @@ public abstract class InterpreterBase extends ParserVisitor {
     protected final JexlContext context;
     /** The options. */
     protected final JexlOptions options;
+    /** The info. */
+    protected final JexlInfo info;
     /** Cache executors. */
     protected final boolean cache;
     /** Cancellation support. */
@@ -99,11 +102,12 @@ public abstract class InterpreterBase extends ParserVisitor {
      * @param opts     the evaluation options
      * @param aContext the evaluation context
      */
-    protected InterpreterBase(final Engine engine, final JexlOptions opts, final JexlContext aContext) {
+    protected InterpreterBase(final Engine engine, final JexlOptions opts, final JexlContext aContext, JexlInfo info) {
         this.jexl = engine;
         this.logger = jexl.logger;
         this.uberspect = jexl.uberspect;
         this.context = aContext != null ? aContext : JexlEngine.EMPTY_CONTEXT;
+        this.info = info;
         this.cache = engine.cache != null;
         final JexlArithmetic jexla = jexl.arithmetic;
         this.options = opts == null? engine.evalOptions(aContext) : opts;
@@ -145,6 +149,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         arithmetic = jexla;
         context = ii.context;
         options = ii.options.copy();
+        info = ii.info;
         cache = ii.cache;
         ns = ii.ns;
         operators = ii.operators;
@@ -240,7 +245,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                 namespace = jexl.getNamespace(prefix);
             }
             if (prefix != null && namespace == null) {
-                throw new JexlException(node, "no such function namespace " + prefix, null);
+                throw createException(node, "no such function namespace " + prefix, null);
             }
         }
         Object functor = null;
@@ -294,7 +299,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                                 break; // we found a constructor that did create a functor
                             }
                         } catch (final Exception xinst) {
-                            throw new JexlException(node, "unable to instantiate namespace " + prefix, xinst);
+                            throw createException(node, "unable to instantiate namespace " + prefix, xinst);
                         }
                     }
                 }
@@ -311,7 +316,7 @@ public abstract class InterpreterBase extends ParserVisitor {
                         }
                     } catch (final ClassNotFoundException e) {
                         // not a class
-                        throw new JexlException(node, "no such class namespace " + prefix, e);
+                        throw createException(node, "no such class namespace " + prefix, e);
                     }
                 }
             }
@@ -432,12 +437,12 @@ public abstract class InterpreterBase extends ParserVisitor {
             lexical = ((ASTIdentifier) node).isLexical();
         }
         if (lexical && !context.has(name)) {
-            throw new JexlException.Variable(node, name, true);
+            throw new JexlException.Variable(detailedInfo(node), name, true);
         }
         try {
             context.set(name, value);
         } catch (final UnsupportedOperationException xsupport) {
-            throw new JexlException(node, "context is readonly", xsupport);
+            throw createException(node, "context is readonly", xsupport);
         }
     }
 
@@ -569,10 +574,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object variableError(final JexlNode node, final String var, final VariableIssue issue) {
         if (isStrictEngine() && !isTernaryProtected(node)) {
-            throw new JexlException.Variable(node, var, issue);
+            throw new JexlException.Variable(detailedInfo(node), var, issue);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.variableError(node, var, issue));
+            logger.debug(JexlException.variableError(detailedInfo(node), var, issue));
         }
         return null;
     }
@@ -595,10 +600,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object unsolvableMethod(final JexlNode node, final String method, final Object[] args) {
         if (isStrictEngine()) {
-            throw new JexlException.Method(node, method, args);
+            throw new JexlException.Method(detailedInfo(node), method, args);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.methodError(node, method, args));
+            logger.debug(JexlException.methodError(detailedInfo(node), method, args));
         }
         return null;
     }
@@ -613,10 +618,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object unsolvableProperty(final JexlNode node, final String property, final boolean undef, final Throwable cause) {
         if (isStrictEngine() && !isTernaryProtected(node)) {
-            throw new JexlException.Property(node, property, undef, cause);
+            throw new JexlException.Property(detailedInfo(node), property, undef, cause);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.propertyError(node, property, undef));
+            logger.debug(JexlException.propertyError(detailedInfo(node), property, undef));
         }
         return null;
     }
@@ -631,10 +636,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object unsolvableField(final JexlNode node, final String field, final boolean undef, final Throwable cause) {
         if (isStrictEngine() && !isTernaryProtected(node)) {
-            throw new JexlException.Field(node, field, undef, cause);
+            throw new JexlException.Field(detailedInfo(node), field, undef, cause);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.fieldError(node, field, undef));
+            logger.debug(JexlException.fieldError(detailedInfo(node), field, undef));
         }
         return null;
     }
@@ -689,10 +694,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object operatorError(final JexlNode node, final JexlOperator operator, final Throwable cause) {
         if (isStrictEngine()) {
-            throw new JexlException.Operator(node, operator.getOperatorSymbol(), cause);
+            throw new JexlException.Operator(detailedInfo(node), operator.getOperatorSymbol(), cause);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.operatorError(node, operator.getOperatorSymbol()), cause);
+            logger.debug(JexlException.operatorError(detailedInfo(node), operator.getOperatorSymbol()), cause);
         }
         return null;
     }
@@ -706,10 +711,10 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object annotationError(final JexlNode node, final String annotation, final Throwable cause) {
         if (isStrictEngine()) {
-            throw new JexlException.Annotation(node, annotation, cause);
+            throw new JexlException.Annotation(detailedInfo(node), annotation, cause);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(JexlException.annotationError(node, annotation), cause);
+            logger.debug(JexlException.annotationError(detailedInfo(node), annotation), cause);
         }
         return null;
     }
@@ -727,9 +732,58 @@ public abstract class InterpreterBase extends ParserVisitor {
             return (JexlException) cause;
         }
         if (cause instanceof InterruptedException) {
-            return new JexlException.Cancel(node);
+            return new JexlException.Cancel(detailedInfo(node));
         }
-        return new JexlException(node, methodName, xany);
+        return new JexlException(detailedInfo(node), methodName, xany);
+    }
+
+    /**
+     * Creates an exception.
+     * @param node       the node triggering the exception
+     * @param msg        the exception message
+     * @return           the exception
+     */
+    protected JexlException createException(final JexlNode node, final String msg) {
+        return createException(node, msg, null);
+    }
+
+    /**
+     * Creates an exception.
+     * @param node       the node triggering the exception
+     * @param msg        the exception message
+     * @param xany       the cause
+     * @return           the exception
+     */
+    protected JexlException createException(final JexlNode node, final String msg, final Throwable xany) {
+        return new JexlException(detailedInfo(node), msg, xany);
+    }
+
+    /**
+     * Gets the most specific information attached to a node.
+     *
+     * @param node the node
+     * @param info the information
+     * @return the information or null
+     */
+     protected JexlInfo detailedInfo(final JexlNode node) {
+        if (info != null) {
+            if (node != null) {
+               JexlInfo i = info.at(node.getLine(), node.getColumn());
+               final Debugger dbg = new Debugger();
+               if (dbg.debug(node)) {
+                   return new JexlInfo(i) {
+                       @Override
+                       public JexlInfo.Detail getDetail() {
+                           return dbg;
+                       }
+                   };
+               }
+               return i;
+            }
+            return info;
+        }
+
+        return node != null ? node.jexlInfo() : null;
     }
 
     /**
@@ -754,7 +808,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected void cancelCheck(final JexlNode node) {
         if (isCancelled()) {
-            throw new JexlException.Cancel(node);
+            throw new JexlException.Cancel(detailedInfo(node));
         }
     }
 
@@ -1085,7 +1139,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object getAttribute(final Object object, final Object attribute, final JexlNode node) {
         if (object == null) {
-            throw new JexlException(node, "object is null");
+            throw createException(node, "object is null");
         }
         cancelCheck(node);
         final JexlOperator operator = node != null &&
@@ -1297,7 +1351,7 @@ public abstract class InterpreterBase extends ParserVisitor {
      */
     protected Object getField(final Object object, final Object attribute, final JexlNode node) {
         if (object == null) {
-            throw new JexlException(node, "object is null");
+            throw createException(node, "object is null");
         }
         cancelCheck(node);
         final JexlOperator operator = JexlOperator.FIELD_GET;

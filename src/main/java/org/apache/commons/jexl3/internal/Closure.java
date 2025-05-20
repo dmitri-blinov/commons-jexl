@@ -96,7 +96,7 @@ public class Closure extends Script {
      * @param lambda the lambda
      */
     protected Closure(final Interpreter theCaller, final ASTJexlScript lambda) {
-        super(theCaller.jexl, null, lambda);
+        super(theCaller.jexl, null, theCaller.detailedInfo(lambda), lambda);
         caller = theCaller;
         frame = lambda.createFrame(theCaller.frame);
         context = theCaller.context;
@@ -112,7 +112,7 @@ public class Closure extends Script {
      * @param args the script arguments
      */
     protected Closure(final Script base, final Object[] args) {
-        super(base.jexl, base.source, base.script);
+        super(base.jexl, base.source, base.info, base.script);
         if (base instanceof Closure) {
             Closure closure = (Closure) base;
             Frame sf = closure.frame;
@@ -151,7 +151,7 @@ public class Closure extends Script {
      * @param chained the chained closure
      */
     protected Closure(final Closure base, final Closure chained) {
-        super(base.jexl, base.source, base.script);
+        super(base.jexl, base.source, base.info, base.script);
         caller = base.caller;
         frame = base.frame.assign();
         context = base.context;
@@ -268,7 +268,7 @@ public class Closure extends Script {
         if (context == null) {
             context = this.context;
         }
-        return jexl.createInterpreter(context, frame, options, caller != null ? caller.current : null);
+        return jexl.createInterpreter(context, frame, options, getInfo(), caller != null ? caller.current : null);
     }
 
     /**

@@ -159,7 +159,7 @@ public class JexlInfo {
         if (dbg!= null) {
             sb.append("![");
             sb.append(dbg.start());
-            sb.append(",");
+            sb.append("..");
             sb.append(dbg.end());
             sb.append("]: '");
             sb.append(dbg.toString());

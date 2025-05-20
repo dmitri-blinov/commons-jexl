@@ -19,6 +19,7 @@ package org.apache.commons.jexl3.internal;
 
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOptions;
 import org.apache.commons.jexl3.parser.ASTArrayAccess;
 import org.apache.commons.jexl3.parser.ASTAssignment;
@@ -108,9 +109,9 @@ public class Engine32 extends Engine {
     }
 
     @Override
-    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, 
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, final JexlInfo info, 
         final Object current) {
-        return new Interpreter(this, opts, context, frame, current) {
+        return new Interpreter(this, opts, context, info, frame, current) {
             @Override
             protected boolean isStrictOperand(JexlNode node) {
                 return false;

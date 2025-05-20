@@ -620,10 +620,11 @@ public class Engine extends JexlEngine {
      * @param context a JexlContext; if null, the empty context is used instead.
      * @param frame   the interpreter frame
      * @param opts    the evaluation options
+     * @param info    the script info
      * @return an Interpreter
      */
-    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts) {
-        return createInterpreter(context, frame, opts, null);
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, final JexlInfo info) {
+        return createInterpreter(context, frame, opts, info, null);
     }
 
     /**
@@ -631,12 +632,13 @@ public class Engine extends JexlEngine {
      * @param context a JexlContext; if null, the empty context is used instead.
      * @param frame   the interpreter frame
      * @param opts    the evaluation options
+     * @param info    the script info
      * @param current the current evaluation object
      * @return an Interpreter
      */
-    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, 
+    protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, final JexlInfo info,
         final Object current) {
-        return new Interpreter(this, opts, context, frame, current);
+        return new Interpreter(this, opts, context, info, frame, current);
     }
 
     /**
@@ -644,10 +646,11 @@ public class Engine extends JexlEngine {
      * @param context a JexlContext; if null, the empty context is used instead.
      * @param frame   the interpreter frame
      * @param opts    the evaluation options
+     * @param info    the script info
      * @return an Interpreter
      */
-    protected Interpreter createResumableInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts) {
-        return new ResumableInterpreter(this, opts, context, frame);
+    protected Interpreter createResumableInterpreter(final JexlContext context, final Frame frame, final JexlOptions opts, final JexlInfo info) {
+        return new ResumableInterpreter(this, opts, context, info, frame);
     }
 
     /**
@@ -668,11 +671,12 @@ public class Engine extends JexlEngine {
         if (scriptText == null) {
             throw new NullPointerException("source is null");
         }
+        final JexlInfo jexlInfo = info != null? info : new JexlInfo();
         final String source = trimSource(scriptText);
         final Scope scope = names == null || names.length == 0? null : new Scope(null, names);
         final JexlFeatures ftrs = features == null? scriptFeatures : features;
-        final ASTJexlScript tree = parse(info, ftrs, source, scope);
-        return new Script(this, source, tree);
+        final ASTJexlScript tree = parse(jexlInfo, ftrs, source, scope);
+        return new Script(this, source, jexlInfo, tree);
     }
 
     /**
@@ -702,7 +706,7 @@ public class Engine extends JexlEngine {
             final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean);
-            final Interpreter interpreter = createInterpreter(context == null? EMPTY_CONTEXT : context, frame, options);
+            final Interpreter interpreter = createInterpreter(context == null? EMPTY_CONTEXT : context, frame, options, script.jexlInfo());
             return interpreter.visitLexicalNode(node, null);
         } catch (final JexlException xjexl) {
             if (silent) {
@@ -730,7 +734,7 @@ public class Engine extends JexlEngine {
             final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean, value);
-            final Interpreter interpreter = createInterpreter(context != null? context : EMPTY_CONTEXT, frame, options);
+            final Interpreter interpreter = createInterpreter(context != null? context : EMPTY_CONTEXT, frame, options, script.jexlInfo());
             interpreter.visitLexicalNode(node, null);
         } catch (final JexlException xjexl) {
             if (silent) {

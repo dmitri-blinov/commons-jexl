@@ -48,6 +48,10 @@ public class Script implements JexlScript, JexlExpression {
      */
     protected final String source;
     /**
+     * The script info.
+     */
+    protected final JexlInfo info;
+    /**
      * The resulting AST we can interpret.
      */
     protected final ASTJexlScript script;
@@ -68,12 +72,14 @@ public class Script implements JexlScript, JexlExpression {
      *
      * @param engine the interpreter to evaluate the expression
      * @param expr   the expression source.
+     * @param expr   the expression info.
      * @param ref    the parsed expression.
      */
-    protected Script(final Engine engine, final String expr, final ASTJexlScript ref) {
+    protected Script(final Engine engine, final String expr, final JexlInfo ri, final ASTJexlScript ref) {
         jexl = engine;
         source = expr;
         script = ref;
+        info = ri;
         version = jexl.getUberspect().getVersion();
     }
 
@@ -123,7 +129,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return  the interpreter
      */
     protected Interpreter createInterpreter(final JexlContext context, final Frame frame, final JexlOptions options) {
-        return jexl.createInterpreter(context, frame, options != null? options : jexl.evalOptions(script, context));
+        return jexl.createInterpreter(context, frame, options != null? options : jexl.evalOptions(script, context), info);
     }
 
     /**
@@ -242,7 +248,7 @@ public class Script implements JexlScript, JexlExpression {
                     arg = arithmetic.cast(type, arg);
                 }
                 if (type.isPrimitive() && arg == null) {
-                    throw new JexlException(script, "not null value required");
+                    throw new JexlException(getInfo(), "not null value required");
                 }
             }
             Array.set(varg, i, arg);
@@ -391,7 +397,7 @@ public class Script implements JexlScript, JexlExpression {
                             arg = arithmetic.cast(type, arg);
                         }
                         if (type.isPrimitive() && arg == null) {
-                            throw new JexlException(script, "not null value required for: " + name);
+                            throw new JexlException(getInfo(), "not null value required for: " + name);
                         }
                         result[pos] = arg;
                     }
@@ -410,7 +416,7 @@ public class Script implements JexlScript, JexlExpression {
                 int symbol = frame.getSymbol(name);
                 boolean isRequired = frame.isVariableRequired(symbol);
                 if (isRequired) {
-                    throw new JexlException(script, "not null value required for: " + name);
+                    throw new JexlException(getInfo(), "not null value required for: " + name);
                 }
             }
         }
@@ -468,7 +474,7 @@ public class Script implements JexlScript, JexlExpression {
      * @return the info
      */
     public JexlInfo getInfo() {
-        return script.jexlInfo();
+        return info;
     }
 
     /**
