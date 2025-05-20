@@ -243,7 +243,7 @@ public interface JexlPermissions {
      * <li>java.rmi {}</li>
      * </ul>
      */
-    public static final JexlPermissions RESTRICTED = JexlPermissions.parse(
+    JexlPermissions RESTRICTED = JexlPermissions.parse(
             "# Restricted Uberspect Permissions",
             "java.nio.*",
             "java.io.*",
@@ -267,7 +267,7 @@ public interface JexlPermissions {
             "java.net {}",
             "java.io { File{} FileDescriptor{} }",
             "java.nio { Path { } Paths { } Files { } }",
-            "java.rmi"
+            "java.rmi {}"
     );
 
     /**

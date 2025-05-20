@@ -85,20 +85,20 @@ public class PermissionsParser {
      * @param srcs the sources
      * @return the permissions map
      */
-    synchronized Permissions parse(Set<String> wildcards, Map<String, Permissions.NoJexlPackage> packages, final String... srcs) {
+    synchronized Permissions parse(final Set<String> wildcards, final Map<String, Permissions.NoJexlPackage> packages,
+            final String... srcs) {
         try {
             if (srcs == null || srcs.length == 0) {
                 return Permissions.UNRESTRICTED;
             }
             this.packages = packages;
             this.wildcards = wildcards;
-            for (final String src : srcs) {
-                this.src = src;
-                this.size = src.length();
+            for (final String source : srcs) {
+                this.src = source;
+                this.size = source.length();
                 readPackages();
             }
-            final Permissions permissions = new Permissions(wildcards, packages);
-            return permissions;
+            return new Permissions(wildcards, packages);
         } finally {
             clear();
         }
