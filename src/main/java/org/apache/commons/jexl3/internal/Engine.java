@@ -671,10 +671,10 @@ public class Engine extends JexlEngine {
         if (scriptText == null) {
             throw new NullPointerException("source is null");
         }
-        final JexlInfo jexlInfo = info != null? info : new JexlInfo();
         final String source = trimSource(scriptText);
-        final Scope scope = names == null || names.length == 0? null : new Scope(null, names);
         final JexlFeatures ftrs = features == null? scriptFeatures : features;
+        final JexlInfo jexlInfo = info != null? info : createInfo(String.valueOf((new Source(ftrs, scriptText)).hashCode()), getCallerName(), 1, 1);
+        final Scope scope = names == null || names.length == 0? null : new Scope(null, names);
         final ASTJexlScript tree = parse(jexlInfo, ftrs, source, scope);
         return new Script(this, source, jexlInfo, tree);
     }
@@ -691,6 +691,17 @@ public class Engine extends JexlEngine {
             .methodCall(false)
             .register(true);
 
+    /**
+     * The features allowed for method calls.
+     */
+    protected static final JexlFeatures METHOD_FEATURES = new JexlFeatures()
+            .localVar(false)
+            .loops(false)
+            .lambda(false)
+            .script(false)
+            .arrayReferenceExpr(false)
+            .methodCall(true);
+
     @Override
     public Object getProperty(final Object bean, final String expr) {
         return getProperty(null, bean, expr);
@@ -703,7 +714,8 @@ public class Engine extends JexlEngine {
         src = "#0" + (src.charAt(0) == '[' ? "" : ".") + src;
         try {
             final Scope scope = new Scope(null, "#0");
-            final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
+            final JexlInfo jexlInfo = createInfo(String.valueOf((new Source(PROPERTY_FEATURES, src)).hashCode()), src, 1, 1);
+            final ASTJexlScript script = parse(jexlInfo, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean);
             final Interpreter interpreter = createInterpreter(context == null? EMPTY_CONTEXT : context, frame, options, script.jexlInfo());
@@ -731,7 +743,8 @@ public class Engine extends JexlEngine {
         src = "#0" + (src.charAt(0) == '[' ? "" : ".") + src + "=" + "#1";
         try {
             final Scope scope = new Scope(null, "#0", "#1");
-            final ASTJexlScript script = parse(null, PROPERTY_FEATURES, src, scope);
+            final JexlInfo jexlInfo = createInfo(String.valueOf((new Source(PROPERTY_FEATURES, src)).hashCode()), src, 1, 1);
+            final ASTJexlScript script = parse(jexlInfo, PROPERTY_FEATURES, src, scope);
             final JexlNode node = script.jjtGetChild(0);
             final Frame frame = script.createFrame(bean, value);
             final Interpreter interpreter = createInterpreter(context != null? context : EMPTY_CONTEXT, frame, options, script.jexlInfo());
@@ -751,7 +764,7 @@ public class Engine extends JexlEngine {
     public Object invokeMethod(final Object obj, final String meth, final Object... args) {
         JexlException xjexl = null;
         Object result = null;
-        final JexlInfo info = debug ? createInfo() : null;
+        final JexlInfo info = createInfo(String.valueOf((new Source(METHOD_FEATURES, meth)).hashCode()), meth, 1, 1);
         try {
             JexlMethod method = uberspect.getMethod(obj, meth, args);
             if (method == null && arithmetic.narrowArguments(args)) {
@@ -798,7 +811,8 @@ public class Engine extends JexlEngine {
     protected Object doCreateInstance(final Object clazz, final Object... args) {
         JexlException xjexl = null;
         Object result = null;
-        final JexlInfo info = debug ? createInfo() : null;
+        final String src = "new " + clazz + "()";
+        final JexlInfo info = createInfo(String.valueOf((new Source(METHOD_FEATURES, src)).hashCode()), src, 1, 1);
         try {
             JexlMethod ctor = uberspect.getConstructor(clazz, args);
             if (ctor == null && arithmetic.narrowArguments(args)) {
@@ -1059,12 +1073,11 @@ public class Engine extends JexlEngine {
                 }
             }
         }
-        final JexlInfo ninfo = info == null && debug ? createInfo() : info;
         // if parser not in use...
         if (parsing.compareAndSet(false, true)) {
             try {
                 // lets parse
-                script = parser.parse(ninfo, features, options, uberspect, src, scope);
+                script = parser.parse(info, features, options, uberspect, src, scope);
             } finally {
                 // no longer in use
                 parsing.set(false);
@@ -1072,7 +1085,7 @@ public class Engine extends JexlEngine {
         } else {
             // ...otherwise parser was in use, create a new temporary one
             final Parser lparser = new Parser(new StringProvider(";"));
-            script = lparser.parse(ninfo, features, options, uberspect, src, scope);
+            script = lparser.parse(info, features, options, uberspect, src, scope);
         }
         if (source != null) {
             cache.put(source, script);

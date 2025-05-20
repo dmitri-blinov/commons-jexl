@@ -73,6 +73,17 @@ public class JexlInfo {
      * @param l line number
      * @param c column number
      */
+    public JexlInfo() {
+        this(null, null, 1, 1);
+    }
+
+    /**
+     * Create info.
+     *
+     * @param source source name
+     * @param l line number
+     * @param c column number
+     */
     public JexlInfo(final String source, final int l, final int c) {
         this(source, null, l, c);
     }
@@ -90,34 +101,6 @@ public class JexlInfo {
         path = p;
         line = l <= 0? 1: l;
         column = c <= 0? 1 : c;
-    }
-
-    /**
-     * Create an information structure for dynamic set/get/invoke/new.
-     * <p>This gathers the class, method and line number of the first calling method
-     * outside of o.a.c.jexl3.</p>
-     */
-    public JexlInfo() {
-        final StackTraceElement[] stack = new Throwable().getStackTrace();
-        String cname = getClass().getName();
-        final String pkgname = getClass().getPackage().getName();
-        StackTraceElement se = null;
-        for (int s = 1; s < stack.length; ++s) {
-            se = stack[s];
-            final String className = se.getClassName();
-            if (!className.equals(cname)) {
-                // go deeper if called from jexl implementation classes
-                if (!className.startsWith(pkgname + ".internal.") && !className.startsWith(pkgname + ".Jexl")
-                    && !className.startsWith(pkgname + ".parser")) {
-                    break;
-                }
-                cname = className;
-            }
-        }
-        this.name = se != null ? se.getClassName() + "." + se.getMethodName() + ":" + se.getLineNumber() : "?";
-        this.path = null;
-        this.line = 1;
-        this.column = 1;
     }
 
     /**
@@ -148,7 +131,9 @@ public class JexlInfo {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        if (name != null) {
+        if (path != null) {
+            sb.append(path);
+        } else if (name != null) {
             sb.append(name);
         }
         sb.append("@");

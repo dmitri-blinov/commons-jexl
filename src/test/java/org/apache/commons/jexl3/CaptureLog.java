@@ -26,7 +26,7 @@ public class CaptureLog implements Log {
     private final List<Object[]> captured = new ArrayList<>();
 
     static Object caller() {
-        final StackTraceElement[] stack = new Exception().fillInStackTrace().getStackTrace();
+        final StackTraceElement[] stack = new Exception().getStackTrace();
         return stack[2];
     }
 

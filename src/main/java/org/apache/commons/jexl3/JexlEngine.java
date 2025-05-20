@@ -599,8 +599,35 @@ public abstract class JexlEngine {
      * @return a JexlInfo instance
      */
     public JexlInfo createInfo() {
-        return new JexlInfo();
+        return createInfo(null, getCallerName(), 1, 1);
     }
+
+    /**
+     * Evaluates caller class name.
+     * <p>This gathers the class, method and line number of the first calling method
+     * outside of o.a.c.jexl3.</p>
+     *
+     * @return a caller name
+     */
+    protected String getCallerName() {
+        final StackTraceElement[] stack = new Throwable().getStackTrace();
+        String cname = getClass().getName();
+        StackTraceElement se = null;
+        for (int s = 1; s < stack.length; ++s) {
+            se = stack[s];
+            final String className = se.getClassName();
+            if (!className.equals(cname)) {
+                // go deeper if called from jexl implementation classes
+                if (!className.startsWith("org.apache.commons.jexl3.internal.") && !className.startsWith("org.apache.commons.jexl3.Jexl")
+                    && !className.startsWith("org.apache.commons.jexl3.parser.")) {
+                    break;
+                }
+                cname = className;
+            }
+        }
+        return se != null ? se.getClassName() + "." + se.getMethodName() + ":" + se.getLineNumber() : "?";
+    }
+
 
     /**
      * Creates a string from a reader.
@@ -632,7 +659,7 @@ public abstract class JexlEngine {
                 getCharset()))) {
             return toString(reader);
         } catch (final IOException xio) {
-            throw new JexlException(createInfo(file.toString(), null, 1, 1), "could not read source File", xio);
+            throw new JexlException(createInfo(file.getName(), file.toString(), 1, 1), "could not read source File", xio);
         }
     }
 
@@ -649,7 +676,7 @@ public abstract class JexlEngine {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), getCharset()))) {
             return toString(reader);
         } catch (final IOException xio) {
-            throw new JexlException(createInfo(url.toString(), null, 1, 1), "could not read source URL", xio);
+            throw new JexlException(createInfo(url.getFile(), url.toString(), 1, 1), "could not read source URL", xio);
         }
     }
 }
