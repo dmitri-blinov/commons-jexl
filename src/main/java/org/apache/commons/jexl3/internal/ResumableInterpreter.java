@@ -29,6 +29,7 @@ import org.apache.commons.jexl3.parser.ASTBlock;
 import org.apache.commons.jexl3.parser.ASTBreak;
 import org.apache.commons.jexl3.parser.ASTContinue;
 import org.apache.commons.jexl3.parser.ASTDoWhileStatement;
+import org.apache.commons.jexl3.parser.ASTDelete;
 import org.apache.commons.jexl3.parser.ASTExpressionStatement;
 import org.apache.commons.jexl3.parser.ASTForStatement;
 import org.apache.commons.jexl3.parser.ASTForeachStatement;
@@ -370,6 +371,12 @@ public class ResumableInterpreter extends Interpreter {
 
     @Override
     protected Object visit(ASTRemove node, Object data) {
+        suspended = false;
+        return super.visit(node, data);
+    }
+
+    @Override
+    protected Object visit(ASTDelete node, Object data) {
         suspended = false;
         return super.visit(node, data);
     }
