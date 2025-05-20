@@ -324,7 +324,7 @@ public class Interpreter extends InterpreterBase {
             }
             tjexl = jexl.putThreadEngine(jexl);
             if (fp > jexl.stackOverflow) {
-                throw new JexlException.StackOverflow(node.jexlInfo(), "jexl (" + jexl.stackOverflow + ")", null);
+                throw new JexlException.StackOverflow(detailedInfo(node), "jexl (" + jexl.stackOverflow + ")", null);
             }
             cancelCheck(node);
             Object result = null;
@@ -353,7 +353,7 @@ public class Interpreter extends InterpreterBase {
             }
             return arithmetic.controlReturn(result);
         } catch (final StackOverflowError xstack) {
-            final JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
+            final JexlException xjexl = new JexlException.StackOverflow(detailedInfo(node), "jvm", xstack);
             if (!isSilent()) {
                 throw xjexl.clean();
             }

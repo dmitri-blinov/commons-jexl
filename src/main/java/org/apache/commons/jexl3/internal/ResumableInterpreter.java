@@ -149,12 +149,12 @@ public class ResumableInterpreter extends Interpreter {
             }
             tjexl = jexl.putThreadEngine(jexl);
             if (fp > jexl.stackOverflow) {
-                throw new JexlException.StackOverflow(node.jexlInfo(), "jexl (" + jexl.stackOverflow + ")", null);
+                throw new JexlException.StackOverflow(detailedInfo(node), "jexl (" + jexl.stackOverflow + ")", null);
             }
             cancelCheck(node);
             return node.jjtAccept(this, null);
         } catch (StackOverflowError xstack) {
-            JexlException xjexl = new JexlException.StackOverflow(node.jexlInfo(), "jvm", xstack);
+            JexlException xjexl = new JexlException.StackOverflow(detailedInfo(node), "jvm", xstack);
             if (!isSilent()) {
                 throw xjexl.clean();
             }
