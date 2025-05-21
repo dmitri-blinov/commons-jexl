@@ -2035,11 +2035,10 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(ASTThrowStatement node, Object data) {
         cancelCheck(node);
-        Object val = node.jjtGetChild(0).jjtAccept(this, data);
-        if (val instanceof Throwable) {
-            InterpreterBase.<RuntimeException>doThrow((Throwable) val);
+        Object thrown = node.jjtGetChild(0).jjtAccept(this, data);
+        if (thrown instanceof Throwable) {
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
         }
-        String thrown = arithmetic.toString(val);
         throw new JexlException.Throw(detailedInfo(node), thrown);
     }
 
