@@ -52,8 +52,4 @@ public class EnumerationIterator<T> implements Iterator<T> {
         return enumeration.hasMoreElements();
     }
 
-    @Override
-    public void remove() {
-        // not implemented
-    }
 }

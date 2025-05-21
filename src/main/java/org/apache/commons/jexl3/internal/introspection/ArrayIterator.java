@@ -88,11 +88,4 @@ public class ArrayIterator implements Iterator<Object> {
         return (pos < size);
     }
 
-    /**
-     * No op--merely added to satify the <code>Iterator</code> interface.
-     */
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
 }
