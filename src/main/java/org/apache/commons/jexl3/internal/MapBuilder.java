@@ -39,10 +39,10 @@ public class MapBuilder implements JexlArithmetic.MapBuilder {
     /**
      * Creates a new builder.
      * @param size the expected map size
-     * @param ordered whether the set should be ordered
+     * @param extended whether the map is extended
      */
-    public MapBuilder(final int size, final boolean ordered) {
-        map = ordered ? new LinkedHashMap<>(size) : new HashMap<>(size);
+    public MapBuilder(final int size, final boolean extended) {
+        map = extended? new LinkedHashMap<>(size) : new HashMap<>(size);
     }
 
     @Override

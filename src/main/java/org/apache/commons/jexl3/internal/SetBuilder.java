@@ -36,14 +36,13 @@ public class SetBuilder implements JexlArithmetic.SetBuilder {
         this(size, false);
     }
 
-
     /**
-     * Creates a new builder with specified set size.
-     * @param size the initial set size
-     * @param ordered whether the set should be ordered
+     * Creates a new builder.
+     * @param size the expected set size
+     * @param extended whether the set is extended
      */
-    public SetBuilder(final int size, final boolean ordered) {
-        set = ordered ? new LinkedHashSet<>(size) : new HashSet<>(size);
+    public SetBuilder(final int size, final boolean extended) {
+        set = extended? new LinkedHashSet<>(size) : new HashSet<>(size);
     }
 
     @Override

@@ -338,11 +338,12 @@ public class JexlArithmetic {
     }
 
     /**
-     * Called by the interpreter when evaluating a literal set.
-     *
+     * Creates a set-builder.
      * @param size the number of elements in the set
-     * @return the set builder
+     * @return a set-builder instance
+     * @deprecated since 3.3.1
      */
+    @Deprecated
     public SetBuilder setBuilder(final int size) {
         return setBuilder(size, false);
     }
@@ -351,11 +352,11 @@ public class JexlArithmetic {
      * Called by the interpreter when evaluating a literal set.
      *
      * @param size the number of elements in the set
-     * @param ordered whether the set is ordered
-     * @return the set builder
+     * @param extended whether the set is extended or not
+     * @return the array builder
      */
-    public SetBuilder setBuilder(final int size, final boolean ordered) {
-        return new org.apache.commons.jexl3.internal.SetBuilder(size, ordered);
+    public SetBuilder setBuilder(final int size, final boolean extended) {
+        return new org.apache.commons.jexl3.internal.SetBuilder(size, extended);
     }
 
     /**
@@ -419,11 +420,12 @@ public class JexlArithmetic {
     }
 
     /**
-     * Called by the interpreter when evaluating a literal map.
-     *
+     * Creates a map-builder.
      * @param size the number of elements in the map
-     * @return the map builder
+     * @return a map-builder instance
+     * @deprecated 3.3
      */
+    @Deprecated
     public MapBuilder mapBuilder(final int size) {
         return mapBuilder(size, false);
     }
@@ -432,11 +434,11 @@ public class JexlArithmetic {
      * Called by the interpreter when evaluating a literal map.
      *
      * @param size the number of elements in the map
-     * @param ordered whether the map is ordered
+     * @param extended whether the map is extended or not
      * @return the map builder
      */
-    public MapBuilder mapBuilder(final int size, final boolean ordered) {
-        return new org.apache.commons.jexl3.internal.MapBuilder(size, ordered);
+    public MapBuilder mapBuilder(final int size, final boolean extended) {
+        return new org.apache.commons.jexl3.internal.MapBuilder(size, extended);
     }
 
     /**
