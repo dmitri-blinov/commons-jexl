@@ -699,7 +699,7 @@ public class JexlArithmetic {
     }
 
     /**
-     * The BigDecimal scale used for comparison and coericion operations.
+     * The BigDecimal scale used for comparison and coercion operations.
      *
      * @return the scale
      */
