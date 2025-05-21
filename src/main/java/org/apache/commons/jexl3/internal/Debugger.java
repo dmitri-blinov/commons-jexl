@@ -483,7 +483,8 @@ public class Debugger extends ParserVisitor implements JexlInfo.Detail {
                 || child instanceof ASTTryWithResourceStatement
                 || child instanceof ASTSwitchStatement
                 || child instanceof ASTSynchronizedStatement
-                || child instanceof ASTAnnotation;
+                || child instanceof ASTAnnotation
+                || child instanceof ASTThrowStatement;
     }
 
     /**
