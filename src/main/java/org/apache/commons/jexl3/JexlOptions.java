@@ -45,7 +45,11 @@ import org.apache.commons.jexl3.internal.Engine;
  */
 public final class JexlOptions {
     /** The assertions bit. */
-    private static final int ASSERTIONS = 8;
+    private static final int ASSERTIONS = 10;
+    /** The interpolation string bit. */
+    private static final int STRICT_INTERPOLATION= 9;
+    /** The const capture bit. */
+    private static final int CONST_CAPTURE = 8;
     /** The shared isntance bit. */
     private static final int SHARED = 7;
     /** The local shade bit. */
@@ -64,7 +68,9 @@ public final class JexlOptions {
     private static final int CANCELLABLE = 0;
     /** The flag names ordered. */
     private static final String[] NAMES = {
-        "cancellable", "strict", "silent", "safe", "lexical", "antish", "lexicalShade", "sharedInstance", "assertions"
+        "cancellable", "strict", "silent", "safe", "lexical", "antish", 
+        "lexicalShade", "sharedInstance", "constCapture", "strictInterpolation",
+        "assertions"
     };
     /** Default mask .*/
     private static int DEFAULT = 1 /*<< CANCELLABLE*/ | 1 << STRICT | 1 << ANTISH | 1 << SAFE;
@@ -271,6 +277,14 @@ public final class JexlOptions {
     }
 
     /**
+     * Gets the strict-interpolation flag of this options instance.
+     * @return true if interpolation strings always return string, false otherwise
+     */
+    public boolean isStrictInterpolation() {
+        return isSet(STRICT_INTERPOLATION, flags);
+    }
+
+    /**
      * Sets whether the engine will attempt solving antish variable names from
      * context.
      * @param flag true if antish variables are solved, false otherwise
@@ -458,7 +472,8 @@ public final class JexlOptions {
         return new JexlOptions().set(this);
     }
 
-    @Override public String toString() {
+    @Override 
+	public String toString() {
         StringBuilder strb = new StringBuilder();
         for(int i = 0; i < NAMES.length; ++i) {
             if (i > 0) {

@@ -22,12 +22,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 import org.apache.commons.jexl3.internal.Engine;
 import org.apache.commons.jexl3.internal.SoftCache;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.introspection.JexlUberspect;
+import org.apache.commons.jexl3.parser.JexlScriptParser;
 import org.apache.commons.logging.Log;
 
 
@@ -142,6 +144,9 @@ public class JexlBuilder {
 
     /** The cache class factory. */
     private IntFunction<JexlCache<?, ?>> cacheFactory = SoftCache::new;
+
+   /** The parser class factory. */
+   private Supplier<JexlScriptParser> parserFactory = null;
 
     /** The stack overflow limit. */
     private int stackOverflow = Integer.MAX_VALUE;
@@ -274,6 +279,25 @@ public class JexlBuilder {
     /** @return the sandbox */
     public JexlSandbox sandbox() {
         return this.sandbox;
+    }
+
+    /**
+     * Gets the Jexl script parser factory the engine will use.
+     * @return the cache factory
+     */
+    public Supplier<JexlScriptParser> parserFactory() {
+        return this.parserFactory;
+    }
+
+    /**
+     * Sets the Jexl script parser factory the engine will use.
+     *
+     * @param factory the function to produce a cache.
+     * @return this builder
+     */
+    public JexlBuilder parserFactory(final Supplier<JexlScriptParser> factory) {
+        this.parserFactory = factory;
+        return this;
     }
 
     /**

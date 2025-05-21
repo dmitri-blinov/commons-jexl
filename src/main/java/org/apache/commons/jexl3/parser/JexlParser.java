@@ -58,7 +58,7 @@ import static org.apache.commons.jexl3.parser.ParserConstants.SEMICOL;
 /**
  * The base class for parsing, manages the parameter/local variable frame.
  */
-public abstract class JexlParser extends StringParser {
+public abstract class JexlParser extends StringParser implements JexlScriptParser {
     /**
      * The associated controller.
      */

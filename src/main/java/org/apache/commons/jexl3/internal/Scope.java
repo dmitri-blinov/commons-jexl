@@ -310,11 +310,11 @@ public final class Scope {
      * <p>
      * This method creates an new entry in the symbol map.
      * </p>
-     * @param name the parameter name
+     * @param param the parameter name
      * @return the register index storing this variable
      */
-    public int declareParameter(final String name) {
-        return declareParameter(name, null, false, false, false, null);
+    public int declareParameter(final String param) {
+        return declareParameter(param, null, false, false, false, null);
     }
 
     /**
@@ -382,11 +382,11 @@ public final class Scope {
      * <p>
      * This method creates an new entry in the symbol map.
      * </p>
-     * @param name the variable name
+     * @param varName the variable name
      * @return the register index storing this variable
      */
-    public int declareVariable(final String name) {
-        return declareVariable(name, null, false, false);
+    public int declareVariable(final String varName) {
+        return declareVariable(varName, null, false, false);
     }
 
     /**
@@ -484,8 +484,8 @@ public final class Scope {
      * @return the source symbol index or -1 if the symbol is not captured
      */
     public int getCaptureDeclaration(final int symbol) {
-        Integer declared = capturedVariables != null? capturedVariables.get(symbol)  : null;
-        return declared != null ? declared.intValue() : -1;
+        final Integer declared = capturedVariables != null ? capturedVariables.get(symbol)  : null;
+        return declared != null ? declared : -1;
     }
 
     /**

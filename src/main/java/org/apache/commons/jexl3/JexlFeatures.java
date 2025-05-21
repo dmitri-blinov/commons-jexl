@@ -67,7 +67,8 @@ public final class JexlFeatures {
         "register", "reserved variable", "local variable", "assign/modify",
         "global assign/modify", "array reference", "create instance", "loop", "function",
         "method call", "set/map/array literal", "pragma", "annotation", "script", "lexical", "lexicalShade",
-        "thin-arrow", "fat-arrow", "namespace pragma", "import pragma", "comparator names", "matching names"
+        "thin-arrow", "fat-arrow", "namespace pragma", "namespace identifier", "import pragma", "comparator names", "pragma anywhere",
+        "const capture", "ref capture", "strict statement", "matching names"
     };
     /** Registers feature ordinal. */
     private static final int REGISTER = 0;
@@ -107,17 +108,22 @@ public final class JexlFeatures {
     public static final int FAT_ARROW = 17;
     /** Namespace pragma feature ordinal. */
     public static final int NS_PRAGMA = 18;
-    /** Import pragma feature ordinal. */
-    public static final int IMPORT_PRAGMA = 19;
+    /** Namespace syntax as an identifier (no space). */
+    public static final int NS_IDENTIFIER = 19;
+    /** Import pragma feature ordinal. */	
+    public static final int IMPORT_PRAGMA = 20;
     /** Comparator names (legacy) syntax. */
-    public static final int COMPARATOR_NAMES = 20;
+    public static final int COMPARATOR_NAMES = 21;
     /** The pragma anywhere feature ordinal. */
-    public static final int PRAGMA_ANYWHERE = 21;
+    public static final int PRAGMA_ANYWHERE = 22;
     /** Captured variables are const. */
-    public static final int CONST_CAPTURE = 22;
+    public static final int CONST_CAPTURE = 23;
+    /** Captured variables are reference. */
+    public static final int REF_CAPTURE = 24;
+    /** Captured variables are reference. */
+    public static final int STRICT_STATEMENT = 25;
     /** Matching names (in) syntax. */
-    public static final int MATCHING_NAMES = 23;
-
+    public static final int MATCHING_NAMES = 26;
     /**
      * All features.
      * Ensure this is updated if additional features are added.
@@ -153,8 +159,8 @@ public final class JexlFeatures {
         | 1L << NS_PRAGMA
         | 1L << IMPORT_PRAGMA
         | 1L << COMPARATOR_NAMES
-        | 1L << MATCHING_NAMES
-        | 1L << PRAGMA_ANYWHERE;
+        | 1L << PRAGMA_ANYWHERE
+        | 1L << MATCHING_NAMES;
 
     /**
      * The canonical scripting (since 3.3.1) features flag mask based on the original default.
