@@ -2039,12 +2039,8 @@ public class Interpreter extends InterpreterBase {
         if (val instanceof Throwable) {
             InterpreterBase.<RuntimeException>doThrow((Throwable) val);
         }
-        String message = arithmetic.toString(val);
-        if (message != null) {
-            throw new RuntimeException(message);
-        } else {
-            throw new RuntimeException();
-        }
+        String thrown = arithmetic.toString(val);
+        throw new JexlException.Throw(detailedInfo(node), thrown);
     }
 
     @Override

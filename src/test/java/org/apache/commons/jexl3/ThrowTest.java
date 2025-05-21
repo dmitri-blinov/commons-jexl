@@ -43,8 +43,8 @@ public class ThrowTest extends JexlTestCase {
         JexlContext jc = new MapContext();
         try {
             Object o = e.execute(jc);
-        } catch (Exception ex) {
-           Assert.assertEquals("Result is not last evaluated expression", "Error", ex.getMessage());
+        } catch (JexlException.Throw ex) {
+           Assert.assertEquals("Result is not as expected", "Error", ex.getValue());
         }
     }
 
