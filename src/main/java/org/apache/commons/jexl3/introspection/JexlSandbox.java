@@ -184,18 +184,6 @@ public final class JexlSandbox {
     }
 
     /**
-     * Gets the read permission value for a given property of a class.
-     *
-     * @param clazz the class name
-     * @param name the property name
-     * @return null if not allowed, the name of the property to use otherwise
-     */
-    @Deprecated
-    public String read(final String clazz, final String name) {
-        return get(clazz).read().get(name);
-    }
-
-    /**
      * Gets the write permission value for a given property of a class.
      *
      * @param clazz the class

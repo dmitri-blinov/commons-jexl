@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
@@ -688,7 +689,7 @@ public abstract class InterpreterBase extends ParserVisitor {
     /**
      * Triggered when an operator fails.
      * @param node     the node where the error originated from
-     * @param operator the method name
+     * @param operator the operator symbol
      * @param cause    the cause of error (if any)
      * @return throws JexlException if strict and not silent, null otherwise
      */

@@ -631,11 +631,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.equals(node, "==", left, right);
+                return operators.equals(node, JexlOperator.EQ, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.equals(node, "==", left, right);
+            return operators.equals(node, JexlOperator.EQ, left, right);
         }
     }
 
@@ -656,11 +656,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return !operators.equals(node, "!=", left, right);
+                return !operators.equals(node, JexlOperator.NE, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return !operators.equals(node, "!=", left, right);
+            return !operators.equals(node, JexlOperator.NE, left, right);
         }
     }
 
@@ -781,11 +781,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.startsWith(node, "^=", left, right);
+                return operators.startsWith(node, JexlOperator.STARTSWITH, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.startsWith(node, "^=", left, right);
+            return operators.startsWith(node, JexlOperator.STARTSWITH, left, right);
         }
     }
 
@@ -806,11 +806,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return !operators.startsWith(node, "^!", left, right);
+                return operators.startsWith(node, JexlOperator.NOT_STARTSWITH, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return !operators.startsWith(node, "^!", left, right);
+            return operators.startsWith(node, JexlOperator.NOT_STARTSWITH, left, right);
         }
     }
 
@@ -831,11 +831,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.endsWith(node, "$=", left, right);
+                return operators.endsWith(node, JexlOperator.ENDSWITH, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return operators.endsWith(node, "$=", left, right);
+            return operators.endsWith(node, JexlOperator.ENDSWITH, left, right);
         }
     }
 
@@ -856,11 +856,11 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return !operators.endsWith(node, "$!", left, right);
+                return operators.endsWith(node, JexlOperator.NOT_ENDSWITH, left, right);
             });
         } else {
             Object right = operand.jjtAccept(this, data);
-            return !operators.endsWith(node, "$!", left, right);
+            return operators.endsWith(node, JexlOperator.NOT_ENDSWITH, left, right);
         }
     }
 
@@ -881,13 +881,13 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return operators.contains(node, "=~", right, left);
+                return operators.contains(node, JexlOperator.CONTAINS, right, left);
             });
         } else {
             final Object right = operand.jjtAccept(this, data);
             // note the arguments inversion between 'in'/'matches' and 'contains'
             // if x in y then y contains x
-            return operators.contains(node, "=~", right, left);
+            return operators.contains(node, JexlOperator.CONTAINS, right, left);
         }
     }
 
@@ -908,13 +908,13 @@ public class Interpreter extends InterpreterBase {
         JexlNode operand = node.jjtGetChild(1);
         if (operand instanceof ASTSetOperand) {
             return checkSetOperand(node, (ASTSetOperand) operand, left, data, (right) -> {
-                return !operators.contains(node, "!~", right, left);
+                return operators.contains(node, JexlOperator.NOT_CONTAINS, right, left);
             });
         } else {
             final Object right = operand.jjtAccept(this, data);
             // note the arguments inversion between (not) 'in'/'matches' and  (not) 'contains'
             // if x not-in y then y not-contains x
-            return !operators.contains(node, "!~", right, left);
+            return operators.contains(node, JexlOperator.NOT_CONTAINS, right, left);
         }
     }
 
@@ -984,7 +984,7 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTUnaryMinusNode node, final Object data) {
         // use cached value if literal
         final Object value = node.jjtGetValue();
-        if (value != null && !(value instanceof JexlMethod)) {
+        if (value instanceof Number) {
             return value;
         }
         final JexlNode valNode = node.jjtGetChild(0);
@@ -1013,7 +1013,7 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTUnaryPlusNode node, final Object data) {
         // use cached value if literal
         final Object value = node.jjtGetValue();
-        if (value != null && !(value instanceof JexlMethod)) {
+        if (value instanceof Number) {
             return value;
         }
         final JexlNode valNode = node.jjtGetChild(0);
@@ -3706,20 +3706,20 @@ public class Interpreter extends InterpreterBase {
     @Override
     protected Object visit(final ASTIncrementGetNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
-        return executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
+        return executeAssign(node, left, 1, JexlOperator.INCREMENT_AND_GET, data);
     }
 
     @Override
     protected Object visit(final ASTDecrementGetNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
-        return executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
+        return executeAssign(node, left, 1, JexlOperator.DECREMENT_AND_GET, data);
     }
 
     @Override
     protected Object visit(final ASTGetIncrementNode node, final Object data) {
         JexlNode left = node.jjtGetChild(0);
         Object value = left.jjtAccept(this, data);
-        executeAssign(node, left, 1, JexlOperator.INCREMENT, data);
+        executeAssign(node, left, 1, JexlOperator.GET_AND_INCREMENT, data);
         return value;
     }
 
@@ -3727,7 +3727,7 @@ public class Interpreter extends InterpreterBase {
     protected Object visit(final ASTGetDecrementNode node, final Object data) {
         final JexlNode left = node.jjtGetChild(0);
         final Object value = left.jjtAccept(this, data);
-        executeAssign(node, left, 1, JexlOperator.DECREMENT, data);
+        executeAssign(node, left, 1, JexlOperator.GET_AND_DECREMENT, data);
         return value;
     }
 

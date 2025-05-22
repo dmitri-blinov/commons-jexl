@@ -38,12 +38,12 @@ public class IncrementDecrementTest extends JexlTestCase {
             super(flag);
         }
 
-        public Object increment(AtomicInteger val) {
+        public Object incrementAndGet(AtomicInteger val) {
             val.incrementAndGet();
             return JexlOperator.ASSIGN;
         }
 
-        public Object decrement(AtomicInteger val) {
+        public Object decrementAndGet(AtomicInteger val) {
             val.decrementAndGet();
             return JexlOperator.ASSIGN;
         }

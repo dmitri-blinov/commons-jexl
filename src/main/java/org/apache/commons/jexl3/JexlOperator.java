@@ -39,7 +39,6 @@ package org.apache.commons.jexl3;
  * @since 3.0
  */
 public enum JexlOperator {
-
     /**
      * Add operator.
      * <br><strong>Syntax:</strong> <code>x + y</code>
@@ -143,6 +142,14 @@ public enum JexlOperator {
      * @see JexlArithmetic#equals
      */
     EQ("==", "equals", 2),
+
+    /**
+     * Not equals operator.
+     * <br><strong>Syntax:</strong> <code>x != y</code>
+     * <br><strong>Method:</strong> <code>calls !(equals(L x, R y));</code>.
+     * @see JexlArithmetic#equals
+     */
+    NE("!=", null, EQ),
 
     /**
      * Less-than operator.
@@ -312,18 +319,46 @@ public enum JexlOperator {
     SELF_XOR("^=", "selfXor", XOR),
 
     /**
-     * Increment operator.
-     * <br><strong>Syntax:</strong> <code>++x</code>
-     * <br><strong>Method:</strong> <code>T increment(L x);</code>.
+     * Increment pseudo-operator.
+     * <br>No syntax, used as helper for the prefix and postfix versions of {@code ++}.
+     * @see JexlArithmetic#increment(Object)
      */
-    INCREMENT("++", "increment", 1),
+    INCREMENT("+1", "increment", 1),
 
     /**
-     * Increment operator.
-     * <br><strong>Syntax:</strong> <code>--x</code>
-     * <br><strong>Method:</strong> <code>T decrement(L x);</code>.
+     * Decrement pseudo-operator.
+     * <br>No syntax, used as helper for the prefix and postfix versions of {@code --}.
+     * @see JexlArithmetic#decrement(Object)
      */
-    DECREMENT("--", "decrement", 1),
+    DECREMENT("-1", "decrement", 1),
+
+    /**
+     * Prefix ++ operator, increments and returns the value after incrementing.
+     * <br><strong>Syntax:</strong> {@code ++x}
+     * <br><strong>Method:</strong> {@code T incrementAndGet(L x);}.
+     */
+    INCREMENT_AND_GET("++.", "incrementAndGet", INCREMENT, 1),
+
+    /**
+     * Postfix ++, increments and returns the value before incrementing.
+     * <br><strong>Syntax:</strong> {@code x++}
+     * <br><strong>Method:</strong> {@code T getAndIncrement(L x);}.
+     */
+    GET_AND_INCREMENT(".++", "getAndIncrement", INCREMENT, 1),
+
+    /**
+     * Prefix --, decrements and returns the value after decrementing.
+     * <br><strong>Syntax:</strong> {@code --x}
+     * <br><strong>Method:</strong> {@code T decrementAndGet(L x);}.
+     */
+    DECREMENT_AND_GET("--.", "decrementAndGet", DECREMENT, 1),
+
+    /**
+     * Postfix --, decrements and returns the value before decrementing.
+     * <br><strong>Syntax:</strong> {@code x--}
+     * <br><strong>Method:</strong> {@code T getAndDecrement(L x);}.
+     */
+    GET_AND_DECREMENT(".--", "getAndDecrement", DECREMENT, 1),
 
     /**
      * Indirect operator.
@@ -449,6 +484,31 @@ public enum JexlOperator {
     CONDITION("?", "testCondition", 1),
 
     /**
+     * Compare overload as in compare(x, y).
+     * <br><strong>Method:</strong> {@code boolean compare(L x, R y);}.
+     * @since 3.4.1
+     */
+    COMPARE("<>", "compare", 2),
+
+    /**
+     * Not-Contains operator.
+     * <p>Not overridable, calls !(contain(...))</p>
+     */
+    NOT_CONTAINS("!~", null, CONTAINS),
+
+    /**
+     * Not-Starts-With operator.
+     * <p>Not overridable, calls !(startsWith(...))</p>
+     */
+    NOT_STARTSWITH("!^", null, STARTSWITH),
+
+    /**
+     * Not-Ends-With operator.
+     * <p>Not overridable, calls !(endsWith(...))</p>
+     */
+    NOT_ENDSWITH("!$", null, ENDSWITH),
+
+    /**
      * Resource generator as in try(var x : y).
      * If the returned Resource is AutoCloseable, close will be called after the execution of the statement.
      * <br><strong>Syntax:</strong> <code>try(var x : y){...} </code>
@@ -485,23 +545,32 @@ public enum JexlOperator {
      * @param argc the number of parameters for the method
      */
     JexlOperator(final String o, final String m, final int argc) {
-        this.operator = o;
-        this.methodName = m;
-        this.arity = argc;
-        this.base = null;
+        this(o, m, null, argc);
     }
 
     /**
-     * Creates a side-effect operator.
+     * Creates a side effect operator with arity == 2.
      *
      * @param o the operator name
      * @param m the method name associated to this operator in a JexlArithmetic
      * @param b the base operator, ie + for +=
      */
     JexlOperator(final String o, final String m, final JexlOperator b) {
+        this(o, m, b, 2);
+    }
+
+    /**
+     * Creates a side effect operator.
+     *
+     * @param o the operator name
+     * @param m the method name associated to this operator in a JexlArithmetic
+     * @param b the base operator, ie + for +=
+     * @param a the operator arity
+     */
+    JexlOperator(final String o, final String m, final JexlOperator b, final int a) {
         this.operator = o;
         this.methodName = m;
-        this.arity = 2;
+        this.arity = a;
         this.base = b;
     }
 

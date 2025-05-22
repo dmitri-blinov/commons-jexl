@@ -82,10 +82,10 @@ public class RelationalPredicate implements Predicate<Object> {
 
            switch(operator) {
                case EQ:
-                   ok = negated ? !operators.equals(node, "!=", t, operand) : operators.equals(node, "==", t, operand);
+                   ok = negated ? !operators.equals(node, JexlOperator.NE, t, operand) : operators.equals(node, JexlOperator.EQ, t, operand);
                    break;
                case CONTAINS:
-                   ok = negated ? !operators.contains(node, "!~", operand, t) : operators.contains(node, "=~", operand, t);
+                   ok = negated ? operators.contains(node, JexlOperator.NOT_CONTAINS, operand, t) : operators.contains(node, JexlOperator.CONTAINS, operand, t);
                    break;
                case LT:
                    ok = negated ? !operators.lessThan(node, t, operand) : operators.lessThan(node, t, operand);
@@ -100,10 +100,10 @@ public class RelationalPredicate implements Predicate<Object> {
                    ok = negated ? !operators.greaterThanOrEqual(node, t, operand) : operators.greaterThanOrEqual(node, t, operand);
                    break;
                case STARTSWITH:
-                   ok = negated ? !operators.startsWith(node, "^!", t, operand) : operators.startsWith(node, "^=", t, operand);
+                   ok = negated ? operators.startsWith(node, JexlOperator.NOT_STARTSWITH, t, operand) : operators.startsWith(node, JexlOperator.STARTSWITH, t, operand);
                    break;
                case ENDSWITH:
-                   ok = negated ? !operators.endsWith(node, "$!", t, operand) : operators.endsWith(node, "$=", t, operand);
+                   ok = negated ? operators.endsWith(node, JexlOperator.NOT_ENDSWITH, t, operand) : operators.endsWith(node, JexlOperator.ENDSWITH, t, operand);
                    break;
                default:
            }
