@@ -884,7 +884,9 @@ public class Interpreter extends InterpreterBase {
                 return operators.contains(node, "=~", right, left);
             });
         } else {
-            Object right = operand.jjtAccept(this, data);
+            final Object right = operand.jjtAccept(this, data);
+            // note the arguments inversion between 'in'/'matches' and 'contains'
+            // if x in y then y contains x
             return operators.contains(node, "=~", right, left);
         }
     }
@@ -909,7 +911,9 @@ public class Interpreter extends InterpreterBase {
                 return !operators.contains(node, "!~", right, left);
             });
         } else {
-            Object right = operand.jjtAccept(this, data);
+            final Object right = operand.jjtAccept(this, data);
+            // note the arguments inversion between (not) 'in'/'matches' and  (not) 'contains'
+            // if x not-in y then y not-contains x
             return !operators.contains(node, "!~", right, left);
         }
     }

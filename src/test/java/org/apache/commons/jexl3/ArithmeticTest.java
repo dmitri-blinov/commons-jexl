@@ -1179,6 +1179,20 @@ public class ArithmeticTest extends JexlTestCase {
         Assert.assertEquals(36L, result);
         result = script.execute(jc, new Var(35), new Var(7));
         Assert.assertEquals(36L, ((Var) result).value);
+        // legacy
+        script = jexl.createScript("(x, y)->bitwiseXor(x,y)");
+        result = script.execute(jc, 35, 7);
+        Assert.assertEquals(36L, result);
+
+        script = jexl.createScript("(x, y)->{ x | y }");
+        result = script.execute(jc, 35, 7);
+        Assert.assertEquals(39L, result);
+        result = script.execute(jc, new Var(35), new Var(7));
+        Assert.assertEquals(39L, ((Var) result).value);
+        // legacy
+        script = jexl.createScript("(x, y)->bitwiseOr(x,y)");
+        result = script.execute(jc, 35, 7);
+        Assert.assertEquals(39L, result);
 
         script = jexl.createScript("(x, y)->{ x << y }");
         result = script.execute(jc, 35, 1);
@@ -1203,6 +1217,10 @@ public class ArithmeticTest extends JexlTestCase {
         Assert.assertEquals(3L, result);
         result = script.execute(jc, new Var(35), new Var(7));
         Assert.assertEquals(3L, ((Var) result).value);
+        // legacy
+        script = jexl.createScript("(x, y)->bitwiseAnd(x,y)");
+        result = script.execute(jc, 35, 7);
+        Assert.assertEquals(3L, result);
 
         script = jexl.createScript("(x, y)->{ x =^ y }");
         result = script.execute(jc, 3115, 31);
@@ -1306,7 +1324,7 @@ public class ArithmeticTest extends JexlTestCase {
         @Override
         public Object divide(final Object left, final Object right) {
             if (left == null && right == null) {
-                return controlNullNullOperands();
+                return controlNullNullOperands(JexlOperator.DIVIDE);
             }
             // if either are bigdecimal use that type
             if (left instanceof BigDecimal || right instanceof BigDecimal) {
@@ -1337,7 +1355,7 @@ public class ArithmeticTest extends JexlTestCase {
         @Override
         public Object mod(final Object left, final Object right) {
             if (left == null && right == null) {
-                return controlNullNullOperands();
+                return controlNullNullOperands(JexlOperator.MOD);
             }
             // if either are bigdecimal use that type
             if (left instanceof BigDecimal || right instanceof BigDecimal) {
