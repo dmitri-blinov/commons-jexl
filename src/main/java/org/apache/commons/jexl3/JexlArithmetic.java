@@ -417,6 +417,19 @@ public class JexlArithmetic {
         public CoercionException(final String msg) {
             super(msg);
         }
+
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param msg the detail message.
+         * @param cause The cause of this Throwable.
+         * @since 3.5.0
+         */
+        public CoercionException(final String msg, final Throwable cause) {
+            super(msg);
+            initCause(cause);
+        }
     }
 
     /**
