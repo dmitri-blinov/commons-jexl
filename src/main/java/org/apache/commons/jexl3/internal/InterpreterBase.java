@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.jexl3.JexlArithmetic;
+import org.apache.commons.jexl3.JexlCache;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
@@ -130,7 +131,7 @@ public abstract class InterpreterBase extends ParserVisitor {
         this.cancelled = acancel != null? acancel : new AtomicBoolean(false);
         this.functions = options.getNamespaces();
         this.functors = null;
-        this.operators = new Operators(this);
+        this.operators = (Operators) uberspect.getArithmetic(arithmetic);
         // the import package facility
         Collection<String> imports = options.getImports();
         this.fqcnSolver = options == jexl.options || imports.isEmpty()
@@ -688,12 +689,13 @@ public abstract class InterpreterBase extends ParserVisitor {
 
     /**
      * Triggered when an operator fails.
-     * @param node     the node where the error originated from
+     * @param ref      the node where the error originated from
      * @param operator the operator symbol
      * @param cause    the cause of error (if any)
      * @return throws JexlException if strict and not silent, null otherwise
      */
-    protected Object operatorError(final JexlNode node, final JexlOperator operator, final Throwable cause) {
+    protected Object operatorError(final JexlCache.Reference ref, final JexlOperator operator, final Throwable cause) {
+        JexlNode node = (ref instanceof JexlNode) ? (JexlNode) ref : null;
         if (isStrictEngine()) {
             throw new JexlException.Operator(detailedInfo(node), operator.getOperatorSymbol(), cause);
         }
@@ -763,10 +765,20 @@ public abstract class InterpreterBase extends ParserVisitor {
      * Gets the most specific information attached to a node.
      *
      * @param node the node
-     * @param info the information
      * @return the information or null
      */
-     protected JexlInfo detailedInfo(final JexlNode node) {
+    protected JexlInfo detailedInfo(final JexlNode node) {
+        return detailedInfo(info, node);
+    }
+
+    /**
+     * Gets the most specific information attached to a node.
+     *
+     * @param info the information
+     * @param node the node
+     * @return the information or null
+     */
+    protected static JexlInfo detailedInfo(final JexlInfo info, final JexlNode node) {
         if (info != null) {
             if (node != null) {
                JexlInfo i = info.at(node.getLine(), node.getColumn());

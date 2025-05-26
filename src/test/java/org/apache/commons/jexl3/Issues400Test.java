@@ -399,4 +399,53 @@ public class Issues400Test {
         assertTrue((boolean) sqle.createScript("a = 25", "a").execute(null, 25));
         assertFalse((boolean) sqle.createScript("a != 25", "a").execute(null, 25));
     }
+
+    public static class Ns429 {
+        public int f(final int x) {
+            return x * 10000 + 42;
+        }
+    }
+
+    @Test
+    public void test429a() {
+        MapContext ctxt = new MapContext();
+        //ctxt.set("b", 1);
+        JexlFeatures features = JexlFeatures.createDefault();
+        final JexlEngine jexl = new JexlBuilder()
+                .features(features)
+                .safe(false).strict(true).silent(false).create();
+        JexlScript f = jexl.createScript("x -> x");
+        ctxt.set("f", f);
+        String src = "#pragma jexl.namespace.b "+Ns429.class.getName()  +"\n"
+                +"b ? b : f(2);";
+        JexlScript script = jexl.createScript(src, "b");
+        assertEquals(1, (int) script.execute(ctxt, 1));
+
+        src = "#pragma jexl.namespace.b "+Ns429.class.getName()  +"\n"
+                +"b ? b:f(2) : 1;";
+        script = jexl.createScript(src, "b");
+        assertEquals(20042, (int) script.execute(ctxt, 1));
+    }
+
+    @Test
+    public void test429b() {
+        MapContext ctxt = new MapContext();
+        ctxt.set("b", 1);
+        JexlFeatures features = JexlFeatures.createDefault();
+        features.namespaceIdentifier(true);
+        final JexlEngine jexl = new JexlBuilder()
+                .features(features)
+                .safe(false).strict(true).silent(false).create();
+        JexlScript f = jexl.createScript("x -> x");
+        ctxt.set("f", f);
+        String src = "#pragma jexl.namespace.b "+Ns429.class.getName()  +"\n"
+                +"b ? b : f(2);";
+        JexlScript script = jexl.createScript(src);
+        assertEquals(1, (int) script.execute(ctxt));
+
+        src = "#pragma jexl.namespace.b "+Ns429.class.getName()  +"\n"
+                +"b ? b:f(2) : 1;";
+        script = jexl.createScript(src);
+        assertEquals(20042, (int) script.execute(ctxt));
+    }
 }

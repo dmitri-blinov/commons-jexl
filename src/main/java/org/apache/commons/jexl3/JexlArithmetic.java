@@ -271,10 +271,23 @@ public class JexlArithmetic {
          * Gets the most specific method for an operator.
          *
          * @param operator the operator
-         * @param arg      the arguments
+         * @param args     the arguments
          * @return the most specific method or null if no specific override could be found
          */
-        JexlMethod getOperator(JexlOperator operator, Object... arg);
+        JexlMethod getOperator(JexlOperator operator, Object... args);
+
+        /**
+         * Try to find the most specific method and evaluate an operator.
+         * <p>This method does not call {@link #overloads(JexlOperator)} and shall not be called with an
+         * assignment operator.</p>
+         *
+         * @param reference an optional cache reference storing actual method or failing signature
+         * @param operator the operator
+         * @param args      the arguments
+         * @return TRY_FAILED if no specific method could be found, the evaluation result otherwise
+         */
+        Object tryEval(JexlCache.Reference reference, JexlOperator operator, Object...args);
+
     }
 
     /**
@@ -1760,9 +1773,9 @@ public class JexlArithmetic {
     protected Boolean collectionContains(final Object collection, final Object value) {
         // convert arrays if needed
         final Object left = arrayWrap(collection);
-        if (left instanceof Collection<?>) {
+        if (left instanceof Collection) {
             final Object right = arrayWrap(value);
-            if (right instanceof Collection<?>) {
+            if (right instanceof Collection) {
                 return ((Collection<?>) left).containsAll((Collection<?>) right);
             }
             return ((Collection<?>) left).contains(value);
@@ -1852,7 +1865,7 @@ public class JexlArithmetic {
      * Check for emptiness of various types: Number, Collection, Array, Map, String.
      *
      * @param object the object to check the emptiness of
-     * @param def the default value if object emptyness can not be determined
+     * @param def the default value if object emptiness can not be determined
      * @return the boolean or null if there is no arithmetic solution
      */
     public Boolean isEmpty(final Object object, final Boolean def) {
@@ -2465,7 +2478,7 @@ public class JexlArithmetic {
                 @SuppressWarnings("unchecked") // OK because of instanceof check above
                 final Comparable<Object> comparable = (Comparable<Object>) right;
                 try {
-                    return -Integer.signum(comparable.compareTo(left));
+                    return -comparable.compareTo(left);
                 } catch (final ClassCastException castException) {
                     // ignore it, continue in sequence
                 }

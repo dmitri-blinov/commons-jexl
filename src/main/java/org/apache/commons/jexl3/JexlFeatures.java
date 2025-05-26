@@ -773,11 +773,35 @@ public final class JexlFeatures {
     }
 
     /**
+     * Sets whether namespace as identifier syntax is enabled.
+     * <p>
+     * When enabled, a namespace call must be of the form <code>ns:fun(...)</code> with no
+     * spaces between the namespace name and the function.
+     * </p>
+     * @param flag true to enable, false to disable
+     * @return this features instance
+     * @since 3.4.1
+     */
+    public JexlFeatures namespaceIdentifier(final boolean flag) {
+        setFeature(NS_IDENTIFIER, flag);
+        return this;
+    }
+
+    /**
      * @return true if namespace pragma are enabled, false otherwise
      */
     public boolean supportsNamespacePragma() {
         return getFeature(NS_PRAGMA);
     }
+
+    /**
+     * @return true if namespace identifier syntax is enabled, false otherwise
+     * @since 3.4.1
+     */
+    public boolean supportsNamespaceIdentifier() {
+        return getFeature(NS_IDENTIFIER);
+    }
+
     /**
      * Sets whether import pragma constructs are enabled.
      * <p>
