@@ -227,6 +227,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import java.lang.reflect.Array;
@@ -3744,10 +3745,9 @@ public class Interpreter extends InterpreterBase {
                                    final JexlOperator assignop, final Object data) { // CSOFF: MethodLength
         cancelCheck(node);
         // left contains the reference to assign to
-        ASTIdentifier variable = null;
+        final ASTIdentifier variable;
         Object object = null;
-        Object value = right;
-        int symbol = -1;
+        final int symbol;
         // check var decl with assign is ok
         if (left instanceof ASTIdentifier) {
             variable = (ASTIdentifier) left;
@@ -3757,11 +3757,16 @@ public class Interpreter extends InterpreterBase {
                     return undefinedVariable(variable, variable.getName());
                 }
             }
+        } else {
+            variable = null;
+            symbol = -1;
         }
         boolean antish = options.isAntish();
         // 0: determine initial object & property:
         final int last = left.jjtGetNumChildren() - 1;
-        // a (var?) v = ... expression
+         // actual value to return, right in most cases
+        Object actual = right;
+         // a (var?) v = ... expression
         if (variable != null) {
             if (symbol >= 0) {
                 // check we are not assigning a symbol itself
@@ -3770,56 +3775,68 @@ public class Interpreter extends InterpreterBase {
                     if (isFinal && !(variable instanceof ASTVar || variable instanceof ASTExtVar)) {
                         throw createException(node, "can not assign a value to the final variable: " + variable.getName());
                     }
-                    if (assignop != null) {
-                        final Object self = getVariable(frame, block, variable);
-                        value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                            operators.tryAssignOverload(node, assignop, self, value);
-                        if (value == JexlOperator.ASSIGN) {
-                            return self;
-                        }
-                    }
+
                     // check if we need to typecast result
                     Class type = block.typeof(symbol);
                     if (type != null) {
                         if (arithmetic.isStrict()) {
-                            value = arithmetic.implicitCast(type, value);
+                            actual = arithmetic.implicitCast(type, actual);
                         } else {
-                            value = arithmetic.cast(type, value);
+                            actual = arithmetic.cast(type, actual);
                         }
-                        if (type.isPrimitive() && value == null) {
+                        if (type.isPrimitive() && actual == null) {
                             throw createException(node, "not null value required for: " + variable.getName());
                         }
                     }
                     boolean isRequired = block.isVariableRequired(symbol);
-                    if (isRequired && value == null) {
+                    if (isRequired && actual == null) {
                         throw createException(node, "not null value required for: " + variable.getName());
                     }
 
-                    frame.set(symbol, value);
-                    // make the closure accessible to itself, ie capture the currently set variable after frame creation
-                    if (value instanceof Closure) {
-                          ((Closure) value).captureSelfIfRecursive(frame, symbol);
+                    if (assignop == null) {
+                        // make the closure accessible to itself, ie capture the currently set variable after frame creation
+                        if (actual instanceof Closure) {
+                            final Closure closure = (Closure) actual;
+                            // the variable scope must be the parent of the lambdas
+                            closure.captureSelfIfRecursive(frame, symbol);
+                        }
+                        frame.set(symbol, actual);
+                    } else {
+                        // go through potential overload
+                        final Object self = getVariable(frame, block, variable);
+                        final Consumer<Object> f = r -> { 
+                            // make the closure accessible to itself, ie capture the currently set variable after frame creation
+                            if (r instanceof Closure) {
+                                final Closure closure = (Closure) r;
+                                // the variable scope must be the parent of the lambdas
+                                closure.captureSelfIfRecursive(frame, symbol);
+                            }
+                            frame.set(symbol, r);
+                        };
+                        actual = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, f, self) :
+                            operators.tryAssignOverload(node, assignop, f, self, actual);
                     }
-                    return value; // 1
+                    return actual; // 1
                 }
                 object = getVariable(frame, block, variable);
                 // top level is a symbol, can not be an antish var
                 antish = false;
             } else {
                 // check we are not assigning direct global
+                final String name = variable.getName();
                 if (last < 0) {
-                    if (assignop != null) {
-                        final Object self = context.get(variable.getName());
-                        value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                            operators.tryAssignOverload(node, assignop, self, value);
-                        if (value == JexlOperator.ASSIGN) {
-                            return self;
-                        }
+                    if (assignop == null) {
+                        setContextVariable(node, name, right);
+                    } else {
+                        // go through potential overload
+                        final Object self = context.get(name);
+                        final Consumer<Object> f = r ->  setContextVariable(node, name, r);
+                        actual = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, f, self) :
+                            operators.tryAssignOverload(node, assignop, f, self, right);
                     }
-                    setContextVariable(node, variable.getName(), value);
-                    return value; // 2
+                    return actual; // 2
                 }
-                object = context.get(variable.getName());
+                object = context.get(name);
                 // top level accesses object, can not be an antish var
                 if (object != null) {
                     antish = false;
@@ -3827,10 +3844,12 @@ public class Interpreter extends InterpreterBase {
             }
         } else if (left instanceof ASTIndirectNode) {
             if (assignop == null) {
-                Object self = left.jjtGetChild(0).jjtAccept(this, data);
+
+                final Object self = left.jjtGetChild(0).jjtAccept(this, data);
                 if (self == null) {
                     throw createException(left, "illegal assignment form *0");
                 }
+
                 if (self instanceof SetPointer) {
                     ((SetPointer) self).set(right);
                 } else {
@@ -3841,18 +3860,27 @@ public class Interpreter extends InterpreterBase {
                 }
                 return right;
             } else {
-                Object self = left.jjtAccept(this, data);
-                if (self == null) {
+
+                // Try with dereferenced object first
+                final Object p = left.jjtAccept(this, data);
+                if (p == null) {
                     throw createException(left, "illegal assignment form *0");
                 }
-                Object result = operators.tryAssignOverload(node, assignop, self, right);
-                if (result == JexlOperator.ASSIGN) {
-                    return self;
+
+                final Consumer<Object> assign = r -> {};
+
+                Object result = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, assign, p) :
+                            operators.tryAssignOverload(node, assignop, assign, p, right);
+
+                if (result == p) {
+                    return p;
                 } else if (result != JexlEngine.TRY_FAILED) {
-                    self = left.jjtGetChild(0).jjtAccept(this, data);
+
+                    final Object self = left.jjtGetChild(0).jjtAccept(this, data);
                     if (self == null) {
                         throw createException(left, "illegal assignment form *0");
                     }
+
                     if (self instanceof SetPointer) {
                         ((SetPointer) self).set(result);
                     } else {
@@ -3862,6 +3890,7 @@ public class Interpreter extends InterpreterBase {
                         }
                     }
                 }
+
                 return right;
             }
         } else if (!(left instanceof ASTReference)) {
@@ -3929,16 +3958,17 @@ public class Interpreter extends InterpreterBase {
                     ant.append('.');
                 }
                 ant.append(propertyId.getName());
-                if (assignop != null) {
+                final String name = ant.toString();
+                if (assignop == null) {
+                    setContextVariable(propertyNode, name, right);
+                } else {
                     final Object self = context.get(ant.toString());
-                    value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                        operators.tryAssignOverload(node, assignop, self, value);
-                    if (value == JexlOperator.ASSIGN) {
-                        return self;
-                    }
+                    final JexlNode pnode = propertyNode;
+                    final Consumer<Object> assign = r -> setContextVariable(pnode, name, r);
+                    actual = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, assign, self) :
+                        operators.tryAssignOverload(node, assignop, assign, self, right);
                 }
-                setContextVariable(propertyNode, ant.toString(), value);
-                return value; // 3
+                return actual; // 3
             }
             // property of an object ?
             property = evalIdentifier(propertyId);
@@ -3964,25 +3994,31 @@ public class Interpreter extends InterpreterBase {
                 unsolvableProperty(objectNode, "<null>.<?>", true, null);
         }
         // 3: one before last, assign
-        if (assignop != null) {
-            Object self = propertyNode instanceof ASTFieldAccess ? 
+        if (assignop == null) {
+            if (propertyNode != null && propertyNode instanceof ASTFieldAccess) {
+                setField(object, property, right, propertyNode);
+            } else {
+                final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
+                                              ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
+                setAttribute(object, property, right, propertyNode, operator);
+            }
+        } else {
+            final Object self = propertyNode instanceof ASTFieldAccess ? 
                 getField(object, property, propertyNode) :
                 getAttribute(object, property, propertyNode);
-            value = assignop.getArity() == 1 ? operators.tryAssignOverload(node, assignop, self) :
-                operators.tryAssignOverload(node, assignop, self, value);
-            if (value == JexlOperator.ASSIGN) {
-                return self;
-            }
-        }
-
-        if (propertyNode != null && propertyNode instanceof ASTFieldAccess) {
-            setField(object, property, value, propertyNode);
-        } else {
+            final Object o = object;
+            final JexlNode n = propertyNode;
             final JexlOperator operator = propertyNode != null && propertyNode.jjtGetParent() instanceof ASTArrayAccess
-                                          ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
-            setAttribute(object, property, value, propertyNode, operator);
+                                         ? JexlOperator.ARRAY_SET : JexlOperator.PROPERTY_SET;
+            final Consumer<Object> assign = (propertyNode != null && propertyNode instanceof ASTFieldAccess) ? 
+                 r -> setField(o, property, r, n) :
+                 r -> setAttribute(o, property, r, n, operator);
+
+            actual = assignop.getArity() == 1 ? 
+                operators.tryAssignOverload(node, assignop, assign, self) : 
+                operators.tryAssignOverload(node, assignop, assign, self, right);
         }
-        return value; // 4
+        return actual;
     }
 
     @Override
