@@ -16,10 +16,25 @@
  */
 package org.apache.commons.jexl3.internal.introspection;
 
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.jexl3.JexlArithmetic;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlOperator;
-import org.apache.commons.jexl3.internal.Operators;
+import org.apache.commons.jexl3.internal.Operator;
 import org.apache.commons.jexl3.introspection.JexlMethod;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.jexl3.introspection.JexlPropertyGet;
@@ -29,21 +44,6 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
-import java.util.EnumSet;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.ConcurrentHashMap;
-
-import java.lang.ref.Reference;
-import java.lang.ref.SoftReference;
-import java.util.List;
 
 /**
  * Implementation of Uberspect to provide the default introspective
@@ -107,7 +107,6 @@ public class Uberspect implements JexlUberspect {
      * If the reference has been collected, this method will recreate the underlying introspector.</p>
      * @return the introspector
      */
-    // CSOFF: DoubleCheckedLocking
     protected final Introspector base() {
         Introspector intro = ref.get();
         if (intro == null) {
@@ -123,7 +122,6 @@ public class Uberspect implements JexlUberspect {
         }
         return intro;
     }
-    // CSON: DoubleCheckedLocking
 
     @Override
     public void setClassLoader(final ClassLoader nloader) {
@@ -143,7 +141,9 @@ public class Uberspect implements JexlUberspect {
 
     @Override
     public ClassLoader getClassLoader() {
-        return loader;
+        synchronized (this) {
+            return loader;
+        }
     }
 
     @Override
@@ -522,43 +522,54 @@ public class Uberspect implements JexlUberspect {
         return ConstructorMethod.discover(base(), ctorHandle);
     }
 
-    @Override
-    public Operators getArithmetic(final JexlArithmetic arithmetic) {
-        Operators jau = null;
-        if (arithmetic != null) {
-            final Class<? extends JexlArithmetic> aclass = arithmetic.getClass();
-            Set<JexlOperator> ops = operatorMap.computeIfAbsent(aclass, k -> {
-                Set<JexlOperator> newOps = EnumSet.noneOf(JexlOperator.class);
-                // deal only with derived classes
-                if (!JexlArithmetic.class.equals(aclass)) {
-                    for (final JexlOperator op : JexlOperator.values()) {
-                        final Method[] methods = getClassMethods(arithmetic.getClass(), op.getMethodName());
-                        if (methods != null) {
-                            for (final Method method : methods) {
-                                final Class<?>[] parms = method.getParameterTypes();
-                                if (parms.length != op.getArity()) {
-                                    continue;
-                                }
-                                // filter method that is an actual overload:
-                                // - not inherited (not declared by base class)
-                                // - nor overridden (not present in base class)
-                                if (!JexlArithmetic.class.equals(method.getDeclaringClass())) {
-                                    try {
-                                        JexlArithmetic.class.getMethod(method.getName(), method.getParameterTypes());
-                                    } catch (final NoSuchMethodException xmethod) {
-                                        // method was not found in JexlArithmetic; this is an operator definition
-                                        newOps.add(op);
-                                    }
+    /**
+     * Computes which operators have an overload implemented in the arithmetic.
+     * <p>This is used to speed up resolution and avoid introspection when possible.</p>
+     * @param arithmetic the arithmetic instance
+     * @return the set of overloaded operators
+     */
+    Set<JexlOperator> getOverloads(final JexlArithmetic arithmetic) {
+        final Class<? extends JexlArithmetic> aclass = arithmetic.getClass();
+        return operatorMap.computeIfAbsent(aclass, k -> {
+            final Set<JexlOperator> newOps = EnumSet.noneOf(JexlOperator.class);
+            // deal only with derived classes
+            if (!JexlArithmetic.class.equals(aclass)) {
+                for (final JexlOperator op : JexlOperator.values()) {
+                    final Method[] methods = getClassMethods(arithmetic.getClass(), op.getMethodName());
+                    if (methods != null) {
+                        for (final Method method : methods) {
+                            final Class<?>[] parms = method.getParameterTypes();
+                            if (parms.length != op.getArity()) {
+                                continue;
+                            }
+                            // filter method that is an actual overload:
+                            // - not inherited (not declared by base class)
+                            // - nor overridden (not present in base class)
+                            if (!JexlArithmetic.class.equals(method.getDeclaringClass())) {
+                                try {
+                                    JexlArithmetic.class.getMethod(method.getName(), method.getParameterTypes());
+                                } catch (final NoSuchMethodException xmethod) {
+                                    // method was not found in JexlArithmetic; this is an operator definition
+                                    newOps.add(op);
                                 }
                             }
                         }
                     }
                 }
-                return newOps;
-            });
-            jau = new Operators(this, arithmetic, ops);
-        }
-        return jau;
+            }
+            return newOps;
+        });
     }
 
+    @Override
+    public JexlArithmetic.Uberspect getArithmetic(final JexlArithmetic arithmetic) {
+        Set<JexlOperator> operators = arithmetic == null ? Collections.emptySet() : getOverloads(arithmetic);
+        return operators.isEmpty()? null : new Operator(this, arithmetic, operators);
+    }
+
+    @Override
+    public Operator getOperator(final JexlArithmetic arithmetic) {
+        Set<JexlOperator> operators = arithmetic == null ? Collections.emptySet() : getOverloads(arithmetic);
+        return new Operator(this, arithmetic, operators);
+    }
 }

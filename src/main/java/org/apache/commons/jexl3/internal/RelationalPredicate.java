@@ -31,7 +31,7 @@ public class RelationalPredicate implements Predicate<Object> {
     /** The arithmetic. */
     protected final JexlArithmetic arithmetic;
     /** The operators implementation. */
-    protected final Operators operators;
+    protected final JexlOperator.Uberspect operators;
     /** The Jexl Node. */
     protected final JexlNode node;
     /** The relational operator. */
@@ -43,7 +43,7 @@ public class RelationalPredicate implements Predicate<Object> {
     /** The operands. */
     protected final Object[] operands;
 
-    protected RelationalPredicate(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
+    protected RelationalPredicate(JexlArithmetic arithmetic, JexlOperator.Uberspect operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
         this.arithmetic = arithmetic;
         this.operators = operators;
         this.node = node;
@@ -132,7 +132,7 @@ public class RelationalPredicate implements Predicate<Object> {
         return new OrPredicate(this, t);
     }
 
-    static Predicate<Object> create(JexlArithmetic arithmetic, Operators operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
+    static Predicate<Object> create(JexlArithmetic arithmetic, JexlOperator.Uberspect operators, JexlOperator operator, JexlNode node, boolean negate, boolean any, Object... operands) {
         return new RelationalPredicate(arithmetic, operators, operator, node, negate, any, operands);
     }
 

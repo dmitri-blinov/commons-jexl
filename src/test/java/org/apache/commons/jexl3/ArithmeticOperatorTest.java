@@ -293,8 +293,8 @@ public class ArithmeticOperatorTest extends JexlTestCase {
         final Set<Integer> as = ad.values;
         final Object[] vars = {ai, al, am, ad, as, ic};
 
-        for (final Object var : vars) {
-            asserter.setVariable("container", var);
+        for (final Object variable : vars) {
+            asserter.setVariable("container", variable);
             for (final int x : ai) {
                 asserter.setVariable("x", x);
                 asserter.assertExpression("x =~ container", Boolean.TRUE);
@@ -356,8 +356,21 @@ public class ArithmeticOperatorTest extends JexlTestCase {
     }
 
     @Test
+    public void testIncrementOperatorOnNull() {
+        final JexlEngine jexl = new JexlBuilder().strict(false).create();
+        JexlScript script;
+        Object result;
+        script = jexl.createScript("var i = null; ++i");
+        result = script.execute(null);
+        assertEquals(1, result);
+        script = jexl.createScript("var i = null; --i");
+        result = script.execute(null);
+        assertEquals(-1, result);
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
-    public void testInterval() throws Exception {
+    public void testInterval() {
         final Map<String, Object> ns = new HashMap<>();
         ns.put("calc", Aggregate.class);
         final JexlEngine jexl = new JexlBuilder().namespaces(ns).create();
@@ -421,7 +434,7 @@ public class ArithmeticOperatorTest extends JexlTestCase {
             }
         }
 
-        protected Object setDateValue(final Date date, final String key, final Object value) throws Exception {
+        protected Object setDateValue(final Date date, final String key, final Object value) {
             final Calendar cal = Calendar.getInstance(UTC);
             cal.setTime(date);
             if ("yyyy".equals(key)) {
@@ -480,11 +493,11 @@ public class ArithmeticOperatorTest extends JexlTestCase {
 
     @Test
     public void testOperatorError() throws Exception {
-        testOperatorError(true);
-        testOperatorError(false);
+        runOperatorError(true);
+        runOperatorError(false);
     }
 
-    private void testOperatorError(final boolean silent) throws Exception {
+    private void runOperatorError(final boolean silent) {
         final CaptureLog log = new CaptureLog();
         final DateContext jc = new DateContext();
         final Date d = new Date();
@@ -507,7 +520,7 @@ public class ArithmeticOperatorTest extends JexlTestCase {
     }
 
     @Test
-    public void testDateArithmetic() throws Exception {
+    public void testDateArithmetic() {
         final Date d = new Date();
         final JexlContext jc = new MapContext();
         final JexlEngine jexl = new JexlBuilder().cache(32).arithmetic(new DateArithmetic(true)).create();
@@ -522,7 +535,7 @@ public class ArithmeticOperatorTest extends JexlTestCase {
     }
 
     @Test
-    public void testFormatArithmetic() throws Exception {
+    public void testFormatArithmetic() {
         final Calendar cal = Calendar.getInstance(UTC);
         cal.set(1969, Calendar.AUGUST, 20);
         final Date x0 = cal.getTime();
@@ -606,23 +619,23 @@ public class ArithmeticOperatorTest extends JexlTestCase {
     /**
      * A comparator using an evaluated expression on objects as comparison arguments.
      */
-    public static class PropertyComparator implements JexlCache.Reference, Comparator<Object> {
+    private static class PropertyComparator implements JexlCache.Reference, Comparator<Object> {
         private final JexlContext context = JexlEngine.getThreadContext();
         private final JexlArithmetic arithmetic;
-        private final JexlArithmetic.Uberspect uber;
+        private final JexlOperator.Uberspect operator;
         private final JexlScript expr;
         private Object cache;
 
         PropertyComparator(JexlArithmetic jexla, JexlScript expr) {
             this.arithmetic = jexla;
-            this.uber = JexlEngine.getThreadEngine().getUberspect().getArithmetic(arithmetic);
+            this.operator = JexlEngine.getThreadEngine().getUberspect().getOperator(arithmetic);
             this.expr = expr;
         }
         @Override
         public int compare(Object o1, Object o2) {
             final Object left = expr.execute(context, o1);
             final Object right = expr.execute(context, o2);
-            Object result = uber.tryEval(this, JexlOperator.COMPARE, left, right);
+            Object result = operator.tryOverload(this, JexlOperator.COMPARE, left, right);
             if (result instanceof Integer) {
                 return (int) result;
             }
@@ -669,7 +682,10 @@ public class ArithmeticOperatorTest extends JexlTestCase {
 
     @Test
     public void testSortArray() {
-        final JexlEngine jexl = new JexlBuilder().arithmetic(new SortingArithmetic(true)).safe(false).strict(true).silent(false).create();
+        final JexlEngine jexl = new JexlBuilder()
+                .cache(32)
+                .arithmetic(new SortingArithmetic(true))
+                .silent(false).create();
         // test data, json like
         final String src = "[{'id':1,'name':'John','type':9},{'id':2,'name':'Doe','type':7},{'id':3,'name':'Doe','type':10}]";
         final Object a =  jexl.createExpression(src).evaluate(null);

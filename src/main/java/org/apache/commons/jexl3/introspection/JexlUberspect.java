@@ -409,7 +409,19 @@ public interface JexlUberspect {
      * @param arithmetic the arithmetic instance
      * @return the arithmetic uberspect or null if no operator method were overridden
      * @since 3.0
+     * @see #getOperator(JexlArithmetic) 
      */
     JexlArithmetic.Uberspect getArithmetic(JexlArithmetic arithmetic);
+
+    /**
+     * Gets an arithmetic operator executor for a given arithmetic instance.
+     *
+     * @param arithmetic the arithmetic instance
+     * @return an operator uberspect instance
+     * @since 3.4.1
+     */
+    default JexlOperator.Uberspect getOperator(JexlArithmetic arithmetic) {
+        return null;
+    }
 
 }
