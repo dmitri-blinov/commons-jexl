@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,6 +34,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThrows;
@@ -381,6 +383,29 @@ public class Issues400Test {
             String je = transcodeSQLExpr(e[i]);
             assertEquals(e[i], je);
         }
+    }
+
+    public static class Arithmetic435 extends JexlArithmetic {
+        public Arithmetic435(boolean strict) {
+            super(strict);
+        }
+        public Object empty(String type) {
+            if ("list".equals(type)) {
+                return Collections.emptyList();
+            }
+            return null;
+        }
+    }
+
+    @Test
+    public void test435() {
+        JexlArithmetic arithmetic = new Arithmetic435(true);
+        JexlEngine jexl = new JexlBuilder().arithmetic(arithmetic).create();
+        final String src = "empty('list')";
+        final JexlScript script = jexl.createScript(src);
+        assertNotNull(script);
+        final Object result = script.execute(null);
+        assertTrue(result instanceof List);
     }
 
     @Test

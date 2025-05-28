@@ -841,7 +841,7 @@ public final class Operator implements JexlOperator.Uberspect {
                 ? tryOverload(node, JexlOperator.EMPTY, object)
                 : JexlEngine.TRY_FAILED;
         if (result != JexlEngine.TRY_FAILED) {
-            return arithmetic.toBoolean(result);
+            return result;
         } else {
             result = arithmetic.isEmpty(object, null);
             if (result == null) {
@@ -858,7 +858,7 @@ public final class Operator implements JexlOperator.Uberspect {
                 }
             }
         }
-        return !(result instanceof Boolean) || (Boolean) result;
+        return result;
     }
 
     @Override
