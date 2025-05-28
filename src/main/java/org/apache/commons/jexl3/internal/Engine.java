@@ -678,9 +678,7 @@ public class Engine extends JexlEngine {
 
     @Override
     public Script createScript(final JexlFeatures features, final JexlInfo info, final String scriptText, final String... names) {
-        if (scriptText == null) {
-            throw new NullPointerException("source is null");
-        }
+        Objects.requireNonNull(scriptText, "scriptText");
         final String source = trimSource(scriptText);
         final JexlFeatures ftrs = features == null? scriptFeatures : features;
         final JexlInfo jexlInfo = info != null? info : createInfo(String.valueOf((new Source(ftrs, scriptText)).hashCode()), getCallerName(), 1, 1);

@@ -22,6 +22,7 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -99,9 +100,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
      * @throws NullPointerException if parent solver is null
      */
     FqcnResolver(FqcnResolver solver) {
-        if (solver == null) {
-            throw new NullPointerException("parent solver can not be null");
-        }
+        Objects.requireNonNull(solver, "solver");
         this.parent = solver;
         this.uberspect = solver.uberspect;
     }

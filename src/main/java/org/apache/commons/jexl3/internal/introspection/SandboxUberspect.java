@@ -27,6 +27,7 @@ import org.apache.commons.jexl3.introspection.JexlUberspect;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An uberspect that controls usage of properties, methods and constructors through a sandbox.
@@ -44,12 +45,8 @@ public final class SandboxUberspect implements JexlUberspect {
      * @param theSandbox the sandbox which is copied to avoid changes at runtime
      */
     public SandboxUberspect(final JexlUberspect theUberspect, final JexlSandbox theSandbox) {
-        if (theSandbox == null) {
-            throw new NullPointerException("sandbox can not be null");
-        }
-        if (theUberspect == null) {
-            throw new NullPointerException("uberspect can not be null");
-        }
+        Objects.requireNonNull(theSandbox, "theSandbox");
+        Objects.requireNonNull(theUberspect, "theUberspect");
         this.uberspect = theUberspect;
         this.sandbox = theSandbox.copy();
     }
