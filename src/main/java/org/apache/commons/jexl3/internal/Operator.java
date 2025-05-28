@@ -213,7 +213,7 @@ public final class Operator implements JexlOperator.Uberspect {
      * @param arg1 the operand
      * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
      */
-    private void controlNullOperands(JexlOperator operator, Object arg1) {
+    private void controlNullOperands(final JexlArithmetic arithmetic, JexlOperator operator, Object arg1) {
         // only check operator if necessary
         if (arg1 == null) {
             // check operator only once if it is not strict
@@ -230,9 +230,9 @@ public final class Operator implements JexlOperator.Uberspect {
      * @param args the operands
      * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
      */
-    private void controlNullOperands(JexlOperator operator, Object arg1, Object arg2) {
-        controlNullOperands(operator, arg1);
-        controlNullOperands(operator, arg2);
+    private void controlNullOperands(final JexlArithmetic arithmetic, JexlOperator operator, Object arg1, Object arg2) {
+        controlNullOperands(arithmetic, operator, arg1);
+        controlNullOperands(arithmetic, operator, arg2);
     }
 
     /**
@@ -242,10 +242,10 @@ public final class Operator implements JexlOperator.Uberspect {
      * @param args the operands
      * @throws JexlArithmetic.NullOperand if operator is strict and an operand is null
      */
-    private void controlNullOperands(JexlOperator operator, Object arg1, Object arg2, Object arg3) {
-        controlNullOperands(operator, arg1);
-        controlNullOperands(operator, arg2);
-        controlNullOperands(operator, arg3);
+    private void controlNullOperands(final JexlArithmetic arithmetic, JexlOperator operator, Object arg1, Object arg2, Object arg3) {
+        controlNullOperands(arithmetic, operator, arg1);
+        controlNullOperands(arithmetic, operator, arg2);
+        controlNullOperands(arithmetic, operator, arg3);
     }
 
     /**
@@ -305,7 +305,7 @@ public final class Operator implements JexlOperator.Uberspect {
 
     @Override
     public Object tryOverload(final JexlCache.Reference node, final JexlOperator operator, final Object arg1) {
-        controlNullOperands(operator, arg1);
+        controlNullOperands(arithmetic, operator, arg1);
         Engine engine = (Engine) JexlEngine.getThreadEngine();
         try {
             return tryEval(isCaching() ? node : null, operator, arg1);
@@ -317,7 +317,7 @@ public final class Operator implements JexlOperator.Uberspect {
 
     @Override
     public Object tryOverload(final JexlCache.Reference node, final JexlOperator operator, final Object arg1, final Object arg2) {
-        controlNullOperands(operator, arg1, arg2);
+        controlNullOperands(arithmetic, operator, arg1, arg2);
         Engine engine = (Engine) JexlEngine.getThreadEngine();
         try {
             return tryEval(engine == null || engine.cache != null ? node : null, operator, arg1, arg2);
@@ -330,7 +330,7 @@ public final class Operator implements JexlOperator.Uberspect {
     @Override
     public Object tryOverload(final JexlCache.Reference node, final JexlOperator operator, final Object arg1, final Object arg2, 
         final Object arg3) {
-        controlNullOperands(operator, arg1, arg2, arg3);
+        controlNullOperands(arithmetic, operator, arg1, arg2, arg3);
         Engine engine = (Engine) JexlEngine.getThreadEngine();
         try {
             return tryEval(engine == null || engine.cache != null ? node : null, operator, arg1, arg2, arg3);
@@ -513,6 +513,10 @@ public final class Operator implements JexlOperator.Uberspect {
         Object result = JexlEngine.TRY_FAILED;
 
         try {
+
+            // if the operator is strict, the left-hand side can not be null
+            controlNullOperands(arithmetic, operator, arg1, arg2);
+
             // attempt assignment operator overload
             if (overloads(operator)) {
                 result = tryOverload(node, operator, arg1, arg2);
@@ -568,6 +572,10 @@ public final class Operator implements JexlOperator.Uberspect {
         Object result = JexlEngine.TRY_FAILED;
 
         try {
+
+            // if the operator is strict, the left-hand side can not be null
+            controlNullOperands(arithmetic, operator, arg1);
+
             // attempt assignment operator overload
             if (overloads(operator)) {
                 result = tryOverload(node, operator, arg1);

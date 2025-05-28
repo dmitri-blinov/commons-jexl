@@ -32,9 +32,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThrows;
 
 import org.apache.commons.jexl3.internal.Debugger;
 import org.apache.commons.jexl3.internal.Scope;
@@ -447,5 +448,34 @@ public class Issues400Test {
                 +"b ? b:f(2) : 1;";
         script = jexl.createScript(src);
         assertEquals(20042, (int) script.execute(ctxt));
+    }
+
+
+    @Test
+    public void test436a() {
+        String[] srcs = {"let i = null; ++i", "let i; ++i;", "let i; i--;",  "let i; i++;"};
+        run436(null, srcs);
+    }
+
+    @Test
+    public void test436b() {
+        String[] srcs = {"var i = null; ++i", "var i; ++i;", "var i; i--;",  "var i; i++;"};
+        run436(null, srcs);
+    }
+
+    @Test
+    public void test436c() {
+        JexlContext ctxt = new MapContext();
+        ctxt.set("i", null);
+        String[] srcs = {"++i", "++i;", "i--;",  "i++;"};
+        run436(null, srcs);
+    }
+
+    void run436(JexlContext ctxt, String[] srcs) {
+        final JexlEngine jexl = new JexlBuilder().create();
+        for(String src : srcs) {
+            JexlScript script = jexl.createScript(src);
+            assertThrows(JexlException.class, () -> script.execute(ctxt));
+        }
     }
 }
