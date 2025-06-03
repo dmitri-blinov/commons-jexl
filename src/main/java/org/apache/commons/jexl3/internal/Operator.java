@@ -549,6 +549,10 @@ public final class Operator implements JexlOperator.Uberspect {
                 result = performBaseOperation(operator, arg1, arg2);
             }
 
+            if (result == JexlOperator.ASSIGN) {
+                return arg1;
+            }
+
             // on success, assign value
             if (result != JexlEngine.TRY_FAILED) {
                 assignFun.accept(result);
@@ -606,6 +610,10 @@ public final class Operator implements JexlOperator.Uberspect {
             // no overload or overload failed, use base operator
             if (result == JexlEngine.TRY_FAILED) {
                 result = performBaseOperation(operator, arg1, null);
+            }
+
+            if (result == JexlOperator.ASSIGN) {
+                return arg1;
             }
 
             // on success, assign value
