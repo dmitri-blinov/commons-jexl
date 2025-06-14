@@ -34,143 +34,21 @@ public class ProbeTest extends JexlTestCase {
         super("ProbeTest");
     }
 
-    protected static class StatementInfo {
+    protected static class JexlProbeTest extends JexlDebugger {
 
-        protected final JexlInfo stmt;
-        protected final JexlNode node;
-
-        protected Object result;
-        protected Throwable exception;
-
-        protected Map<String, VarInfo> locals = new LinkedHashMap<> ();
-        protected Map<String, VarInfo> parameters = new LinkedHashMap<> ();
-        protected Map<String, VarInfo> capturedVariables = new LinkedHashMap<> ();
-
-        protected StatementInfo(final JexlInfo stmt, final JexlNode node) {
-            this.stmt = stmt;
-            this.node = node;
-        }
-
-        protected Map<String, VarInfo> getLocals() {
-            return locals;
-        }
-
-        protected VarInfo getLocal(final String name) {
-            return locals.get(name);
-        }
-
-        protected Map<String, VarInfo> getParameters() {
-            return parameters;
-        }
-
-        protected VarInfo getParameter(final String name) {
-            return parameters.get(name);
-        }
-
-        protected Map<String, VarInfo> getCapturedVariables() {
-            return capturedVariables;
-        }
-
-        protected VarInfo getCapturedVar(final String name) {
-            return capturedVariables.get(name);
-        }
-
-        protected JexlInfo getStatement() {
-            return stmt;
-        }
-
-        protected JexlNode getNode() {
-            return node;
-        }
-
-        protected Object getResult() {
-            return result;
-        }
-
-        protected void captureFrame(JexlProbe.Frame frame) {
-            captureVariables(frame.getLocals(), locals);
-            captureVariables(frame.getParameters(), parameters);
-            captureVariables(frame.getCapturedVariables(), capturedVariables);
-        }
-
-        protected void captureVariables(JexlProbe.Scope l, Map<String, VarInfo> vars) {
-            String[] names = l.getNames();
-            if (names != null) {
-                for (String name : names) {
-                    JexlProbe.Variable i = l.getVariableInfo(name);
-                    if (i != null) {
-                       vars.put(name, new VarInfo(name, i.getType(), i.isRequired(), i.isFinal(), l.getVariable(name)));
-                    } else {
-                       vars.put(name, null);
-                    }
-                }
-            }
-        }
-
-        protected void setResult(Object value) {
-            result = value;
-        }
-
-        protected Throwable getException() {
-            return exception;
-        }
-
-        protected void setException(Throwable value) {
-            exception = value;
-        }
-
-    }
-
-    protected static class VarInfo {
-
-        protected final String name;
-        protected final Class type;
-        protected final boolean isFinal;
-        protected final boolean isRequired;
-
-        protected final Object value;
-
-        protected VarInfo(final String name, final Class type, final boolean isFinal, final boolean isRequired, final Object value) {
-            this.name = name;
-            this.type = type;
-            this.isFinal = isFinal;
-            this.isRequired = isRequired;
-            this.value = value;
-        }
-
-        protected String getName() {
-            return name;
-        }
-
-        protected Class getType() {
-            return type;
-        }
-
-        protected Object getValue() {
-            return value;
-        }
-
-        protected boolean isFinal() {
-            return isFinal;
-        }
-
-        protected boolean isRequired() {
-            return isRequired;
-        }
-
-    }
-
-    protected static class JexlProbeTest implements JexlProbe {
-
-        protected long frameId;
-        protected long sourceId;
-
-        protected List<StatementInfo> stmts = new ArrayList<StatementInfo> ();
-        protected Map<JexlInfo, String> sources = new HashMap<> ();
+        protected List<JexlDebugger.StatementInfo> stmts = new ArrayList<JexlDebugger.StatementInfo> ();
 
         protected JexlInfo script;
         protected Object result;
         protected Throwable exception;
+
+        protected JexlProbeTest() {
+            this(true);
+        }
+
+        protected JexlProbeTest(boolean enabled) {
+            setEnabled(enabled);
+        }
 
         protected JexlInfo getScript() {
             return script;
@@ -184,37 +62,18 @@ public class ProbeTest extends JexlTestCase {
             return exception;
         }
 
-        protected Map<JexlInfo, String> getSources() {
-            return sources;
-        }
-
-        protected String getSource(JexlInfo script) {
-            return sources.get(script);
-        }
-
-        protected List<StatementInfo> getStatements() {
+        protected List<JexlDebugger.StatementInfo> getStatements() {
             return stmts;
         }
 
-        protected StatementInfo getStatement(int i) {
+        protected JexlDebugger.StatementInfo getStatement(int i) {
             return stmts.get(i);
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return true;
-        }
-
-        @Override
-        public long loadSource(JexlInfo script, String source) {
-            sources.put(script, source);
-            return ++sourceId;
         }
 
         @Override
         public long startScript(JexlInfo script) {
             this.script = script;
-            return ++frameId;
+            return super.startScript(script);
         }
 
         @Override
