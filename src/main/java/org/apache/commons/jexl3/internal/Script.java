@@ -219,7 +219,7 @@ public class Script implements JexlScript, JexlExpression {
     public Object execute(final JexlContext context, final Object... args) {
         checkCacheVersion();
         final Interpreter interpreter = createInterpreter(context, args);
-        return interpreter.interpret(script);
+        return interpreter.interpretScript(script);
     }
 
     protected boolean isArray(final Object o) {
@@ -553,7 +553,7 @@ public class Script implements JexlScript, JexlExpression {
          * @return the evaluation result
          */
         protected Object interpret() {
-            return interpreter.interpret(script);
+            return interpreter.interpretScript(script);
         }
 
         @Override

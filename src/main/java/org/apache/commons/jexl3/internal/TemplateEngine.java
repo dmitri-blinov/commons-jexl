@@ -467,7 +467,7 @@ public final class TemplateEngine extends JxltEngine {
         /** The JEXL string for this unified expression. */
         protected final CharSequence expr;
         /** The JEXL node for this unified expression. */
-        protected final JexlNode node;
+        protected final ASTJexlScript node;
 
         /**
          * Creates a JEXL interpretable unified expression.
@@ -475,7 +475,7 @@ public final class TemplateEngine extends JxltEngine {
          * @param theNode   the unified expression as an AST
          * @param theSource the source unified expression if any
          */
-        protected JexlBasedExpression(final CharSequence theExpr, final JexlNode theNode, final TemplateExpression theSource) {
+        protected JexlBasedExpression(final CharSequence theExpr, final ASTJexlScript theNode, final TemplateExpression theSource) {
             super(theSource);
             this.expr = theExpr;
             this.node = theNode;
@@ -497,7 +497,7 @@ public final class TemplateEngine extends JxltEngine {
 
         @Override
         protected Object evaluate(final Interpreter interpreter, final UnaryOperator<Object> oper) {
-            Object result = interpreter.interpret(node);
+            Object result = interpreter.interpretScript(node);
             return oper != null ? oper.apply(result) : result;
         }
 
@@ -527,7 +527,7 @@ public final class TemplateEngine extends JxltEngine {
          * @param node   the unified expression as an AST
          * @param source the source unified expression if any
          */
-        ImmediateExpression(final CharSequence expr, final JexlNode node, final TemplateExpression source) {
+        ImmediateExpression(final CharSequence expr, final ASTJexlScript node, final TemplateExpression source) {
             super(expr, node, source);
         }
 
@@ -552,7 +552,7 @@ public final class TemplateEngine extends JxltEngine {
          * @param node   the unified expression as an AST
          * @param source the source unified expression if any
          */
-        DeferredExpression(final CharSequence expr, final JexlNode node, final TemplateExpression source) {
+        DeferredExpression(final CharSequence expr, final ASTJexlScript node, final TemplateExpression source) {
             super(expr, node, source);
         }
 
@@ -589,7 +589,7 @@ public final class TemplateEngine extends JxltEngine {
          * @param node   the unified expression as an AST
          * @param source the source unified expression if any
          */
-        NestedExpression(final CharSequence expr, final JexlNode node, final TemplateExpression source) {
+        NestedExpression(final CharSequence expr, final ASTJexlScript node, final TemplateExpression source) {
             super(expr, node, source);
             if (this.source != this) {
                 throw new IllegalArgumentException("Nested TemplateExpression can not have a source");
@@ -614,8 +614,8 @@ public final class TemplateEngine extends JxltEngine {
 
         @Override
         protected TemplateExpression prepare(final Interpreter interpreter) {
-            final String value = interpreter.interpret(node).toString();
-            final JexlNode dnode = jexl.parse(node.jexlInfo(), noscript, value, null);
+            final String value = interpreter.interpretScript(node).toString();
+            final ASTJexlScript dnode = jexl.parse(node.jexlInfo(), noscript, value, null);
             return new ImmediateExpression(value, dnode, this);
         }
 

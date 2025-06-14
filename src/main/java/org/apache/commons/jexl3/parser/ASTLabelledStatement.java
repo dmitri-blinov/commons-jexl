@@ -31,11 +31,6 @@ public class ASTLabelledStatement extends JexlLexicalNode {
         super(p, id);
     }
 
-    @Override
-    public String toString() {
-        return label;
-    }
-
     void setLabel(String identifier) {
         label = identifier;
     }

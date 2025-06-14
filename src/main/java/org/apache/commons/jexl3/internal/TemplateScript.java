@@ -298,7 +298,7 @@ public final class TemplateScript implements JxltEngine.Template {
                 .expressions(exprs)
                 .writer(writer);
         final Interpreter interpreter = jexl.createTemplateInterpreter(targs);
-        interpreter.interpret(script);
+        interpreter.interpretScript(script);
     }
 
     @Override

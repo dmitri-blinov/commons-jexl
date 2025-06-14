@@ -23,6 +23,7 @@ import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOperator;
 import org.apache.commons.jexl3.JexlOptions;
+import org.apache.commons.jexl3.JexlProbe;
 
 import org.apache.commons.jexl3.parser.ASTAssertStatement;
 import org.apache.commons.jexl3.parser.ASTBlock;
@@ -37,8 +38,10 @@ import org.apache.commons.jexl3.parser.ASTForeachVar;
 import org.apache.commons.jexl3.parser.ASTFunctionStatement;
 import org.apache.commons.jexl3.parser.ASTIdentifier;
 import org.apache.commons.jexl3.parser.ASTIfStatement;
+import org.apache.commons.jexl3.parser.ASTJexlScript;
 import org.apache.commons.jexl3.parser.ASTMultipleAssignment;
 import org.apache.commons.jexl3.parser.ASTMultipleVarStatement;
+import org.apache.commons.jexl3.parser.ASTNullLiteral;
 import org.apache.commons.jexl3.parser.ASTRemove;
 import org.apache.commons.jexl3.parser.ASTReturnStatement;
 import org.apache.commons.jexl3.parser.ASTSwitchStatement;
@@ -126,17 +129,29 @@ public class ResumableInterpreter extends Interpreter {
         state = new HashMap<JexlNode,InterpreterState> ();
     }
 
-    /**
-     * Interpret the given script/expression.
-     * <p>
-     * If the underlying JEXL engine is silent, errors will be logged through
-     * its logger as warning.
-     * @param node the script or expression to interpret.
-     * @return the result of the interpretation.
-     * @throws JexlException if any error occurs during interpretation.
-     */
     @Override
-    public Object interpret(JexlNode node) {
+    public Object interpretScript(final ASTJexlScript node) {
+        try {
+             if (!suspended)
+                beforeScript(node);
+
+             Object result = interpret(node);
+
+             if (!suspended)
+                afterScript(node, result, null);
+
+             return result;
+        } catch (Throwable thrown) {
+
+             afterScript(node, null, thrown);
+             InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+             // Never reaches here
+             return null;
+        }
+    }
+
+    @Override
+    public Object interpret(final JexlNode node) {
         JexlContext.ThreadLocal tcontext = null;
         JexlEngine tjexl = null;
         Interpreter tinter = null;
@@ -153,8 +168,34 @@ public class ResumableInterpreter extends Interpreter {
                 throw new JexlException.StackOverflow(detailedInfo(node), "jexl (" + jexl.stackOverflow + ")", null);
             }
             cancelCheck(node);
-            return node.jjtAccept(this, null);
-        } catch (StackOverflowError xstack) {
+
+            Object result = null;
+            try {
+                // Execution block is the first child
+                result = node.jjtGetChild(0).jjtAccept(this, null);
+            } catch (JexlException.Return xreturn) {
+                result = xreturn.getValue();
+            }
+            // Check return type
+            Scope s = frame != null ? frame.getScope() : null;
+            Class type = s != null ? s.getReturnType() : null;
+            if (type != null) {
+                if (type == Void.TYPE) {
+                    return null;
+                }
+                if (arithmetic.isStrict()) {
+                    result = arithmetic.implicitCast(type, result);
+                } else {
+                    result = arithmetic.cast(type, result);
+                }
+                if (type.isPrimitive() && result == null) {
+                    throw createException(node, "not null return value required");
+                }
+            }
+
+            return arithmetic.controlReturn(result);
+
+        } catch (final StackOverflowError xstack) {
             JexlException xjexl = new JexlException.StackOverflow(detailedInfo(node), "jvm", xstack);
             if (!isSilent()) {
                 throw xjexl.clean();
@@ -162,15 +203,13 @@ public class ResumableInterpreter extends Interpreter {
             if (logger.isWarnEnabled()) {
                 logger.warn(xjexl.getMessage(), xjexl.getCause());
             }
-        } catch (JexlException.Return xreturn) {
-            return xreturn.getValue();
-        } catch (JexlException.Cancel xcancel) {
+        } catch (final JexlException.Cancel xcancel) {
             // cancelled |= Thread.interrupted();
             cancelled.weakCompareAndSet(false, Thread.interrupted());
             if (isCancellable()) {
                 throw xcancel.clean();
             }
-        } catch (JexlException xjexl) {
+        } catch (final JexlException xjexl) {
             if (!isSilent()) {
                 throw xjexl.clean();
             }
@@ -203,6 +242,38 @@ public class ResumableInterpreter extends Interpreter {
     }
 
     @Override
+    protected void beforeScript(final ASTJexlScript node) {
+        JexlProbe probe = jexl.getProbe();
+        if (probe != null && probe.isEnabled()) {
+            stackFrame = new ProbeStackFrame(probe.startScript(info), node, true);
+        }
+    }
+
+    @Override
+    protected boolean testPredicate(JexlNode node, Object condition) {
+        cancelCheck(node);
+        try {
+            if (!suspended)
+                beforeStatement(node);
+
+            final Object predicate = operators.tryOverload(node, JexlOperator.CONDITION, condition);
+            boolean test = arithmetic.testPredicate(predicate != JexlEngine.TRY_FAILED? predicate : condition);
+
+            if (!suspended)
+                afterStatement(node, test, null);
+            return test;
+        } catch (Throwable thrown) {
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return false;
+        }
+    }
+
+
+    @Override
     protected Object visit(ASTExpressionStatement node, Object data) {
         suspended = false;
         return super.visit(node, data);
@@ -217,65 +288,92 @@ public class ResumableInterpreter extends Interpreter {
     @Override
     protected Object visit(ASTIfStatement node, Object data) {
         cancelCheck(node);
+
+        Object result = null;
+        Object condition = null;
+
+        InterpreterState st = state.get(node);
+        if (st != null) {
+            condition = st.getValue();
+            if (condition == null) {
+                suspended = false;
+                return null;
+            }
+        } else {
+            suspended = false;
+        }
+
         try {
-            Object condition = null;
-            InterpreterState st = state.get(node);
+
+            if (!suspended)
+                beforeStatement(node);
+
             if (st == null) {
                 st = new InterpreterState(0);
                 state.put(node, st);
-                suspended = false;
                 condition = node.jjtGetChild(0).jjtAccept(this, null);
-            } else {
-                condition = st.getValue();
-                if (condition == null) {
-                    suspended = false;
-                    return null;
-                }
             }
-            if (arithmetic.toBoolean(condition)) {
-                st.setValue(Boolean.TRUE);
-                // first objectNode is true statement
-                JexlNode child = node.jjtGetChild(1);
-                try {
-                    return child.jjtAccept(this, null);
-                } catch (JexlException.Yield stmtYield) {
-                    if (child instanceof ASTYieldStatement) {
-                        if (suspended) {
-                            st.setValue(null);
+
+            try {
+
+                final JexlNode testNode = node.jjtGetChild(0);
+                if (testPredicate(testNode, condition)) {
+                    st.setValue(Boolean.TRUE);
+                    // first objectNode is true statement
+                    JexlNode child = node.jjtGetChild(1);
+                    try {
+                        result = child.jjtAccept(this, null);
+                    } catch (JexlException.Yield stmtYield) {
+                        if (child instanceof ASTYieldStatement) {
+                            if (suspended) {
+                                st.setValue(null);
+                            }
                         }
+                        throw stmtYield;
                     }
-                    throw stmtYield;
-                }
-            }
-            if (node.jjtGetNumChildren() > 2) {
-                st.setValue(Boolean.FALSE);
-                // if there is an else, execute it.
-                JexlNode child = node.jjtGetChild(2);
-                try {
-                    return child.jjtAccept(this, null);
-                } catch (JexlException.Yield stmtYield) {
-                    if (child instanceof ASTYieldStatement) {
-                        if (suspended) {
-                            st.setValue(null);
+                } else if (node.jjtGetNumChildren() > 2) {
+                    st.setValue(Boolean.FALSE);
+                    // if there is an else, execute it.
+                    JexlNode child = node.jjtGetChild(2);
+                    try {
+                        result = child.jjtAccept(this, null);
+                    } catch (JexlException.Yield stmtYield) {
+                        if (child instanceof ASTYieldStatement) {
+                            if (suspended) {
+                                st.setValue(null);
+                            }
                         }
+                        throw stmtYield;
                     }
-                    throw stmtYield;
+                }
+
+            } catch (JexlException.Break stmtBreak) {
+                String target = stmtBreak.getLabel();
+                if (target == null || !target.equals(node.getLabel())) {
+                    throw stmtBreak;
+                }
+                // break
+                result = null;
+            } catch (ArithmeticException xrt) {
+                throw createException(node.jjtGetChild(0), "if error", xrt);
+            } finally {
+                if (!suspended) {
+                    state.remove(node);
                 }
             }
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
+            return result;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
             return null;
-        } catch (JexlException.Break stmtBreak) {
-            String target = stmtBreak.getLabel();
-            if (target == null || !target.equals(node.getLabel())) {
-                throw stmtBreak;
-            }
-            // break
-            return null;
-        } catch (ArithmeticException xrt) {
-            throw createException(node.jjtGetChild(0), "if error", xrt);
-        } finally {
-            if (!suspended) {
-                state.remove(node);
-            }
         }
     }
 
@@ -286,20 +384,27 @@ public class ResumableInterpreter extends Interpreter {
      * @return the result of the last expression evaluation
      */
     private Object visitBlock(ASTBlock node, Object data) {
+        cancelCheck(node);
         Object result = null;
         int start = 0;
         InterpreterState st = state.get(node);
-        if (st == null) {
-            st = new InterpreterState(0);
-            state.put(node, st);
-            suspended = false;
-        } else {
+        if (st != null) {
             start = st.getIndex();
+        } else {
+            suspended = false;
         }
+
         try {
+            if (!suspended)
+                beforeStatement(node);
+
+            if (st == null) {
+                st = new InterpreterState(0);
+                state.put(node, st);
+            }
+
             final int numChildren = node.jjtGetNumChildren();
             for (int i = start; i < numChildren; i++) {
-                cancelCheck(node);
                 JexlNode statement = node.jjtGetChild(i);
                 try {
                     result = statement.jjtAccept(this, data);
@@ -320,14 +425,27 @@ public class ResumableInterpreter extends Interpreter {
                     }
                 }
             }
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
             // Evaluated empty block
             suspended = false;
+            return result;
+
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
         } finally {
             if (!suspended) {
                 state.remove(node);
             }
         }
-        return result;
     }
 
     @Override
@@ -396,34 +514,44 @@ public class ResumableInterpreter extends Interpreter {
               block = new LexicalFrame(frame, block);
         }
         try {
-            final int numChildren = node.jjtGetNumChildren();
-            JexlNode expressionNode = node.jjtGetChild(1);
+
             boolean when = false;
             boolean doBody = true;
-            Object result = null;
-            InterpreterState st = null;
+
+            InterpreterState st = state.get(node);
+
+            if (st != null) {
+                when = true;
+                doBody = !st.isCompleted();
+            } else {
+                suspended = false;
+            }
+
+            if (!suspended)
+                beforeStatement(node);
+
+            final int numChildren = node.jjtGetNumChildren();
+            JexlNode conditionNode = node.jjtGetChild(1);
+
             try {
-                st = state.get(node);
+
                 if (st == null) {
                     st = new InterpreterState(0);
                     state.put(node, st);
-                    suspended = false;
                     // Initialize for-loop
-                    result = node.jjtGetChild(0).jjtAccept(this, data);
-                    when = (Boolean) expressionNode.jjtAccept(this, data);
-                } else {
-                    when = true;
-                    doBody = !st.isCompleted();
+                    node.jjtGetChild(0).jjtAccept(this, data);
+                    when = testPredicate(conditionNode, conditionNode.jjtAccept(this, data));
                 }
+
                 /* third objectNode is the statement to execute */
-                JexlNode statement = node.jjtGetNumChildren() > 3 ? node.jjtGetChild(3) : null;
+                JexlNode statement = numChildren > 3 ? node.jjtGetChild(3) : null;
 
                 while (when) {
-                    cancelCheck(node);
+
                     // Execute loop body
                     if (statement != null && doBody) {
                         try {
-                            result = statement.jjtAccept(this, data);
+                            statement.jjtAccept(this, data);
                         } catch (JexlException.Yield stmtYield) {
                             if (statement instanceof ASTYieldStatement) {
                                 if (suspended) {
@@ -450,16 +578,30 @@ public class ResumableInterpreter extends Interpreter {
                         doBody = true;
                     }
                     // for-increment node
-                    result = node.jjtGetChild(2).jjtAccept(this, data);
-                    // for0termination check
-                    when = (Boolean) expressionNode.jjtAccept(this, data);
+                    node.jjtGetChild(2).jjtAccept(this, data);
+                    // for-termination check
+                    when = testPredicate(conditionNode, conditionNode.jjtAccept(this, data));
                 }
-                return result;
+
             } finally {
                 if (!suspended) {
                     state.remove(node);
                 }
             }
+
+            if (!suspended)
+                afterStatement(node, null, null);
+
+            // undefined result
+            return null;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+
         } finally {
             if (lexical && !suspended) {
                 // restore lexical frame
@@ -498,17 +640,30 @@ public class ResumableInterpreter extends Interpreter {
         }
 
         try {
+
             Iterator<?> itemsIterator = null;
             int i = -1;
 
-            InterpreterState st = null;
             boolean when = false;
             boolean doBody = true;
-            try {
-                st = state.get(node);
-                if (st == null) {
-                    suspended = false;
 
+            InterpreterState st = state.get(node);
+
+            if (st != null) {
+                when = true;
+                doBody = !st.isCompleted();
+                itemsIterator = (Iterator<?>) st.getValue();
+                i = st.getIndex();
+            } else {
+                suspended = false;
+            }
+
+            if (!suspended)
+                beforeStatement(node);
+
+            try {
+
+                if (st == null) {
                     /* second objectNode is the variable to iterate */
                     Object iterableValue = node.jjtGetChild(1).jjtAccept(this, data);
                     // make sure there is a value to iterate on
@@ -529,37 +684,55 @@ public class ResumableInterpreter extends Interpreter {
                     }
                     st = new InterpreterState(i, itemsIterator);
                     state.put(node, st);
-                } else {
-                    when = true;
-                    doBody = !st.isCompleted();
-                    itemsIterator = (Iterator<?>) st.getValue();
-                    i = st.getIndex();
                 }
+
                 if (itemsIterator != null) {
                     try {
                         /* third objectNode is the statement to execute */
                         JexlNode statement = node.jjtGetNumChildren() >= 3 ? node.jjtGetChild(2) : null;
                         while (when || itemsIterator.hasNext()) {
+
                             if (!when) {
-                                cancelCheck(node);
+                                cancelCheck(loopReference);
                                 i += 1;
+
                                 // increment context counter
                                 st.incIndex();
-                                // set loopVariable to value of iterator
-                                Object value = itemsIterator.next();
-                                if (loopValueVariable != null) {
-                                    if (value instanceof Map.Entry<?,?>) {
-                                        Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
-                                        executeAssign(node, loopVariable, entry.getKey(), null, data);
-                                        executeAssign(node, loopValueVariable, entry.getValue(), null, data);
+
+                                try {
+
+                                    if (!suspended)
+                                        beforeStatement(loopReference);
+
+                                    // set loopVariable to value of iterator
+                                    Object value = itemsIterator.next();
+                                    if (loopValueVariable != null) {
+                                        if (value instanceof Map.Entry<?,?>) {
+                                            Map.Entry<?,?> entry = (Map.Entry<?,?>) value;
+                                            executeAssign(loopReference, loopVariable, entry.getKey(), null, data);
+                                            executeAssign(loopReference, loopValueVariable, entry.getValue(), null, data);
+                                        } else {
+                                            executeAssign(loopReference, loopVariable, i, null, data);
+                                            executeAssign(loopReference, loopValueVariable, value, null, data);
+                                        }
                                     } else {
-                                        executeAssign(node, loopVariable, i, null, data);
-                                        executeAssign(node, loopValueVariable, value, null, data);
+                                        executeAssign(loopReference, loopVariable, value, null, data);
                                     }
-                                } else {
-                                    executeAssign(node, loopVariable, value, null, data);
+
+                                    if (!suspended)
+                                        afterStatement(loopReference, value, null);
+
+                                } catch (Throwable thrown) {
+
+                                    if (!suspended)
+                                        afterStatement(loopReference, null, thrown);
+
+                                    InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+                                    // Never reaches here
+                                    return null;
                                 }
                             }
+
                             if (statement != null && doBody) {
                                 try {
                                     // execute statement
@@ -609,13 +782,26 @@ public class ResumableInterpreter extends Interpreter {
                     state.remove(node);
                 }
             }
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
+            return result;
+
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+
         } finally {
             // restore lexical frame
             if (lexical && !suspended) {
                 block = block.pop();
             }
         }
-        return result;
     }
 
     @Override
@@ -646,22 +832,29 @@ public class ResumableInterpreter extends Interpreter {
     protected Object visit(ASTWhileStatement node, Object data) {
         cancelCheck(node);
         Object result = null;
-        /* first objectNode is the expression */
-        JexlNode expressionNode = node.jjtGetChild(0);
+        /* first objectNode is the condition */
+        JexlNode conditionNode = node.jjtGetChild(0);
 
         Object condition = null;
         InterpreterState st = state.get(node);
-        if (st == null) {
-            condition = expressionNode.jjtAccept(this, data);
-            st = new InterpreterState(0, condition);
-            state.put(node, st);
-            suspended = false;
-        } else {
+        if (st != null) {
             condition = st.getValue();
+        } else {
+            suspended = false;
         }
+
         try {
-            while (arithmetic.toBoolean(condition)) {
-                cancelCheck(node);
+
+            if (!suspended)
+                beforeStatement(node);
+
+            if (st == null) {
+                condition = conditionNode.jjtAccept(this, data);
+                st = new InterpreterState(0, condition);
+                state.put(node, st);
+            }
+
+            while (testPredicate(conditionNode, condition)) {
                 if (node.jjtGetNumChildren() > 1) {
                     JexlNode child = node.jjtGetChild(1);
                     try {
@@ -685,47 +878,79 @@ public class ResumableInterpreter extends Interpreter {
                     suspended = false;
                 }
                 // Reevaluate while condition
-                condition = expressionNode.jjtAccept(this, data);
+                condition = conditionNode.jjtAccept(this, data);
             }
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
+            return result;
+
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+
         } finally {
             if (!suspended) {
                 state.remove(node);
             }
         }
-        return result;
     }
 
     @Override
     protected Object visit(ASTDoWhileStatement node, Object data) {
         Object result = null;
-        /* last objectNode is the expression */
-        JexlNode expressionNode = node.jjtGetChild(node.jjtGetNumChildren() - 1);
-        do {
-            cancelCheck(node);
-            // execute statement
-            if (node.jjtGetNumChildren() > 1) {
-                try {
-                    result = node.jjtGetChild(0).jjtAccept(this, data);
-                } catch (JexlException.Break stmtBreak) {
-                    String target = stmtBreak.getLabel();
-                    if (target == null || target.equals(node.getLabel())) {
-                        break;
-                    } else {
-                        throw stmtBreak;
-                    }
-                } catch (JexlException.Continue stmtContinue) {
-                    String target = stmtContinue.getLabel();
-                    if (target != null && !target.equals(node.getLabel())) {
-                        throw stmtContinue;
-                    }
-                    // continue
-                }
-            } else {
-                suspended = false;
-            }
-        } while (arithmetic.toBoolean(expressionNode.jjtAccept(this, data)));
+        final int nc = node.jjtGetNumChildren();
 
-        return result;
+        try {
+            if (!suspended)
+                beforeStatement(node);
+
+            /* last objectNode is the condition */
+            final JexlNode conditionNode = node.jjtGetChild(nc - 1);
+
+            do {
+                // execute statement
+                if (nc > 1) {
+                    try {
+                        result = node.jjtGetChild(0).jjtAccept(this, data);
+                    } catch (JexlException.Break stmtBreak) {
+                        String target = stmtBreak.getLabel();
+                        if (target == null || target.equals(node.getLabel())) {
+                            break;
+                        } else {
+                            throw stmtBreak;
+                        }
+                    } catch (JexlException.Continue stmtContinue) {
+                        String target = stmtContinue.getLabel();
+                        if (target != null && !target.equals(node.getLabel())) {
+                            throw stmtContinue;
+                        }
+                        // continue
+                    }
+                } else {
+                    suspended = false;
+                }
+            } while (testPredicate(conditionNode, conditionNode.jjtAccept(this, data)));
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
+            return result;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+        }
     }
 
     @Override
@@ -743,13 +968,20 @@ public class ResumableInterpreter extends Interpreter {
             block = new LexicalFrame(frame, block);
         }
         try {
-            int start = 0;
             final int childCount = node.jjtGetNumChildren();
 
+            int start = 0;
             InterpreterState st = state.get(node);
-            if (st == null) {
+            if (st != null) {
+                start = st.getIndex();
+            } else {
                 suspended = false;
+            }
 
+            if (!suspended)
+                beforeStatement(node);
+
+            if (st == null) {
                 boolean matched = false;
                 /* first objectNode is the switch expression */
                 Object left = node.jjtGetChild(0).jjtAccept(this, data);
@@ -762,21 +994,29 @@ public class ResumableInterpreter extends Interpreter {
                         // check all labels
                         for (int j = 0; j < labels.jjtGetNumChildren(); j++) {
                             JexlNode label = labels.jjtGetChild(j);
-                            Object right = label instanceof ASTIdentifier ? 
-                                label.jjtAccept(this, scope) : 
-                                label.jjtAccept(this, data);
-                            try {
-                                Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
-                                if (caseMatched == JexlEngine.TRY_FAILED) {
-                                    caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                            if (left == null) {
+                                if (label instanceof ASTNullLiteral) {
+                                    matched = true;
+                                    start = i;
+                                    break l;
                                 }
-                                matched = arithmetic.toBoolean(caseMatched);
-                            } catch (ArithmeticException xrt) {
-                                throw createException(node, "== error", xrt);
-                            }
-                            if (matched) {
-                                start = i;
-                                break l;
+                            } else {
+                                Object right = label instanceof ASTIdentifier ? 
+                                    label.jjtAccept(this, scope) : 
+                                    label.jjtAccept(this, data);
+                                try {
+                                    Object caseMatched = operators.tryOverload(child, JexlOperator.EQ, left, right);
+                                    if (caseMatched == JexlEngine.TRY_FAILED) {
+                                        caseMatched = arithmetic.equals(left, right) ? Boolean.TRUE : Boolean.FALSE;
+                                    }
+                                    matched = arithmetic.toBoolean(caseMatched);
+                                } catch (ArithmeticException xrt) {
+                                    throw createException(node, "== error", xrt);
+                                }
+                                if (matched) {
+                                    start = i;
+                                    break l;
+                                }
                             }
                         }
                     }
@@ -795,12 +1035,11 @@ public class ResumableInterpreter extends Interpreter {
 
                 st = new InterpreterState(start);
                 state.put(node, st);
-            } else {
-                start = st.getIndex();
             }
 
+            Object result = null;
+
             try {
-                Object result = null;
                 // execute all cases starting from matched one
                 if (start > 0) {
                     try {
@@ -819,12 +1058,26 @@ public class ResumableInterpreter extends Interpreter {
                 } else {
                     suspended = false;
                 }
-                return result;
+
             } finally {
                 if (!suspended) {
                     state.remove(node);
                 }
             }
+
+            if (!suspended)
+               afterStatement(node, result, null);
+
+            return result;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+
         } finally {
             // restore lexical frame
             if (lexical && !suspended) {
@@ -835,7 +1088,10 @@ public class ResumableInterpreter extends Interpreter {
 
     @Override
     protected Object visit(ASTSwitchStatementCase node, Object data) {
+        cancelCheck(node);
+
         int start = 1;
+
         InterpreterState st = state.get(node);
         if (st == null) {
             suspended = false;
@@ -844,11 +1100,14 @@ public class ResumableInterpreter extends Interpreter {
         } else {
             start = st.getIndex();
         }
+
+        Object result = null;
         try {
-            Object result = null;
+            if (!suspended)
+                beforeStatement(node);
+
             final int childCount = node.jjtGetNumChildren();
             for (int i = start; i < childCount; i++) {
-                cancelCheck(node);
                 JexlNode statement = node.jjtGetChild(i);
                 try {
                     result = statement.jjtAccept(this, data);
@@ -863,7 +1122,19 @@ public class ResumableInterpreter extends Interpreter {
                 }
             }
             suspended = false;
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
             return result;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
         } finally {
             if (!suspended) {
                 state.remove(node);
@@ -873,6 +1144,8 @@ public class ResumableInterpreter extends Interpreter {
 
     @Override
     protected Object visit(ASTSwitchStatementDefault node, Object data) {
+        cancelCheck(node);
+
         int start = 0;
         InterpreterState st = state.get(node);
         if (st == null) {
@@ -882,11 +1155,14 @@ public class ResumableInterpreter extends Interpreter {
         } else {
             start = st.getIndex();
         }
+
+        Object result = null;
         try {
-            Object result = null;
+            if (!suspended)
+                beforeStatement(node);
+
             final int childCount = node.jjtGetNumChildren();
             for (int i = start; i < childCount; i++) {
-                cancelCheck(node);
                 JexlNode statement = node.jjtGetChild(i);
                 try {
                     result = statement.jjtAccept(this, data);
@@ -901,7 +1177,20 @@ public class ResumableInterpreter extends Interpreter {
                 st.incIndex();
             }
             suspended = false;
+
+            if (!suspended)
+                afterStatement(node, result, null);
+
             return result;
+        } catch (Throwable thrown) {
+
+            if (!suspended)
+                afterStatement(node, null, thrown);
+
+            InterpreterBase.<RuntimeException>doThrow((Throwable) thrown);
+            // Never reaches here
+            return null;
+
         } finally {
             if (!suspended) {
                 state.remove(node);

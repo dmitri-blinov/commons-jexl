@@ -139,6 +139,9 @@ public class JexlBuilder {
     /** The {@link JexlArithmetic} instance. */
     private JexlArithmetic arithmetic;
 
+    /** The {@link JexlProbe} instance. */
+    private JexlProbe probe;
+
     /** The cache size. */
     private int cache = -1;
 
@@ -263,6 +266,22 @@ public class JexlBuilder {
     /** @return the arithmetic */
     public JexlArithmetic arithmetic() {
         return this.arithmetic;
+    }
+
+    /**
+     * Sets the JexlProbe instance the engine will use.
+     *
+     * @param a the probe
+     * @return this builder
+     */
+    public JexlBuilder probe(final JexlProbe probe) {
+        this.probe = probe;
+        return this;
+    }
+
+    /** @return the probe */
+    public JexlProbe probe() {
+        return this.probe;
     }
 
     /**

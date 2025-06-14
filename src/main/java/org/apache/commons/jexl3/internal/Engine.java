@@ -45,6 +45,7 @@ import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlOptions;
+import org.apache.commons.jexl3.JexlProbe;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.internal.introspection.SandboxUberspect;
 import org.apache.commons.jexl3.internal.introspection.Uberspect;
@@ -102,6 +103,10 @@ public class Engine extends JexlEngine {
      * The {@link JexlArithmetic} instance.
      */
     protected final JexlArithmetic arithmetic;
+    /**
+     * The {@link JexlProbe} instance.
+     */
+    protected final JexlProbe probe;
     /**
      * The map of 'prefix:function' to object implementing the namespaces.
      */
@@ -242,6 +247,7 @@ public class Engine extends JexlEngine {
         }
         this.logger = conf.logger() == null ? LogFactory.getLog(JexlEngine.class) : conf.logger();
         this.arithmetic = conf.arithmetic() == null ? new JexlArithmetic(this.strict) : conf.arithmetic();
+        this.probe = conf.probe();
         options.setMathContext(arithmetic.getMathContext());
         options.setMathScale(arithmetic.getMathScale());
         options.setStrictArithmetic(arithmetic.isStrict());
@@ -373,6 +379,10 @@ public class Engine extends JexlEngine {
     @Override
     public Charset getCharset() {
         return charset;
+    }
+
+    protected JexlProbe getProbe() {
+        return probe;
     }
 
     /**
@@ -1096,6 +1106,9 @@ public class Engine extends JexlEngine {
         }
         if (source != null) {
             cache.put(source, script);
+        }
+        if (probe != null) {
+            probe.loadSource(info, src);
         }
         return script;
     }
