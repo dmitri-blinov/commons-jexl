@@ -19,6 +19,8 @@ package org.apache.commons.jexl3;
 
 import org.apache.commons.jexl3.internal.Script;
 
+import java.util.Objects;
+
 /**
  * Helper class to carry information such as a url/file name, line and column for
  * debugging information reporting.
@@ -203,6 +205,43 @@ public class JexlInfo {
      */
     public static JexlInfo from(final JexlScript script) {
         return script instanceof Script? ((Script) script).getInfo() :  null;
+    }
+
+    @Override
+    public int hashCode() { //CSOFF: MagicNumber
+        int hash = 3;
+        hash = 53 * hash + (int) (this.line ^ (this.line >>> 32));
+        hash = 53 * hash + (int) (this.column ^ (this.column >>> 32));
+        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 53 * hash + (this.path != null ? this.path.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JexlInfo other = (JexlInfo) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.path, other.path)) {
+            return false;
+        }
+        if (this.line != other.line) {
+            return false;
+        }
+        if (this.column != other.column) {
+            return false;
+        }
+        return true;
     }
 }
 

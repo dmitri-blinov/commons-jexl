@@ -70,6 +70,8 @@ public class ProbeTest extends JexlTestCase {
             return stmts.get(i);
         }
 
+        // JexlProbe interface
+
         @Override
         public long startScript(JexlInfo script) {
             this.script = script;
@@ -86,21 +88,19 @@ public class ProbeTest extends JexlTestCase {
 
         @Override
         public boolean startStatement(JexlInfo source, JexlNode node, Frame frame) {
-            stmts.add(new StatementInfo(source, node));
-            return true;
-        }
+            super.startStatement(source, node, frame);
 
-        @Override
-        public boolean endStatement(JexlInfo source, JexlNode node, Frame frame, Object result, Throwable any) {
-            int pos = stmts.size() - 1;
-            StatementInfo stmt = stmts.get(pos);
+            long id = frame.getFrameId();
+            ThreadInfo ti = threads.get(Thread.currentThread());
 
-            stmt.setResult(result);
-            stmt.setException(any);
-            stmt.captureFrame(frame);
+            StackFrameInfo sfi = ti.getStackFrameInfo(id);
+            StatementInfo stmt = sfi.getStatement(node);
+
+            stmts.add(stmt);
 
             return true;
         }
+
     }
 
     @Test

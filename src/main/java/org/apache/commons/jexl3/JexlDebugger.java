@@ -29,14 +29,185 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public abstract class JexlDebugger implements JexlProbe {
 
-    protected boolean enabled;
-
+    /** execution threads known to debugger. */
+    protected Map<Thread, ThreadInfo> threads;
+    /** script sources known to debugger. */
     protected Map<JexlInfo, String> sources;
+    /** breakpoints. */
+    protected Map<Long, JexlInfo> breakpoints;
+    /** stañkframe id counter. */
     protected LongAdder frameId;
+    /** breakpoint id counter. */
+    protected LongAdder breakpointId;
+    /** if debugger is enabled to recieve notifications, off by default. */
+    protected volatile boolean enabled;
+    /** if debugger should break on new thread execution. */
+    protected volatile boolean breakOnNewThread;
 
     public JexlDebugger() {
         sources = new ConcurrentHashMap<> ();
+        threads = new ConcurrentHashMap<> ();
+        breakpoints = new ConcurrentHashMap<> ();
         frameId = new LongAdder();
+    }
+
+    /**
+     * The various thread states of debugged thread.
+     */
+    public enum ThreadCommand {
+        /** The thread should run as normal. */
+        CONTINUE,
+        /** The thread should pause its execution. */
+        PAUSE,
+        /** The thread should cancel its execution. */
+        ABORT,
+        /** The thread should step in to call or next statement. */
+        STEP_IN,
+        /** The thread should step over to next statement. */
+        STEP_OVER,
+        /** The thread should step out to end of call or next statement. */
+        STEP_OUT;
+    }
+
+    protected class ThreadInfo {
+
+        protected final Thread thread;
+        /** execution thread stack frames. */
+        protected final Map<Long, StackFrameInfo> frames;
+        /** execution thread command. */
+        protected volatile ThreadCommand command;
+        /** execution thread is paused. */
+        protected volatile boolean paused;
+
+        protected ThreadInfo(final Thread t) {
+            thread = t;
+            frames = Collections.synchronizedMap(new LinkedHashMap<> ());
+            command = breakOnNewThread ? ThreadCommand.PAUSE : null;
+        }
+
+        public Thread getThread() {
+            return thread;
+        }
+
+        public boolean isPaused() {
+            return paused;
+        }
+
+        public void setPaused(boolean value) {
+            paused = value;
+        }
+
+        public synchronized ThreadCommand getCommand() {
+            return command;
+        }
+
+        public synchronized void setCommand(ThreadCommand value) {
+            command = value;
+        }
+
+        protected synchronized ThreadCommand waitCommand() {
+            ThreadCommand result = command;
+            command = null;
+            return result;
+        }
+
+        protected void addFrame(long id) {
+            frames.put(id, new StackFrameInfo(this, id));
+        }
+
+        protected void removeFrame(long id) {
+            frames.remove(id);
+        }
+
+        public Set<Long> getStackFrames() {
+            return Collections.unmodifiableSet(frames.keySet());
+        }
+
+        public StackFrameInfo getStackFrameInfo(long id) {
+            return frames.get(id);
+        }
+
+        public boolean isEmpty() {
+            return frames.isEmpty();
+        }
+    }
+
+    public class StackFrameInfo {
+
+        /** tread info. */
+        protected final ThreadInfo threadInfo;
+        /** stañkframe id. */
+        protected final long frameId;
+        /** interpreter state. */
+        protected final Map<JexlNode,StatementInfo> state;
+
+        protected StackFrameInfo(final ThreadInfo ti, final long frameId) {
+            this.threadInfo = ti;
+            this.frameId = frameId;
+            this.state = new LinkedHashMap();
+        }
+
+        public ThreadInfo getThreadInfo() {
+            return threadInfo;
+        }
+
+        protected void startStatement(final JexlNode node, final StatementInfo stmt) {
+            state.put(node, stmt);
+
+            do {
+                ThreadCommand cmd = threadInfo.waitCommand();
+
+                if (cmd != null) {
+                    synchronized (threadInfo) {
+                        switch (cmd) {
+                            case PAUSE : 
+                               if (!threadInfo.isPaused()) {
+                                   threadInfo.setPaused(true);
+                                   executionStopped(this, "pause");
+                               }
+                               break;
+                            case CONTINUE : 
+                               if (threadInfo.isPaused()) {
+                                   threadInfo.setPaused(false);
+                                   executionContinued(this);
+                               }
+                               break;
+                            case ABORT : 
+                               threadInfo.setPaused(false);
+                               throw new JexlException.Cancel(node.jexlInfo());
+                            case STEP_IN : 
+                               if (threadInfo.isPaused()) {
+                                   threadInfo.setPaused(false);
+                                   executionContinued(this);
+                               }
+                               executionContinued(this);
+                               break;
+                            case STEP_OVER : 
+                               if (threadInfo.isPaused()) {
+                                   threadInfo.setPaused(false);
+                                   executionContinued(this);
+                               }
+                               break;
+                            case STEP_OUT : 
+                               if (threadInfo.isPaused()) {
+                                   threadInfo.setPaused(false);
+                                   executionContinued(this);
+                               }
+                               break;
+                        }
+                    }
+                }
+            } while (threadInfo.isPaused());
+        }
+
+        protected void endStatement(final JexlNode node) {
+            state.remove(node);
+        }
+
+        public StatementInfo getStatement(final JexlNode node) {
+            return state.get(node);
+        }
+
     }
 
     protected static class StatementInfo {
@@ -165,8 +336,75 @@ public abstract class JexlDebugger implements JexlProbe {
 
     }
 
+    public Set<JexlInfo> getSources() {
+        return Collections.unmodifiableSet(sources.keySet());
+    }
+
     public String getSource(JexlInfo script) {
         return sources.get(script);
+    }
+
+    public Set<Thread> getThreads() {
+        return Collections.unmodifiableSet(threads.keySet());
+    }
+
+    public boolean isBreakOnNewThread() {
+        return breakOnNewThread;
+    }
+
+    public void setBreakOnNewThread(boolean value) {
+        breakOnNewThread = value;
+    }
+
+    public long addBreakpoint(JexlInfo source) {
+
+        for (Map.Entry<Long, JexlInfo> entry : breakpoints.entrySet()) {
+            if (entry.getValue().equals(source)) {
+                return entry.getKey();
+            }
+        }
+
+        breakpointId.increment();
+        long id = breakpointId.longValue();
+
+        breakpoints.put(id, source);
+
+        return id;
+    }
+
+    public boolean removeBreakpoint(long id) {
+        return breakpoints.remove(id) != null;
+    }
+
+    public boolean removeBreakpoint(JexlInfo source) {
+
+        long id = -1;
+        for (Map.Entry<Long, JexlInfo> entry : breakpoints.entrySet()) {
+            if (entry.getValue().equals(source)) {
+                id = entry.getKey();
+                break;
+            }
+        }
+
+        return id != -1 ? removeBreakpoint(id) : false;
+    }
+
+    // JexlDebugger event interface
+
+    public void executionStopped(StackFrameInfo si, String reason) {
+
+    }
+
+    public void executionContinued(StackFrameInfo si) {
+
+    }
+
+    public void threadStarted(ThreadInfo thread) {
+
+    }
+
+    public void threadExited(ThreadInfo thread) {
+
     }
 
     // JexlProbe interface
@@ -187,23 +425,69 @@ public abstract class JexlDebugger implements JexlProbe {
     }
 
     @Override
-    public long startScript(JexlInfo script) {
+    public synchronized long startScript(JexlInfo script) {
         frameId.increment();
-        return frameId.longValue();
+        long id = frameId.longValue();
+
+        ThreadInfo ti = threads.computeIfAbsent(Thread.currentThread(), x -> {
+           ThreadInfo result = new ThreadInfo(x);
+           threadStarted(result);
+           return result;
+        });
+
+        ti.addFrame(id);
+
+        return id;
     }
 
     @Override
-    public boolean endScript(Frame frame, Object result, Throwable any) {
+    public synchronized boolean endScript(Frame frame, Object result, Throwable any) {
+        long id = frame.getFrameId();
+
+        ThreadInfo ti = threads.get(Thread.currentThread());
+
+        ti.removeFrame(id);
+
+        if (ti.isEmpty()) {
+            Thread t = Thread.currentThread();
+            threadExited(ti);
+            threads.remove(t);
+        }
+
         return true;
     }
 
     @Override
     public boolean startStatement(JexlInfo source, JexlNode node, Frame frame) {
+
+        long id = frame.getFrameId();
+        ThreadInfo ti = threads.get(Thread.currentThread());
+
+        StackFrameInfo sfi = ti.getStackFrameInfo(id);
+
+        StatementInfo stmt = new StatementInfo(source, node);
+        stmt.captureFrame(frame);
+
+        sfi.startStatement(node, stmt);
+
         return true;
     }
 
     @Override
     public boolean endStatement(JexlInfo source, JexlNode node, Frame frame, Object result, Throwable any) {
+
+        long id = frame.getFrameId();
+        ThreadInfo ti = threads.get(Thread.currentThread());
+
+        StackFrameInfo sfi = ti.getStackFrameInfo(id);
+        StatementInfo stmt = sfi.getStatement(node);
+
+        stmt.setResult(result);
+        stmt.setException(any);
+        stmt.captureFrame(frame);
+
+        sfi.endStatement(node);
+
         return true;
     }
 
